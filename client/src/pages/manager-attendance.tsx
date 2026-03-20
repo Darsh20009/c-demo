@@ -123,11 +123,11 @@ export default function ManagerAttendance() {
     setApprovingId(requestId);
     try {
       const response = await fetch(`/api/leave-requests/${requestId}/approve`, {
-        method: 'POST',
+        method: 'PATCH',
         credentials: 'include'
       });
       if (response.ok) {
-        setLeaveRequests(leaveRequests.filter(r => r.id !== requestId));
+        setLeaveRequests(leaveRequests.filter((r: any) => r.id !== requestId && r._id !== requestId));
       }
     } catch (error) {
       console.error("Error approving leave request:", error);
@@ -140,11 +140,11 @@ export default function ManagerAttendance() {
     setRejectingId(requestId);
     try {
       const response = await fetch(`/api/leave-requests/${requestId}/reject`, {
-        method: 'POST',
+        method: 'PATCH',
         credentials: 'include'
       });
       if (response.ok) {
-        setLeaveRequests(leaveRequests.filter(r => r.id !== requestId));
+        setLeaveRequests(leaveRequests.filter((r: any) => r.id !== requestId && r._id !== requestId));
       }
     } catch (error) {
       console.error("Error rejecting leave request:", error);

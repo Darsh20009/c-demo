@@ -11034,6 +11034,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all pending leave requests (manager/admin only)
+  app.get("/api/leave-requests/pending", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { LeaveRequestModel } = await import("@shared/schema-leave");
+      const role = req.employee?.role;
+
+      if (role !== 'manager' && role !== 'admin' && role !== 'owner') {
+        return res.status(403).json({ error: "صلاحيات غير كافية" });
+      }
+
+      const requests = await LeaveRequestModel.find({ status: 'pending' }).sort({ createdAt: -1 });
+
+      res.json(requests.map(serializeDoc));
+    } catch (error) {
+      res.status(500).json({ error: "فشل جلب طلبات الاجازة المعلقة" });
+    }
+  });
+
   // Approve a leave request (manager/admin only)
   app.patch("/api/leave-requests/:id/approve", requireAuth, async (req: AuthRequest, res) => {
     try {
