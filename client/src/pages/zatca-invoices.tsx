@@ -250,7 +250,7 @@ export default function ZATCAInvoicesPage() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+          <Card className="bg-primary text-primary-foreground">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>

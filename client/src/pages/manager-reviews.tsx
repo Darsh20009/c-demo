@@ -215,7 +215,7 @@ export default function ManagerReviewsPage() {
               <Button
                 onClick={() => replyDialog && replyMutation.mutate({ id: replyDialog._id, reply: replyText })}
                 disabled={!replyText.trim() || replyMutation.isPending}
-                className="w-full bg-amber-600 hover:bg-amber-700"
+                className="w-full bg-primary hover:bg-primary/90"
                 data-testid="btn-submit-reply"
               >
                 {replyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : null}

@@ -844,7 +844,7 @@ export default function EmployeeCashier() {
  <div className="max-w-7xl mx-auto">
  <div className="flex items-center justify-between mb-6">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+ <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
  <Coffee className="w-6 h-6 text-white" />
  </div>
  <div>

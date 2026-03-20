@@ -233,7 +233,7 @@ export default function LeaveRequestPage() {
               <Button
                 type="submit"
                 disabled={isLoading || !startDate || !endDate || !reason.trim()}
-                className="w-full h-11 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-lg"
+                className="w-full h-11 bg-primary hover:bg-primary/90 text-white text-lg"
                 data-testid="button-submit-leave"
               >
                 {isLoading ? "جاري الإرسال..." : "تقديم الطلب"}

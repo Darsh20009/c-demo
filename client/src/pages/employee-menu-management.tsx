@@ -728,7 +728,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
          <div className="max-w-7xl mx-auto mb-6">
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
          <div className="flex items-center gap-3">
-         <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center flex-shrink-0">
+         <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
          <Coffee className="w-6 h-6 text-white" />
          </div>
          <div>
@@ -1030,7 +1030,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  </Button>
  <Button
  type="submit"
-  className="bg-gradient-to-r from-amber-500 to-amber-700"
+  className="bg-primary"
  data-testid="button-next"
  >
  "التالي: إضافة المكونات"
@@ -1945,7 +1945,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
        </AlertDialogCancel>
        <AlertDialogAction
          onClick={handleConfirmSkipRecipe}
-         className="bg-gradient-to-r from-amber-600 to-amber-700 text-white"
+         className="bg-primary text-white"
          data-testid="button-skip-recipe-confirm"
        >
          إنشاء بدون وصفة

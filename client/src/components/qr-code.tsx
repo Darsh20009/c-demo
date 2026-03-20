@@ -41,11 +41,11 @@ export default function QRCodeComponent({
  {title && (
  <div className="space-y-2">
  <div className="flex items-center justify-center space-x-2 space-x-reverse">
- <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
- <h3 className="font-amiri text-2xl font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent">
+ <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+ <h3 className="font-amiri text-2xl font-bold text-primary">
  {title}
  </h3>
- <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+ <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
  </div>
  <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto"></div>
  </div>
@@ -100,13 +100,13 @@ export default function QRCodeComponent({
 
  <div className="space-y-3">
  <div className="flex items-center justify-center space-x-3 space-x-reverse text-amber-700">
- <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+ <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
  <QrCode className="w-4 h-4 text-white" />
  </div>
  <span className="text-lg font-bold font-amiri">
  وجّه الكاميرا نحو الرمز للطلب
  </span>
- <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+ <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
  <span className="text-white text-xs"></span>
  </div>
  </div>

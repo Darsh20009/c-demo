@@ -14,7 +14,7 @@ export default function UnifiedHub() {
    <div className="container mx-auto px-4 py-3">
    <div className="flex items-center justify-between">
    <div className="flex items-center gap-3">
-   <div className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-background0 text-white px-4 py-2 rounded-lg shadow-lg">
+   <div className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg shadow-lg">
    <Layout className="w-5 h-5" />
    <span className="font-bold text-sm">مركز التحكم الموحد</span>
    </div>
@@ -63,7 +63,7 @@ export default function UnifiedHub() {
    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
    {/* Employee Dashboard Panel */}
    <div className="bg-card/50 rounded-xl border border-primary/20 shadow-2xl overflow-hidden backdrop-blur-sm">
-   <div className="bg-gradient-to-r from-amber-600 to-background0 px-4 py-3 flex items-center gap-2">
+   <div className="bg-primary px-4 py-3 flex items-center gap-2">
    <Users className="w-5 h-5 text-white" />
    <h2 className="text-white font-bold">لوحة الموظفين</h2>
    </div>
@@ -74,7 +74,7 @@ export default function UnifiedHub() {
 
    {/* Menu View Panel */}
    <div className="bg-card/50 rounded-xl border border-primary/20 shadow-2xl overflow-hidden backdrop-blur-sm">
-   <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 flex items-center gap-2">
+   <div className="bg-primary px-4 py-3 flex items-center gap-2">
    <Coffee className="w-5 h-5 text-white" />
    <h2 className="text-white font-bold">منيو العرض</h2>
    </div>

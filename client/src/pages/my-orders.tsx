@@ -175,7 +175,7 @@ export default function MyOrders() {
               </p>
               <Button
                 onClick={() => setLocation("/menu")}
-                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-cairo"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-cairo"
               >
                 {t("orders.browse_menu")}
               </Button>
@@ -199,7 +199,7 @@ export default function MyOrders() {
               </p>
               <Button
                 onClick={() => setLocation("/menu")}
-                className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-cairo"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-cairo"
               >
                 {t("orders.browse_menu")}
               </Button>
@@ -302,7 +302,7 @@ export default function MyOrders() {
                           <Button
                             onClick={() => reviewMutation.mutate({ orderId: order.id, rating: reviewRating, comment: reviewComment })}
                             disabled={reviewMutation.isPending}
-                            className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-cairo"
+                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-cairo"
                             data-testid={'btn-submit-review-' + order.id}
                           >
                             {reviewMutation.isPending ? '...' : 'إرسال التقييم'}

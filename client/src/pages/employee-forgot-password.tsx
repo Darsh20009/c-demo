@@ -96,7 +96,7 @@ export default function EmployeeForgotPassword() {
  <Card className="w-full max-w-md border-primary/30 bg-gradient-to-br from-stone-900/95 to-stone-950/95 backdrop-blur shadow-2xl">
  <CardHeader className="space-y-3 text-center pb-6">
  <div className="flex justify-center">
- <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-lg shadow-amber-900/50">
+ <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
  <Coffee className="w-10 h-10 text-white" />
  </div>
  </div>
@@ -128,7 +128,7 @@ export default function EmployeeForgotPassword() {
 
  <Button
  type="submit"
- className="w-full h-12 text-lg font-bold bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-lg shadow-amber-900/50 transition-all duration-300 hover:scale-[1.02]"
+ className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
  data-testid="button-submit"
  >
  <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ export default function EmployeeForgotPassword() {
  <Button
  type="submit"
  disabled={loading}
- className="w-full h-12 text-lg font-bold bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white shadow-lg shadow-amber-900/50 transition-all duration-300 hover:scale-[1.02]"
+ className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
  data-testid="button-reset-password"
  >
  {loading ? "جارٍ التغيير..." : "تغيير كلمة المرور"}

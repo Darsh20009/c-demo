@@ -348,7 +348,7 @@ export default function UnifiedInventoryRecipesPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+              <Card className="bg-primary text-primary-foreground">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>

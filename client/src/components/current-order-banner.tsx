@@ -69,7 +69,7 @@ export default function CurrentOrderBanner() {
  transition={{ type: "spring", stiffness: 100 }}
  className="fixed top-0 left-0 right-0 z-50 p-4"
  >
- <Card className="max-w-4xl mx-auto bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 shadow-xl relative">
+ <Card className="max-w-4xl mx-auto bg-card border-2 border-primary/30 shadow-xl relative">
  <button
  onClick={() => setDismissed(true)}
  className="absolute top-2 left-2 p-1 rounded-full hover:bg-amber-100 transition-colors z-10"

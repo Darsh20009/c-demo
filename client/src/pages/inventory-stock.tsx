@@ -389,11 +389,11 @@ export default function InventoryStockPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/20">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-amber-500/20">
               <Warehouse className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold bg-primary bg-clip-text text-transparent">
                 إدارة المخزون
               </h1>
               <p className="text-muted-foreground text-sm">تحكم كامل في المواد الخام والمخزون</p>
@@ -402,7 +402,7 @@ export default function InventoryStockPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <Button
               onClick={() => setIsNewBatchOpen(true)}
-              className="bg-gradient-to-r from-amber-500 to-background0 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20"
+              className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-amber-500/20"
               data-testid="button-new-batch"
             >
               <PackagePlus className="h-4 w-4 ml-2" />
@@ -917,7 +917,7 @@ export default function InventoryStockPage() {
               <Button 
                 onClick={handleSubmitNewBatch}
                 disabled={newBatchMutation.isPending}
-                className="bg-gradient-to-r from-amber-500 to-background0 hover:from-amber-600 hover:to-orange-600"
+                className="bg-primary hover:bg-primary/90"
                 data-testid="button-confirm-new-batch"
               >
                 {newBatchMutation.isPending ? (

@@ -72,7 +72,7 @@ export default function EmployeeActivation() {
  <Card className="w-full max-w-md bg-gradient-to-br from-background to-background border-primary/20">
  <CardHeader className="space-y-4">
  <div className="flex justify-center">
- <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+ <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
  <Coffee className="w-8 h-8 text-white" />
  </div>
  </div>
@@ -187,7 +187,7 @@ export default function EmployeeActivation() {
  <Button
  type="submit"
  disabled={isLoading}
- className="w-full bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800 text-white"
+ className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
  data-testid="button-activate"
  >
  {isLoading ? "جاري التفعيل..." : "تفعيل الحساب"}

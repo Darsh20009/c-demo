@@ -301,7 +301,7 @@ export default function SupportSystemPage() {
               اتصل بنا
             </Button>
             <Button 
-              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700"
+              className="bg-primary hover:bg-primary/90"
               onClick={() => setShowNewTicketDialog(true)}
             >
               <Plus className="w-4 h-4 ml-2" />
@@ -611,7 +611,7 @@ export default function SupportSystemPage() {
                     className="bg-white/5 border-white/10 text-white min-h-32"
                   />
                 </div>
-                <Button className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700">
+                <Button className="bg-primary hover:bg-primary/90">
                   <Send className="w-4 h-4 ml-2" />
                   إرسال الرسالة
                 </Button>
@@ -690,7 +690,7 @@ export default function SupportSystemPage() {
             >
               إلغاء
             </Button>
-            <Button className="bg-gradient-to-r from-amber-500 to-amber-600">
+            <Button className="bg-primary">
               <Ticket className="w-4 h-4 ml-2" />
               إنشاء التذكرة
             </Button>
@@ -764,7 +764,7 @@ export default function SupportSystemPage() {
                   onChange={(e) => setNewMessage(e.target.value)}
                   className="bg-white/5 border-white/10 text-white flex-1"
                 />
-                <Button className="bg-gradient-to-r from-amber-500 to-amber-600">
+                <Button className="bg-primary">
                   <Send className="w-4 h-4" />
                 </Button>
               </div>

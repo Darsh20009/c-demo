@@ -394,7 +394,7 @@ export default function CashierTables() {
 
   if (isAdminUser && !selectedBranchId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-amber-100 flex items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4" dir="rtl">
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle>اختر الفرع</CardTitle>
@@ -428,7 +428,7 @@ export default function CashierTables() {
   const activeBranchId = selectedBranchId || employeeBranchId;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-amber-100 pb-16 sm:pb-0" dir="rtl">
+    <div className="min-h-screen bg-background pb-16 sm:pb-0" dir="rtl">
       <div className="max-w-7xl mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

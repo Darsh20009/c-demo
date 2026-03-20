@@ -389,7 +389,7 @@ const CheckoutModal = memo(() => {
    ) : (
      <>
        <div className="bg-card/50 rounded-xl p-6 border border-primary/20">
-         <PaymentMethods paymentMethods={paymentMethods} selectedMethod={selectedPaymentMethod} onSelectMethod={setSelectedPaymentMethod} comingSoon={true} />
+         <PaymentMethods paymentMethods={paymentMethods} selectedMethod={selectedPaymentMethod} onSelectMethod={setSelectedPaymentMethod} comingSoon={false} />
          {selectedPaymentMethod && paymentMethods.find(m => m.id === selectedPaymentMethod)?.requiresReceipt && (
            <div className="mt-4 p-4 border-2 border-dashed rounded-lg text-center">
              <Label htmlFor="receipt-upload" className="cursor-pointer">

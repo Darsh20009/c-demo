@@ -330,7 +330,7 @@ export default function ManagerEmployees() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
               <Coffee className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -363,7 +363,7 @@ export default function ManagerEmployees() {
  <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
  <DialogTrigger asChild>
  <Button
- className="bg-gradient-to-r from-amber-500 to-amber-700 hover:from-amber-600 hover:to-amber-800"
+ className="bg-primary hover:bg-primary/90"
  data-testid="button-add-employee"
  >
  <Plus className="w-4 h-4 ml-2" />
@@ -654,7 +654,7 @@ export default function ManagerEmployees() {
         <Button
           type="submit"
           disabled={createEmployeeMutation.isPending}
-          className="bg-gradient-to-r from-amber-500 to-amber-700 w-full sm:w-auto hover-elevate active-elevate-2"
+          className="bg-primary w-full sm:w-auto hover-elevate active-elevate-2"
           data-testid="button-submit-add"
         >
           {createEmployeeMutation.isPending ? "جاري الإضافة..." : "إضافة الموظف"}
@@ -685,7 +685,7 @@ export default function ManagerEmployees() {
  className="w-10 h-10 rounded-full object-cover"
  />
  ) : (
- <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+ <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
  <User className="w-6 h-6 text-white" />
  </div>
  )}
@@ -977,7 +977,7 @@ export default function ManagerEmployees() {
  <Button
  type="submit"
  disabled={updateEmployeeMutation.isPending}
- className="bg-gradient-to-r from-amber-500 to-amber-700"
+ className="bg-primary"
  data-testid="button-submit-edit"
  >
  {updateEmployeeMutation.isPending ? "جاري التحديث..." : "حفظ التغييرات"}

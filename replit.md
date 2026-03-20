@@ -4,6 +4,13 @@ QIROX Cafe is a comprehensive digital management system for coffee shops. It has
 - **QIROX Cafe** - Customer-facing ordering, loyalty, and delivery
 - **QIROX Systems** - Employee/Manager/Admin portal for operations
 
+## Recent Fixes (March 2026)
+
+- **Payment "Coming Soon" Removed**: `comingSoon={false}` in `checkout.tsx` and `checkout-modal.tsx` — payment methods are now fully active
+- **Product Add-ons Auto-confirm**: Products with no sizes, variants, or add-ons are added directly to cart without showing the customization dialog (`drink-customization-dialog.tsx`)
+- **Design System Color Migration**: All pages migrated from old amber/golden brand colors to the new monochrome green design system (`hsl(155, 60%, 38%)`). Pages fixed include: `cart-page.tsx`, `cashier-tables.tsx`, `accounting-dashboard.tsx`, `accounting-smart.tsx`, `employee-forgot-password.tsx`, `employee-activation.tsx`, `MyOrders.tsx`, `my-orders.tsx`, `employee-cashier.tsx`, `employee-home.tsx`, `employee-menu-management.tsx`, `employee-ingredients-management.tsx`, `executive-dashboard.tsx`, `leave-request.tsx`, `manager-attendance.tsx`, `manager-drivers.tsx`, `manager-employees.tsx`, `manager-reviews.tsx`, `inventory-stock.tsx`, `cashier-table-orders.tsx`, `advanced-analytics.tsx`, `supplier-management.tsx`, `support-system.tsx`, `unified-hub.tsx`, `unified-inventory-recipes.tsx`, `zatca-invoices.tsx`, `checkout.tsx`, `menu-view.tsx`, and components: `ImageLibraryModal.tsx`, `current-order-banner.tsx`, `error-boundary.tsx`, `qr-code.tsx`, `payment-methods.tsx`
+- **CSS Classes**: Added `golden-gradient` (green gradient text), updated `glow-effect` and `shimmer` to use primary green; added `font-amiri` (IBM Plex Arabic/Tajawal)
+
 ## Quick Start
 
 - **Build**: `npx vite build` (builds frontend to dist/public/)

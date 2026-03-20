@@ -318,7 +318,7 @@ export default function AccountingSmartPage() {
         </Card>
 
         <Card 
-          className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 cursor-pointer hover-elevate"
+          className="border-0 shadow-lg bg-card cursor-pointer hover-elevate"
           onClick={() => setDrilldownType("orders")}
           data-testid="card-cogs-drilldown"
         >

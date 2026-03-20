@@ -165,7 +165,7 @@ export function ImageLibraryModal({ open, onClose, onSelect, currentUrl }: Image
             type="button"
             onClick={handleConfirm}
             disabled={!selected}
-            className="flex-1 bg-gradient-to-r from-amber-500 to-amber-700 text-white"
+            className="flex-1 bg-primary text-primary-foreground"
           >
             اختيار الصورة
           </Button>

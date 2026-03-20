@@ -143,7 +143,7 @@ export default function EmployeeHome() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <Coffee className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
               </div>
               <div>

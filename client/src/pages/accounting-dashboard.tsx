@@ -521,7 +521,7 @@ export default function AccountingDashboardPage() {
     : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-yellow-50 dark:from-background dark:via-primary/5 dark:to-background" dir="rtl">
+    <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
           <Button 
@@ -1141,7 +1141,7 @@ export default function AccountingDashboardPage() {
             ) : dashboardData ? (
               <>
                 {/* Report Header with Export Buttons */}
-                <Card className="bg-gradient-to-l from-amber-50 to-background dark:from-amber-900/20 dark:to-orange-900/20 border-primary dark:border-primary">
+                <Card className="bg-card border-primary dark:border-primary">
                   <CardHeader>
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div>

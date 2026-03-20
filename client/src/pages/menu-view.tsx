@@ -409,7 +409,7 @@ export default function MenuView() {
  title="امسح للطلب"
  className="w-full"
  />
- <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl p-4 text-center">
+ <div className="bg-primary text-primary-foreground rounded-2xl p-4 text-center">
  <p className="text-lg font-bold">
  لكل لحظة قهوة ، لحظة نجاح
  </p>
@@ -477,7 +477,7 @@ export default function MenuView() {
  className="w-full"
  />
  
- <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl p-6 text-center">
+ <div className="bg-primary text-primary-foreground rounded-2xl p-6 text-center">
  <p className="text-xl font-bold">
  لكل لحظة قهوة ، لحظة نجاح
  </p>
@@ -561,7 +561,7 @@ export default function MenuView() {
  <h4 className="font-amiri font-bold text-primary text-lg">{currentItem.nameAr}</h4>
  <p className="text-muted-foreground text-sm">{currentItem.description}</p>
  <div className="text-primary font-bold text-xl">{currentItem.price} ريال</div>
- <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-lg p-3">
+ <div className="bg-primary text-primary-foreground rounded-lg p-3">
  <p className="text-sm font-bold">
  لكل لحظة قهوة ، لحظة نجاح
  </p>
@@ -614,7 +614,7 @@ export default function MenuView() {
  <p className="text-xs md:text-xl text-gray-300">
  أجود أنواع القهوة العربية الأصيلة
  </p>
- <div className="bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl md:rounded-2xl p-2 md:p-4">
+ <div className="bg-primary text-primary-foreground rounded-xl md:rounded-2xl p-2 md:p-4">
  <p className="text-xs md:text-lg font-bold">
  لكل لحظة قهوة ، لحظة نجاح
  </p>

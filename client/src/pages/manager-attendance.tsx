@@ -254,7 +254,7 @@ export default function ManagerAttendance() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
               <Coffee className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -643,7 +643,7 @@ export default function ManagerAttendance() {
                             className="w-12 h-12 rounded-full object-cover border-2 border-primary/50"
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-700 rounded-full flex items-center justify-center">
+                          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
                             <span className="text-white font-bold text-lg">
                               {record.employee?.fullName?.charAt(0) || '?'}
                             </span>

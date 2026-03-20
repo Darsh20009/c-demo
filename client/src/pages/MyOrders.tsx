@@ -62,7 +62,7 @@ export default function MyOrders() {
  {/* Page Title */}
  <div className="max-w-4xl mx-auto mb-6">
  <div className="flex items-center gap-3 mb-2">
- <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
+ <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
  <ShoppingBag className="w-6 h-6 text-white" />
  </div>
  <div>
@@ -184,7 +184,7 @@ export default function MyOrders() {
  </p>
  <Button
  onClick={() => navigate("/menu")}
- className="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800"
+ className="bg-primary hover:bg-primary/90 text-primary-foreground"
  data-testid="button-browse-menu"
  >
  تصفح القائمة

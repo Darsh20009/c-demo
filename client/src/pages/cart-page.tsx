@@ -118,7 +118,7 @@ export default function CartPage() {
                               e.currentTarget.src = "/images/default-coffee.png";
                             }}
                           />
-                          <div className={`absolute -top-1 sm:-top-2 w-5 h-5 sm:w-6 sm:h-6 bg-amber-600 rounded-full flex items-center justify-center shadow-md ${isAr ? '-right-1 sm:-right-2' : '-left-1 sm:-left-2'}`}>
+                          <div className={`absolute -top-1 sm:-top-2 w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center shadow-md ${isAr ? '-right-1 sm:-right-2' : '-left-1 sm:-left-2'}`}>
                             <span className="text-white text-[10px] sm:text-xs font-bold">{item.quantity}</span>
                           </div>
                         </div>
@@ -197,7 +197,7 @@ export default function CartPage() {
 
             <div className="hidden lg:block lg:col-span-1">
               <Card className="bg-gradient-to-br from-card/95 to-background/80 border-primary/50 backdrop-blur-sm sticky top-24 shadow-2xl">
-                <CardHeader className="bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-t-lg">
+                <CardHeader className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-t-lg">
                   <CardTitle className="font-amiri text-2xl flex items-center gap-2">
                     <ShoppingCart className="w-6 h-6" />
                     {t("checkout.order_summary")}
@@ -220,7 +220,7 @@ export default function CartPage() {
 
                   <Button 
                     onClick={() => setLocation("/delivery")}
-                    className="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white py-6 text-xl font-bold hover:from-amber-700 hover:to-orange-700 transition-all duration-300 shadow-xl hover:shadow-amber-500/25 rounded-full"
+                    className="w-full bg-primary text-primary-foreground py-6 text-xl font-bold hover:bg-primary/90 transition-all duration-300 shadow-xl rounded-full"
                     data-testid="button-checkout"
                   >
                     {t("cart.checkout_now")}
@@ -240,7 +240,7 @@ export default function CartPage() {
             </div>
             <Button 
               onClick={() => setLocation("/delivery")}
-              className="flex-1 max-w-[200px] bg-gradient-to-r from-amber-600 to-orange-600 text-white py-5 text-lg font-bold hover:from-amber-700 hover:to-orange-700 rounded-full shadow-lg"
+              className="flex-1 max-w-[200px] bg-primary text-primary-foreground py-5 text-lg font-bold hover:bg-primary/90 rounded-full shadow-lg"
               data-testid="button-checkout-mobile"
             >
               {t("cart.checkout")}

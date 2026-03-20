@@ -269,7 +269,7 @@ export default function ExecutiveDashboard() {
       <div className="header-gold px-6 py-4 border-b border-sidebar-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-lg">
               <Sparkles className="w-6 h-6 text-slate-900" />
             </div>
             <div>

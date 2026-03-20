@@ -366,7 +366,7 @@ export default function CashierTableOrders() {
                                 {branch && (
                                   <div className="flex items-center gap-2 mb-2">
                                     <MapPin className="w-4 h-4 text-accent" />
-                                    <span className="text-xs bg-gradient-to-r from-amber-600 to-amber-700 text-white px-2 py-1 rounded">
+                                    <span className="text-xs bg-primary text-white px-2 py-1 rounded">
                                       {branch.nameAr}
                                     </span>
                                   </div>

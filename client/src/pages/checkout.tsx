@@ -171,7 +171,7 @@ function LoyaltyCheckoutCard({
           </div>
 
           <Button
-            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold h-10 gap-2"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-10 gap-2"
             onClick={() => onApplyPoints(inputVal)}
             data-testid="button-apply-points"
           >
@@ -653,7 +653,7 @@ export default function CheckoutPage() {
               </p>
               <Button
                 onClick={() => setLocation("/auth")}
-                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                 data-testid="button-register-after-order"
               >
                 سجّل الآن — مجاناً
@@ -763,7 +763,7 @@ export default function CheckoutPage() {
                   paymentMethods={paymentMethods.filter(m => m.id !== 'qahwa-card')}
                   selectedMethod={selectedPaymentMethod}
                   onSelectMethod={setSelectedPaymentMethod}
-                  comingSoon={true}
+                  comingSoon={false}
                 />
 
                 {selectedPaymentMethod === 'cash' && cashDistanceChecking && (

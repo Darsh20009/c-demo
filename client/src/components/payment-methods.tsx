@@ -389,7 +389,7 @@ export default function PaymentMethods({
                       </div>
                       <div className="flex gap-2">
                         <Button 
-                          className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                           onClick={handleSearchCard}
                           disabled={isSearching}
                         >
@@ -397,7 +397,7 @@ export default function PaymentMethods({
                         </Button>
                         <Button 
                           variant="ghost" 
-                          className="text-amber-700 hover:bg-amber-50"
+                          className="text-primary hover:bg-primary/10"
                           onClick={() => setCardMode(null)}
                         >
                           إلغاء

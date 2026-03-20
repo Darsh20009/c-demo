@@ -301,6 +301,22 @@ export default function DrinkCustomizationDialog({
 
   const isLoading = loadingAddons || loadingCoffeeAddons;
 
+  // Auto-confirm if product has no sizes and no add-ons after loading
+  useEffect(() => {
+    if (!open || isLoading || !activeItem) return;
+    const hasSizes = activeItem.availableSizes && activeItem.availableSizes.length > 0;
+    const hasVariants = variants && variants.length > 1;
+    const hasAddons = availableAddons.length > 0;
+    if (!hasSizes && !hasVariants && !hasAddons) {
+      const customization: DrinkCustomization = {
+        selectedAddons: [],
+        totalAddonsPrice: 0,
+      };
+      onConfirm(customization, quantity, activeItem);
+      onClose();
+    }
+  }, [isLoading, open]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!activeItem) return null;
 
   return (
