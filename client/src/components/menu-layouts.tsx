@@ -54,10 +54,10 @@ export function ClassicMenuLayout({ items, onAddItem, lang, currency, favoriteId
             >
               <div className="w-20 h-20 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
                 <img
-                  src={item.imageUrl || "/placeholder-coffee.png"}
+                  src={item.imageUrl || "/images/default-coffee.png"}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-coffee.png"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
                 />
               </div>
               <div className="flex-1 min-w-0 py-1">
@@ -112,10 +112,10 @@ export function CardsMenuLayout({ items, onAddItem, lang, currency, favoriteIds,
             >
               <div className="relative aspect-square overflow-hidden bg-secondary">
                 <img
-                  src={item.imageUrl || "/placeholder-coffee.png"}
+                  src={item.imageUrl || "/images/default-coffee.png"}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-coffee.png"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
                 />
                 {item.isBestSeller && (
                   <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
@@ -175,10 +175,10 @@ export function ListMenuLayout({ items, onAddItem, lang, currency, favoriteIds, 
             >
               <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
                 <img
-                  src={item.imageUrl || "/placeholder-coffee.png"}
+                  src={item.imageUrl || "/images/default-coffee.png"}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder-coffee.png"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
                 />
               </div>
               <div className="flex-1 min-w-0">

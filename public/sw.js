@@ -1,6 +1,6 @@
 // QIROX Cafe Service Worker - Handles push notifications and offline caching
 
-const CACHE_NAME = 'qirox-cafe-v2';
+const CACHE_NAME = 'qirox-cafe-v3';
 
 // Install: cache essential assets
 self.addEventListener('install', (event) => {

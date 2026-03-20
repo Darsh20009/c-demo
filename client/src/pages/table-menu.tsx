@@ -760,7 +760,7 @@ export default function TableMenuNew() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       alt={i18n.language === 'ar' ? item.nameAr : item.nameEn || item.nameAr}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/placeholder-coffee.png";
+                        (e.target as HTMLImageElement).src = "/images/default-coffee.png";
                       }}
                     />
                   </div>
@@ -806,7 +806,7 @@ export default function TableMenuNew() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         alt={i18n.language === 'ar' ? item.nameAr : item.nameEn || item.nameAr}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/placeholder-coffee.png";
+                          (e.target as HTMLImageElement).src = "/images/default-coffee.png";
                         }}
                       />
                     </div>
