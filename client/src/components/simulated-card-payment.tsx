@@ -1,8 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CheckCircle, CreditCard, Lock, Shield, Wifi, ArrowLeft } from "lucide-react";
+import { CheckCircle, Lock, Shield, ArrowLeft, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SimulatedCardPaymentProps {
@@ -13,41 +11,44 @@ interface SimulatedCardPaymentProps {
 
 type CardBrand = "visa" | "mastercard" | "mada" | "amex" | "unknown";
 type PayStep = "form" | "processing" | "success";
+type ActiveField = "number" | "name" | "expiry" | "cvv" | null;
 
 function detectCardBrand(num: string): CardBrand {
-  const n = num.replace(/\s/g, "");
-  if (/^4/.test(n) && (n.length < 2 || /^4(0024|0148|0168|0502|0544|0547|0553|0579|0651|0660|0685|0686|0688|0700|0707|0709|0714|1563|1564|5564|5660|5688|9989)/.test(n) || parseInt(n.substring(0,6)) >= 446200 && parseInt(n.substring(0,6)) <= 446204)) {
-    return "mada";
-  }
-  if (/^4/.test(n)) return "visa";
+  const n = num.replace(/\D/g, "");
   if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return "mastercard";
   if (/^3[47]/.test(n)) return "amex";
+  if (/^4/.test(n)) {
+    const prefix6 = parseInt(n.substring(0, 6) || "0");
+    const madaPrefixes = [427415, 427672, 428331, 440533, 440647, 440795, 440981, 441082, 445564, 446393, 446404, 446672, 448536, 448609, 448660, 455708, 457865, 458456, 462220, 468540, 468541, 468542, 468543, 417633, 446393];
+    if (madaPrefixes.some(p => prefix6 === p) || (prefix6 >= 446200 && prefix6 <= 446204)) return "mada";
+    return "visa";
+  }
   return "unknown";
 }
 
 function CardBrandLogo({ brand }: { brand: CardBrand }) {
   if (brand === "visa") return (
-    <div className="bg-white rounded px-2 py-1">
+    <div className="bg-white/90 rounded px-2 py-0.5 shadow-sm">
       <span className="text-blue-800 font-black text-sm italic tracking-tighter">VISA</span>
     </div>
   );
   if (brand === "mastercard") return (
-    <div className="flex">
-      <div className="w-7 h-7 rounded-full bg-red-500 opacity-90" />
-      <div className="w-7 h-7 rounded-full bg-yellow-400 opacity-90 -ml-3.5" />
+    <div className="flex items-center">
+      <div className="w-6 h-6 rounded-full bg-red-500 opacity-90 shadow-sm" />
+      <div className="w-6 h-6 rounded-full bg-yellow-400 opacity-90 -ml-3 shadow-sm" />
     </div>
   );
   if (brand === "mada") return (
-    <div className="bg-white rounded px-2 py-1">
+    <div className="bg-white/90 rounded px-2 py-0.5 shadow-sm">
       <span className="text-green-700 font-black text-sm tracking-tight">mada</span>
     </div>
   );
   if (brand === "amex") return (
-    <div className="bg-white rounded px-2 py-1">
+    <div className="bg-white/90 rounded px-2 py-0.5 shadow-sm">
       <span className="text-blue-600 font-black text-xs tracking-tight">AMEX</span>
     </div>
   );
-  return <CreditCard className="w-8 h-8 text-white/60" />;
+  return null;
 }
 
 function formatCardNumber(val: string) {
@@ -59,41 +60,44 @@ function formatExpiry(val: string) {
   return digits;
 }
 
+const CARD_GRADIENTS: Record<CardBrand, string> = {
+  mastercard: "from-[#1a1a1a] via-[#2a2a2a] to-[#0d0d0d]",
+  visa: "from-[#1A1F71] via-[#243299] to-[#0d1255]",
+  mada: "from-[#006c35] via-[#008a45] to-[#004d26]",
+  amex: "from-[#2c6b5a] via-[#3d8a72] to-[#1a4d3f]",
+  unknown: "from-[#1c2340] via-[#2a3460] to-[#0f1429]",
+};
+
 export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: SimulatedCardPaymentProps) {
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
+  const [activeField, setActiveField] = useState<ActiveField>(null);
   const [step, setStep] = useState<PayStep>("form");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const cvvRef = useRef<HTMLInputElement>(null);
+
+  const numberInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const expiryInputRef = useRef<HTMLInputElement>(null);
+  const cvvInputRef = useRef<HTMLInputElement>(null);
 
   const brand = detectCardBrand(cardNumber);
-
-  const cardGradient =
-    brand === "mastercard"
-      ? "from-[#1a1a1a] via-[#2d2d2d] to-[#111]"
-      : brand === "visa"
-      ? "from-[#1A1F71] via-[#2d3799] to-[#0d1255]"
-      : brand === "mada"
-      ? "from-[#006c35] via-[#008a45] to-[#004d26]"
-      : brand === "amex"
-      ? "from-[#007B5E] via-[#00A878] to-[#005a45]"
-      : "from-[#1c2340] via-[#2a3460] to-[#0f1429]";
+  const gradient = CARD_GRADIENTS[brand];
 
   const validate = () => {
     const e: Record<string, string> = {};
     const num = cardNumber.replace(/\s/g, "");
-    if (num.length < 16) e.cardNumber = "رقم البطاقة غير مكتمل";
-    if (!cardName.trim() || cardName.trim().length < 3) e.cardName = "اكتب اسمك كما هو على البطاقة";
+    if (num.length < 16) e.number = "رقم البطاقة غير مكتمل";
+    if (!cardName.trim() || cardName.trim().length < 3) e.name = "اكتب اسمك كما هو على البطاقة";
     const [m, y] = expiry.split("/");
-    const now = new Date();
-    if (!m || !y || parseInt(m) < 1 || parseInt(m) > 12) { e.expiry = "تاريخ الانتهاء غير صحيح"; }
-    else {
+    if (!m || !y || parseInt(m) < 1 || parseInt(m) > 12) {
+      e.expiry = "تاريخ انتهاء غير صحيح";
+    } else {
+      const now = new Date();
       const expYear = 2000 + parseInt(y);
-      const expMonth = parseInt(m);
-      if (expYear < now.getFullYear() || (expYear === now.getFullYear() && expMonth < now.getMonth() + 1)) {
+      if (expYear < now.getFullYear() || (expYear === now.getFullYear() && parseInt(m) < now.getMonth() + 1)) {
         e.expiry = "البطاقة منتهية الصلاحية";
       }
     }
@@ -104,23 +108,42 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
 
   const handlePay = () => {
     if (!validate()) return;
+    setActiveField(null);
+    setIsFlipped(false);
     setStep("processing");
     setTimeout(() => {
       setStep("success");
-      setTimeout(() => {
-        onSuccess();
-      }, 1800);
+      setTimeout(() => onSuccess(), 1800);
     }, 2800);
   };
 
-  const displayNumber = cardNumber || "•••• •••• •••• ••••";
+  const focusField = (field: ActiveField) => {
+    setActiveField(field);
+    if (field === "cvv") {
+      setIsFlipped(true);
+      setTimeout(() => cvvInputRef.current?.focus(), 50);
+    } else {
+      setIsFlipped(false);
+      setTimeout(() => {
+        if (field === "number") numberInputRef.current?.focus();
+        else if (field === "name") nameInputRef.current?.focus();
+        else if (field === "expiry") expiryInputRef.current?.focus();
+      }, 50);
+    }
+  };
+
+  const displayNumber = cardNumber
+    ? cardNumber.padEnd(19, " ").replace(/ /g, "•").split("").map((c, i) =>
+        [4, 9, 14].includes(i) ? " " : c
+      ).join("")
+    : "•••• •••• •••• ••••";
 
   if (step === "processing") {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center justify-center py-12 space-y-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col items-center justify-center py-14 space-y-6"
         data-testid="card-processing-screen"
       >
         <div className="relative">
@@ -129,13 +152,13 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
             <Lock className="w-8 h-8 text-primary" />
           </div>
         </div>
-        <div className="text-center space-y-2">
-          <p className="text-lg font-bold text-foreground">جاري معالجة الدفع...</p>
-          <p className="text-sm text-muted-foreground">الرجاء الانتظار، يتم التحقق من بطاقتك</p>
+        <div className="text-center space-y-1">
+          <p className="text-lg font-bold">جاري معالجة الدفع...</p>
+          <p className="text-sm text-muted-foreground">الرجاء الانتظار</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
           <Shield className="w-3.5 h-3.5 text-green-600" />
-          <span>دفع آمن ومشفّر 256-bit SSL</span>
+          دفع آمن 256-bit SSL
         </div>
       </motion.div>
     );
@@ -144,10 +167,10 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
   if (step === "success") {
     return (
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
+        initial={{ opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 18 }}
-        className="flex flex-col items-center justify-center py-10 space-y-5"
+        transition={{ type: "spring", stiffness: 220, damping: 18 }}
+        className="flex flex-col items-center justify-center py-12 space-y-5"
         data-testid="card-success-screen"
       >
         <motion.div
@@ -159,9 +182,9 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
           <CheckCircle className="w-12 h-12 text-green-600" />
         </motion.div>
         <div className="text-center space-y-1">
-          <p className="text-xl font-black text-foreground">تمّ الدفع بنجاح!</p>
+          <p className="text-xl font-black">تمّ الدفع بنجاح!</p>
           <p className="text-sm text-muted-foreground">
-            تم خصم <span className="font-bold text-primary">{amount.toFixed(2)} ر.س</span> من بطاقتك
+            تم خصم <span className="font-bold text-primary">{amount.toFixed(2)} ر.س</span>
           </p>
         </div>
       </motion.div>
@@ -171,149 +194,250 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
   return (
     <div className="space-y-5" dir="rtl" data-testid="simulated-card-payment">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-foreground">بيانات البطاقة البنكية</h3>
+        <h3 className="text-base font-bold">بيانات البطاقة البنكية</h3>
         <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">
           <Shield className="w-3 h-3" />
           دفع آمن
         </div>
       </div>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground bg-muted/40 rounded-xl px-4 py-2.5">
-        <span>البطاقات المقبولة:</span>
-        <div className="flex items-center gap-2">
-          <div className="bg-white border rounded px-1.5 py-0.5">
-            <span className="text-green-700 font-black text-[11px]">mada</span>
-          </div>
-          <div className="bg-white border rounded px-1.5 py-0.5">
-            <span className="text-blue-800 font-black text-[11px] italic">VISA</span>
-          </div>
-          <div className="flex bg-white border rounded px-1 py-0.5 gap-0.5 items-center">
-            <div className="w-3.5 h-3.5 rounded-full bg-red-500" />
-            <div className="w-3.5 h-3.5 rounded-full bg-yellow-400 -ml-1.5" />
-          </div>
-        </div>
-      </div>
-
-      <div className="relative h-44 cursor-pointer" style={{ perspective: "1000px" }} onClick={() => {}}>
+      {/* ── Card Visual ── */}
+      <div className="relative" style={{ perspective: "1200px" }} data-testid="card-visual">
         <motion.div
-          className="relative w-full h-full"
+          className="relative w-full"
+          style={{ aspectRatio: "1.586", transformStyle: "preserve-3d" }}
           animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 120, damping: 18 }}
-          style={{ transformStyle: "preserve-3d" }}
+          transition={{ duration: 0.55, type: "spring", stiffness: 130, damping: 20 }}
         >
+          {/* ── FRONT ── */}
           <div
-            className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${cardGradient} p-6 shadow-2xl`}
+            className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} shadow-2xl overflow-hidden`}
             style={{ backfaceVisibility: "hidden" }}
           >
-            <div className="flex justify-between items-start">
-              <Wifi className="w-6 h-6 text-white/60 rotate-90" />
+            {/* background shimmer */}
+            <div className="absolute inset-0 opacity-10"
+              style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 0%, transparent 60%)" }} />
+
+            {/* top row */}
+            <div className="absolute top-5 left-5 right-5 flex justify-between items-start">
+              <Wifi className="w-5 h-5 text-white/50 rotate-90" />
               <CardBrandLogo brand={brand} />
             </div>
-            <div className="mt-4">
-              <div className="w-10 h-7 rounded bg-gradient-to-br from-yellow-300 to-yellow-500 opacity-80 mb-4 shadow-inner" />
-              <p className="text-white font-mono text-lg tracking-[0.2em] font-bold">
-                {cardNumber || "•••• •••• •••• ••••"}
-              </p>
+
+            {/* chip */}
+            <div className="absolute top-16 right-5 w-10 h-7 rounded-md bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 shadow-inner opacity-85">
+              <div className="absolute inset-0 grid grid-cols-3 gap-0.5 p-0.5 opacity-40">
+                {Array.from({length:9}).map((_,i) => <div key={i} className="bg-yellow-600 rounded-sm" />)}
+              </div>
             </div>
-            <div className="flex justify-between items-end mt-4">
-              <div>
-                <p className="text-white/50 text-[10px] uppercase tracking-wider mb-0.5">حامل البطاقة</p>
-                <p className="text-white font-bold text-sm truncate max-w-[150px]">
+
+            {/* card number — clickable to edit */}
+            <button
+              type="button"
+              className={`absolute bottom-16 left-5 right-5 text-left transition-all`}
+              onClick={() => focusField("number")}
+              data-testid="card-field-number"
+            >
+              <p className="text-white/50 text-[9px] uppercase tracking-widest mb-0.5 text-right">رقم البطاقة</p>
+              <p className={`text-white font-mono tracking-[0.2em] font-bold text-right transition-all ${
+                activeField === "number" ? "text-yellow-300 text-base" : "text-sm sm:text-base"
+              }`}>
+                {cardNumber
+                  ? cardNumber.padEnd(16, "•").replace(/(.{4})/g, "$1 ").trim()
+                  : "•••• •••• •••• ••••"}
+              </p>
+              {activeField === "number" && (
+                <div className="mt-1 h-0.5 bg-yellow-400/70 rounded-full w-full" />
+              )}
+            </button>
+
+            {/* bottom row — name + expiry */}
+            <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
+              <button
+                type="button"
+                className="text-right flex-1 min-w-0"
+                onClick={() => focusField("name")}
+                data-testid="card-field-name"
+              >
+                <p className="text-white/50 text-[9px] uppercase tracking-widest mb-0.5">حامل البطاقة</p>
+                <p className={`text-white font-bold text-xs truncate transition-all ${
+                  activeField === "name" ? "text-yellow-300" : ""
+                }`}>
                   {cardName || "CARDHOLDER NAME"}
                 </p>
-              </div>
-              <div className="text-right">
-                <p className="text-white/50 text-[10px] uppercase tracking-wider mb-0.5">صالحة حتى</p>
-                <p className="text-white font-bold text-sm">{expiry || "MM/YY"}</p>
-              </div>
+                {activeField === "name" && (
+                  <div className="mt-0.5 h-0.5 bg-yellow-400/70 rounded-full" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="text-left ml-4 shrink-0"
+                onClick={() => focusField("expiry")}
+                data-testid="card-field-expiry"
+              >
+                <p className="text-white/50 text-[9px] uppercase tracking-widest mb-0.5">صالحة حتى</p>
+                <p className={`text-white font-bold text-xs transition-all ${
+                  activeField === "expiry" ? "text-yellow-300" : ""
+                }`}>
+                  {expiry || "MM/YY"}
+                </p>
+                {activeField === "expiry" && (
+                  <div className="mt-0.5 h-0.5 bg-yellow-400/70 rounded-full" />
+                )}
+              </button>
             </div>
           </div>
 
+          {/* ── BACK ── */}
           <div
-            className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${cardGradient} shadow-2xl`}
+            className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} shadow-2xl overflow-hidden`}
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
-            <div className="w-full h-10 bg-black/60 mt-8" />
-            <div className="px-6 mt-4">
-              <div className="bg-white/90 rounded-md px-3 py-2 flex items-center justify-between">
-                <span className="text-xs text-gray-500 tracking-widest">•••</span>
-                <span className="font-mono font-bold text-gray-800 text-sm">{cvv || "CVV"}</span>
+            <div className="absolute top-10 left-0 right-0 h-10 bg-black/60" />
+            <div className="absolute top-[88px] left-5 right-5">
+              <div className="bg-white/90 rounded h-9 flex items-center justify-end px-3 gap-3">
+                <div className="flex-1 h-3 bg-gray-300/60 rounded-full" />
+                <button
+                  type="button"
+                  className="font-mono font-bold text-gray-800 text-sm min-w-[40px] text-left"
+                  onClick={() => focusField("cvv")}
+                  data-testid="card-field-cvv"
+                >
+                  {cvv ? "•".repeat(cvv.length) : "CVV"}
+                </button>
               </div>
-              <p className="text-white/50 text-[10px] text-center mt-2">رمز الأمان (CVV)</p>
+              <p className="text-white/50 text-[10px] text-center mt-1">اضغط لإدخال رمز CVV</p>
             </div>
-            <div className="absolute bottom-4 left-6 right-6 flex justify-between items-center">
-              <p className="text-white/40 text-[10px]">QIROX Cafe — Simulated</p>
+            <div className="absolute bottom-4 left-5 right-5 flex justify-between items-center">
+              <p className="text-white/30 text-[9px]">QIROX Cafe</p>
               <CardBrandLogo brand={brand} />
             </div>
           </div>
         </motion.div>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium">رقم البطاقة</Label>
-          <Input
-            placeholder="•••• •••• •••• ••••"
-            value={cardNumber}
-            onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-            maxLength={19}
-            inputMode="numeric"
-            className={`font-mono tracking-widest text-base ${errors.cardNumber ? "border-destructive" : ""}`}
-            data-testid="input-card-number"
-            dir="ltr"
-          />
-          {errors.cardNumber && <p className="text-xs text-destructive">{errors.cardNumber}</p>}
-        </div>
+      {/* ── Hidden Inputs (triggered by tapping fields on card) ── */}
+      <AnimatePresence mode="wait">
+        {activeField && (
+          <motion.div
+            key={activeField}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
+            className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 space-y-1"
+          >
+            {activeField === "number" && (
+              <>
+                <p className="text-xs font-medium text-primary">رقم البطاقة</p>
+                <input
+                  ref={numberInputRef}
+                  value={cardNumber}
+                  onChange={e => setCardNumber(formatCardNumber(e.target.value))}
+                  onBlur={() => setActiveField(null)}
+                  placeholder="•••• •••• •••• ••••"
+                  maxLength={19}
+                  inputMode="numeric"
+                  dir="ltr"
+                  className="w-full bg-transparent font-mono tracking-widest text-lg font-bold outline-none text-foreground placeholder:text-muted-foreground/50"
+                  data-testid="input-card-number"
+                  autoFocus
+                />
+                {errors.number && <p className="text-xs text-destructive">{errors.number}</p>}
+              </>
+            )}
+            {activeField === "name" && (
+              <>
+                <p className="text-xs font-medium text-primary">اسم حامل البطاقة</p>
+                <input
+                  ref={nameInputRef}
+                  value={cardName}
+                  onChange={e => setCardName(e.target.value.toUpperCase())}
+                  onBlur={() => setActiveField(null)}
+                  placeholder="FULL NAME"
+                  dir="ltr"
+                  className="w-full bg-transparent uppercase tracking-wide text-lg font-bold outline-none text-foreground placeholder:text-muted-foreground/50"
+                  data-testid="input-card-name"
+                  autoFocus
+                />
+                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              </>
+            )}
+            {activeField === "expiry" && (
+              <>
+                <p className="text-xs font-medium text-primary">تاريخ الانتهاء</p>
+                <input
+                  ref={expiryInputRef}
+                  value={expiry}
+                  onChange={e => setExpiry(formatExpiry(e.target.value))}
+                  onBlur={() => setActiveField(null)}
+                  placeholder="MM/YY"
+                  maxLength={5}
+                  inputMode="numeric"
+                  dir="ltr"
+                  className="w-full bg-transparent font-mono text-lg font-bold outline-none text-foreground placeholder:text-muted-foreground/50"
+                  data-testid="input-card-expiry"
+                  autoFocus
+                />
+                {errors.expiry && <p className="text-xs text-destructive">{errors.expiry}</p>}
+              </>
+            )}
+            {activeField === "cvv" && (
+              <>
+                <p className="text-xs font-medium text-primary">رمز CVV</p>
+                <input
+                  ref={cvvInputRef}
+                  value={cvv}
+                  onChange={e => {
+                    setCvv(e.target.value.replace(/\D/g, "").slice(0, 4));
+                  }}
+                  onBlur={() => { setActiveField(null); setIsFlipped(false); }}
+                  placeholder="•••"
+                  maxLength={4}
+                  inputMode="numeric"
+                  type="password"
+                  dir="ltr"
+                  className="w-full bg-transparent font-mono text-lg font-bold outline-none text-foreground placeholder:text-muted-foreground/50"
+                  data-testid="input-card-cvv"
+                  autoFocus
+                />
+                {errors.cvv && <p className="text-xs text-destructive">{errors.cvv}</p>}
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium">اسم حامل البطاقة</Label>
-          <Input
-            placeholder="كما هو مكتوب على البطاقة"
-            value={cardName}
-            onChange={(e) => setCardName(e.target.value.toUpperCase())}
-            className={`uppercase tracking-wide ${errors.cardName ? "border-destructive" : ""}`}
-            data-testid="input-card-name"
-            dir="ltr"
-          />
-          {errors.cardName && <p className="text-xs text-destructive">{errors.cardName}</p>}
-        </div>
+      {/* Hint — show instructions when no field active */}
+      {!activeField && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-xs text-muted-foreground"
+        >
+          اضغط على أي حقل في البطاقة لإدخال بياناتك
+        </motion.p>
+      )}
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">تاريخ الانتهاء</Label>
-            <Input
-              placeholder="MM/YY"
-              value={expiry}
-              onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-              maxLength={5}
-              inputMode="numeric"
-              className={`font-mono ${errors.expiry ? "border-destructive" : ""}`}
-              data-testid="input-card-expiry"
-              dir="ltr"
-            />
-            {errors.expiry && <p className="text-xs text-destructive">{errors.expiry}</p>}
+      {/* Accepted cards */}
+      <div className="flex items-center gap-3 text-xs text-muted-foreground bg-muted/40 rounded-xl px-4 py-2.5">
+        <span>البطاقات المقبولة:</span>
+        <div className="flex items-center gap-2">
+          <div className="bg-white border rounded px-1.5 py-0.5 shadow-sm">
+            <span className="text-green-700 font-black text-[11px]">mada</span>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm font-medium">رمز CVV</Label>
-            <Input
-              ref={cvvRef}
-              placeholder="•••"
-              value={cvv}
-              onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              maxLength={4}
-              inputMode="numeric"
-              type="password"
-              className={`font-mono ${errors.cvv ? "border-destructive" : ""}`}
-              data-testid="input-card-cvv"
-              dir="ltr"
-              onFocus={() => setIsFlipped(true)}
-              onBlur={() => setIsFlipped(false)}
-            />
-            {errors.cvv && <p className="text-xs text-destructive">{errors.cvv}</p>}
+          <div className="bg-white border rounded px-1.5 py-0.5 shadow-sm">
+            <span className="text-blue-800 font-black text-[11px] italic">VISA</span>
+          </div>
+          <div className="flex bg-white border rounded px-1 py-0.5 gap-0.5 items-center shadow-sm">
+            <div className="w-3.5 h-3.5 rounded-full bg-red-500" />
+            <div className="w-3.5 h-3.5 rounded-full bg-yellow-400 -ml-1.5" />
           </div>
         </div>
       </div>
 
+      {/* Amount + Pay button */}
       <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Lock className="w-4 h-4 text-primary" />
@@ -344,7 +468,7 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
 
       <p className="text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
         <Shield className="w-3 h-3 text-green-600" />
-        هذه بيئة محاكاة آمنة — لن يتم خصم أي مبلغ حقيقي
+        بيئة محاكاة آمنة — لن يتم خصم أي مبلغ حقيقي
       </p>
     </div>
   );
