@@ -106,6 +106,7 @@ const OSInventoryManagement = lazy(() => import("@/pages/os-inventory-management
 const OSRecipeManagement = lazy(() => import("@/pages/os-recipe-management"));
 const OSAccountingDashboard = lazy(() => import("@/pages/os-accounting-dashboard"));
 const OSStockManagement = lazy(() => import("@/pages/os-stock-management"));
+const NotFound = lazy(() => import("@/pages/not-found"));
 const OSRolesManagement = lazy(() => import("@/pages/os-roles-management"));
 const ExecutiveDashboard = lazy(() => import("@/pages/executive-dashboard"));
 const UnifiedInventoryRecipes = lazy(() => import("@/pages/unified-inventory-recipes"));
@@ -158,6 +159,13 @@ const PageLoader = () => {
 };
 
 const MaintenancePage = lazy(() => import("@/pages/maintenance"));
+
+function RouterFallback() {
+  const path = window.location.pathname;
+  const isStaffPath = path.startsWith('/employee') || path.startsWith('/manager') || path.startsWith('/admin') || path.startsWith('/driver') || path.startsWith('/qirox');
+  if (isStaffPath) return <NotFound />;
+  return <MenuPage />;
+}
 
 function AppRouter() {
   const { data: businessConfig } = useQuery<any>({
@@ -348,7 +356,7 @@ function AppRouter() {
 
       {/* Customer Delivery Tracking */}
       <Route path="/delivery/track/:orderId"><DeliveryTracking /></Route>
-      <Route component={MenuPage} />
+      <Route component={RouterFallback} />
     </Switch>
   );
 }
