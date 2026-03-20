@@ -3131,9 +3131,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newShift = await CashierShiftModel.create({
         shiftNumber,
         employeeId,
-        employeeName: req.employee.name || req.employee.username,
+        employeeName: req.employee.fullName || req.employee.username,
         branchId: req.employee.branchId || 'main',
-        branchName: req.employee.branchName || '',
+        branchName: '',
         status: 'open',
         openedAt: new Date(),
         openingCash: Number(openingCash) || 0,
@@ -3277,7 +3277,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: Number(amount) || 0,
         reason: reason || '',
         timestamp: new Date(),
-        performedBy: req.employee.username || req.employee.name,
+        performedBy: req.employee.username || req.employee.fullName,
       });
       activeShift.updatedAt = new Date();
       await activeShift.save();

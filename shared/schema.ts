@@ -2639,6 +2639,9 @@ export const insertDiscountCodeSchema = z.object({
 export const insertLoyaltyCardSchema = z.object({
   customerName: z.string().optional(),
   phoneNumber: z.string(),
+  cardNumber: z.string().optional(),
+  qrToken: z.string().optional(),
+  customerId: z.string().optional(),
 });
 
 export const insertCardCodeSchema = z.object({
@@ -5040,6 +5043,7 @@ export interface IDeliveryOrder extends Document {
   carColor?: string;
   plateNumber?: string;
   saveCarInfo?: number;
+  totalAmount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -5095,6 +5099,7 @@ const DeliveryOrderSchema = new Schema<IDeliveryOrder>({
   customerFeedback: { type: String },
   proofOfDelivery: { type: String },
   signatureUrl: { type: String },
+  totalAmount: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

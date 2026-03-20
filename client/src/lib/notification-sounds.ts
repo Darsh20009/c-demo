@@ -37,16 +37,14 @@ function getCtx(): AudioContext | null {
 async function ensureCtxRunning(): Promise<boolean> {
   const ctx = getCtx();
   if (!ctx) return false;
-  if (ctx.state === 'running') return true;
-  if (ctx.state === 'suspended') {
-    try {
-      await ctx.resume();
-      return ctx.state === 'running';
-    } catch {
-      return false;
-    }
+  const stateNow = ctx.state as string;
+  if (stateNow === 'running') return true;
+  try {
+    await ctx.resume();
+  } catch {
+    return false;
   }
-  return false;
+  return (ctx.state as string) === 'running';
 }
 
 // ─── Audio unlock via silent sound on first interaction ─────────────────────
