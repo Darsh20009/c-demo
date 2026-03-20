@@ -4951,6 +4951,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Verify phone matches email - التحقق من تطابق رقم الجوال مع البريد
+  // Verify phone + name for password recovery (no email needed)
+  app.post("/api/customers/verify-phone-name", async (req, res) => {
+    try {
+      const { phone, name } = req.body;
+
+      if (!phone || !name) {
+        return res.status(400).json({ error: "رقم الجوال والاسم مطلوبان" });
+      }
+
+      const cleanPhone = phone.trim().replace(/\s/g, '');
+      const cleanName = name.trim().toLowerCase();
+
+      const customer = await storage.getCustomerByPhone(cleanPhone);
+
+      if (!customer) {
+        return res.json({ valid: false });
+      }
+
+      const customerName = (customer.name || "").trim().toLowerCase();
+      const valid = customerName === cleanName || customerName.includes(cleanName) || cleanName.includes(customerName);
+      res.json({ valid });
+    } catch (error) {
+      res.status(500).json({ error: "فشل التحقق من البيانات" });
+    }
+  });
+
+  // Reset password using phone + name (no email required)
+  app.post("/api/customers/reset-password-by-phone-name", async (req, res) => {
+    try {
+      const { phone, name, newPassword } = req.body;
+
+      if (!phone || !name || !newPassword) {
+        return res.status(400).json({ error: "جميع الحقول مطلوبة" });
+      }
+
+      if (newPassword.length < 4) {
+        return res.status(400).json({ error: "كلمة المرور يجب أن تكون على الأقل 4 أحرف" });
+      }
+
+      const cleanPhone = phone.trim().replace(/\s/g, '');
+      const cleanName = name.trim().toLowerCase();
+
+      const customer = await storage.getCustomerByPhone(cleanPhone);
+
+      if (!customer) {
+        return res.status(400).json({ error: "البيانات غير صحيحة" });
+      }
+
+      const customerName = (customer.name || "").trim().toLowerCase();
+      const nameMatch = customerName === cleanName || customerName.includes(cleanName) || cleanName.includes(customerName);
+
+      if (!nameMatch) {
+        return res.status(400).json({ error: "البيانات غير صحيحة" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      const updated = await storage.updateCustomer((customer as any)._id.toString(), {
+        password: hashedPassword,
+      });
+
+      if (!updated) {
+        return res.status(500).json({ error: "فشل تحديث كلمة المرور" });
+      }
+
+      res.json({ success: true, message: "تم تغيير كلمة المرور بنجاح" });
+    } catch (error) {
+      res.status(500).json({ error: "فشل تغيير كلمة المرور" });
+    }
+  });
+
   app.post("/api/customers/verify-phone-email", async (req, res) => {
     try {
       const { email, phone } = req.body;
