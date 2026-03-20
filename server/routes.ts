@@ -6171,8 +6171,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const doc = serializeDoc(cartItem);
           
           // Fetch addons to get their prices and names
+          // selectedAddons stores custom `id` fields (nanoid), not MongoDB _id
           const addons = await Promise.all(
-            (cartItem.selectedAddons || []).map((addonId: string) => ProductAddonModel.findById(addonId).lean())
+            (cartItem.selectedAddons || []).map((addonId: string) =>
+              ProductAddonModel.findOne({ id: addonId }).lean()
+            )
           );
           
           // CRITICAL: Force the ID to be the custom 'id' (composite) if available, otherwise use coffeeItemId

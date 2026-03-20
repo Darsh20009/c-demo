@@ -63,7 +63,7 @@ export function ClassicMenuLayout({ items, onAddItem, lang, currency, favoriteId
               <div className="flex-1 min-w-0 py-1">
                 <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
                   <h3 className="text-base font-semibold truncate text-foreground">{getItemName(item, lang)}</h3>
-                  {item.isBestSeller && <Badge className="bg-amber-500 text-white text-[9px] px-1.5 h-4"><Star className="w-2.5 h-2.5 ml-0.5" />الأكثر طلباً</Badge>}
+                  {item.isBestSeller && <Badge className="bg-primary text-primary-foreground text-[9px] px-1.5 h-4"><Star className="w-2.5 h-2.5 ml-0.5" />الأكثر طلباً</Badge>}
                   {item.isNew && <Badge className="bg-green-500 text-white text-[9px] px-1.5 h-4">جديد</Badge>}
                 </div>
                 <p className="text-xs text-muted-foreground truncate mb-2">{item.description || "مشروب مميز"}</p>
@@ -118,7 +118,7 @@ export function CardsMenuLayout({ items, onAddItem, lang, currency, favoriteIds,
                   onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
                 />
                 {item.isBestSeller && (
-                  <div className="absolute top-2 right-2 bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                  <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                     <Flame className="w-2.5 h-2.5" />الأكثر طلباً
                   </div>
                 )}

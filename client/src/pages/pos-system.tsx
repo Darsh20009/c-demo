@@ -771,7 +771,7 @@ export default function PosSystem() {
             <Receipt className="w-4 h-4 ml-2" />
             {t('pos.open_bills')}
             {openTableOrders.length > 0 && (
-              <Badge className="absolute -top-2 -right-2 px-1.5 min-w-[18px] h-[18px] bg-orange-500">
+              <Badge className="absolute -top-2 -right-2 px-1.5 min-w-[18px] h-[18px] bg-primary text-primary-foreground">
                 {openTableOrders.length}
               </Badge>
             )}

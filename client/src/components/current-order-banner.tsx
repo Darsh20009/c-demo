@@ -81,14 +81,14 @@ export default function CurrentOrderBanner() {
  <div className="p-4">
  <div className="flex items-center justify-between mb-3">
  <div className="flex items-center gap-2">
- <Coffee className="w-5 h-5 text-amber-700" />
- <h3 className="font-bold text-amber-900">طلبك الحالي</h3>
+ <Coffee className="w-5 h-5 text-primary" />
+ <h3 className="font-bold text-foreground">طلبك الحالي</h3>
  </div>
  <Button
  size="sm"
  variant="ghost"
  onClick={() => setLocation("/my-orders")}
- className="text-amber-700 hover:text-amber-900 hover:bg-amber-100"
+ className="text-primary hover:text-primary/80 hover:bg-primary/10"
  >
  عرض التفاصيل
  <ArrowLeft className="w-4 h-4 mr-2" />

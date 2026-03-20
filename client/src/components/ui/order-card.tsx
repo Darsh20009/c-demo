@@ -437,7 +437,7 @@ export function OrderCard({
                 <Button 
                   onClick={() => onStartPreparing(order.id, 5)}
                   disabled={isPending}
-                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-black"
+                  className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                   data-testid={`button-start-preparing-${order.orderNumber}`}
                 >
                   <Play className="h-4 w-4 ml-2" />
@@ -557,7 +557,7 @@ export function OrderCard({
             <Button 
               onClick={() => onStartPreparing(order.id)}
               disabled={isPending}
-              className="flex-1 bg-amber-500 hover:bg-amber-600 text-black"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
               data-testid={`button-start-preparing-${order.orderNumber}`}
             >
               <Play className="h-4 w-4 ml-2" />

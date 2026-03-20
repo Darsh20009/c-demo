@@ -10,12 +10,17 @@ QIROX Cafe is a comprehensive digital management system for coffee shops. It has
 - **Product Add-ons Auto-confirm**: Products with no sizes, variants, or add-ons are added directly to cart without showing the customization dialog (`drink-customization-dialog.tsx`)
 - **Design System Color Migration**: All pages migrated from old amber/golden brand colors to the new monochrome green design system (`hsl(155, 60%, 38%)`). 50+ pages fixed across the entire codebase.
 - **`bg-background0` Bug Fixed**: Removed invalid CSS class `bg-background0` (typo) across 15+ files — replaced with `bg-primary`, `bg-primary/10`, `bg-primary/20`, etc. as appropriate.
-- **Key Pages Fixed This Session**:
-  - Backgrounds: `my-orders.tsx`, `cashier-reservations.tsx`, `cashier-table-orders.tsx`, `cashier-phone-lookup.tsx`, `employee-ingredients-management.tsx`, `maintenance.tsx`, `supplier-management.tsx`, `unified-inventory-recipes.tsx`, `zatca-invoices.tsx`
-  - Orange/Amber → Primary: `accounting-dashboard.tsx`, `accounting-smart-dashboard.tsx`, `admin-settings.tsx`, `bi-analytics.tsx`, `card-customization.tsx`, `employee-cashier.tsx`, `employee-home.tsx`, `executive-dashboard.tsx`, `gift-cards-management.tsx`, `inventory-raw-items.tsx`, `inventory-recipes.tsx`, `inventory-stock.tsx`, `manager-attendance.tsx`, `manager-employees.tsx`, `owner-dashboard.tsx`, `support-system.tsx`, `user-guide.tsx`, `warehouse-management.tsx`, `order-status-display.tsx`
-  - Components: `CardCarousel.tsx`, `OrderMeta.tsx`, `PaymentReceiptDialog.tsx`, `branch-location-picker.tsx`, `coffee-card.tsx`, `qr-code.tsx`, `KitchenLayout.tsx`
-- **CSS Classes**: Added `golden-gradient` (green gradient text), updated `glow-effect` and `shimmer` to use primary green; added `font-amiri` (IBM Plex Arabic/Tajawal)
-- **PRESERVED intentional amber/orange**: Star rating stars, loyalty tier gold colors, payment gateway test mode banners, ZATCA warning text, order status "in transit" (orange), urgent order pulse badges, maintenance mode warning, promo notification type colors
+- **Cart Addon CastError Fixed**: `ProductAddonModel.findOne({ id: addonId })` instead of `findById(addonId)` since `selectedAddons` stores nanoid strings, not MongoDB ObjectIds.
+- **ForgotPassword Two-Path Flow**: Added email+phone path and phone+account-name path for users without email. Backend endpoints: `POST /api/customers/verify-phone-name` and `POST /api/customers/reset-password-by-phone-name`.
+- **Fallback Image Fix**: Broken fallback `/placeholder-coffee.png` → `/images/default-coffee.png` in `table-menu.tsx`, `menu.tsx`, `menu-layouts.tsx`.
+- **Missing Route Added**: `/manager/inventory/transfers` route added to App.tsx with lazy import for `InventoryTransfersPage`.
+- **Green Color Fixes (Latest Session)**:
+  - `order-card.tsx`: "Start Preparing" (بدء التحضير) buttons changed from `bg-amber-500` to `bg-primary`
+  - `current-order-banner.tsx`: Coffee icon and heading text changed from amber to primary/foreground
+  - `receipt-invoice.tsx`: Download PDF button amber styling removed (now uses standard outline)
+  - `menu-layouts.tsx`: Best seller badges (الأكثر طلباً) changed from `bg-amber-500` to `bg-primary`
+  - `pos-system.tsx`: Open bills count badge changed from `bg-orange-500` to `bg-primary`
+- **PRESERVED intentional amber/orange**: Star rating stars, loyalty tier gold colors, payment gateway test mode banners, ZATCA warning text, order status "in transit" (orange), urgent order pulse badges, maintenance mode warning, promo notification type colors, low-stock warning indicators, "coming soon" payment method badges, kitchen delivery status indicators
 
 ## Quick Start
 

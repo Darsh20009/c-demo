@@ -72,6 +72,7 @@ const InventoryRecipes = lazy(() => import("@/pages/inventory-recipes"));
 const InventoryStock = lazy(() => import("@/pages/inventory-stock"));
 const InventoryAlerts = lazy(() => import("@/pages/inventory-alerts"));
 const InventoryMovements = lazy(() => import("@/pages/inventory-movements"));
+const InventoryTransfers = lazy(() => import("@/pages/inventory-transfers"));
 const POSSystem = lazy(() => import("@/pages/pos-system"));
 const ShiftManagement = lazy(() => import("@/pages/shift-management"));
 const KitchenDisplay = lazy(() => import("@/pages/kitchen-display"));
@@ -288,6 +289,7 @@ function AppRouter() {
       <Route path="/manager/inventory/stock"><AuthGuard userType="manager"><InventoryStock /></AuthGuard></Route>
       <Route path="/manager/inventory/alerts"><AuthGuard userType="manager"><InventoryAlerts /></AuthGuard></Route>
       <Route path="/manager/inventory/movements"><AuthGuard userType="manager"><InventoryMovements /></AuthGuard></Route>
+      <Route path="/manager/inventory/transfers"><AuthGuard userType="manager"><InventoryTransfers /></AuthGuard></Route>
       <Route path="/manager/accounting"><AuthGuard userType="manager"><AccountingDashboard /></AuthGuard></Route>
       <Route path="/manager/shifts"><AuthGuard userType="manager"><ShiftManagement /></AuthGuard></Route>
       <Route path="/manager/inventory/smart"><AuthGuard userType="manager"><InventorySmartPage /></AuthGuard></Route>

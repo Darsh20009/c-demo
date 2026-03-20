@@ -324,7 +324,7 @@ export function ReceiptInvoice({ order, variant = "button" }: ReceiptInvoiceProp
           <Button
             onClick={generatePDF}
             variant="outline"
-            className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300"
+            className="flex-1"
             data-testid="button-download-invoice"
           >
             <Download className="ml-2 h-4 w-4" />
