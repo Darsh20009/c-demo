@@ -233,7 +233,7 @@ export default function InventoryRawItemsPage() {
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900/50 dark:to-amber-800/50">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/40 dark:to-primary/30">
             <Package className="h-8 w-8 text-accent dark:text-accent" />
           </div>
           <div>
@@ -252,7 +252,7 @@ export default function InventoryRawItemsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-primary dark:border-primary">
+        <div className="rounded-xl border p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/10 border-primary dark:border-primary">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-sm font-medium text-muted-foreground">إجمالي المواد</span>
             <Package className="h-4 w-4 text-accent" />

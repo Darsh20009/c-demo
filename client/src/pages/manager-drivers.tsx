@@ -164,7 +164,7 @@ export default function ManagerDrivers() {
  <Button
  variant="outline"
  onClick={() => setLocation("/manager/dashboard")}
- className="border-primary/50 text-accent hover:bg-background0 hover:text-white"
+ className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-back"
  >
  <ArrowRight className="w-4 h-4 ml-2" />

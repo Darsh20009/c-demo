@@ -156,7 +156,7 @@ export default function OrderTrackingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-background py-12 px-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="font-amiri text-4xl font-bold text-primary mb-2">

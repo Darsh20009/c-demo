@@ -419,7 +419,7 @@ export default function AdminBranches() {
           branches.map((branch) => {
             const branchId = branch.id;
             return (
-              <Card key={branchId} className="hover:shadow-md transition-shadow border-orange-100 dark:border-orange-900/30">
+              <Card key={branchId} className="hover:shadow-md transition-shadow border-border">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-xl font-bold">{branch.nameAr}</CardTitle>

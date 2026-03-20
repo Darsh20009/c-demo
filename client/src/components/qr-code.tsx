@@ -55,7 +55,7 @@ export default function QRCodeComponent({
  <div className="relative group">
  {/* Multiple glow layers for depth */}
  <div className="absolute inset-0 bg-amber-400/30 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
- <div className="absolute inset-0 bg-orange-300/20 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-500 delay-75"></div>
+ <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-lg group-hover:blur-xl transition-all duration-500 delay-75"></div>
  
  <div className="relative bg-white rounded-3xl p-6 border-4 border-amber-200 shadow-2xl group-hover:shadow-amber-300/50 transition-all duration-500 group-hover:scale-105">
  {/* Corner decorations */}

@@ -64,12 +64,12 @@ const SearchCustomer: React.FC<SearchCustomerProps> = ({ setSearchPhone, searchP
         value={phoneNumber}
         onChange={(e) => setPhoneNumber(e.target.value)}
         onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-        className="bg-gray-900 border-amber-500/30 text-white pr-10 text-right"
+        className="pr-10 text-right"
         dir="ltr"
         data-testid="input-phone"
         maxLength={9}
       />
-      <Button onClick={handleSearch} className="bg-background0 hover:bg-primary text-black">
+      <Button onClick={handleSearch} className="bg-primary hover:bg-primary/90 text-primary-foreground">
         بحث
       </Button>
     </div>

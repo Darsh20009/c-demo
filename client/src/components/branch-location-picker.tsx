@@ -89,7 +89,7 @@ export default function BranchLocationPicker({ initialLat, initialLng, onLocatio
           variant="outline"
           size="sm"
           onClick={handleUseCurrentLocation}
-          className="border-amber-500/50 text-amber-500 hover:bg-amber-500/10"
+          className="border-primary/50 text-primary hover:bg-primary/10"
         >
           <Navigation className="w-4 h-4 ml-1" />
           موقعي الحالي

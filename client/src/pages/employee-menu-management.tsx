@@ -780,11 +780,11 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
    <div className="flex flex-col gap-3">
      <span>إضافة مشروب جديد</span>
      <div className="flex items-center gap-2 text-sm font-normal">
-       <span className={`px-3 py-1 rounded-full ${addStep === 1 ? 'bg-background0 text-white' : 'bg-gray-600 text-gray-300'}`}>
+       <span className={`px-3 py-1 rounded-full ${addStep === 1 ? 'bg-primary text-white' : 'bg-gray-600 text-gray-300'}`}>
          1. المعلومات الأساسية
        </span>
        <ArrowLeft className="w-4 h-4 text-gray-400" />
-       <span className={`px-3 py-1 rounded-full ${addStep === 2 ? 'bg-background0 text-white' : 'bg-gray-600 text-gray-300'}`}>
+       <span className={`px-3 py-1 rounded-full ${addStep === 2 ? 'bg-primary text-white' : 'bg-gray-600 text-gray-300'}`}>
          2. المكونات والوصفة
        </span>
      </div>
@@ -1254,7 +1254,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/ingredients")}
- className="border-primary/50 text-accent hover:bg-background0 hover:text-white"
+ className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-ingredients"
  >
  إدارةالمكونات
@@ -1262,7 +1262,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/dashboard")}
- className="border-primary/50 text-accent hover:bg-background0 hover:text-white"
+ className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-back"
  >
  <ArrowRight className="w-4 h-4 ml-2" />
@@ -1331,7 +1331,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  item.availabilityStatus === 'available' ? "bg-green-500" :
  item.availabilityStatus === 'out_of_stock' ? "bg-red-500" :
  item.availabilityStatus === 'coming_soon' ? "bg-blue-500" :
- "bg-background0"
+ "bg-primary"
  }
  data-testid={`badge-status-${item.id}`}
  >

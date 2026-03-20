@@ -170,7 +170,7 @@ export default function EmployeeActivation() {
  </div>
  </div>
 
- <div className="bg-background0/10 border border-primary/30 rounded-lg p-4">
+ <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
  <div className="flex items-start gap-2">
  <UserPlus className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
  <div className="text-sm text-accent/90">

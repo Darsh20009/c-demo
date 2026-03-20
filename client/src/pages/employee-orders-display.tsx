@@ -12,6 +12,7 @@ import {
 import { Clock, ChefHat, CheckCircle2, ArrowLeft } from "lucide-react";
 import type { Employee } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 
 interface Order {
   id: string;
@@ -121,7 +122,7 @@ export default function EmployeeOrdersDisplay() {
       preparing: "bg-blue-50",
       ready: "bg-green-50",
     };
-    return colors[statusSection] || "bg-gray-50";
+    return colors[statusSection] || "bg-muted/30";
   };
 
   const getStatusBorderColor = (statusSection: string) => {
@@ -130,16 +131,16 @@ export default function EmployeeOrdersDisplay() {
       preparing: "border-blue-300",
       ready: "border-green-300",
     };
-    return colors[statusSection] || "border-gray-300";
+    return colors[statusSection] || "border-border";
   };
 
   const getOrderCardBg = (statusSection: string) => {
     const colors: Record<string, string> = {
-      pending: "bg-white border-l-4 border-l-yellow-400",
-      preparing: "bg-white border-l-4 border-l-blue-400",
-      ready: "bg-white border-l-4 border-l-green-400",
+      pending: "bg-card border-l-4 border-l-yellow-400",
+      preparing: "bg-card border-l-4 border-l-blue-400",
+      ready: "bg-card border-l-4 border-l-green-400",
     };
-    return colors[statusSection] || "bg-white border-l-4 border-l-gray-400";
+    return colors[statusSection] || "bg-card border-l-4 border-l-border";
   };
 
   const OrderCard = ({ order, statusSection }: { order: Order; statusSection: string }) => (
@@ -158,14 +159,14 @@ export default function EmployeeOrdersDisplay() {
           )}
           <span className="text-[10px] text-muted-foreground">{new Date(order.createdAt || "").toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
-        <p className="text-3xl sm:text-4xl font-bold text-gray-900 font-mono mb-1 truncate w-full">
+        <p className="text-3xl sm:text-4xl font-bold text-foreground font-mono mb-1 truncate w-full">
           {getLastThreeDigits(order.orderNumber)}
         </p>
         <div className="flex items-center justify-center gap-1 flex-wrap w-full">
-          <p className="text-base sm:text-lg font-bold text-gray-900 leading-none truncate max-w-[70%]">
+          <p className="text-base sm:text-lg font-bold text-foreground leading-none truncate max-w-[70%]">
             {order.totalAmount}
           </p>
-          <p className="text-xs sm:text-sm font-semibold text-gray-700 leading-none shrink-0"><SarIcon /></p>
+          <p className="text-xs sm:text-sm font-semibold text-muted-foreground leading-none shrink-0"><SarIcon /></p>
         </div>
       </div>
     </div>
@@ -176,9 +177,9 @@ export default function EmployeeOrdersDisplay() {
     return (
       <div>
         <div className={`flex items-center gap-2 mb-4 pb-3 border-b-2 ${getStatusBorderColor(status)}`}>
-          <Icon className="w-6 h-6 text-gray-700" />
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          <span className="text-xl font-semibold text-gray-600 ml-2">({count})</span>
+          <Icon className="w-6 h-6 text-muted-foreground" />
+          <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+          <span className="text-xl font-semibold text-muted-foreground ml-2">({count})</span>
         </div>
         <div className={`p-4 rounded-lg border-2 ${getStatusBgColor(status)} ${getStatusBorderColor(status)} min-h-40`}>
           {orders_list.length > 0 ? (
@@ -188,7 +189,7 @@ export default function EmployeeOrdersDisplay() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-8 font-semibold">لا توجد طلبات</p>
+            <p className="text-center text-muted-foreground py-8 font-semibold">لا توجد طلبات</p>
           )}
         </div>
       </div>
@@ -196,30 +197,32 @@ export default function EmployeeOrdersDisplay() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 bg-white rounded-lg shadow p-4">
+      <div className="flex items-center justify-between mb-8 bg-card rounded-lg border border-border p-4">
         <Button
           onClick={() => setLocation("/employee/dashboard")}
           size="icon"
           variant="ghost"
-          className="text-gray-700"
           data-testid="button-back"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900">عرض الطلبات</h1>
+        <div className="flex items-center gap-3">
+          <img src={qiroxLogoStaff} alt="QIROX" className="w-8 h-8 object-contain rounded-lg" />
+          <h1 className="text-3xl font-bold text-foreground">عرض الطلبات</h1>
+        </div>
         <div className="w-10" />
       </div>
 
       {/* Branch Selection - Only show if not auto-detected */}
       {!selectedBranch && (
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="bg-card rounded-lg border border-border p-4 mb-6">
+          <label className="block text-sm font-semibold text-foreground mb-2">
             اختر الفرع
           </label>
           <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-            <SelectTrigger className="w-full border-2 border-gray-300 text-base h-12" data-testid="select-branch">
+            <SelectTrigger className="w-full border-2 border-border text-base h-12" data-testid="select-branch">
               <SelectValue placeholder="اختر الفرع" />
             </SelectTrigger>
             <SelectContent>
@@ -235,7 +238,7 @@ export default function EmployeeOrdersDisplay() {
 
       {isLoading && selectedBranch ? (
         <div className="text-center py-8">
-          <p className="text-lg text-gray-600 font-semibold">جاري تحميل الطلبات...</p>
+          <p className="text-lg text-muted-foreground font-semibold">جاري تحميل الطلبات...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

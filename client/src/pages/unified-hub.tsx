@@ -8,7 +8,7 @@ export default function UnifiedHub() {
  const [activeView, setActiveView] = useState<"both" | "employee" | "menu">("both");
 
  return (
-  <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950">
+  <div className="min-h-screen bg-background">
    {/* Header Controls */}
    <div className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-primary/20 shadow-lg">
    <div className="container mx-auto px-4 py-3">
@@ -99,7 +99,7 @@ export default function UnifiedHub() {
    </div>
    {/* Decorative Elements */}
    <div className="fixed inset-0 pointer-events-none">
-   <div className="absolute top-20 left-10 w-72 h-72 bg-background0/5 rounded-full blur-3xl"></div>
+   <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl"></div>
    <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
    </div>
   </div>

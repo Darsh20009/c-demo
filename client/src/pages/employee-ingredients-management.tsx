@@ -127,7 +127,7 @@ export default function EmployeeIngredientsManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-6 shadow-lg">
         <div className="max-w-7xl mx-auto">
@@ -153,7 +153,7 @@ export default function EmployeeIngredientsManagement() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-r-4 border-primary">
+          <div className="bg-card rounded-lg border border-border border-r-4 border-r-primary p-4">
             <p className="text-gray-700 dark:text-gray-300">
               <strong>تنبيه:</strong> عند تعطيل أي مادة، سيتم تلقائياً التأثير على جميع المشروبات التي تحتوي على هذه المادة في وصفاتها.
             </p>
@@ -162,38 +162,38 @@ export default function EmployeeIngredientsManagement() {
 
         {/* Category Tabs */}
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-6">
-          <TabsList className="grid grid-cols-3 lg:grid-cols-5 gap-2 h-auto p-2 bg-white dark:bg-gray-800">
+          <TabsList className="grid grid-cols-3 lg:grid-cols-5 gap-2 h-auto p-2 bg-card">
             <TabsTrigger 
               value="ingredient" 
-              className="data-[state=active]:bg-background0 data-[state=active]:text-white"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white"
               data-testid="tab-ingredient"
             >
               المكونات
             </TabsTrigger>
             <TabsTrigger 
               value="packaging" 
-              className="data-[state=active]:bg-background0 data-[state=active]:text-white"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white"
               data-testid="tab-packaging"
             >
               التغليف
             </TabsTrigger>
             <TabsTrigger 
               value="consumable" 
-              className="data-[state=active]:bg-background0 data-[state=active]:text-white"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white"
               data-testid="tab-consumable"
             >
               المستهلكات
             </TabsTrigger>
             <TabsTrigger 
               value="equipment" 
-              className="data-[state=active]:bg-background0 data-[state=active]:text-white"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white"
               data-testid="tab-equipment"
             >
               المعدات
             </TabsTrigger>
             <TabsTrigger 
               value="other" 
-              className="data-[state=active]:bg-background0 data-[state=active]:text-white"
+              className="data-[state=active]:bg-primary data-[state=active]:text-white"
               data-testid="tab-other"
             >
               أخرى
@@ -204,7 +204,7 @@ export default function EmployeeIngredientsManagement() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-48 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+              <div key={i} className="h-48 bg-muted rounded-xl animate-pulse" />
             ))}
           </div>
         ) : (
@@ -218,7 +218,7 @@ export default function EmployeeIngredientsManagement() {
                   key={item.id} 
                   className={`group relative overflow-visible transition-all duration-300 ${
                     isAvailable 
-                      ? 'bg-white dark:bg-gray-800 border-2 border-primary dark:border-primary' 
+                      ? 'bg-card border-2 border-primary' 
                       : 'bg-gray-100 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 opacity-75'
                   }`}
                   data-testid={`card-raw-item-${item.id}`}
@@ -226,7 +226,7 @@ export default function EmployeeIngredientsManagement() {
                   {/* Decorative background gradient */}
                   <div className={`absolute inset-0 rounded-lg bg-gradient-to-br ${
                     isAvailable 
-                      ? 'from-amber-50 to-background dark:from-amber-950/20 dark:to-orange-950/20' 
+                      ? 'from-primary/5 to-background dark:from-primary/20 dark:to-background' 
                       : 'from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800'
                   } opacity-50`} />
                   
@@ -235,7 +235,7 @@ export default function EmployeeIngredientsManagement() {
                     <div className="flex items-start justify-between gap-2 mb-4">
                       <div className={`p-3 rounded-full ${
                         isAvailable 
-                          ? 'bg-gradient-to-br from-amber-400 to-background0' 
+                          ? 'bg-gradient-to-br from-primary to-primary/80' 
                           : 'bg-gray-400'
                       } shadow-lg`}>
                         <Icon className="w-6 h-6 text-white" />

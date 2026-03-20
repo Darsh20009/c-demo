@@ -112,7 +112,7 @@ interface ZATCASettings {
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  pending: { label: "قيد الانتظار", color: "bg-background0", icon: Clock },
+  pending: { label: "قيد الانتظار", color: "bg-primary", icon: Clock },
   submitted: { label: "تم الإرسال", color: "bg-blue-500", icon: Send },
   accepted: { label: "مقبولة", color: "bg-green-500", icon: CheckCircle },
   rejected: { label: "مرفوضة", color: "bg-red-500", icon: XCircle },
@@ -201,7 +201,7 @@ export default function ZATCAInvoicesPage() {
   const totalVat = invoices.filter(i => i.status === 'accepted').reduce((sum, i) => sum + i.vatAmount, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-yellow-50 dark:from-background dark:via-primary/5 dark:to-background" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
           <Button 

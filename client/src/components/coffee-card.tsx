@@ -87,7 +87,7 @@ function CoffeeCard({ item, variants = [] }: CoffeeCardProps) {
       } else {
         return (
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-[1px] flex items-center justify-center z-20">
-            <Badge className="bg-orange-600 text-white text-base py-2 px-6 rounded-full shadow-2xl border-2 border-white/20">
+            <Badge className="bg-destructive text-destructive-foreground text-base py-2 px-6 rounded-full shadow-2xl border-2 border-white/20">
               غير متوفر حالياً
             </Badge>
           </div>

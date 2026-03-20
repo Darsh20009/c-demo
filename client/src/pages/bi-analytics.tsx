@@ -185,9 +185,9 @@ export default function BIAnalytics() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <Target className="w-5 h-5 text-orange-500" />
+                    <Target className="w-5 h-5 text-primary" />
                     {data?.summary?.avgOrderChange !== undefined && (
-                      <Badge variant={data.summary.avgOrderChange >= 0 ? "default" : "destructive"} className={data.summary.avgOrderChange >= 0 ? "bg-orange-500" : ""}>
+                      <Badge variant={data.summary.avgOrderChange >= 0 ? "default" : "destructive"} className={data.summary.avgOrderChange >= 0 ? "bg-primary" : ""}>
                         {data.summary.avgOrderChange >= 0 ? '+' : ''}{data.summary.avgOrderChange}%
                       </Badge>
                     )}

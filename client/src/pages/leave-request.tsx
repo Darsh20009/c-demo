@@ -209,7 +209,7 @@ export default function LeaveRequestPage() {
                 <div className="bg-primary/30 rounded-lg p-3 border border-primary/20">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-300 text-sm">عدد الأيام</span>
-                    <Badge className="bg-background0/20 text-accent border-primary/30">
+                    <Badge className="bg-primary/20 text-accent border-primary/30">
                       {calculateDays()} أيام
                     </Badge>
                   </div>

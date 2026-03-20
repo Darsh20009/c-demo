@@ -150,7 +150,7 @@ export default function AdminReports() {
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   const StatBox = ({ label, value, trend, icon: Icon }: any) => (
-    <Card className="border-0 bg-gradient-to-br from-card to-background dark:from-card dark:to-slate-800">
+    <Card className="border-0 bg-gradient-to-br from-card to-background">
       <CardContent className="pt-6">
         <p className="text-sm text-muted-foreground font-medium">{label}</p>
         <p className="text-3xl font-bold mt-2">{value}</p>

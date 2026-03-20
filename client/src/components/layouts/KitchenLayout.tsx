@@ -88,7 +88,7 @@ export function KitchenLayout({
           <SidebarHeader className="border-b p-4">
             <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarFallback className="bg-orange-600 text-white">
+                <AvatarFallback className="bg-primary text-primary-foreground">
                   {employee?.nameAr?.charAt(0) || "ب"}
                 </AvatarFallback>
               </Avatar>
@@ -165,7 +165,7 @@ export function KitchenLayout({
             </div>
             {employee && (
               <div className="flex items-center gap-2">
-                <Badge className="bg-orange-600 text-white text-xs">
+                <Badge className="bg-primary text-primary-foreground text-xs">
                   KDS
                 </Badge>
                 <span className="text-sm text-muted-foreground hidden sm:block">

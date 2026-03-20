@@ -406,7 +406,7 @@ export default function ManagerTables() {
   };
 
   return (
-    <div className="min-h-screen p-4 bg-[#f0ecd8]" dir="rtl">
+    <div className="min-h-screen p-4 bg-background" dir="rtl">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -417,7 +417,7 @@ export default function ManagerTables() {
             </h1>
             <p className="text-muted-foreground">إدارة طاولات المقهى وإنشاء رموز QR</p>
           </div>
-          <Button variant="outline" className="bg-[#944219]" onClick={() => setLocation("/manager/dashboard")}>
+          <Button variant="outline" className="" onClick={() => setLocation("/manager/dashboard")}>
             العودة للوحة التحكم
           </Button>
         </div>
@@ -621,7 +621,7 @@ export default function ManagerTables() {
 
         {/* QR Code Dialog */}
         <Dialog open={qrDialogOpen} onOpenChange={setQrDialogOpen}>
-          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-[#fefffe]" dir="rtl">
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card" dir="rtl">
             <DialogHeader>
               <DialogTitle>
                 بطاقة QR للطاولة {selectedTable?.tableNumber}

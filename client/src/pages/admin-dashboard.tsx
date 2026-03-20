@@ -144,15 +144,15 @@ export default function AdminDashboard() {
                 <span className="text-sm font-medium">إجمالي الإيرادات</span>
                 <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{totalRevenue.toFixed(0)} <SarIcon /></span>
               </div>
-              <div className="flex justify-between items-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+              <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
                 <span className="text-sm font-medium">متوسط قيمة الطلب</span>
-                <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">{avgOrderValue.toFixed(2)} <SarIcon /></span>
+                <span className="text-2xl font-bold text-primary">{avgOrderValue.toFixed(2)} <SarIcon /></span>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 bg-white dark:bg-card">
+        <Card className="border-0 bg-card">
           <CardHeader className="pb-4">
             <CardTitle>إجراءات سريعة</CardTitle>
           </CardHeader>
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-orange-200 dark:border-orange-900/30">
+                  <tr className="border-b border-border">
                     <th className="text-right p-3 font-semibold">الاسم</th>
                     <th className="text-right p-3 font-semibold">الدور</th>
                     <th className="text-right p-3 font-semibold">الحالة</th>

@@ -65,7 +65,7 @@ export default function EmployeeHome() {
       description: t('home.leave_desc'),
       icon: FileText,
       path: "/employee/leave-request",
-      color: "from-orange-500 to-orange-600",
+      color: "from-primary to-primary/80",
       testId: "button-leave"
     },
     {
@@ -92,7 +92,7 @@ export default function EmployeeHome() {
       description: t('home.drinks_mgmt_desc'),
       icon: Coffee,
       path: "/employee/menu-management",
-      color: "from-amber-500 to-amber-600",
+      color: "from-primary to-primary/80",
       testId: "button-menu-mgmt"
     },
     {
@@ -100,7 +100,7 @@ export default function EmployeeHome() {
       description: t('home.food_mgmt_desc'),
       icon: Utensils,
       path: "/employee/menu-management?type=food",
-      color: "from-orange-500 to-orange-600",
+      color: "from-primary to-primary/80",
       testId: "button-food-mgmt"
     },
     {

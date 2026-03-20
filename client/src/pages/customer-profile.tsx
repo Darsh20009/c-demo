@@ -159,7 +159,7 @@ export default function CustomerProfilePage() {
   allOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-20" dir="rtl">
+    <div className="min-h-screen bg-background pb-20" dir="rtl">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary to-primary/80 p-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center gap-2">

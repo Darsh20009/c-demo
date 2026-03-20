@@ -614,7 +614,7 @@ export default function AccountingDashboardPage() {
                   </Card>
 
                   <Card 
-                    className="bg-gradient-to-br from-orange-500 to-orange-600 text-white cursor-pointer transition-transform hover:scale-[1.02]"
+                    className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground cursor-pointer transition-transform hover:scale-[1.02]"
                     onClick={() => openDrilldown('cogs')}
                     data-testid="card-cogs-drilldown"
                   >
@@ -1205,7 +1205,7 @@ export default function AccountingDashboardPage() {
                         <p className="text-2xl font-bold text-green-800 dark:text-green-300">{dashboardData.totalRevenue.toFixed(2)}</p>
                         <p className="text-xs text-green-600"><SarIcon /></p>
                       </div>
-                      <div className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/20 rounded-xl border border-accent dark:border-accent">
+                      <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/10 rounded-xl border border-accent dark:border-accent">
                         <div className="flex items-center gap-2 mb-2">
                           <Package className="w-5 h-5 text-accent" />
                           <span className="text-sm text-accent dark:text-accent font-medium">تكلفة المكونات</span>

@@ -135,7 +135,7 @@ export default function OSStockManagement() {
 
       {/* Stock Alerts */}
       {alerts.length > 0 && (
-        <Card className="border-orange-200 bg-background dark:bg-accent/20">
+        <Card className="border-amber-200 bg-background dark:bg-accent/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-accent" />
@@ -145,7 +145,7 @@ export default function OSStockManagement() {
           <CardContent>
             <div className="space-y-2">
               {alerts.slice(0, 5).map((alert: any, i: number) => (
-                <div key={i} className="p-3 bg-white dark:bg-card rounded border border-orange-200">
+                <div key={i} className="p-3 bg-background dark:bg-card rounded border border-border">
                   <p className="font-medium">{alert.rawItemName}</p>
                   <p className="text-sm text-muted-foreground">المخزون الحالي: {alert.currentQuantity} - الحد الأدنى: {alert.thresholdQuantity}</p>
                 </div>

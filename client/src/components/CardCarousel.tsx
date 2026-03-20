@@ -151,7 +151,7 @@ export default function CardCarousel({ cards, activeCard, onSelectCard }: CardCa
                 onSelectCard(card);
               }}
               className={`h-2 rounded-full transition-all ${
-                card.id === activeCard.id ? "bg-amber-500 w-8" : "bg-white/20 w-2 hover:bg-white/30"
+                card.id === activeCard.id ? "bg-primary w-8" : "bg-white/20 w-2 hover:bg-white/30"
               }`}
               aria-label={`بطاقة ${idx + 1}`}
             />

@@ -213,10 +213,10 @@ export default function TableCheckout() {
   }
 
   return (
-    <div className="min-h-screen bg-white" dir="rtl">
+    <div className="min-h-screen bg-background" dir="rtl">
       <div className="max-w-2xl mx-auto p-4 sm:p-6 lg:p-8 min-h-screen flex flex-col justify-center">
-        <div className="mb-8 text-center bg-gradient-to-br from-amber-50 to-orange-100 p-8 rounded-2xl shadow-lg">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 shadow-md">
+        <div className="mb-8 text-center bg-card p-8 rounded-2xl border border-border shadow-sm">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-background rounded-full mb-4 shadow-md">
             <Coffee className="w-10 h-10 text-accent" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-2">

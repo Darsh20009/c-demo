@@ -201,7 +201,7 @@ export default function InventoryDashboardPage() {
       return { status: "out", label: "نفد", color: "bg-destructive", textColor: "text-destructive" };
     }
     if (currentQty <= minLevel) {
-      return { status: "low", label: "منخفض", color: "bg-background0", textColor: "text-accent dark:text-accent" };
+      return { status: "low", label: "منخفض", color: "bg-primary", textColor: "text-accent dark:text-accent" };
     }
     if (currentQty >= maxLevel * 0.8) {
       return { status: "high", label: "مرتفع", color: "bg-green-500", textColor: "text-green-600 dark:text-green-400" };

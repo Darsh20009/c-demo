@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Truck, Phone, ArrowLeft } from "lucide-react";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 
 export default function DriverLogin() {
   const [, setLocation] = useLocation();
@@ -53,8 +54,11 @@ export default function DriverLogin() {
     <div className="min-h-screen bg-gradient-to-b from-background to-primary/5 flex items-center justify-center p-4" dir="rtl">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <Truck className="w-10 h-10 text-primary" />
+          <div className="flex justify-center mb-3">
+            <img src={qiroxLogoStaff} alt="QIROX Systems" className="w-14 h-14 object-contain rounded-xl" />
+          </div>
+          <div className="w-14 h-14 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-2">
+            <Truck className="w-7 h-7 text-primary" />
           </div>
           <CardTitle className="text-2xl">بوابة المندوب</CardTitle>
           <CardDescription>سجل دخولك لإدارة طلبات التوصيل</CardDescription>

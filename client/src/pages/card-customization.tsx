@@ -70,7 +70,7 @@ export default function CardCustomizationPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/20">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">تخصيص بطاقتك</h1>
           <Button
@@ -88,10 +88,10 @@ export default function CardCustomizationPage() {
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {/* Hero Section */}
         <div className="relative group animate-in fade-in-0 slide-in-from-top-10 duration-500">
-          <div className="absolute -inset-1 bg-gradient-to-r from-amber-400/30 via-primary/50/30 to-amber-400/30 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
-          <div className="relative bg-gradient-to-br from-amber-50/90 via-primary/5/80 to-background/90 backdrop-blur-sm rounded-2xl p-8 border-2 border-primary/50 shadow-xl">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-primary/20 to-primary/30 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+          <div className="relative bg-gradient-to-br from-primary/5 via-background to-background backdrop-blur-sm rounded-2xl p-8 border-2 border-primary/50 shadow-xl">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-gradient-to-r from-amber-500 to-orange-600 rounded-full text-white shadow-lg">
+              <div className="p-3 bg-primary rounded-full text-primary-foreground shadow-lg">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>

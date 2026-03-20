@@ -299,7 +299,7 @@ export default function OwnerDashboard() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-primary/20">
+              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <ShoppingCart className="w-5 h-5 text-accent" />
@@ -337,8 +337,8 @@ export default function OwnerDashboard() {
                         }}
                         className={`p-4 rounded-lg border cursor-pointer transition-all ${
                           selectedCollection === key
-                            ? 'border-primary bg-background0/10'
-                            : 'border-primary/20 hover:border-primary/50 hover:bg-background0/5'
+                            ? 'border-primary bg-primary/10'
+                            : 'border-primary/20 hover:border-primary/50 hover:bg-primary/5'
                         }`}
                         data-testid={`collection-${key}`}
                       >

@@ -108,7 +108,7 @@ const categoryConfig: Record<string, { label: string; icon: any; gradient: strin
   ingredient: { 
     label: "مكون", 
     icon: Coffee,
-    gradient: "from-amber-500 to-background0"
+    gradient: "from-primary to-primary/80"
   },
   packaging: { 
     label: "تغليف", 
@@ -385,7 +385,7 @@ export default function InventoryStockPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-background/30 dark:from-slate-950 dark:via-slate-900 dark:to-amber-950/10 p-4 md:p-6" dir="rtl">
+    <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">

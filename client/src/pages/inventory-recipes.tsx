@@ -568,7 +568,7 @@ export default function InventoryRecipesPage() {
           <p className="text-xs text-muted-foreground mt-1">وصفة مكتملة</p>
         </div>
 
-        <div className="rounded-xl border p-4 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 border-primary dark:border-primary">
+        <div className="rounded-xl border p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/10 border-primary dark:border-primary">
           <div className="flex items-center justify-between gap-2 mb-2">
             <span className="text-sm font-medium text-muted-foreground">تحتاج وصفات</span>
             <AlertTriangle className="h-4 w-4 text-accent dark:text-accent" />
@@ -794,7 +794,7 @@ export default function InventoryRecipesPage() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-2 border-primary/20 dark:border-primary/20 bg-gradient-to-br from-amber-50 to-transparent dark:from-amber-900/10 dark:to-transparent">
+                <Card className="border-2 border-primary/20 dark:border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-full bg-primary dark:bg-primary/30">
@@ -818,7 +818,7 @@ export default function InventoryRecipesPage() {
                   profitMargin && profitMargin.percentage >= 50 
                     ? 'border-emerald-500/20 dark:border-emerald-400/20 bg-gradient-to-br from-emerald-50 to-transparent dark:from-emerald-900/10 dark:to-transparent' 
                     : profitMargin && profitMargin.percentage >= 30 
-                      ? 'border-primary/20 dark:border-primary/20 bg-gradient-to-br from-amber-50 to-transparent dark:from-amber-900/10 dark:to-transparent'
+                      ? 'border-primary/20 dark:border-primary/20 bg-gradient-to-br from-primary/5 to-transparent'
                       : 'border-red-500/20 dark:border-red-400/20 bg-gradient-to-br from-red-50 to-transparent dark:from-red-900/10 dark:to-transparent'
                 }`}>
                   <CardContent className="pt-4">
@@ -872,7 +872,7 @@ export default function InventoryRecipesPage() {
                             profitMargin.percentage >= 50 
                               ? '[&>div]:bg-emerald-500' 
                               : profitMargin.percentage >= 30 
-                                ? '[&>div]:bg-background0'
+                                ? '[&>div]:bg-primary'
                                 : '[&>div]:bg-red-500'
                           }`}
                         />

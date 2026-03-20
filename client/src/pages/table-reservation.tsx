@@ -190,7 +190,7 @@ export default function TableReservation() {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4" dir="rtl">
         <Card className="w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-500">
           <CardContent className="pt-12 pb-8 text-center">
             <div className="mb-6">
@@ -214,7 +214,7 @@ export default function TableReservation() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-yellow-50 py-8 px-4" dir="rtl">
+    <div className="min-h-screen bg-background py-8 px-4" dir="rtl">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full mb-4">

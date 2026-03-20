@@ -630,7 +630,7 @@ export default function ManagerEmployees() {
  )}
  </div>
 
- <div className="bg-background0/10 border border-primary/30 rounded-lg p-4">
+ <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
  <p className="text-sm text-accent/90">
   سيتم إنشاء الموظف بدون كلمة مرور. يجب على الموظف الذهاب إلى صفحة "موظف جديد" لإنشاء كلمة المرور الخاصةبه.
  </p>
@@ -675,7 +675,7 @@ export default function ManagerEmployees() {
               className="bg-gradient-to-br from-background to-background border-primary/20 overflow-hidden hover-elevate"
               data-testid={`card-employee-${employee.id}`}
             >
- <CardHeader className="bg-gradient-to-r from-amber-500/20 to-amber-700/20">
+ <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/20">
  <div className="flex items-center justify-between">
  <CardTitle className="text-accent flex items-center gap-2">
  {employee.imageUrl ? (
@@ -695,7 +695,7 @@ export default function ManagerEmployees() {
  size="sm"
  variant="ghost"
  onClick={() => setEditingEmployee(employee)}
- className="text-accent hover:bg-background0/10"
+ className="text-accent hover:bg-primary/10"
  data-testid={`button-edit-${employee.id}`}
  >
  <Edit className="w-4 h-4" />

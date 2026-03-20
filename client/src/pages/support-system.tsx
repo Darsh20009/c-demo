@@ -247,14 +247,14 @@ const categoryConfig: Record<string, { label: string; icon: any; color: string }
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
   low: { label: "منخفض", color: "bg-gray-500" },
-  medium: { label: "متوسط", color: "bg-background0" },
-  high: { label: "عالي", color: "bg-background0" },
+  medium: { label: "متوسط", color: "bg-primary" },
+  high: { label: "عالي", color: "bg-primary" },
   urgent: { label: "عاجل", color: "bg-red-500" },
 };
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
   open: { label: "مفتوح", color: "bg-blue-500", icon: AlertCircle },
-  in_progress: { label: "قيد المعالجة", color: "bg-background0", icon: Clock },
+  in_progress: { label: "قيد المعالجة", color: "bg-primary", icon: Clock },
   waiting: { label: "بانتظار الرد", color: "bg-purple-500", icon: Clock },
   resolved: { label: "تم الحل", color: "bg-green-500", icon: CheckCircle },
   closed: { label: "مغلق", color: "bg-gray-500", icon: XCircle },
@@ -339,14 +339,14 @@ export default function SupportSystemPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-primary/30">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-white/60 text-sm">متوسط الرد</p>
                   <p className="text-2xl font-bold text-white mt-1">2 ساعة</p>
                 </div>
-                <div className="p-3 rounded-xl bg-background0/20">
+                <div className="p-3 rounded-xl bg-primary/20">
                   <Clock className="w-6 h-6 text-accent" />
                 </div>
               </div>
@@ -370,19 +370,19 @@ export default function SupportSystemPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white/5 border border-white/10 p-1">
-            <TabsTrigger value="tickets" className="data-[state=active]:bg-background0 data-[state=active]:text-black">
+            <TabsTrigger value="tickets" className="data-[state=active]:bg-primary data-[state=active]:text-black">
               <Ticket className="w-4 h-4 ml-2" />
               التذاكر
             </TabsTrigger>
-            <TabsTrigger value="faq" className="data-[state=active]:bg-background0 data-[state=active]:text-black">
+            <TabsTrigger value="faq" className="data-[state=active]:bg-primary data-[state=active]:text-black">
               <HelpCircle className="w-4 h-4 ml-2" />
               الأسئلة الشائعة
             </TabsTrigger>
-            <TabsTrigger value="articles" className="data-[state=active]:bg-background0 data-[state=active]:text-black">
+            <TabsTrigger value="articles" className="data-[state=active]:bg-primary data-[state=active]:text-black">
               <Book className="w-4 h-4 ml-2" />
               قاعدة المعرفة
             </TabsTrigger>
-            <TabsTrigger value="contact" className="data-[state=active]:bg-background0 data-[state=active]:text-black">
+            <TabsTrigger value="contact" className="data-[state=active]:bg-primary data-[state=active]:text-black">
               <MessageCircle className="w-4 h-4 ml-2" />
               تواصل معنا
             </TabsTrigger>
@@ -735,12 +735,12 @@ export default function SupportSystemPage() {
                       className={`p-4 rounded-lg ${
                         message.sender === "user" 
                           ? "bg-white/5 mr-8" 
-                          : "bg-background0/10 ml-8 border border-primary/20"
+                          : "bg-primary/10 ml-8 border border-primary/20"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          message.sender === "user" ? "bg-white/10" : "bg-background0/20"
+                          message.sender === "user" ? "bg-white/10" : "bg-primary/20"
                         }`}>
                           <User className="w-4 h-4 text-white/60" />
                         </div>

@@ -856,7 +856,7 @@ export default function EmployeeCashier() {
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/cashier/phone-lookup")}
- className="border-primary/50 text-accent hover:bg-background0 hover:text-white"
+ className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-phone-lookup"
  >
  <Search className="w-4 h-4 ml-2" />
@@ -925,7 +925,7 @@ export default function EmployeeCashier() {
  </div>
  </div>
 
- <div className="text-xs text-gray-500 p-3 bg-background0/10 rounded-lg border border-primary/20">
+ <div className="text-xs text-gray-500 p-3 bg-primary/10 rounded-lg border border-primary/20">
  <p className="font-medium text-accent mb-1">ملاحظة:</p>
  <p>عند تفعيل جهاز POS، سيتم معالجة الدفعات الإلكترونية تلقائياً عبر الجهاز. تأكد من توصيل الجهاز بشكل صحيح قبل التفعيل.</p>
  </div>
@@ -964,7 +964,7 @@ export default function EmployeeCashier() {
  size="icon"
  variant="outline"
  onClick={handleOpenCashDrawer}
- className="border-primary/50 text-accent hover:bg-background0 hover:text-white"
+ className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-open-drawer"
  title="فتح الخزانة"
  >
@@ -973,7 +973,7 @@ export default function EmployeeCashier() {
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/dashboard")}
- className="border-primary/50 text-accent hover:bg-background0 hover:text-white"
+ className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-back-dashboard"
  >
  <ArrowRight className="w-4 h-4 ml-2" />
@@ -1117,7 +1117,7 @@ export default function EmployeeCashier() {
  ))}
  </div>
 
- <Separator className="bg-background0/20" />
+ <Separator className="bg-primary/20" />
 
  <div className="space-y-3">
  <div className="space-y-2">
@@ -1288,13 +1288,13 @@ export default function EmployeeCashier() {
  )}
 
  {loyaltyCard && (
- <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 p-4 rounded-lg border-2 border-primary/30 space-y-2">
+ <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border-2 border-primary/30 space-y-2">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <Gift className="w-5 h-5 text-accent" />
  <span className="text-accent font-semibold">بطاقة كوبي</span>
  </div>
- <Badge className="bg-background0 text-black">
+ <Badge className="bg-primary text-black">
  {(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)} أختام
  </Badge>
  </div>
@@ -1309,7 +1309,7 @@ export default function EmployeeCashier() {
  isUsed
  ? 'bg-gray-600 border-gray-500 text-gray-400 line-through'
  : isEarned
- ? 'bg-background0 border-primary text-black'
+ ? 'bg-primary border-primary text-black'
  : 'bg-gray-800 border-gray-600 text-gray-500'
  }`}
  >
@@ -1523,7 +1523,7 @@ export default function EmployeeCashier() {
  </div>
  </div>
 
- <Separator className="bg-background0/20" />
+ <Separator className="bg-primary/20" />
 
  <div className="space-y-2">
  <div className="flex justify-between items-center text-sm">
@@ -1551,7 +1551,7 @@ export default function EmployeeCashier() {
  </div>
  )}
 
- <Separator className="bg-background0/10" />
+ <Separator className="bg-primary/10" />
  
  <div className="flex justify-between items-center text-lg font-bold">
  <span className="text-accent">الإجمالي:</span>

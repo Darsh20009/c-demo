@@ -38,7 +38,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
       {[1,2,3,4,5].map(s => (
-        <Star key={s} className={`w-4 h-4 ${s <= rating ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`} />
+        <Star key={s} className={`w-4 h-4 ${s <= rating ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground'}`} />
       ))}
     </div>
   );
@@ -81,40 +81,40 @@ export default function ManagerReviewsPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-card via-slate-800 to-slate-900" dir="rtl">
+    <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" onClick={() => setLocation("/manager/dashboard")} className="text-slate-300 hover:text-white" data-testid="btn-back">
+          <Button variant="ghost" onClick={() => setLocation("/manager/dashboard")} className="text-muted-foreground hover:text-foreground" data-testid="btn-back">
             <ArrowLeft className="w-4 h-4 ml-2" />العودة
           </Button>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Star className="w-7 h-7 text-amber-400" />تقييمات العملاء
           </h1>
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="border-slate-700 text-slate-300">
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="border-border text-muted-foreground">
             تحديث
           </Button>
         </div>
 
         {/* Rating summary */}
-        <Card className="bg-slate-800/50 border-slate-700 mb-6">
+        <Card className="bg-card border-border mb-6">
           <CardContent className="p-4">
             <div className="flex items-center gap-6 flex-wrap">
               <div className="text-center">
-                <p className="text-5xl font-bold text-white">{avgRating.toFixed(1)}</p>
+                <p className="text-5xl font-bold text-foreground">{avgRating.toFixed(1)}</p>
                 <StarRating rating={Math.round(avgRating)} />
-                <p className="text-slate-400 text-xs mt-1">{data?.total || 0} تقييم</p>
+                <p className="text-muted-foreground text-xs mt-1">{data?.total || 0} تقييم</p>
               </div>
               <div className="flex-1 space-y-1 min-w-[180px]">
                 {ratingCounts.map(({ rating, count }) => {
                   const pct = (data?.total || 0) > 0 ? (count / (data?.total || 1)) * 100 : 0;
                   return (
                     <div key={rating} className="flex items-center gap-2">
-                      <span className="text-slate-400 text-xs w-3">{rating}</span>
+                      <span className="text-muted-foreground text-xs w-3">{rating}</span>
                       <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                      <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                         <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-slate-400 text-xs w-6">{count}</span>
+                      <span className="text-muted-foreground text-xs w-6">{count}</span>
                     </div>
                   );
                 })}
@@ -125,9 +125,9 @@ export default function ManagerReviewsPage() {
 
         {/* Filter */}
         <div className="flex items-center gap-3 mb-4">
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-muted-foreground" />
           <Select value={ratingFilter} onValueChange={setRatingFilter}>
-            <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white" data-testid="select-rating-filter">
+            <SelectTrigger className="w-40 bg-background border-border" data-testid="select-rating-filter">
               <SelectValue placeholder="فلتر التقييم" />
             </SelectTrigger>
             <SelectContent>
@@ -144,27 +144,27 @@ export default function ManagerReviewsPage() {
         {isLoading ? (
           <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-amber-400" /></div>
         ) : reviews.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
+          <div className="text-center py-12 text-muted-foreground">
             <Star className="w-16 h-16 mx-auto mb-4 opacity-30" />
             <p>لا توجد تقييمات بعد</p>
           </div>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <Card key={review._id} className="bg-slate-800/50 border-slate-700" data-testid={`card-review-${review._id}`}>
+              <Card key={review._id} className="bg-card border-border" data-testid={`card-review-${review._id}`}>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
                       <p className="text-white font-medium">{review.customerName || 'عميل'}</p>
-                      {review.customerPhone && <p className="text-slate-400 text-xs">{review.customerPhone}</p>}
-                      <p className="text-slate-500 text-xs mt-0.5">
+                      {review.customerPhone && <p className="text-muted-foreground text-xs">{review.customerPhone}</p>}
+                      <p className="text-muted-foreground text-xs mt-0.5">
                         {review.orderNumber ? `طلب #${review.orderNumber}` : ''} · {new Date(review.createdAt).toLocaleDateString('ar-SA')}
                       </p>
                     </div>
                     <StarRating rating={review.rating} />
                   </div>
                   {review.comment && (
-                    <p className="text-slate-300 text-sm mb-3 bg-card/50 p-3 rounded-lg">"{review.comment}"</p>
+                    <p className="text-muted-foreground text-sm mb-3 bg-card/50 p-3 rounded-lg">"{review.comment}"</p>
                   )}
                   {review.managerReply ? (
                     <div className="bg-green-900/30 border border-green-800 rounded-lg p-3">
@@ -172,13 +172,13 @@ export default function ManagerReviewsPage() {
                         <CheckCircle className="w-4 h-4 text-green-400" />
                         <span className="text-green-400 text-xs font-medium">رد المدير</span>
                       </div>
-                      <p className="text-slate-300 text-sm">{review.managerReply}</p>
+                      <p className="text-muted-foreground text-sm">{review.managerReply}</p>
                     </div>
                   ) : (
                     <Button
                       variant="outline" size="sm"
                       onClick={() => { setReplyDialog(review); setReplyText(""); }}
-                      className="border-slate-600 text-slate-300 hover:text-white hover:border-slate-500"
+                      className="border-border text-muted-foreground hover:text-foreground hover:border-primary/50"
                       data-testid={`btn-reply-${review._id}`}
                     >
                       <MessageSquare className="w-3 h-3 ml-2" />رد على التقييم
@@ -192,23 +192,23 @@ export default function ManagerReviewsPage() {
 
         {/* Reply Dialog */}
         <Dialog open={!!replyDialog} onOpenChange={o => !o && setReplyDialog(null)}>
-          <DialogContent className="bg-slate-900 border-slate-700 text-white" dir="rtl">
+          <DialogContent className="bg-card border-border" dir="rtl">
             <DialogHeader>
               <DialogTitle className="text-white">الرد على تقييم {replyDialog?.customerName}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               {replyDialog?.comment && (
                 <div className="bg-card/50 rounded-lg p-3">
-                  <p className="text-slate-400 text-xs mb-1">تقييم العميل:</p>
+                  <p className="text-muted-foreground text-xs mb-1">تقييم العميل:</p>
                   <StarRating rating={replyDialog.rating} />
-                  <p className="text-slate-300 text-sm mt-1">"{replyDialog.comment}"</p>
+                  <p className="text-muted-foreground text-sm mt-1">"{replyDialog.comment}"</p>
                 </div>
               )}
               <Textarea
                 value={replyText}
                 onChange={e => setReplyText(e.target.value)}
                 placeholder="اكتب ردك هنا..."
-                className="bg-slate-800 border-slate-700 text-white resize-none"
+                className="bg-background border-border resize-none"
                 rows={4}
                 data-testid="textarea-reply"
               />

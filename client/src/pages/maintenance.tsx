@@ -7,7 +7,7 @@ export default function MaintenancePage({ reason = "maintenance" }: { reason?: s
   const isUpdate = reason === "update" || reason === "تحديث";
 
   return (
-    <div className="min-h-screen bg-[#F7F8F8] dark:bg-[#1a1410] flex flex-col items-center justify-center p-4 text-center" dir="rtl">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center" dir="rtl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -25,10 +25,10 @@ export default function MaintenancePage({ reason = "maintenance" }: { reason?: s
         </div>
 
         <div className="space-y-4">
-          <h1 className="text-3xl font-bold text-[#1F2D2E] dark:text-white font-ibm-arabic">
+          <h1 className="text-3xl font-bold text-foreground font-ibm-arabic">
             {isUpdate ? "جاري التحديث..." : "الموقع تحت الصيانة"}
           </h1>
-          <p className="text-[#6B7C7D] dark:text-gray-400 text-lg leading-relaxed">
+          <p className="text-muted-foreground text-lg leading-relaxed">
             {isUpdate 
               ? "نحن نقوم بإضافة مميزات جديدة لنقدم لكم تجربة أفضل. سنعود قريباً جداً!" 
               : "نحن نقوم ببعض أعمال الصيانة الدورية لنضمن لكم أفضل جودة. شكراً لصبركم!"}

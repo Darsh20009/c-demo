@@ -252,7 +252,7 @@ export default function AdminEmployees() {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-white dark:bg-background min-h-screen">
+    <div className="p-6 space-y-6 bg-background min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -283,7 +283,7 @@ export default function AdminEmployees() {
 
       {/* Add/Edit Form */}
       {(showAddForm || editingId) && (
-        <Card className="border-orange-200 dark:border-orange-900/30 bg-background dark:bg-accent/10">
+        <Card className="border-primary/30 bg-background dark:bg-accent/10">
           <CardHeader className="pb-4">
             <CardTitle>{editingId ? 'تعديل الموظف' : 'إضافة موظف جديد'}</CardTitle>
           </CardHeader>
@@ -525,7 +525,7 @@ export default function AdminEmployees() {
       </div>
 
       {/* Employees Table */}
-      <Card className="border-0 bg-white dark:bg-card">
+      <Card className="border-0 bg-card">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">
             الموظفون ({filteredEmployees.length})
@@ -536,7 +536,7 @@ export default function AdminEmployees() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b-2 border-orange-200 dark:border-orange-900/30">
+                  <tr className="border-b-2 border-border">
                     <th className="text-right p-4 font-semibold w-8">
                       <input
                         type="checkbox"

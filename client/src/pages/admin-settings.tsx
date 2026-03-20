@@ -1133,7 +1133,7 @@ export default function AdminSettings() {
 
               <div className="space-y-3">
                 <div className="flex items-center gap-2 pb-1">
-                  <Utensils className="w-4 h-4 text-orange-600" />
+                  <Utensils className="w-4 h-4 text-primary" />
                   <Label className="text-sm font-bold">أقسام إدارة المأكولات</Label>
                   <Badge variant="secondary" className="text-[10px]">{foodCategories.length}</Badge>
                 </div>
@@ -1145,8 +1145,8 @@ export default function AdminSettings() {
                   return (
                     <div key={cat.id} className="flex items-center justify-between p-2.5 bg-card border rounded-lg group" data-testid={`category-item-${cat.id}`}>
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
-                          <IconComp className="w-4 h-4 text-orange-600" />
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                          <IconComp className="w-4 h-4 text-primary" />
                         </div>
                         <div>
                           <span className="text-sm font-medium">{cat.nameAr}</span>

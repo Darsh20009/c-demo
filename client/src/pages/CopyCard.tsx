@@ -999,7 +999,7 @@ export default function CopyCard() {
           </div>
         )}
 
-        <Button onClick={() => navigate("/menu")} variant="outline" className="w-full h-12 md:h-13 border-primary/20 bg-background0/5 text-accent font-bold rounded-xl text-sm md:text-base mt-4 mb-8">
+        <Button onClick={() => navigate("/menu")} variant="outline" className="w-full h-12 md:h-13 border-primary/20 bg-primary/5 text-accent font-bold rounded-xl text-sm md:text-base mt-4 mb-8">
           <Coffee className="w-4 h-4 ml-2" />تصفح القائمة والطلب الآن
         </Button>
       </div>

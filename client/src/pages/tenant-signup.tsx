@@ -10,6 +10,7 @@ import { CheckCircle2, AlertCircle, Loader } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import SarIcon from "@/components/sar-icon";
+import qiroxLogoCustomer from "@assets/qirox-logo-customer.png";
 
 const SUBSCRIPTION_PLANS = [
   {
@@ -153,7 +154,7 @@ export default function TenantSignup() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-background dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-12 text-center">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
@@ -171,14 +172,17 @@ export default function TenantSignup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-background dark:from-slate-950 dark:to-slate-900 py-8 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground dark:text-foreground mb-2">
-            انضم إلى Menuza
+          <div className="flex justify-center mb-4">
+            <img src={qiroxLogoCustomer} alt="QIROX Cafe" className="w-16 h-16 object-contain rounded-xl" />
+          </div>
+          <h1 className="text-4xl font-bold text-foreground mb-2">
+            انضم إلى QIROX Cafe
           </h1>
-          <p className="text-muted-foreground dark:text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-lg">
             أكمل البيانات الخاصة بمتجرك لبدء رحلتك مع نظام إدارة المقاهي الأفضل
           </p>
         </div>

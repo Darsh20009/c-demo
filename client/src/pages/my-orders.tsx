@@ -126,7 +126,7 @@ export default function MyOrders() {
 
   return (
     <CustomerLayout showNav={true} showHeader={false}>
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-amber-100 overflow-hidden relative" data-testid="page-my-orders">
+      <div className="min-h-screen bg-background overflow-hidden relative" data-testid="page-my-orders">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-20 left-20 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-32 right-16 w-32 h-32 bg-accent/15 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1.5s'}}></div>
@@ -156,7 +156,7 @@ export default function MyOrders() {
             transition={{ duration: 0.5 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl font-amiri font-bold bg-gradient-to-r from-amber-800 to-orange-700 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-amiri font-bold text-foreground mb-2">
               {t("orders.title")}
             </h1>
             <p className="text-accent font-cairo">
@@ -165,7 +165,7 @@ export default function MyOrders() {
           </motion.div>
 
           {!isAuthenticated ? (
-            <Card className="p-8 bg-white/90 backdrop-blur-lg shadow-2xl border-2 border-primary/50 text-center">
+            <Card className="p-8 bg-card backdrop-blur-lg shadow-2xl border-2 border-primary/50 text-center">
               <Coffee className="h-16 w-16 text-accent mx-auto mb-4" />
               <h2 className="text-2xl font-amiri font-bold text-accent mb-3">
                 {t("orders.no_orders")}
@@ -189,7 +189,7 @@ export default function MyOrders() {
               </div>
             </div>
           ) : allOrders.length === 0 ? (
-            <Card className="p-8 bg-white/90 backdrop-blur-lg shadow-2xl border-2 border-primary/50 text-center">
+            <Card className="p-8 bg-card backdrop-blur-lg shadow-2xl border-2 border-primary/50 text-center">
               <Coffee className="h-16 w-16 text-accent mx-auto mb-4" />
               <h2 className="text-2xl font-amiri font-bold text-accent mb-3">
                 {t("orders.no_orders")}
@@ -214,7 +214,7 @@ export default function MyOrders() {
                   transition={{ delay: index * 0.1 }}
                 >
                   <div className="space-y-4">
-                    <Card className="p-6 bg-white/90 backdrop-blur-lg shadow-lg border-2 border-primary/50">
+                    <Card className="p-6 bg-card backdrop-blur-lg shadow-lg border-2 border-primary/50">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
@@ -270,7 +270,7 @@ export default function MyOrders() {
                           variant="outline"
                           size="sm"
                           onClick={() => { setActiveReview(order.id); setReviewRating(5); setReviewComment(''); }}
-                          className="border-amber-500/50 text-amber-600 hover:bg-amber-50 font-cairo"
+                          className="border-primary/50 text-primary hover:bg-primary/10 font-cairo"
                           data-testid={'btn-rate-order-' + order.id}
                         >
                           <Star className="w-4 h-4 ml-2 text-amber-400" />
@@ -287,14 +287,14 @@ export default function MyOrders() {
                     )}
 
                     {activeReview === order.id && (
-                      <Card className="p-4 bg-amber-50 border-amber-200">
+                      <Card className="p-4 bg-card border-border">
                         <p className="text-center text-accent font-cairo font-semibold mb-2">كيف كانت تجربتك؟</p>
                         <StarRatingInput value={reviewRating} onChange={setReviewRating} />
                         <textarea
                           value={reviewComment}
                           onChange={e => setReviewComment(e.target.value)}
                           placeholder="أضف تعليقك (اختياري)..."
-                          className="w-full mt-2 p-2 rounded-lg border border-amber-200 bg-white text-sm font-cairo resize-none focus:outline-none focus:border-amber-400"
+                          className="w-full mt-2 p-2 rounded-lg border border-border bg-background text-sm font-cairo resize-none focus:outline-none focus:border-primary"
                           rows={3}
                           data-testid={'textarea-review-' + order.id}
                         />
@@ -307,7 +307,7 @@ export default function MyOrders() {
                           >
                             {reviewMutation.isPending ? '...' : 'إرسال التقييم'}
                           </Button>
-                          <Button variant="outline" onClick={() => setActiveReview(null)} className="border-amber-300 text-amber-700 font-cairo">
+                          <Button variant="outline" onClick={() => setActiveReview(null)} className="border-border text-muted-foreground font-cairo">
                             إلغاء
                           </Button>
                         </div>

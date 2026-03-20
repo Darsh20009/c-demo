@@ -29,7 +29,7 @@ export function PaymentReceiptDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-white flex items-center gap-2">
-              <Receipt className="w-5 h-5 text-amber-500" />
+              <Receipt className="w-5 h-5 text-primary" />
               إيصال الدفع - طلب #{orderId.slice(0, 8)}
             </DialogTitle>
             <Button

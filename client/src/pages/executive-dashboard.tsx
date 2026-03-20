@@ -321,7 +321,7 @@ export default function ExecutiveDashboard() {
         <div className="dashboard-grid">
           <div className="kpi-card card-hover">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-background0 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
                 <DollarSign className="w-5 h-5 text-slate-900" />
               </div>
               <Badge className="badge-premium badge-gold">
@@ -470,7 +470,7 @@ export default function ExecutiveDashboard() {
                 {topProducts.map((product, index) => (
                   <div key={product.name} className="flex items-center gap-4">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold
-                      ${index === 0 ? 'bg-gradient-to-br from-amber-400 to-background0 text-slate-900' : 
+                      ${index === 0 ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground' : 
                         index === 1 ? 'bg-slate-200 text-slate-700' :
                         index === 2 ? 'bg-accent text-accent' :
                         'bg-slate-100 text-slate-600'}`}
@@ -502,7 +502,7 @@ export default function ExecutiveDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-primary dark:border-primary">
+                <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/10 border border-primary dark:border-primary">
                   <div className="flex items-center gap-2 mb-2">
                     <Building2 className="w-4 h-4 text-accent" />
                     <span className="text-sm text-accent dark:text-accent">الفروع</span>
@@ -619,7 +619,7 @@ export default function ExecutiveDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-primary dark:border-primary">
+                <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/20 dark:to-primary/10 border border-primary dark:border-primary">
                   <div className="flex items-center gap-2 mb-2">
                     <DollarSign className="w-4 h-4 text-accent" />
                     <span className="text-sm text-accent dark:text-accent">التكلفة الشهرية (تقديرية)</span>
@@ -699,7 +699,7 @@ export default function ExecutiveDashboard() {
                     <div className="w-24 text-sm font-medium">{roleData.role}</div>
                     <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-amber-400 to-background0 rounded-full"
+                        className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full"
                         style={{ 
                           width: `${(roleData.count / laborAnalytics.totalEmployees) * 100}%` 
                         }}

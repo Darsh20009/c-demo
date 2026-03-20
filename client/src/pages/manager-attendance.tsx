@@ -298,7 +298,7 @@ export default function ManagerAttendance() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-orange-500/20 to-orange-600/10 border-accent/20">
+          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-accent/20">
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-accent" />
@@ -411,7 +411,7 @@ export default function ManagerAttendance() {
 
                 <Button
                   onClick={downloadReport}
-                  className="bg-background0 hover:bg-primary text-white"
+                  className="bg-primary hover:bg-primary text-white"
                   data-testid="button-download-report"
                 >
                   <Download className="w-4 h-4 ml-2" />
@@ -553,7 +553,7 @@ export default function ManagerAttendance() {
                                 className="w-8 h-8 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-8 h-8 bg-background0/30 rounded-full flex items-center justify-center text-xs">
+                              <div className="w-8 h-8 bg-primary/30 rounded-full flex items-center justify-center text-xs">
                                 {record.employee?.fullName?.charAt(0) || '?'}
                               </div>
                             )}

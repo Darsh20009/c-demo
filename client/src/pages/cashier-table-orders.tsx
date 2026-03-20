@@ -301,7 +301,7 @@ export default function CashierTableOrders() {
   const filteredMyOrders = myOrders || [];
 
   return (
-    <div className="min-h-screen p-4 pb-20 sm:pb-4 bg-gray-50 text-[#111112]" dir="rtl">
+    <div className="min-h-screen p-4 pb-20 sm:pb-4 bg-background" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4">
@@ -344,7 +344,7 @@ export default function CashierTableOrders() {
 
           {/* Unassigned Orders */}
           <TabsContent value="pending">
-            <Card className="border-primary/20 bg-white">
+            <Card className="border-primary/20 bg-card">
               <CardHeader>
                 <CardTitle className="text-accent text-right">الطلبات الجديدة</CardTitle>
               </CardHeader>
@@ -429,7 +429,7 @@ export default function CashierTableOrders() {
 
           {/* My Orders */}
           <TabsContent value="my-orders">
-            <Card className="border-primary/20 bg-white">
+            <Card className="border-primary/20 bg-card">
               <CardHeader>
                 <CardTitle className="text-accent text-right">طلباتي</CardTitle>
               </CardHeader>
@@ -529,7 +529,7 @@ export default function CashierTableOrders() {
 
           {/* Tables Management */}
           <TabsContent value="tables">
-            <Card className="border-primary/20 bg-white">
+            <Card className="border-primary/20 bg-card">
               <CardHeader>
                 <CardTitle className="text-accent text-right">إدارة الطاولات</CardTitle>
               </CardHeader>

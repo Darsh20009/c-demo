@@ -153,10 +153,10 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   confirmed: { label: "مؤكد", color: "bg-green-500" },
   received: { label: "تم الاستلام", color: "bg-emerald-600" },
   cancelled: { label: "ملغي", color: "bg-red-500" },
-  pending: { label: "قيد الانتظار", color: "bg-background0" },
+  pending: { label: "قيد الانتظار", color: "bg-primary" },
   paid: { label: "مدفوع", color: "bg-green-500" },
   overdue: { label: "متأخر", color: "bg-red-500" },
-  disputed: { label: "متنازع", color: "bg-background0" },
+  disputed: { label: "متنازع", color: "bg-primary" },
   active: { label: "نشط", color: "bg-green-500" },
   inactive: { label: "غير نشط", color: "bg-gray-500" },
   blocked: { label: "محظور", color: "bg-red-500" },
@@ -334,7 +334,7 @@ export default function SupplierManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-yellow-50 dark:from-background dark:via-primary/5 dark:to-background" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
           <Button 
@@ -646,7 +646,7 @@ export default function SupplierManagementPage() {
                     {suppliers.slice(0, 3).map((supplier, idx) => (
                       <div key={supplier.id} className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                          idx === 0 ? 'bg-background0 text-white' :
+                          idx === 0 ? 'bg-primary text-white' :
                           idx === 1 ? 'bg-gray-400 text-white' :
                           'bg-primary text-white'
                         }`}>

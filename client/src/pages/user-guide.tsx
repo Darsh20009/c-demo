@@ -325,7 +325,7 @@ export default function UserGuidePage() {
   const currentSection = guideSections.find(s => s.id === activeSection);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-yellow-50 dark:from-background dark:via-primary/5 dark:to-background" dir="rtl">
+    <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
           <Button 
@@ -412,7 +412,7 @@ export default function UserGuidePage() {
                     <div className="space-y-4">
                       {currentSection.steps.map((step, index) => (
                         <div key={index} className="relative pr-8 pb-6 border-r-2 border-primary dark:border-primary last:border-0 last:pb-0">
-                          <div className="absolute right-0 top-0 -translate-x-1/2 w-8 h-8 bg-background0 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                          <div className="absolute right-0 top-0 -translate-x-1/2 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold text-sm">
                             {index + 1}
                           </div>
                           <div className="mr-6">
@@ -485,9 +485,9 @@ export default function UserGuidePage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-l from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 border-primary">
+              <Card className="bg-gradient-to-l from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-primary">
                 <CardContent className="flex items-center gap-4 p-6">
-                  <div className="p-4 bg-white dark:bg-background rounded-xl shadow">
+                  <div className="p-4 bg-card rounded-xl border border-border shadow-sm">
                     <Coffee className="w-10 h-10 text-accent" />
                   </div>
                   <div className="flex-1">
