@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { playNotificationSound } from "@/lib/notification-sounds";
+import { playNotificationSound, getSoundEnabled, setSoundEnabled as saveSoundEnabled } from "@/lib/notification-sounds";
+import { AudioUnlockBanner } from "@/components/audio-unlock-banner";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import SarIcon from "@/components/sar-icon";
 
@@ -56,7 +57,7 @@ interface IBranch {
 export default function CashierTableOrders() {
   const [, setLocation] = useLocation();
   const [employee, setEmployee] = useState<Employee | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => getSoundEnabled('cashier-tables'));
   const previousOrderIdsRef = useRef<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -312,16 +313,12 @@ export default function CashierTableOrders() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="icon"
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className={soundEnabled ? "border-green-500 text-green-500" : "border-muted text-muted-foreground"}
-              data-testid="button-toggle-sound"
-              aria-label={soundEnabled ? "كتم الصوت" : "تفعيل الصوت"}
-            >
-              {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-            </Button>
+            <AudioUnlockBanner
+              pageKey="cashier-tables"
+              soundEnabled={soundEnabled}
+              onToggleSound={(val) => { setSoundEnabled(val); saveSoundEnabled('cashier-tables', val); }}
+              compact
+            />
             <Button variant="outline" className="bg-gray-800" onClick={() => setLocation("/employee/dashboard")}>
               العودة للوحة التحكم
             </Button>

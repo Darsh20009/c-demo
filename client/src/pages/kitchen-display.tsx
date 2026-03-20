@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingState } from "@/components/ui/states";
 import { useToast } from "@/hooks/use-toast";
-import { playNotificationSound } from "@/lib/notification-sounds";
+import { playNotificationSound, getSoundEnabled, setSoundEnabled as saveSoundEnabled } from "@/lib/notification-sounds";
+import { AudioUnlockBanner } from "@/components/audio-unlock-banner";
 import { useOrderWebSocket } from "@/lib/websocket";
 import { OrderCard } from "@/components/ui/order-card";
 import { 
@@ -102,7 +103,7 @@ export default function KitchenDisplay() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => getSoundEnabled('kitchen'));
   const [deliveryTypeFilter, setDeliveryTypeFilter] = useState<string>("all");
   const previousOrderCountRef = useRef<number>(-1);
   const previousReadyCountRef = useRef<number>(-1);
@@ -406,16 +407,11 @@ export default function KitchenDisplay() {
                 </SelectContent>
               </Select>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className={soundEnabled ? "border-primary text-primary" : "border-muted text-muted-foreground"}
-                data-testid="button-toggle-sound"
-              >
-                {soundEnabled ? <Volume2 className="h-4 w-4 ml-1" /> : <VolumeX className="h-4 w-4 ml-1" />}
-                {soundEnabled ? "الصوت" : "صامت"}
-              </Button>
+              <AudioUnlockBanner
+                pageKey="kitchen"
+                soundEnabled={soundEnabled}
+                onToggleSound={(val) => { setSoundEnabled(val); saveSoundEnabled('kitchen', val); }}
+              />
               
               <Button
                 variant="outline"

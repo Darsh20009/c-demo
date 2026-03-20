@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useOrderWebSocket } from "@/lib/websocket";
+import { getSoundEnabled, setSoundEnabled as saveSoundEnabled } from "@/lib/notification-sounds";
+import { AudioUnlockBanner } from "@/components/audio-unlock-banner";
 import { 
   Coffee, ShoppingBag, Trash2, Plus, Minus, Search, 
   CreditCard, ChevronLeft, ChevronRight, ChevronDown, XCircle, 
@@ -90,7 +92,7 @@ export default function PosSystem() {
   const [customerLookupFound, setCustomerLookupFound] = useState<boolean | null>(null);
   const [splitViewMode, setSplitViewMode] = useState(false);
   const [mobilePanelView, setMobilePanelView] = useState<'products' | 'cart'>('products');
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => getSoundEnabled('pos'));
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [syncing, setSyncing] = useState(false);
   const [newOrdersCount, setNewOrdersCount] = useState(0);
@@ -721,15 +723,14 @@ export default function PosSystem() {
             <Settings className="w-4 h-4" />
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="hidden sm:flex"
-            data-testid="button-sound-toggle"
-          >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          </Button>
+          <div className="hidden sm:flex">
+            <AudioUnlockBanner
+              pageKey="pos"
+              soundEnabled={soundEnabled}
+              onToggleSound={(val) => { setSoundEnabled(val); saveSoundEnabled('pos', val); }}
+              compact
+            />
+          </div>
 
           <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-500' : 'bg-red-500'}`} title={wsConnected ? t('pos.connected_status') : t('pos.disconnected_status')} />
 
@@ -1939,7 +1940,7 @@ export default function PosSystem() {
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="sound-notif" className="text-sm font-bold cursor-pointer">{t('pos.sound_notif')}</Label>
-              <Switch id="sound-notif" checked={soundEnabled} onCheckedChange={setSoundEnabled} />
+              <Switch id="sound-notif" checked={soundEnabled} onCheckedChange={(val) => { setSoundEnabled(val); saveSoundEnabled('pos', val); }} />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="show-vat" className="text-sm font-bold cursor-pointer">{t('pos.show_vat')}</Label>
