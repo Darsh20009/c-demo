@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import PaymentMethods from "@/components/payment-methods";
 import GeideaCheckoutWidget from "@/components/geidea-checkout";
+import SimulatedCardPayment from "@/components/simulated-card-payment";
 import { customerStorage } from "@/lib/customer-storage";
 import { useCustomer } from "@/contexts/CustomerContext";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
@@ -214,6 +215,7 @@ export default function CheckoutPage() {
   const [cashDistanceChecking, setCashDistanceChecking] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showInlineGeidea, setShowInlineGeidea] = useState(false);
+  const [showSimulatedCard, setShowSimulatedCard] = useState(false);
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [showSuccessPage, setShowSuccessPage] = useState(false);
   const [customerName, setCustomerName] = useState("");
@@ -520,6 +522,20 @@ export default function CheckoutPage() {
   };
 
   const handleProceedPayment = () => {
+    const isFreeOrder = getFinalTotalWithPoints() <= 0;
+
+    if (isFreeOrder) {
+      if (!selectedPaymentMethod) {
+        setSelectedPaymentMethod('cash');
+      }
+      if (!customerName.trim()) {
+        toast({ variant: "destructive", title: t("checkout.enter_customer_name") });
+        return;
+      }
+      setShowConfirmation(true);
+      return;
+    }
+
     if (!selectedPaymentMethod) {
       toast({ variant: "destructive", title: t("checkout.select_payment") });
       return;
@@ -536,17 +552,22 @@ export default function CheckoutPage() {
       toast({ variant: "destructive", title: t("checkout.enter_customer_name") });
       return;
     }
-    // For Geidea/Apple Pay: skip the confirmation dialog — show inline widget directly
-    if (isOnlinePaymentMethod(selectedPaymentMethod)) {
+    if (isCardPaymentMethod(selectedPaymentMethod) || isOnlinePaymentMethod(selectedPaymentMethod)) {
       confirmAndCreateOrder();
       return;
     }
     setShowConfirmation(true);
   };
 
+  const isCardPaymentMethod = (method: string | null) => {
+    if (!method) return false;
+    const cardMethods = ['geidea', 'bank_card', 'credit_card', 'card', 'neoleap', 'paymob-card'];
+    return cardMethods.includes(method);
+  };
+
   const isOnlinePaymentMethod = (method: string | null) => {
     if (!method) return false;
-    const onlineMethods = ['neoleap', 'geidea', 'apple_pay', 'neoleap-apple-pay', 'bank_card', 'paymob-card', 'paymob-wallet'];
+    const onlineMethods = ['apple_pay', 'neoleap-apple-pay', 'paymob-wallet'];
     return onlineMethods.includes(method);
   };
 
@@ -614,6 +635,14 @@ export default function CheckoutPage() {
       channel: "online",
     };
 
+    if (isCardPaymentMethod(selectedPaymentMethod)) {
+      pendingGeideaOrderData.current = orderData;
+      geideaOrderNum.current = `CLN-${Date.now()}`;
+      setShowConfirmation(false);
+      setShowSimulatedCard(true);
+      return;
+    }
+
     if (isOnlinePaymentMethod(selectedPaymentMethod)) {
       pendingGeideaOrderData.current = orderData;
       geideaOrderNum.current = `CLN-${Date.now()}`;
@@ -639,7 +668,7 @@ export default function CheckoutPage() {
 
   if (showSuccessPage) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-red-950" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="min-h-screen flex items-center justify-center p-8 bg-background" dir={isAr ? 'rtl' : 'ltr'}>
         <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl text-center space-y-6">
           <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
           <h2 className="text-3xl font-bold text-accent">{t("nav.thank_you")}</h2>
@@ -913,8 +942,28 @@ export default function CheckoutPage() {
                   />
                 )}
 
+                {/* Simulated card payment widget */}
+                {showSimulatedCard && (
+                  <div className="rounded-2xl border border-border bg-card p-5 shadow-md" data-testid="section-simulated-card">
+                    <SimulatedCardPayment
+                      amount={pendingGeideaOrderData.current?.totalAmount || getFinalTotalWithPoints()}
+                      onSuccess={() => {
+                        const od = pendingGeideaOrderData.current;
+                        if (od) {
+                          const confirmedOrder = { ...od, status: 'payment_confirmed', paymentReference: `CARD-SIM-${Date.now()}` };
+                          createOrderMutation.mutate(confirmedOrder);
+                        } else {
+                          confirmAndCreateOrder();
+                        }
+                        setShowSimulatedCard(false);
+                      }}
+                      onCancel={() => setShowSimulatedCard(false)}
+                    />
+                  </div>
+                )}
+
                 {/* Inline Geidea payment widget — same page, no separate screen */}
-                {showInlineGeidea ? (
+                {!showSimulatedCard && showInlineGeidea ? (
                   <div className="space-y-3" data-testid="section-geidea-inline">
                     <div className="bg-primary rounded-xl px-4 py-3 text-white text-center">
                       <p className="text-xs opacity-75">إجمالي الطلب</p>
@@ -952,7 +1001,7 @@ export default function CheckoutPage() {
                       ← العودة للطلب
                     </Button>
                   </div>
-                ) : (
+                ) : !showSimulatedCard ? (
                   <Button
                     onClick={handleProceedPayment}
                     className="w-full h-14 text-lg"
@@ -964,11 +1013,11 @@ export default function CheckoutPage() {
                   >
                     {selectedPaymentMethod === 'cash' && cashDistanceChecking ? (
                       <><Loader2 className="w-5 h-5 animate-spin ml-2" />جاري التحقق من الموقع...</>
-                    ) : isOnlinePaymentMethod(selectedPaymentMethod) ? (
+                    ) : (isCardPaymentMethod(selectedPaymentMethod) || isOnlinePaymentMethod(selectedPaymentMethod)) ? (
                       <><CreditCard className="w-5 h-5 ml-2" />ادفع الآن</>
                     ) : t("checkout.confirm_order")}
                   </Button>
-                )}
+                ) : null}
               </CardContent>
             </Card>
           </div>
