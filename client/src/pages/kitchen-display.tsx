@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingState } from "@/components/ui/states";
 import { useToast } from "@/hooks/use-toast";
-import { playNotificationSound, getSoundEnabled, setSoundEnabled as saveSoundEnabled } from "@/lib/notification-sounds";
+import { playNotificationSound, getSoundEnabled, setSoundEnabled as saveSoundEnabled, testSound } from "@/lib/notification-sounds";
 import { AudioUnlockBanner } from "@/components/audio-unlock-banner";
 import { useOrderWebSocket } from "@/lib/websocket";
 import { OrderCard } from "@/components/ui/order-card";

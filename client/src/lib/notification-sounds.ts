@@ -37,14 +37,27 @@ function getCtx(): AudioContext | null {
 async function ensureCtxRunning(): Promise<boolean> {
   const ctx = getCtx();
   if (!ctx) return false;
-  const stateNow = ctx.state as string;
-  if (stateNow === 'running') return true;
+  if ((ctx.state as string) === 'running') return true;
   try {
     await ctx.resume();
+    // Give the browser a moment to settle
+    await new Promise(r => setTimeout(r, 30));
   } catch {
     return false;
   }
   return (ctx.state as string) === 'running';
+}
+
+// ─── Auto-resume when tab becomes visible ────────────────────────────────────
+
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && sharedCtx && sharedCtx.state === 'suspended') {
+      try {
+        await sharedCtx.resume();
+      } catch {}
+    }
+  });
 }
 
 // ─── Audio unlock via silent sound on first interaction ─────────────────────
@@ -53,17 +66,24 @@ const SILENT_DATA_URI =
   'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 async function unlockAudioContext(): Promise<void> {
-  if (audioUnlocked) return;
+  if (audioUnlocked) {
+    // Re-check actual context state
+    const ctx = sharedCtx;
+    if (ctx && ctx.state === 'suspended') {
+      try { await ctx.resume(); } catch {}
+    }
+    return;
+  }
   try {
-    // 1. Silent HTML5 Audio unlock
+    // 1. Silent HTML5 Audio unlock (unblocks autoplay policy in most browsers)
     const silent = new Audio(SILENT_DATA_URI);
     silent.volume = 0.001;
     await silent.play().catch(() => {});
 
     // 2. AudioContext resume
     const ctx = getCtx();
-    if (ctx && ctx.state === 'suspended') {
-      await ctx.resume();
+    if (ctx && (ctx.state as string) !== 'running') {
+      await ctx.resume().catch(() => {});
     }
     audioUnlocked = true;
   } catch {
@@ -72,11 +92,15 @@ async function unlockAudioContext(): Promise<void> {
 }
 
 export function isAudioUnlocked(): boolean {
-  return audioUnlocked;
+  // Also check actual context state
+  if (!audioUnlocked) return false;
+  if (sharedCtx && sharedCtx.state === 'suspended') return false;
+  return true;
 }
 
 /** Call this once after any user gesture to unlock audio for the session. */
 export async function initAudioUnlock(): Promise<void> {
+  audioUnlocked = false; // force re-unlock
   await unlockAudioContext();
 }
 
@@ -139,28 +163,87 @@ export function setSoundEnabled(pageKey: string, enabled: boolean): void {
   } catch {}
 }
 
-// ─── Play the MP4 alert file ─────────────────────────────────────────────────
+// ─── Web Audio API beep ──────────────────────────────────────────────────────
 
-async function playFileSound(volume = 1.0): Promise<void> {
-  return new Promise<void>((resolve) => {
-    try {
-      const audio = new Audio('/online-order-alert.mp4');
-      audio.volume = Math.max(0, Math.min(1, volume));
-      const done = () => resolve();
-      const timer = setTimeout(done, 8000);
-      audio.onended = () => { clearTimeout(timer); resolve(); };
-      audio.onerror = () => { clearTimeout(timer); resolve(); };
-      const p = audio.play();
-      if (p && typeof p.catch === 'function') {
-        p.catch(() => { clearTimeout(timer); resolve(); });
-      }
-    } catch {
-      resolve();
-    }
-  });
+interface BeepConfig {
+  freqs: number[];
+  duration: number;
+  type?: OscillatorType;
+  volume?: number;
 }
 
-// ─── WAV Beep Generator ──────────────────────────────────────────────────────
+const SOUND_CONFIGS: Record<NotificationSoundType, BeepConfig[]> = {
+  // New online order: bright ascending ding-ding-ding
+  newOrder: [
+    { freqs: [523], duration: 0.2, type: 'sine', volume: 0.9 },
+    { freqs: [659], duration: 0.2, type: 'sine', volume: 0.9 },
+    { freqs: [784], duration: 0.35, type: 'sine', volume: 0.9 },
+  ],
+  // Online order voice: more prominent double-ring
+  onlineOrderVoice: [
+    { freqs: [880, 1100], duration: 0.15, type: 'sine', volume: 1.0 },
+    { freqs: [880, 1100], duration: 0.15, type: 'sine', volume: 0.9 },
+    { freqs: [1046, 1318], duration: 0.4, type: 'sine', volume: 1.0 },
+  ],
+  // Cashier / POS order: two quick beeps
+  cashierOrder: [
+    { freqs: [660], duration: 0.15, type: 'sine', volume: 0.85 },
+    { freqs: [880], duration: 0.25, type: 'sine', volume: 0.85 },
+  ],
+  // Status change: single mid tone
+  statusChange: [
+    { freqs: [440], duration: 0.3, type: 'sine', volume: 0.7 },
+  ],
+  // Success: pleasant ascending two-tone
+  success: [
+    { freqs: [523], duration: 0.18, type: 'sine', volume: 0.8 },
+    { freqs: [659], duration: 0.28, type: 'sine', volume: 0.8 },
+  ],
+  // Alert: two descending tones
+  alert: [
+    { freqs: [880], duration: 0.2, type: 'sine', volume: 0.9 },
+    { freqs: [659], duration: 0.3, type: 'sine', volume: 0.9 },
+  ],
+};
+
+async function playBeepWebAudio(type: NotificationSoundType, masterVolume: number): Promise<boolean> {
+  try {
+    const running = await ensureCtxRunning();
+    if (!running) return false;
+    const ctx = sharedCtx!;
+
+    const configs = SOUND_CONFIGS[type] ?? SOUND_CONFIGS.newOrder;
+    let startTime = ctx.currentTime;
+
+    for (const config of configs) {
+      const duration = config.duration;
+      const vol = (config.volume ?? 1.0) * masterVolume;
+
+      const master = ctx.createGain();
+      master.gain.setValueAtTime(0, startTime);
+      master.gain.linearRampToValueAtTime(vol, startTime + 0.01);
+      master.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      master.connect(ctx.destination);
+
+      for (const freq of config.freqs) {
+        const osc = ctx.createOscillator();
+        osc.type = config.type ?? 'sine';
+        osc.frequency.value = freq;
+        osc.connect(master);
+        osc.start(startTime);
+        osc.stop(startTime + duration + 0.01);
+      }
+
+      startTime += duration + 0.05;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ─── WAV Data-URI fallback ───────────────────────────────────────────────────
 
 function generateBeepWav(frequencies: number[], durationMs: number, sampleRate = 22050): string {
   const numSamples = Math.floor((sampleRate * durationMs) / 1000);
@@ -199,89 +282,55 @@ function generateBeepWav(frequencies: number[], durationMs: number, sampleRate =
   return 'data:audio/wav;base64,' + btoa(binary);
 }
 
-const audioCache: Partial<Record<NotificationSoundType, string>> = {};
+const wavCache: Partial<Record<NotificationSoundType, string>> = {};
 
-function getBeepDataUrl(type: NotificationSoundType): string {
-  if (!audioCache[type]) {
-    switch (type) {
-      case 'newOrder':
-        audioCache[type] = generateBeepWav([523, 659, 784], 350);
-        break;
-      case 'cashierOrder':
-        audioCache[type] = generateBeepWav([660, 880], 200);
-        break;
-      case 'success':
-        audioCache[type] = generateBeepWav([523, 659], 250);
-        break;
-      case 'statusChange':
-        audioCache[type] = generateBeepWav([440], 300);
-        break;
-      case 'alert':
-        audioCache[type] = generateBeepWav([880, 659], 300);
-        break;
-      default:
-        audioCache[type] = generateBeepWav([523, 659, 784], 350);
-    }
+function getWavDataUrl(type: NotificationSoundType): string {
+  if (!wavCache[type]) {
+    const cfgs = SOUND_CONFIGS[type] ?? SOUND_CONFIGS.newOrder;
+    const allFreqs = cfgs.flatMap(c => c.freqs);
+    const totalDuration = cfgs.reduce((s, c) => s + c.duration * 1000, 0);
+    wavCache[type] = generateBeepWav([...new Set(allFreqs)], Math.max(200, totalDuration));
   }
-  return audioCache[type]!;
+  return wavCache[type]!;
 }
 
-// ─── Web Audio API beep ──────────────────────────────────────────────────────
-
-async function playBeepWebAudio(type: NotificationSoundType, volume: number): Promise<boolean> {
+async function playBeepHtml5(type: NotificationSoundType, volume: number): Promise<void> {
   try {
-    const running = await ensureCtxRunning();
-    if (!running) return false;
-    const ctx = sharedCtx!;
-
-    const freqMap: Record<string, number[]> = {
-      newOrder: [523, 659, 784],
-      cashierOrder: [660, 880],
-      success: [523, 659],
-      statusChange: [440],
-      alert: [880, 659],
-    };
-    const freqs = freqMap[type] || [523, 659, 784];
-    const master = ctx.createGain();
-    master.gain.value = volume;
-    master.connect(ctx.destination);
-
-    freqs.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(master);
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      const start = ctx.currentTime + i * 0.12;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(1 / freqs.length, start + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
-      osc.start(start);
-      osc.stop(start + 0.3);
-    });
-
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function playBeep(type: NotificationSoundType, volume: number): Promise<void> {
-  const ok = await playBeepWebAudio(type, volume);
-  if (ok) return;
-
-  try {
-    const audio = new Audio(getBeepDataUrl(type));
+    const audio = new Audio(getWavDataUrl(type));
     audio.volume = Math.max(0, Math.min(1, volume));
     await audio.play();
     await new Promise<void>((resolve) => {
       audio.onended = () => resolve();
       audio.onerror = () => resolve();
-      setTimeout(resolve, 800);
+      setTimeout(resolve, 1500);
     });
   } catch {
-    // Browser blocked audio — user must interact first
+    // Browser blocked audio
+  }
+}
+
+// ─── Main playBeep: Web Audio → HTML5 fallback ───────────────────────────────
+
+async function playBeep(type: NotificationSoundType, volume: number): Promise<void> {
+  const ok = await playBeepWebAudio(type, volume);
+  if (!ok) {
+    await playBeepHtml5(type, volume);
+  }
+}
+
+// ─── Test sound (bypasses dedup) ─────────────────────────────────────────────
+
+export async function testSound(type: NotificationSoundType = 'success', volume = 0.8): Promise<boolean> {
+  try {
+    // Force unlock first
+    await unlockAudioContext();
+    const ok = await playBeepWebAudio(type, volume);
+    if (!ok) {
+      await playBeepHtml5(type, volume);
+    }
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -293,22 +342,7 @@ export async function playNotificationSound(
 ): Promise<void> {
   if (isDuplicate(type)) return;
   markPlayed(type);
-
-  if (type === 'onlineOrderVoice') {
-    await playFileSound(volume);
-    await new Promise(r => setTimeout(r, 500));
-    await playFileSound(volume * 0.85);
-  } else if (type === 'newOrder') {
-    await playBeep('newOrder', volume);
-    await new Promise(r => setTimeout(r, 350));
-    await playBeep('newOrder', volume * 0.7);
-  } else if (type === 'cashierOrder') {
-    await playBeep('cashierOrder', volume);
-    await new Promise(r => setTimeout(r, 180));
-    await playBeep('cashierOrder', volume * 0.8);
-  } else {
-    await playBeep(type, volume);
-  }
+  await playBeep(type, volume);
 }
 
 export async function playNotificationSequence(

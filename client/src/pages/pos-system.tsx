@@ -3,12 +3,12 @@ import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useOrderWebSocket } from "@/lib/websocket";
-import { getSoundEnabled, setSoundEnabled as saveSoundEnabled } from "@/lib/notification-sounds";
+import { getSoundEnabled, setSoundEnabled as saveSoundEnabled, testSound } from "@/lib/notification-sounds";
 import { AudioUnlockBanner } from "@/components/audio-unlock-banner";
 import { 
   Coffee, ShoppingBag, Trash2, Plus, Minus, Search, 
   CreditCard, ChevronLeft, ChevronRight, ChevronDown, XCircle, 
-  Volume2, VolumeX, ClipboardList, Grid3X3, Tag, 
+  Volume2, VolumeX, ClipboardList, Grid3X3, Tag, PlayCircle,
   Columns2, ArrowRight, Printer, CheckCircle, CheckCircle2, ShoppingCart, 
   Clock, Check, X, AlertTriangle, MessageSquare, 
   Archive, RefreshCw, Wifi, WifiOff, Loader2,
@@ -2042,7 +2042,20 @@ export default function PosSystem() {
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="sound-notif" className="text-sm font-bold cursor-pointer">{t('pos.sound_notif')}</Label>
-              <Switch id="sound-notif" checked={soundEnabled} onCheckedChange={(val) => { setSoundEnabled(val); saveSoundEnabled('pos', val); }} />
+              <div className="flex items-center gap-2">
+                {soundEnabled && (
+                  <button
+                    onClick={() => testSound('newOrder', 0.8)}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                    title="اختبار الصوت"
+                    data-testid="button-test-sound-settings"
+                  >
+                    <PlayCircle className="w-4 h-4" />
+                    <span>اختبار</span>
+                  </button>
+                )}
+                <Switch id="sound-notif" checked={soundEnabled} onCheckedChange={(val) => { setSoundEnabled(val); saveSoundEnabled('pos', val); }} />
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="show-vat" className="text-sm font-bold cursor-pointer">{t('pos.show_vat')}</Label>
