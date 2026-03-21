@@ -16,6 +16,7 @@ import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import type { Employee } from "@shared/schema";
 import { useOrderWebSocket } from "@/lib/websocket";
 import { queryClient } from "@/lib/queryClient";
+import { playNotificationSound } from "@/lib/notification-sounds";
 
 interface LeaveRequest {
   id: string;
@@ -95,14 +96,12 @@ export default function EmployeeDashboard() {
         setTimeout(() => setNewOrderAlert(null), 15000);
       }
       if (order?.channel !== 'pos') {
-        import("@/lib/notification-sounds").then(({ playNotificationSound }) => {
-          const isOnline = order?.channel === 'online';
-          if (isOnline) {
-            playNotificationSound('onlineOrderVoice', 1.0);
-          } else {
-            playNotificationSound('newOrder', 1.0);
-          }
-        });
+        const isOnline = order?.channel === 'online' || order?.channel === 'web';
+        if (isOnline) {
+          playNotificationSound('onlineOrderVoice', 1.0);
+        } else {
+          playNotificationSound('newOrder', 1.0);
+        }
       }
     },
     onOrderUpdated: () => {

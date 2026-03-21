@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useOrderWebSocket } from "@/lib/websocket";
-import { getSoundEnabled, setSoundEnabled as saveSoundEnabled, testSound } from "@/lib/notification-sounds";
+import { getSoundEnabled, setSoundEnabled as saveSoundEnabled, testSound, playNotificationSound } from "@/lib/notification-sounds";
 import { AudioUnlockBanner } from "@/components/audio-unlock-banner";
 import { 
   Coffee, ShoppingBag, Trash2, Plus, Minus, Search, 
@@ -132,19 +132,14 @@ export default function PosSystem() {
       if (isOnlineWebOrder) {
         setNewOrdersCount(prev => prev + 1);
         if (soundEnabled) {
-          import("@/lib/notification-sounds").then(({ playNotificationSound }) => {
-            playNotificationSound('onlineOrderVoice', 1.0);
-          });
+          playNotificationSound('onlineOrderVoice', 1.0);
         }
         toast({
           title: t('pos.new_order_toast'),
           description: t('pos.new_order_toast_desc', { number: order?.orderNumber || '', amount: order?.totalAmount || 0 }),
         });
       } else if (!isPosOrder && soundEnabled) {
-        // Other non-POS non-web channels: gentle beep only
-        import("@/lib/notification-sounds").then(({ playNotificationSound }) => {
-          playNotificationSound('newOrder', 0.6);
-        });
+        playNotificationSound('newOrder', 0.6);
       }
       // POS orders: no sound, no toast (cashier already knows they created it)
     },
@@ -634,9 +629,7 @@ export default function PosSystem() {
 
       // Play confirmation sound for the cashier who placed the order
       if (soundEnabled) {
-        import("@/lib/notification-sounds").then(({ testSound }) => {
-          testSound('success', 0.85);
-        });
+        testSound('success', 0.85);
       }
 
       setShowReceiptDialog(true);

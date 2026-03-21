@@ -362,6 +362,16 @@ app.use('/attached_assets', express.static(path.resolve(__dirname, '..', 'attach
   }
 }));
 
+// Serve public static files (audio, images) explicitly so Vite dev middleware doesn't intercept
+app.use(express.static(path.resolve(__dirname, '..', 'public'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.mp4') || filePath.endsWith('.mp3') || filePath.endsWith('.ogg') || filePath.endsWith('.wav')) {
+      res.set('Content-Type', filePath.endsWith('.mp4') ? 'video/mp4' : 'audio/mpeg');
+      res.set('Cache-Control', 'public, max-age=86400');
+    }
+  }
+}));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
