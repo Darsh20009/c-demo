@@ -1570,6 +1570,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to clear data" });
     }
   });
+
+  // Demo Data Management
+  app.get("/api/admin/demo-stats", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
+      const [ordersCount, customersCount, cartCount] = await Promise.all([
+        OrderModel.countDocuments({ tenantId }),
+        CustomerModel.countDocuments({ tenantId }),
+        CartItemModel.countDocuments({ tenantId }),
+      ]);
+      res.json({ ordersCount, customersCount, cartCount });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get demo stats" });
+    }
+  });
+
+  app.delete("/api/admin/demo-orders", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
+      const [ordersResult, cartResult] = await Promise.all([
+        OrderModel.deleteMany({ tenantId }),
+        CartItemModel.deleteMany({ tenantId }),
+        NotificationModel.deleteMany({ tenantId }),
+      ]);
+      console.log(`[DEMO] Cleared ${ordersResult.deletedCount} orders for tenant ${tenantId}`);
+      res.json({ message: `تم حذف ${ordersResult.deletedCount} طلب بنجاح`, deletedCount: ordersResult.deletedCount });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete demo orders" });
+    }
+  });
+
+  app.delete("/api/admin/demo-customers", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
+      const result = await CustomerModel.deleteMany({ tenantId });
+      await (await import("@shared/schema")).LoyaltyCardModel?.deleteMany({ tenantId }).catch(() => {});
+      console.log(`[DEMO] Cleared ${result.deletedCount} customers for tenant ${tenantId}`);
+      res.json({ message: `تم حذف ${result.deletedCount} عميل بنجاح`, deletedCount: result.deletedCount });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete demo customers" });
+    }
+  });
+
   app.get("/api/config", requireAuth, async (req: AuthRequest, res) => {
     const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
     const config = await storage.getBusinessConfig(tenantId);

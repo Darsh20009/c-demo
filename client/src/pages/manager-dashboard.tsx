@@ -31,6 +31,8 @@ import {
 } from "recharts";
 import type { Employee, Order, Customer } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
+import { DemoDataManager } from "@/components/demo-data-manager";
+import { FlaskConical } from "lucide-react";
 
 interface EmployeeWithStats extends Employee {
  orderCount?: number;
@@ -89,6 +91,7 @@ export default function ManagerDashboard() {
  const [branchSearchResults, setBranchSearchResults] = useState<Array<{ name: string; lat: string; lon: string }>>([]);
  const [showBranchResults, setShowBranchResults] = useState(false);
  const [isSearchingBranch, setIsSearchingBranch] = useState(false);
+ const [demoManagerOpen, setDemoManagerOpen] = useState(false);
  const [managerAssignmentType, setManagerAssignmentType] = useState<"existing" | "new">("existing");
  const [selectedManagerId, setSelectedManagerId] = useState<string>("");
  const [newManagerForm, setNewManagerForm] = useState({
@@ -703,6 +706,7 @@ export default function ManagerDashboard() {
  })();
 
  return (
+ <>
  <div className="min-h-screen bg-background p-6" dir="rtl">
  <div className="max-w-7xl mx-auto">
  <header className="bg-card backdrop-blur-sm rounded-2xl border border-border p-6 mb-6">
@@ -719,6 +723,15 @@ export default function ManagerDashboard() {
  </div>
  </div>
  <div className="flex items-center gap-3 flex-wrap">
+ <Button
+ variant="outline"
+ onClick={() => setDemoManagerOpen(true)}
+ className="text-muted-foreground hover:text-foreground"
+ data-testid="button-demo-manager-header"
+ >
+ <FlaskConical className="w-4 h-4 ml-2" />
+ البيانات التجريبية
+ </Button>
  <Button
  variant="outline"
  onClick={handleLogout}
@@ -1713,5 +1726,7 @@ export default function ManagerDashboard() {
  </Tabs>
  </div>
  </div>
+ <DemoDataManager open={demoManagerOpen} onOpenChange={setDemoManagerOpen} />
+ </>
  );
 }

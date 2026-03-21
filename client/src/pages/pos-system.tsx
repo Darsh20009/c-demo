@@ -1318,12 +1318,12 @@ export default function PosSystem() {
                           <div className="mb-3">
                             {(() => {
                               const steps = [
-                                { key: 'pending', label: i18n.language === 'ar' ? 'انتظار' : 'Pending' },
+                                { key: 'pending', label: i18n.language === 'ar' ? 'مؤكد' : 'Confirmed', aliases: ['payment_confirmed', 'confirmed'] },
                                 { key: 'in_progress', label: i18n.language === 'ar' ? 'تحضير' : 'Preparing' },
                                 { key: 'ready', label: i18n.language === 'ar' ? 'جاهز' : 'Ready' },
                                 { key: 'completed', label: i18n.language === 'ar' ? 'مكتمل' : 'Done' },
                               ];
-                              const currentIdx = steps.findIndex(s => s.key === order.status);
+                              const currentIdx = steps.findIndex(s => s.key === order.status || (s.aliases || []).includes(order.status));
                               return (
                                 <div className="flex items-center gap-1" dir="ltr">
                                   {steps.map((step, idx) => (
@@ -1353,7 +1353,7 @@ export default function PosSystem() {
 
                         {/* ─── Action Buttons (all orders, not just online) ─── */}
                         <div className="flex gap-2 flex-wrap">
-                          {order.status === 'pending' && (
+                          {(order.status === 'pending' || order.status === 'payment_confirmed' || order.status === 'confirmed') && (
                             <Button 
                               size="sm" 
                               onClick={() => updateOrderStatusMutation.mutate({ orderId: order.id || order._id, status: 'in_progress' })}
