@@ -15,9 +15,11 @@ import { Separator } from "@/components/ui/separator";
 import { ReceiptInvoice } from "@/components/receipt-invoice";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import SarIcon from "@/components/sar-icon";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function EmployeeOrders() {
   const { toast } = useToast();
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const [employee, setEmployee] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -216,30 +218,30 @@ export default function EmployeeOrders() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-primary flex items-center gap-2" data-testid="text-page-title">
-                  إدارة الطلبات
+                  {tc("إدارة الطلبات", "Orders Management")}
                   {newOrdersCount > 0 && <BellRing className="w-5 h-5 text-destructive animate-pulse" />}
                 </h1>
-                <p className="text-muted-foreground text-sm">الموظف: {employee.fullName}</p>
+                <p className="text-muted-foreground text-sm">{tc("الموظف:", "Staff:")} {employee.fullName}</p>
               </div>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => refetch()} data-testid="button-refresh">
                 <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
-                تحديث
+                {tc("تحديث", "Refresh")}
               </Button>
               <Button variant="outline" onClick={() => setLocation("/employee/dashboard")} data-testid="button-back">
                 <ArrowRight className="w-4 h-4 ml-2" />
-                العودة
+                {tc("العودة", "Back")}
               </Button>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Label className="font-semibold">تصفية حسب الفرع:</Label>
+            <Label className="font-semibold">{tc("تصفية حسب الفرع:", "Filter by Branch:")}</Label>
             <Select value={selectedBranchId || "all"} onValueChange={(v) => setSelectedBranchId(v === "all" ? null : v)}>
-              <SelectTrigger className="w-56" data-testid="select-branch"><SelectValue placeholder="اختر فرع" /></SelectTrigger>
+              <SelectTrigger className="w-56" data-testid="select-branch"><SelectValue placeholder={tc("اختر فرع", "Select branch")} /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الفروع</SelectItem>
+                <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
                 {branches.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.nameAr}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -258,16 +260,16 @@ export default function EmployeeOrders() {
               data-testid="button-complete-all"
             >
               {completeAllOrdersMutation.isPending ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <CheckCircle className="w-4 h-4 ml-2" />}
-              إكمال الطلبات الجاهزة
+              {tc("إكمال الطلبات الجاهزة", "Complete Ready Orders")}
             </Button>
             <Button 
               onClick={() => {
                 const cancellableOrders = orders.filter(o => ['pending', 'in_progress', 'ready'].includes(o.status));
                 if (cancellableOrders.length === 0) {
-                  toast({ title: "لا توجد طلبات لإلغائها" });
+                  toast({ title: tc("لا توجد طلبات لإلغائها", "No orders to cancel") });
                   return;
                 }
-                if (confirm("هل تريد حقاً إلغاء جميع الطلبات المفتوحة؟")) {
+                if (confirm(tc("هل تريد حقاً إلغاء جميع الطلبات المفتوحة؟", "Really cancel all open orders?"))) {
                   cancelAllOrdersMutation.mutate();
                 }
               }} 
@@ -276,7 +278,7 @@ export default function EmployeeOrders() {
               data-testid="button-cancel-all"
             >
               {cancelAllOrdersMutation.isPending ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <XCircle className="w-4 h-4 ml-2" />}
-              إلغاء كل الطلبات
+              {tc("إلغاء كل الطلبات", "Cancel All Orders")}
             </Button>
           </div>
 
@@ -286,7 +288,7 @@ export default function EmployeeOrders() {
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input 
-                    placeholder="بحث بالرقم أو اسم العميل أو الجوال..." 
+                    placeholder={tc("بحث بالرقم أو اسم العميل أو الجوال...", "Search by number, name or phone...")} 
                     value={searchQuery} 
                     onChange={e => setSearchQuery(e.target.value)} 
                     className="pr-10 text-right" 
@@ -294,39 +296,39 @@ export default function EmployeeOrders() {
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger data-testid="select-status"><SelectValue placeholder="الحالة" /></SelectTrigger>
+                  <SelectTrigger data-testid="select-status"><SelectValue placeholder={tc("الحالة", "Status")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">الكل</SelectItem>
-                    <SelectItem value="pending">جديد</SelectItem>
-                    <SelectItem value="payment_confirmed">تم الدفع</SelectItem>
-                    <SelectItem value="confirmed">مؤكد</SelectItem>
-                    <SelectItem value="in_progress">قيد التحضير</SelectItem>
-                    <SelectItem value="ready">جاهز</SelectItem>
-                    <SelectItem value="completed">مكتمل</SelectItem>
-                    <SelectItem value="cancelled">ملغي</SelectItem>
+                    <SelectItem value="all">{tc("الكل", "All")}</SelectItem>
+                    <SelectItem value="pending">{tc("جديد", "New")}</SelectItem>
+                    <SelectItem value="payment_confirmed">{tc("تم الدفع", "Paid")}</SelectItem>
+                    <SelectItem value="confirmed">{tc("مؤكد", "Confirmed")}</SelectItem>
+                    <SelectItem value="in_progress">{tc("قيد التحضير", "In Progress")}</SelectItem>
+                    <SelectItem value="ready">{tc("جاهز", "Ready")}</SelectItem>
+                    <SelectItem value="completed">{tc("مكتمل", "Completed")}</SelectItem>
+                    <SelectItem value="cancelled">{tc("ملغي", "Cancelled")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="mt-4 grid grid-cols-5 gap-2 text-center">
                 <div className="p-2 border rounded-md bg-background">
                   <p className="text-primary font-bold text-lg">{filteredOrders.length}</p>
-                  <p className="text-xs text-muted-foreground">إجمالي</p>
+                  <p className="text-xs text-muted-foreground">{tc("إجمالي", "Total")}</p>
                 </div>
                 <div className="p-2 border rounded-md bg-background">
                   <p className="text-destructive font-bold text-lg">{filteredOrders.filter(o => o.status === "pending" || o.status === "payment_confirmed").length}</p>
-                  <p className="text-xs text-muted-foreground">جديد</p>
+                  <p className="text-xs text-muted-foreground">{tc("جديد", "New")}</p>
                 </div>
                 <div className="p-2 border rounded-md bg-background">
                   <p className="text-primary font-bold text-lg">{filteredOrders.filter(o => o.status === "in_progress").length}</p>
-                  <p className="text-xs text-muted-foreground">تحضير</p>
+                  <p className="text-xs text-muted-foreground">{tc("تحضير", "Prep")}</p>
                 </div>
                 <div className="p-2 border rounded-md bg-background">
                   <p className="text-foreground font-bold text-lg">{filteredOrders.filter(o => o.status === "ready").length}</p>
-                  <p className="text-xs text-muted-foreground">جاهز</p>
+                  <p className="text-xs text-muted-foreground">{tc("جاهز", "Ready")}</p>
                 </div>
                 <div className="p-2 border rounded-md bg-background">
                   <p className="text-muted-foreground font-bold text-lg">{filteredOrders.filter(o => o.status === "completed").length}</p>
-                  <p className="text-xs text-muted-foreground">مكتمل</p>
+                  <p className="text-xs text-muted-foreground">{tc("مكتمل", "Done")}</p>
                 </div>
               </div>
             </CardContent>
@@ -444,7 +446,7 @@ export default function EmployeeOrders() {
                       <Separator />
 
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-primary text-lg">الإجمالي: {Number(order.totalAmount).toFixed(2)} <SarIcon /></span>
+                        <span className="font-bold text-primary text-lg">{tc("الإجمالي:", "Total:")} {Number(order.totalAmount).toFixed(2)} <SarIcon /></span>
                         <div className="flex items-center gap-2">
                           <Button 
                             size="sm" 
@@ -453,16 +455,16 @@ export default function EmployeeOrders() {
                             data-testid={`button-print-${orderId}`}
                           >
                             <Printer className="w-3.5 h-3.5 ml-1" />
-                            طباعة
+                            {tc("طباعة", "Print")}
                           </Button>
                           <Badge variant={order.paymentStatus === 'paid' ? 'success' : 'outline'} className="text-[10px]">
-                            {order.paymentStatus === 'paid' ? 'مدفوع' : 'غير مدفوع'}
+                            {order.paymentStatus === 'paid' ? tc('مدفوع', 'Paid') : tc('غير مدفوع', 'Unpaid')}
                           </Badge>
                           <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                             {order.paymentMethod === 'cash' ? (
-                              <><Banknote className="w-3 h-3" /> نقدي</>
+                              <><Banknote className="w-3 h-3" /> {tc("نقدي", "Cash")}</>
                             ) : (
-                              <><CreditCard className="w-3 h-3" /> شبكة</>
+                              <><CreditCard className="w-3 h-3" /> {tc("شبكة", "Card")}</>
                             )}
                           </span>
                         </div>
@@ -477,7 +479,7 @@ export default function EmployeeOrders() {
                             data-testid={`button-start-${orderId}`}
                           >
                             <PlayCircle className="w-3.5 h-3.5 ml-1" />
-                            بدء التحضير
+                            {tc("بدء التحضير", "Start Prep")}
                           </Button>
                         )}
                         {(order.status === 'payment_confirmed' || order.status === 'confirmed') && (
@@ -488,7 +490,7 @@ export default function EmployeeOrders() {
                             data-testid={`button-start-confirmed-${orderId}`}
                           >
                             <PlayCircle className="w-3.5 h-3.5 ml-1" />
-                            بدء التحضير
+                            {tc("بدء التحضير", "Start Prep")}
                           </Button>
                         )}
                         {order.status === 'in_progress' && (
@@ -499,7 +501,7 @@ export default function EmployeeOrders() {
                             data-testid={`button-ready-${orderId}`}
                           >
                             <CheckCircle className="w-3.5 h-3.5 ml-1" />
-                            جاهز للتسليم
+                            {tc("جاهز للتسليم", "Ready")}
                           </Button>
                         )}
                         {order.status === 'ready' && (
@@ -510,7 +512,7 @@ export default function EmployeeOrders() {
                             data-testid={`button-complete-${orderId}`}
                           >
                             <CheckCircle className="w-3.5 h-3.5 ml-1" />
-                            إكمال
+                            {tc("إكمال", "Complete")}
                           </Button>
                         )}
 

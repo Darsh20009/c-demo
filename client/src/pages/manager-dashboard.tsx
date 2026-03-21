@@ -33,6 +33,7 @@ import type { Employee, Order, Customer } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
 import { DemoDataManager } from "@/components/demo-data-manager";
 import { FlaskConical } from "lucide-react";
+import { useTranslate } from "@/lib/useTranslate";
 
 interface EmployeeWithStats extends Employee {
  orderCount?: number;
@@ -66,6 +67,7 @@ export default function ManagerDashboard() {
  const [, setLocation] = useLocation();
  const [manager, setManager] = useState<Employee | null>(null);
  const [dateFilter, setDateFilter] = useState<"today" | "week" | "month" | "all">("all");
+ const tc = useTranslate();
 
  // Set SEO metadata
  useEffect(() => {
@@ -717,9 +719,9 @@ export default function ManagerDashboard() {
  </div>
  <div>
  <h1 className="text-2xl font-bold text-primary">
- لوحة تحكم المدير
+ {tc("لوحة تحكم المدير", "Manager Dashboard")}
  </h1>
- <p className="text-muted-foreground text-sm">مرحباً، {manager.fullName}</p>
+ <p className="text-muted-foreground text-sm">{tc("مرحباً،", "Welcome,")} {manager.fullName}</p>
  </div>
  </div>
  <div className="flex items-center gap-3 flex-wrap">
@@ -730,14 +732,14 @@ export default function ManagerDashboard() {
  data-testid="button-demo-manager-header"
  >
  <FlaskConical className="w-4 h-4 ml-2" />
- البيانات التجريبية
+ {tc("البيانات التجريبية", "Demo Data")}
  </Button>
  <Button
  variant="outline"
  onClick={handleLogout}
  data-testid="button-logout"
  >
- تسجيل الخروج
+ {tc("تسجيل الخروج", "Logout")}
  </Button>
  <Button
  variant="outline"
@@ -745,7 +747,7 @@ export default function ManagerDashboard() {
  data-testid="button-back"
  >
  <ArrowLeft className="w-4 h-4 ml-2" />
- رجوع
+ {tc("رجوع", "Back")}
  </Button>
  </div>
  </div>
@@ -758,7 +760,7 @@ export default function ManagerDashboard() {
  data-testid="button-pos"
  >
  <Package className="w-6 h-6" />
- <span className="text-sm">نقاط البيع</span>
+ <span className="text-sm">{tc("نقاط البيع", "POS")}</span>
  </Button>
  <Button
  onClick={() => setLocation("/manager/inventory")}
@@ -767,7 +769,7 @@ export default function ManagerDashboard() {
  data-testid="button-inventory"
  >
  <Warehouse className="w-6 h-6" />
- <span className="text-sm">المخزون</span>
+ <span className="text-sm">{tc("المخزون", "Inventory")}</span>
  </Button>
  <Button
  onClick={() => setLocation("/manager/attendance")}
@@ -776,7 +778,7 @@ export default function ManagerDashboard() {
  data-testid="button-attendance"
  >
  <UserCheck className="w-6 h-6" />
- <span className="text-sm">الحضور</span>
+ <span className="text-sm">{tc("الحضور", "Attendance")}</span>
  </Button>
  <Button
  onClick={handleExportData}
@@ -785,27 +787,27 @@ export default function ManagerDashboard() {
  data-testid="button-export"
  >
  <Download className="w-6 h-6" />
- <span className="text-sm">تصدير Excel</span>
+ <span className="text-sm">{tc("تصدير Excel", "Export Excel")}</span>
  </Button>
  <Select value={dateFilter} onValueChange={(value: any) => setDateFilter(value)}>
  <SelectTrigger className="h-20 flex flex-col gap-2 bg-card border-border rounded-xl">
  <Calendar className="w-6 h-6" />
  <span className="text-sm">
- {dateFilter === "today" ? "اليوم" : dateFilter === "week" ? "أسبوع" : dateFilter === "month" ? "شهر" : "الكل"}
+ {dateFilter === "today" ? tc("اليوم", "Today") : dateFilter === "week" ? tc("أسبوع", "Week") : dateFilter === "month" ? tc("شهر", "Month") : tc("الكل", "All")}
  </span>
  </SelectTrigger>
  <SelectContent className="bg-card border-border">
- <SelectItem value="today">اليوم</SelectItem>
- <SelectItem value="week">آخر أسبوع</SelectItem>
- <SelectItem value="month">آخر شهر</SelectItem>
- <SelectItem value="all">كل الفترة</SelectItem>
+ <SelectItem value="today">{tc("اليوم", "Today")}</SelectItem>
+ <SelectItem value="week">{tc("آخر أسبوع", "Last Week")}</SelectItem>
+ <SelectItem value="month">{tc("آخر شهر", "Last Month")}</SelectItem>
+ <SelectItem value="all">{tc("كل الفترة", "All Time")}</SelectItem>
  </SelectContent>
  </Select>
  {isAdmin && (
    <Button
      variant="destructive"
      onClick={() => {
-       if (confirm('تحذير: هذا سيحذف جميع الطلبات والعملاء! هل تريد المتابعة؟')) {
+       if (confirm(tc('تحذير: هذا سيحذف جميع الطلبات والعملاء! هل تريد المتابعة؟', 'Warning: This will delete all orders and customers! Continue?'))) {
          clearAllDataMutation.mutate();
        }
      }}
@@ -814,7 +816,7 @@ export default function ManagerDashboard() {
      data-testid="button-clear-all-data"
    >
      <Trash2 className="w-6 h-6" />
-     <span className="text-xs">{clearAllDataMutation.isPending ? 'جاري...' : 'تنظيف'}</span>
+     <span className="text-xs">{clearAllDataMutation.isPending ? tc('جاري...', 'Loading...') : tc('تنظيف', 'Clear')}</span>
    </Button>
  )}
  </div>
@@ -827,12 +829,12 @@ export default function ManagerDashboard() {
  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
  <Users className="w-4 h-4 text-primary" />
  </div>
- إجمالي العملاء
+ {tc("إجمالي العملاء", "Total Customers")}
  </CardTitle>
  </CardHeader>
  <CardContent>
  <div className="text-4xl font-bold text-foreground">{customers.length}</div>
- <p className="text-xs text-muted-foreground mt-1">عميل مسجل في النظام</p>
+ <p className="text-xs text-muted-foreground mt-1">{tc("عميل مسجل في النظام", "Registered customers")}</p>
  </CardContent>
  </Card>
 
@@ -843,15 +845,15 @@ export default function ManagerDashboard() {
  <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
  <ShoppingBag className="w-4 h-4 text-accent" />
  </div>
- الطلبات
+ {tc("الطلبات", "Orders")}
  </CardTitle>
  </CardHeader>
  <CardContent>
  <div className="text-4xl font-bold text-foreground">{filteredOrders.length}</div>
  <div className="flex items-center gap-2 mt-1">
- <Badge variant="secondary">{completedOrders.length} مكتمل</Badge>
+ <Badge variant="secondary">{completedOrders.length} {tc("مكتمل", "completed")}</Badge>
  <span className="text-xs text-muted-foreground">
- {dateFilter === "today" ? "اليوم" : dateFilter === "week" ? "الأسبوع" : dateFilter === "month" ? "الشهر" : "الكل"}
+ {dateFilter === "today" ? tc("اليوم", "Today") : dateFilter === "week" ? tc("الأسبوع", "This Week") : dateFilter === "month" ? tc("الشهر", "This Month") : tc("الكل", "All Time")}
  </span>
  </div>
  </CardContent>
@@ -864,7 +866,7 @@ export default function ManagerDashboard() {
  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
  <DollarSign className="w-4 h-4 text-primary" />
  </div>
- إجمالي المبيعات
+ {tc("إجمالي المبيعات", "Total Revenue")}
  </CardTitle>
  </CardHeader>
  <CardContent>
@@ -888,28 +890,28 @@ export default function ManagerDashboard() {
  <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
  <Activity className="w-4 h-4 text-secondary-foreground" />
  </div>
- متوسط الطلب
+ {tc("متوسط الطلب", "Average Order")}
  </CardTitle>
  </CardHeader>
  <CardContent>
  <div className="text-4xl font-bold text-foreground">
  {filteredOrders.length > 0 ? (totalRevenue / filteredOrders.length).toFixed(2) : '0.00'}
  </div>
- <p className="text-xs text-muted-foreground mt-1">ريال سعودي لكل طلب</p>
+ <p className="text-xs text-muted-foreground mt-1">{tc("ريال سعودي لكل طلب", "SAR per order")}</p>
  </CardContent>
  </Card>
  </div>
 
  <Tabs defaultValue="orders" className="space-y-4">
  <TabsList className="grid w-full grid-cols-8 h-14">
- <TabsTrigger value="orders" className="rounded-lg">الطلبات</TabsTrigger>
- <TabsTrigger value="analytics" className="rounded-lg">التحليلات</TabsTrigger>
- <TabsTrigger value="top-items" className="rounded-lg">الأكثر مبيعاً</TabsTrigger>
- <TabsTrigger value="employees" className="rounded-lg">أداء الموظفين</TabsTrigger>
- <TabsTrigger value="branches" className="rounded-lg">الفروع</TabsTrigger>
- <TabsTrigger value="coupons" className="rounded-lg">الكوبونات</TabsTrigger>
- <TabsTrigger value="delivery" className="rounded-lg">التوصيل</TabsTrigger>
- <TabsTrigger value="erp" className="rounded-lg">المحاسبة</TabsTrigger>
+ <TabsTrigger value="orders" className="rounded-lg">{tc("الطلبات", "Orders")}</TabsTrigger>
+ <TabsTrigger value="analytics" className="rounded-lg">{tc("التحليلات", "Analytics")}</TabsTrigger>
+ <TabsTrigger value="top-items" className="rounded-lg">{tc("الأكثر مبيعاً", "Top Items")}</TabsTrigger>
+ <TabsTrigger value="employees" className="rounded-lg">{tc("أداء الموظفين", "Staff Performance")}</TabsTrigger>
+ <TabsTrigger value="branches" className="rounded-lg">{tc("الفروع", "Branches")}</TabsTrigger>
+ <TabsTrigger value="coupons" className="rounded-lg">{tc("الكوبونات", "Coupons")}</TabsTrigger>
+ <TabsTrigger value="delivery" className="rounded-lg">{tc("التوصيل", "Delivery")}</TabsTrigger>
+ <TabsTrigger value="erp" className="rounded-lg">{tc("المحاسبة", "Accounting")}</TabsTrigger>
  </TabsList>
 
  <TabsContent value="orders" className="space-y-4">
@@ -917,7 +919,7 @@ export default function ManagerDashboard() {
  <CardHeader>
  <div className="flex items-center justify-between flex-wrap gap-3">
  <div>
- <CardTitle>سجل الطلبات</CardTitle>
+ <CardTitle>{tc("سجل الطلبات", "Orders Log")}</CardTitle>
  <CardDescription>آخر {filteredOrders.length} طلب مسجل في النظام</CardDescription>
  </div>
  <div className="flex items-center gap-2">
@@ -1052,7 +1054,7 @@ export default function ManagerDashboard() {
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
  <Card>
  <CardHeader>
- <CardTitle>إجمالي المبيعات اليومية</CardTitle>
+ <CardTitle>{tc("إجمالي المبيعات اليومية", "Daily Revenue")}</CardTitle>
  </CardHeader>
  <CardContent className="h-[300px]">
  <ResponsiveContainer width="100%" height="100%">
@@ -1075,7 +1077,7 @@ export default function ManagerDashboard() {
 
  <Card>
  <CardHeader>
- <CardTitle>توزيع طرق الدفع</CardTitle>
+ <CardTitle>{tc("توزيع طرق الدفع", "Payment Methods")}</CardTitle>
  </CardHeader>
  <CardContent className="h-[300px]">
  <ResponsiveContainer width="100%" height="100%">
@@ -1105,8 +1107,8 @@ export default function ManagerDashboard() {
  <TabsContent value="top-items" className="space-y-4">
  <Card>
  <CardHeader>
- <CardTitle>المنتجات الأكثر مبيعاً</CardTitle>
- <CardDescription>ترتيب المنتجات حسب عدد المبيعات</CardDescription>
+ <CardTitle>{tc("المنتجات الأكثر مبيعاً", "Best Selling Items")}</CardTitle>
+ <CardDescription>{tc("ترتيب المنتجات حسب عدد المبيعات", "Products ranked by sales count")}</CardDescription>
  </CardHeader>
  <CardContent>
  <div className="h-[400px]">
@@ -1127,8 +1129,8 @@ export default function ManagerDashboard() {
  <TabsContent value="employees" className="space-y-4">
  <Card>
  <CardHeader>
- <CardTitle>أداء الموظفين</CardTitle>
- <CardDescription>مبيعات الموظفين وعدد الطلبات لكل موظف</CardDescription>
+ <CardTitle>{tc("أداء الموظفين", "Staff Performance")}</CardTitle>
+ <CardDescription>{tc("مبيعات الموظفين وعدد الطلبات لكل موظف", "Staff sales and order counts per employee")}</CardDescription>
  </CardHeader>
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1142,16 +1144,16 @@ export default function ManagerDashboard() {
  </div>
  <div>
  <p className="font-bold">{emp.fullName}</p>
- <Badge variant="outline" className="text-[10px]">{emp.role === 'admin' ? 'مدير عام' : emp.role === 'manager' ? 'مدير' : 'موظف'}</Badge>
+ <Badge variant="outline" className="text-[10px]">{emp.role === 'admin' ? tc('مدير عام', 'Admin') : emp.role === 'manager' ? tc('مدير', 'Manager') : tc('موظف', 'Staff')}</Badge>
  </div>
  </div>
  <div className="space-y-2">
  <div className="flex justify-between text-sm">
- <span className="text-muted-foreground">عدد الطلبات:</span>
+ <span className="text-muted-foreground">{tc("عدد الطلبات:", "Orders:")}</span>
  <span className="font-bold">{emp.orderCount || 0}</span>
  </div>
  <div className="flex justify-between text-sm">
- <span className="text-muted-foreground">إجمالي المبيعات:</span>
+ <span className="text-muted-foreground">{tc("إجمالي المبيعات:", "Total Sales:")}</span>
  <span className="font-bold text-primary">{(emp.totalSales || 0).toFixed(2)} <SarIcon /></span>
  </div>
  </div>
@@ -1168,9 +1170,9 @@ export default function ManagerDashboard() {
  <CardHeader>
  <div className="flex justify-between items-center gap-4 flex-wrap">
  <div>
- <CardTitle className="text-primary">الفروع</CardTitle>
+ <CardTitle className="text-primary">{tc("الفروع", "Branches")}</CardTitle>
  <CardDescription>
- إدارة فروع المقهى
+ {tc("إدارة فروع المقهى", "Manage cafe branches")}
  </CardDescription>
  </div>
  {isAdmin && (
@@ -1633,8 +1635,8 @@ export default function ManagerDashboard() {
  <CardHeader>
  <div className="flex items-center justify-between">
  <div>
- <CardTitle>إدارة أكواد الخصم</CardTitle>
- <CardDescription>إنشاء وإدارة أكواد الخصم للعملاء</CardDescription>
+ <CardTitle>{tc("إدارة أكواد الخصم", "Coupon Management")}</CardTitle>
+ <CardDescription>{tc("إنشاء وإدارة أكواد الخصم للعملاء", "Create and manage discount codes for customers")}</CardDescription>
  </div>
  </div>
  </CardHeader>
@@ -1649,8 +1651,8 @@ export default function ManagerDashboard() {
  <CardHeader>
  <div className="flex items-center justify-between">
  <div>
- <CardTitle>إدارة التوصيل</CardTitle>
- <CardDescription>إدارة مناديب التوصيل ومناطق الخدمة والربط مع المنصات الخارجية</CardDescription>
+ <CardTitle>{tc("إدارة التوصيل", "Delivery Management")}</CardTitle>
+ <CardDescription>{tc("إدارة مناديب التوصيل ومناطق الخدمة والربط مع المنصات الخارجية", "Manage delivery drivers, service areas and third-party integrations")}</CardDescription>
  </div>
  </div>
  </CardHeader>
@@ -1665,12 +1667,12 @@ export default function ManagerDashboard() {
  <CardHeader>
  <div className="flex items-center justify-between">
  <div>
- <CardTitle>نظام المحاسبة والفواتير</CardTitle>
- <CardDescription>إدارة الحسابات والفواتير الضريبية ومتابعة الأرباح</CardDescription>
+ <CardTitle>{tc("نظام المحاسبة والفواتير", "Accounting & Invoices")}</CardTitle>
+ <CardDescription>{tc("إدارة الحسابات والفواتير الضريبية ومتابعة الأرباح", "Manage accounts, tax invoices and profit tracking")}</CardDescription>
  </div>
  <Button onClick={() => setLocation('/erp/accounting')} data-testid="button-open-erp">
  <ExternalLink className="w-4 h-4 ml-2" />
- فتح نظام المحاسبة
+ {tc("فتح نظام المحاسبة", "Open Accounting")}
  </Button>
  </div>
  </CardHeader>
@@ -1682,7 +1684,7 @@ export default function ManagerDashboard() {
  <TrendingUp className="w-6 h-6 text-green-600" />
  </div>
  <div>
- <p className="text-sm text-muted-foreground">إجمالي الإيرادات</p>
+ <p className="text-sm text-muted-foreground">{tc("إجمالي الإيرادات", "Total Revenue")}</p>
  <p className="text-2xl font-bold text-green-600">{totalRevenue.toFixed(2)} <SarIcon /></p>
  </div>
  </CardContent>
@@ -1693,7 +1695,7 @@ export default function ManagerDashboard() {
  <Receipt className="w-6 h-6 text-blue-600" />
  </div>
  <div>
- <p className="text-sm text-muted-foreground">عدد الطلبات</p>
+ <p className="text-sm text-muted-foreground">{tc("عدد الطلبات", "Total Orders")}</p>
  <p className="text-2xl font-bold text-blue-600">{filteredOrders.length}</p>
  </div>
  </CardContent>
@@ -1704,20 +1706,20 @@ export default function ManagerDashboard() {
  <DollarSign className="w-6 h-6 text-purple-600" />
  </div>
  <div>
- <p className="text-sm text-muted-foreground">متوسط الطلب</p>
+ <p className="text-sm text-muted-foreground">{tc("متوسط الطلب", "Avg. Order")}</p>
  <p className="text-2xl font-bold text-purple-600">{filteredOrders.length > 0 ? (totalRevenue / filteredOrders.length).toFixed(2) : '0.00'} <SarIcon /></p>
  </div>
  </CardContent>
  </Card>
  </div>
  <div className="mt-4 p-4 bg-muted/30 rounded-lg">
- <p className="text-sm text-muted-foreground mb-2">للوصول إلى نظام المحاسبة الكامل مع:</p>
+ <p className="text-sm text-muted-foreground mb-2">{tc("للوصول إلى نظام المحاسبة الكامل مع:", "Access the full accounting system with:")}</p>
  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
- <li>دليل الحسابات</li>
- <li>قيود اليومية</li>
- <li>ميزان المراجعة</li>
- <li>قائمة الدخل والميزانية العمومية</li>
- <li>الفواتير الضريبية المتوافقة مع ZATCA</li>
+ <li>{tc("دليل الحسابات", "Chart of Accounts")}</li>
+ <li>{tc("قيود اليومية", "Journal Entries")}</li>
+ <li>{tc("ميزان المراجعة", "Trial Balance")}</li>
+ <li>{tc("قائمة الدخل والميزانية العمومية", "Income Statement & Balance Sheet")}</li>
+ <li>{tc("الفواتير الضريبية المتوافقة مع ZATCA", "ZATCA-compliant Tax Invoices")}</li>
  </ul>
  </div>
  </CardContent>

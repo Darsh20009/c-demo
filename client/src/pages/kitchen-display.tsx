@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useTranslate } from "@/lib/useTranslate";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,6 +102,7 @@ function getElapsedMinutes(dateString: string): number {
 export default function KitchenDisplay() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [activeTab, setActiveTab] = useState("all");
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(() => getSoundEnabled('kitchen'));
@@ -329,7 +331,7 @@ export default function KitchenDisplay() {
               </Button>
               <div className="flex items-center gap-2">
                 <ChefHat className="h-6 w-6 text-primary" />
-                <h1 className="text-xl font-bold">شاشة المطبخ</h1>
+                <h1 className="text-xl font-bold">{tc("شاشة المطبخ", "Kitchen Display")}</h1>
               </div>
             </div>
             
@@ -441,30 +443,30 @@ export default function KitchenDisplay() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
             <TabsTrigger value="all" data-testid="tab-all">
-              الكل ({orders.length})
+              {tc("الكل", "All")} ({orders.length})
             </TabsTrigger>
             <TabsTrigger value="pending" data-testid="tab-pending">
-              انتظار ({pendingOrders.length + needsPrepNowOrders.length})
+              {tc("انتظار", "Waiting")} ({pendingOrders.length + needsPrepNowOrders.length})
             </TabsTrigger>
             <TabsTrigger value="preparing" data-testid="tab-preparing">
-              تحضير ({preparingOrders.length})
+              {tc("تحضير", "Preparing")} ({preparingOrders.length})
             </TabsTrigger>
             <TabsTrigger value="ready" data-testid="tab-ready">
-              جاهز ({readyOrders.length})
+              {tc("جاهز", "Ready")} ({readyOrders.length})
             </TabsTrigger>
             <TabsTrigger 
               value="delayed" 
               data-testid="tab-delayed"
               className={delayedCount > 0 ? "text-destructive" : ""}
             >
-              متأخر ({delayedCount})
+              {tc("متأخر", "Delayed")} ({delayedCount})
             </TabsTrigger>
             <TabsTrigger
               value="scheduled"
               data-testid="tab-scheduled"
               className={needsPrepNowOrders.length > 0 ? "text-orange-500 font-bold" : scheduledOrders.length > 0 ? "text-blue-500" : ""}
             >
-              مجدول ({scheduledOrders.length + needsPrepNowOrders.length})
+              {tc("مجدول", "Scheduled")} ({scheduledOrders.length + needsPrepNowOrders.length})
             </TabsTrigger>
           </TabsList>
           

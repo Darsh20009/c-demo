@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslate } from "@/lib/useTranslate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -138,6 +139,7 @@ const paymentMethodLabels: Record<string, string> = {
 export default function ZATCAInvoicesPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [activeTab, setActiveTab] = useState("invoices");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -249,7 +251,7 @@ export default function ZATCAInvoicesPage() {
           </Button>
           <h1 className="text-2xl md:text-3xl font-bold text-accent dark:text-accent flex items-center gap-2">
             <Receipt className="w-8 h-8" />
-            الفوترة الإلكترونية - ZATCA
+            {tc("الفوترة الإلكترونية - ZATCA", "E-Invoicing - ZATCA")}
           </h1>
           <div className="flex gap-2">
             <Button 
@@ -342,15 +344,15 @@ export default function ZATCAInvoicesPage() {
           <TabsList className="grid w-full grid-cols-3 bg-primary dark:bg-primary/30">
             <TabsTrigger value="invoices" className="flex items-center gap-1">
               <FileText className="w-4 h-4" />
-              الفواتير
+              {tc("الفواتير", "Invoices")}
             </TabsTrigger>
             <TabsTrigger value="compliance" className="flex items-center gap-1">
               <Shield className="w-4 h-4" />
-              الامتثال
+              {tc("الامتثال", "Compliance")}
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-1">
               <FileCheck className="w-4 h-4" />
-              التقارير
+              {tc("التقارير", "Reports")}
             </TabsTrigger>
           </TabsList>
 

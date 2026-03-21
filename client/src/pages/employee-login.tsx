@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Employee } from "@shared/schema";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function EmployeeLogin() {
   const [location, setLocation] = useLocation();
@@ -18,13 +19,13 @@ export default function EmployeeLogin() {
   const [error, setError] = useState("");
   const [showQRScanner, setShowQRScanner] = useState(false);
   const qrScannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const tc = useTranslate();
 
   const [rememberMe, setRememberMe] = useState(true);
-
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
-    document.title = "تسجيل دخول الموظفين - QIROX Systems";
+    document.title = tc("تسجيل دخول الموظفين - QIROX Systems", "Employee Login - QIROX Systems");
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -33,7 +34,6 @@ export default function EmployeeLogin() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Auto-login if session exists
     const stored = localStorage.getItem("currentEmployee");
     if (stored) {
       try {
@@ -64,7 +64,7 @@ export default function EmployeeLogin() {
       
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.error || "فشل تسجيل الدخول");
+        throw new Error(data?.error || tc("فشل تسجيل الدخول", "Login failed"));
       }
       
       return data as Employee;
@@ -78,7 +78,7 @@ export default function EmployeeLogin() {
       window.location.href = "/employee/dashboard";
     },
     onError: (err: any) => {
-      setError(err?.message || "بيانات تسجيل الدخول غير صحيحة");
+      setError(err?.message || tc("بيانات تسجيل الدخول غير صحيحة", "Invalid login credentials"));
       setPassword("");
     },
   });
@@ -88,7 +88,7 @@ export default function EmployeeLogin() {
     setError("");
     
     if (!username || !password) {
-      setError("الرجاء إدخال اسم المستخدم وكلمة المرور");
+      setError(tc("الرجاء إدخال اسم المستخدم وكلمة المرور", "Please enter your username and password"));
       return;
     }
 
@@ -113,13 +113,12 @@ export default function EmployeeLogin() {
             setError("");
             scanner.clear();
             setShowQRScanner(false);
-            
             loginMutation.mutate({ employeeId: scannedId });
           } else {
-            setError("صيغة الباركود غير صحيحة");
+            setError(tc("صيغة الباركود غير صحيحة", "Invalid QR code format"));
           }
         } catch (err) {
-          setError("خطأ في قراءة الباركود");
+          setError(tc("خطأ في قراءة الباركود", "Error reading QR code"));
         }
       },
       (error) => {
@@ -149,17 +148,17 @@ export default function EmployeeLogin() {
             <img src={qiroxLogoStaff} alt="QIROX Systems" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2 font-playfair">QIROX Systems</h1>
-          <p className="text-muted-foreground font-cairo">تسجيل دخول الموظف</p>
+          <p className="text-muted-foreground font-cairo">{tc("تسجيل دخول الموظف", "Employee Login")}</p>
         </div>
 
         {showQRScanner ? (
           <Card className="bg-card border-border/50 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl text-center font-playfair text-accent">
-                مسح بطاقة الموظف
+                {tc("مسح بطاقة الموظف", "Scan Employee Card")}
               </CardTitle>
               <CardDescription className="text-center text-muted-foreground">
-                وجه الكاميرا نحو QR الكود الموجود على بطاقتك
+                {tc("وجه الكاميرا نحو QR الكود الموجود على بطاقتك", "Point the camera at the QR code on your card")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -176,7 +175,7 @@ export default function EmployeeLogin() {
                 className="w-full border-primary/20 text-primary"
                 data-testid="button-cancel-qr"
               >
-                إلغاء
+                {tc("إلغاء", "Cancel")}
               </Button>
             </CardContent>
           </Card>
@@ -184,10 +183,10 @@ export default function EmployeeLogin() {
           <Card className="bg-card border-border/50 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl text-center font-playfair text-foreground">
-                تسجيل الدخول
+                {tc("تسجيل الدخول", "Sign In")}
               </CardTitle>
               <CardDescription className="text-center text-muted-foreground">
-                أدخل بيانات حسابك للوصول
+                {tc("أدخل بيانات حسابك للوصول", "Enter your account credentials to access")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -197,7 +196,7 @@ export default function EmployeeLogin() {
                     <User className="absolute right-3 top-3 h-5 w-5 text-primary" />
                     <Input
                       type="text"
-                      placeholder="اسم المستخدم"
+                      placeholder={tc("اسم المستخدم", "Username")}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="pr-10 bg-background border-border"
@@ -214,7 +213,7 @@ export default function EmployeeLogin() {
                     <Lock className="absolute right-3 top-3 h-5 w-5 text-primary" />
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="كلمة المرور"
+                      placeholder={tc("كلمة المرور", "Password")}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="pr-10 pl-10 bg-background border-border"
@@ -238,7 +237,7 @@ export default function EmployeeLogin() {
                       className="text-xs text-accent hover:text-accent/80 underline"
                       data-testid="link-forgot-password"
                     >
-                      نسيت كلمة المرور؟
+                      {tc("نسيت كلمة المرور؟", "Forgot password?")}
                     </button>
                   </div>
                   {error && (
@@ -256,7 +255,7 @@ export default function EmployeeLogin() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
                   />
-                  <label htmlFor="remember-me" className="text-sm text-muted-foreground mr-2">تذكرني</label>
+                  <label htmlFor="remember-me" className="text-sm text-muted-foreground mr-2">{tc("تذكرني", "Remember me")}</label>
                 </div>
                 
                 <Button
@@ -268,10 +267,10 @@ export default function EmployeeLogin() {
                   {loginMutation.isPending ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري تسجيل الدخول...
+                      {tc("جاري تسجيل الدخول...", "Signing in...")}
                     </>
                   ) : (
-                    "دخول"
+                    tc("دخول", "Sign In")
                   )}
                 </Button>
 
@@ -284,10 +283,10 @@ export default function EmployeeLogin() {
                     data-testid="button-scan-qr"
                   >
                     <QrCode className="w-4 h-4 ml-2" />
-                    مسح بطاقة الموظف
+                    {tc("مسح بطاقة الموظف", "Scan Employee Card")}
                   </Button>
 
-                  <p className="text-sm text-muted-foreground text-center">موظف جديد؟</p>
+                  <p className="text-sm text-muted-foreground text-center">{tc("موظف جديد؟", "New employee?")}</p>
                   <Button
                     type="button"
                     variant="outline"
@@ -295,7 +294,7 @@ export default function EmployeeLogin() {
                     className="w-full border-primary/20 text-primary"
                     data-testid="button-activate"
                   >
-                    تفعيل حساب جديد
+                    {tc("تفعيل حساب جديد", "Activate New Account")}
                   </Button>
 
                   <div className="py-2">
@@ -306,7 +305,6 @@ export default function EmployeeLogin() {
                         const manifestTag = document.getElementById('main-manifest') as HTMLLinkElement;
                         if (manifestTag) manifestTag.href = '/employee-manifest.json';
                         
-                        // Force update for some browsers
                         const newManifest = manifestTag.cloneNode(true) as HTMLLinkElement;
                         newManifest.href = '/employee-manifest.json?v=' + Date.now();
                         manifestTag.parentNode?.replaceChild(newManifest, manifestTag);
@@ -320,16 +318,16 @@ export default function EmployeeLogin() {
                         } else {
                           const ua = navigator.userAgent.toLowerCase();
                           if (/iphone|ipad|ipod/.test(ua)) {
-                            alert("لتثبيت النظام على iPhone: اضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'");
+                            alert(tc("لتثبيت النظام على iPhone: اضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'", "To install on iPhone: tap 'Share' then 'Add to Home Screen'"));
                           } else {
-                            alert("لتثبيت النظام: اضغط على القائمة (⋮) ثم 'تثبيت التطبيق'");
+                            alert(tc("لتثبيت النظام: اضغط على القائمة (⋮) ثم 'تثبيت التطبيق'", "To install: tap the menu (⋮) then 'Install App'"));
                           }
                         }
                       }}
                       className="w-full text-primary font-bold hover:bg-primary/5"
                     >
                       <Download className="ml-2 h-4 w-4" />
-                      تحميل نظام الموظفين
+                      {tc("تحميل نظام الموظفين", "Download Staff App")}
                     </Button>
                   </div>
                 </div>
@@ -345,7 +343,7 @@ export default function EmployeeLogin() {
             className="text-primary hover:text-primary/80"
             data-testid="link-back"
           >
-            رجوع
+            {tc("رجوع", "Back")}
           </Button>
         </div>
       </div>

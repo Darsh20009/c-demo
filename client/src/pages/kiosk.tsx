@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle, Coffee, ChevronRight, X, Loader2 } from "lucide-react";
 import qiroxLogo from "@assets/qirox-logo-customer.png";
+import { useTranslate } from "@/lib/useTranslate";
+import { useTranslation } from "react-i18next";
 
 interface MenuItem {
   _id: string;
@@ -35,10 +37,16 @@ function itemKey(item: MenuItem): string {
   return item._id || item.id || '';
 }
 
+const ALL_CATEGORY = "__all__";
+
 export default function KioskPage() {
   const { toast } = useToast();
+  const tc = useTranslate();
+  const { i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("الكل");
+  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORY);
   const [showCart, setShowCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -55,9 +63,9 @@ export default function KioskPage() {
     i.isAvailable !== false && (i as any).availabilityStatus !== 'out_of_stock'
   );
 
-  const categories = ["الكل", ...Array.from(new Set(availableItems.map(i => i.category).filter((c): c is string => !!c)))];
+  const categories = [ALL_CATEGORY, ...Array.from(new Set(availableItems.map(i => i.category).filter((c): c is string => !!c)))];
 
-  const filteredItems = selectedCategory === "الكل"
+  const filteredItems = selectedCategory === ALL_CATEGORY
     ? availableItems
     : availableItems.filter(i => i.category === selectedCategory);
 
@@ -72,7 +80,7 @@ export default function KioskPage() {
         setShowCart(false);
         setShowCheckout(false);
         setCustomerName("");
-        setSelectedCategory("الكل");
+        setSelectedCategory(ALL_CATEGORY);
       }
     }, 120000);
     setIdleTimer(t);
@@ -92,7 +100,7 @@ export default function KioskPage() {
       return [...prev, { item, quantity: 1 }];
     });
     setSelectedItem(null);
-    toast({ title: "✅ تمت الإضافة", description: item.nameAr });
+    toast({ title: tc("✅ تمت الإضافة", "✅ Added"), description: isEn ? item.nameEn : item.nameAr });
   };
 
   const removeFromCart = (id: string) => {
@@ -107,7 +115,7 @@ export default function KioskPage() {
   const placeOrderMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/orders", {
-        customerName: customerName || "زبون الكشك",
+        customerName: customerName || tc("زبون الكشك", "Kiosk Customer"),
         items: cart.map(c => ({
           coffeeItemId: c.item._id || c.item.id,
           quantity: c.quantity,
@@ -122,7 +130,7 @@ export default function KioskPage() {
         orderType: "dine-in",
         branchId: "default",
       });
-      if (!res.ok) throw new Error("فشل إرسال الطلب");
+      if (!res.ok) throw new Error(tc("فشل إرسال الطلب", "Failed to place order"));
       return res.json();
     },
     onSuccess: (data) => {
@@ -134,33 +142,33 @@ export default function KioskPage() {
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        setSelectedCategory("الكل");
+        setSelectedCategory(ALL_CATEGORY);
       }, 8000);
     },
-    onError: () => toast({ variant: "destructive", title: "خطأ", description: "تعذّر إرسال الطلب. حاول مجدداً." }),
+    onError: () => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: tc("تعذّر إرسال الطلب. حاول مجدداً.", "Failed to place order. Please try again.") }),
   });
 
   if (showSuccess) {
     return (
       <div className="h-screen bg-primary flex flex-col items-center justify-center text-white text-center p-8" data-testid="kiosk-success">
         <CheckCircle className="w-32 h-32 mb-6 animate-bounce" />
-        <h1 className="text-5xl font-black mb-4">شكراً لطلبك!</h1>
-        <p className="text-3xl font-bold mb-2">رقم الطلب</p>
+        <h1 className="text-5xl font-black mb-4">{tc("شكراً لطلبك!", "Thank you for your order!")}</h1>
+        <p className="text-3xl font-bold mb-2">{tc("رقم الطلب", "Order Number")}</p>
         <div className="text-8xl font-black bg-white text-primary rounded-3xl px-10 py-6 mb-6">#{orderNumber}</div>
-        <p className="text-2xl text-white/80">سنُخبرك عند جاهزية طلبك</p>
-        <div className="mt-8 text-lg text-white/60">سيعود الشاشة تلقائياً خلال ثوانٍ...</div>
+        <p className="text-2xl text-white/80">{tc("سنُخبرك عند جاهزية طلبك", "We'll notify you when your order is ready")}</p>
+        <div className="mt-8 text-lg text-white/60">{tc("سيعود الشاشة تلقائياً خلال ثوانٍ...", "Screen will reset in a few seconds...")}</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden" onClick={resetIdle} data-testid="kiosk-page">
+    <div className="h-screen bg-background flex flex-col overflow-hidden" onClick={resetIdle} data-testid="kiosk-page" dir={isEn ? "ltr" : "rtl"}>
       {/* Header */}
       <div className="bg-primary text-white px-6 py-3 flex items-center justify-between shrink-0 shadow-lg">
         <img src={qiroxLogo} alt="QIROX" className="h-10 object-contain brightness-0 invert" />
         <div className="text-center">
-          <p className="text-lg font-bold">نظام الطلب الذاتي</p>
-          <p className="text-xs text-white/70">Self-Order Kiosk</p>
+          <p className="text-lg font-bold">{tc("نظام الطلب الذاتي", "Self-Order Kiosk")}</p>
+          <p className="text-xs text-white/70">{tc("Self-Order Kiosk", "اطلب بنفسك")}</p>
         </div>
         <button
           onClick={() => setShowCart(true)}
@@ -190,7 +198,7 @@ export default function KioskPage() {
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            {cat}
+            {cat === ALL_CATEGORY ? tc("الكل", "All") : cat}
           </button>
         ))}
       </div>
@@ -200,14 +208,14 @@ export default function KioskPage() {
         {menuLoading && (
           <div className="flex flex-col items-center justify-center h-64 gap-4">
             <Loader2 className="w-10 h-10 text-primary animate-spin" />
-            <p className="text-muted-foreground font-medium">جاري تحميل القائمة...</p>
+            <p className="text-muted-foreground font-medium">{tc("جاري تحميل القائمة...", "Loading menu...")}</p>
           </div>
         )}
         {!menuLoading && filteredItems.length === 0 && (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
             <Coffee className="w-16 h-16 text-primary/30" />
-            <p className="text-muted-foreground font-medium text-lg">لا توجد منتجات متاحة</p>
-            <p className="text-muted-foreground/60 text-sm">يرجى التواصل مع الموظف</p>
+            <p className="text-muted-foreground font-medium text-lg">{tc("لا توجد منتجات متاحة", "No items available")}</p>
+            <p className="text-muted-foreground/60 text-sm">{tc("يرجى التواصل مع الموظف", "Please contact staff")}</p>
           </div>
         )}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
@@ -225,7 +233,7 @@ export default function KioskPage() {
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}
-                      alt={item.nameAr}
+                      alt={isEn ? item.nameEn : item.nameAr}
                       className="w-full h-full object-cover"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
@@ -241,8 +249,8 @@ export default function KioskPage() {
                   )}
                 </div>
                 <div className="p-3 text-center">
-                  <p className="font-bold text-base leading-tight mb-1">{item.nameAr}</p>
-                  <p className="text-xs text-muted-foreground mb-2">{item.nameEn}</p>
+                  <p className="font-bold text-base leading-tight mb-1">{isEn ? item.nameEn : item.nameAr}</p>
+                  <p className="text-xs text-muted-foreground mb-2">{isEn ? item.nameAr : item.nameEn}</p>
                   <Badge className="bg-primary/10 text-primary border-0 font-black text-sm">
                     {item.price.toFixed(2)} <SarIcon />
                   </Badge>
@@ -257,7 +265,9 @@ export default function KioskPage() {
       <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl">{selectedItem?.nameAr}</DialogTitle>
+            <DialogTitle className="text-center text-xl">
+              {selectedItem ? (isEn ? selectedItem.nameEn : selectedItem.nameAr) : ""}
+            </DialogTitle>
           </DialogHeader>
           {selectedItem && (
             <div className="text-center space-y-4">
@@ -265,7 +275,7 @@ export default function KioskPage() {
                 {selectedItem.imageUrl ? (
                   <img
                     src={selectedItem.imageUrl}
-                    alt={selectedItem.nameAr}
+                    alt={isEn ? selectedItem.nameEn : selectedItem.nameAr}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const t = e.target as HTMLImageElement;
@@ -276,7 +286,7 @@ export default function KioskPage() {
                 ) : null}
                 <Coffee className={`w-20 h-20 text-primary/30 fallback-icon ${selectedItem.imageUrl ? 'hidden' : ''}`} />
               </div>
-              <p className="text-muted-foreground">{selectedItem.nameEn}</p>
+              <p className="text-muted-foreground">{isEn ? selectedItem.nameAr : selectedItem.nameEn}</p>
               <p className="text-3xl font-black text-primary">{selectedItem.price.toFixed(2)} <SarIcon /></p>
               <Button
                 size="lg"
@@ -284,7 +294,7 @@ export default function KioskPage() {
                 onClick={() => addToCart(selectedItem)}
                 data-testid="button-kiosk-add-to-cart"
               >
-                <Plus className="w-5 h-5 mr-2" /> إضافة للطلب
+                <Plus className="w-5 h-5 mr-2" /> {tc("إضافة للطلب", "Add to Order")}
               </Button>
             </div>
           )}
@@ -296,21 +306,21 @@ export default function KioskPage() {
         <DialogContent className="max-w-md h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xl">
-              <ShoppingCart className="w-6 h-6 text-primary" /> طلبك ({cartCount})
+              <ShoppingCart className="w-6 h-6 text-primary" /> {tc(`طلبك (${cartCount})`, `Your Order (${cartCount})`)}
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="flex-1">
             {cart.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground">
                 <ShoppingCart className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg">طلبك فارغ</p>
+                <p className="text-lg">{tc("طلبك فارغ", "Your cart is empty")}</p>
               </div>
             ) : (
               <div className="space-y-3 p-1">
                 {cart.map(c => (
                   <div key={itemKey(c.item)} className="flex items-center gap-3 bg-muted/40 rounded-xl p-3" data-testid={`kiosk-cart-item-${itemKey(c.item)}`}>
                     <div className="flex-1">
-                      <p className="font-bold">{c.item.nameAr}</p>
+                      <p className="font-bold">{isEn ? c.item.nameEn : c.item.nameAr}</p>
                       <p className="text-sm text-muted-foreground">{(c.item.price * c.quantity).toFixed(2)} <SarIcon /></p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -330,11 +340,11 @@ export default function KioskPage() {
           {cart.length > 0 && (
             <div className="space-y-3 pt-4 border-t">
               <div className="flex justify-between font-black text-xl">
-                <span>الإجمالي:</span>
+                <span>{tc("الإجمالي:", "Total:")}</span>
                 <span className="text-primary">{cartTotal.toFixed(2)} <SarIcon /></span>
               </div>
               <Button size="lg" className="w-full text-lg py-6" onClick={() => { setShowCart(false); setShowCheckout(true); }} data-testid="button-kiosk-checkout">
-                متابعة الطلب <ChevronRight className="w-5 h-5 ml-1" />
+                {tc("متابعة الطلب", "Continue")} <ChevronRight className="w-5 h-5 ml-1" />
               </Button>
             </div>
           )}
@@ -345,13 +355,13 @@ export default function KioskPage() {
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl">تأكيد الطلب</DialogTitle>
+            <DialogTitle className="text-xl">{tc("تأكيد الطلب", "Confirm Order")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-semibold text-muted-foreground block mb-1">اسمك (اختياري)</label>
+              <label className="text-sm font-semibold text-muted-foreground block mb-1">{tc("اسمك (اختياري)", "Your name (optional)")}</label>
               <Input
-                placeholder="اكتب اسمك لمناداتك عند الجاهزية"
+                placeholder={tc("اكتب اسمك لمناداتك عند الجاهزية", "Enter your name so we can call you")}
                 value={customerName}
                 onChange={e => setCustomerName(e.target.value)}
                 className="text-lg py-5"
@@ -361,23 +371,23 @@ export default function KioskPage() {
             <div className="bg-muted/50 rounded-xl p-4 space-y-2">
               {cart.map(c => (
                 <div key={itemKey(c.item)} className="flex justify-between text-sm">
-                  <span>{c.item.nameAr} × {c.quantity}</span>
+                  <span>{isEn ? c.item.nameEn : c.item.nameAr} × {c.quantity}</span>
                   <span className="font-bold">{(c.item.price * c.quantity).toFixed(2)}</span>
                 </div>
               ))}
               <div className="border-t pt-2 flex justify-between font-black text-lg">
-                <span>الإجمالي</span>
+                <span>{tc("الإجمالي", "Total")}</span>
                 <span className="text-primary">{cartTotal.toFixed(2)} <SarIcon /></span>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground text-center">الدفع عند الاستلام نقداً أو بطاقة</p>
+            <p className="text-sm text-muted-foreground text-center">{tc("الدفع عند الاستلام نقداً أو بطاقة", "Pay at counter — cash or card")}</p>
             <div className="grid grid-cols-2 gap-3">
               <Button variant="outline" size="lg" onClick={() => { setShowCheckout(false); setShowCart(true); }} data-testid="button-kiosk-back">
-                <X className="w-4 h-4 mr-2" /> تعديل
+                <X className="w-4 h-4 mr-2" /> {tc("تعديل", "Edit")}
               </Button>
               <Button size="lg" onClick={() => placeOrderMutation.mutate()} disabled={placeOrderMutation.isPending} data-testid="button-kiosk-confirm">
                 {placeOrderMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
-                تأكيد
+                {tc("تأكيد", "Confirm")}
               </Button>
             </div>
           </div>

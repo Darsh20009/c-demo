@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useTranslate } from "@/lib/useTranslate";
+import { useTranslation } from "react-i18next";
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
@@ -28,23 +30,27 @@ const getNotificationIcon = (type: string) => {
   }
 };
 
-const getNotificationLabel = (type: string) => {
-  switch (type) {
-    case "order_update":
-      return "تحديث الطلب";
-    case "referral":
-      return "الإحالات";
-    case "loyalty":
-      return "البرنامج الموالي";
-    case "promotion":
-      return "عروض ترويجية";
-    default:
-      return "نظام";
-  }
-};
-
 export default function NotificationsPage() {
   const { sendNotification } = useNotifications();
+  const tc = useTranslate();
+  const { i18n } = useTranslation();
+  const dir = i18n.language === 'en' ? 'ltr' : 'rtl';
+
+  const getNotificationLabel = (type: string) => {
+    switch (type) {
+      case "order_update":
+        return tc("تحديث الطلب", "Order Update");
+      case "referral":
+        return tc("الإحالات", "Referrals");
+      case "loyalty":
+        return tc("برنامج الولاء", "Loyalty Program");
+      case "promotion":
+        return tc("عروض ترويجية", "Promotions");
+      default:
+        return tc("نظام", "System");
+    }
+  };
+
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["/api/notifications"],
     queryFn: async () => {
@@ -80,16 +86,16 @@ export default function NotificationsPage() {
   const unreadCount = notifications?.filter((n: any) => !n.isRead).length || 0;
 
   if (isLoading) {
-    return <div className="p-4">جاري التحميل...</div>;
+    return <div className="p-4">{tc("جاري التحميل...", "Loading...")}</div>;
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-4">
+    <div className="max-w-3xl mx-auto p-4 space-y-4" dir={dir}>
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">الإشعارات</h1>
+          <h1 className="text-3xl font-bold">{tc("الإشعارات", "Notifications")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {unreadCount} إشعارات جديدة
+            {unreadCount} {tc("إشعارات جديدة", "new notifications")}
           </p>
         </div>
         {unreadCount > 0 && (
@@ -100,7 +106,7 @@ export default function NotificationsPage() {
             data-testid="button-mark-all-read"
           >
             <CheckCircle2 className="w-4 h-4 ml-2" />
-            وضع علامة على الكل كمقروء
+            {tc("وضع علامة على الكل كمقروء", "Mark All as Read")}
           </Button>
         )}
       </div>
@@ -108,7 +114,7 @@ export default function NotificationsPage() {
       {notifications && notifications.length === 0 ? (
         <Card className="p-8 text-center">
           <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">لا توجد إشعارات حالياً</p>
+          <p className="text-muted-foreground">{tc("لا توجد إشعارات حالياً", "No notifications yet")}</p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -143,7 +149,7 @@ export default function NotificationsPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {new Date(notification.createdAt).toLocaleDateString(
-                      "ar-SA",
+                      i18n.language === 'en' ? 'en-US' : "ar-SA",
                       {
                         year: "numeric",
                         month: "long",

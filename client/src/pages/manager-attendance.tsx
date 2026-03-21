@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslate } from "@/lib/useTranslate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,7 @@ interface Branch {
 
 export default function ManagerAttendance() {
   const [, setLocation] = useLocation();
+  const tc = useTranslate();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -258,8 +260,8 @@ export default function ManagerAttendance() {
               <Coffee className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-accent">سجل الحضور</h1>
-              <p className="text-gray-400 text-xs">إدارة حضور جميع الموظفين والمديرين</p>
+              <h1 className="text-xl font-bold text-accent">{tc("سجل الحضور", "Attendance Log")}</h1>
+              <p className="text-gray-400 text-xs">{tc("إدارة حضور جميع الموظفين والمديرين", "Manage attendance for all employees and managers")}</p>
             </div>
           </div>
           <Button
@@ -280,7 +282,7 @@ export default function ManagerAttendance() {
                 <Users className="w-5 h-5 text-blue-400" />
                 <div>
                   <p className="text-blue-400 text-2xl font-bold">{stats.total}</p>
-                  <p className="text-gray-400 text-xs">إجمالي</p>
+                  <p className="text-gray-400 text-xs">{tc("إجمالي", "Total")}</p>
                 </div>
               </div>
             </CardContent>
@@ -292,7 +294,7 @@ export default function ManagerAttendance() {
                 <CheckCircle2 className="w-5 h-5 text-green-400" />
                 <div>
                   <p className="text-green-400 text-2xl font-bold">{stats.present}</p>
-                  <p className="text-gray-400 text-xs">حاضرون</p>
+                  <p className="text-gray-400 text-xs">{tc("حاضرون", "Present")}</p>
                 </div>
               </div>
             </CardContent>
@@ -304,7 +306,7 @@ export default function ManagerAttendance() {
                 <AlertTriangle className="w-5 h-5 text-accent" />
                 <div>
                   <p className="text-accent text-2xl font-bold">{stats.late}</p>
-                  <p className="text-gray-400 text-xs">متأخرون</p>
+                  <p className="text-gray-400 text-xs">{tc("متأخرون", "Late")}</p>
                 </div>
               </div>
             </CardContent>
@@ -316,7 +318,7 @@ export default function ManagerAttendance() {
                 <ArrowRight className="w-5 h-5 text-purple-400" />
                 <div>
                   <p className="text-purple-400 text-2xl font-bold">{stats.checkedOut}</p>
-                  <p className="text-gray-400 text-xs">انصرفوا</p>
+                  <p className="text-gray-400 text-xs">{tc("انصرفوا", "Checked Out")}</p>
                 </div>
               </div>
             </CardContent>
@@ -328,7 +330,7 @@ export default function ManagerAttendance() {
                 <XCircle className="w-5 h-5 text-red-400" />
                 <div>
                   <p className="text-red-400 text-2xl font-bold">{stats.absent}</p>
-                  <p className="text-gray-400 text-xs">غياب</p>
+                  <p className="text-gray-400 text-xs">{tc("غياب", "Absent")}</p>
                 </div>
               </div>
             </CardContent>
@@ -505,12 +507,12 @@ export default function ManagerAttendance() {
             <div className="flex items-center justify-between">
               <CardTitle className="text-accent flex items-center gap-2">
                 <Clock className="w-5 h-5" />
-                سجلات الحضور
+                {tc("سجلات الحضور", "Attendance Records")}
               </CardTitle>
               <Tabs value={viewMode} onValueChange={(val) => setViewMode(val as 'cards' | 'table')}>
                 <TabsList className="bg-[#1a1410]">
-                  <TabsTrigger value="cards">بطاقات</TabsTrigger>
-                  <TabsTrigger value="table">جدول</TabsTrigger>
+                  <TabsTrigger value="cards">{tc("بطاقات", "Cards")}</TabsTrigger>
+                  <TabsTrigger value="table">{tc("جدول", "Table")}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>

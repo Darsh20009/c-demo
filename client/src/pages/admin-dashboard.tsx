@@ -5,9 +5,11 @@ import { Users, TrendingUp, DollarSign, Calendar, Activity, Settings, Clock } fr
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
 import SarIcon from "@/components/sar-icon";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function AdminDashboard() {
   const [, navigate] = useLocation();
+  const tc = useTranslate();
 
   useEffect(() => {
     document.title = "لوحة تحكم الإدارة - QIROX Cafe | إحصائيات شاملة";
@@ -85,39 +87,39 @@ export default function AdminDashboard() {
     <div className="p-6 space-y-8 bg-gradient-to-b from-background via-primary/5 to-background min-h-screen">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold font-playfair text-foreground">لوحة التحكم</h1>
-          <p className="text-muted-foreground mt-2 font-cairo">مرحباً بك في نظام الإدارة</p>
+          <h1 className="text-4xl font-bold font-playfair text-foreground">{tc("لوحة التحكم", "Dashboard")}</h1>
+          <p className="text-muted-foreground mt-2 font-cairo">{tc("مرحباً بك في نظام الإدارة", "Welcome to the management system")}</p>
         </div>
         <Button variant="outline" onClick={() => navigate('/admin/settings')}>
           <Settings className="w-4 h-4 ml-2" />
-          الإعدادات
+          {tc("الإعدادات", "Settings")}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           icon={Users}
-          label="إجمالي الموظفين"
+          label={tc("إجمالي الموظفين", "Total Employees")}
           value={employees.length}
-          subtext={`${activeEmployees} نشطين`}
+          subtext={`${activeEmployees} ${tc("نشطين", "active")}`}
         />
         <StatCard
           icon={Activity}
-          label="الحاضرون اليوم"
+          label={tc("الحاضرون اليوم", "Present Today")}
           value={presentToday}
-          subtext={`من ${activeEmployees} موظف نشط`}
+          subtext={`${tc("من", "of")} ${activeEmployees} ${tc("موظف نشط", "active employees")}`}
         />
         <StatCard
           icon={Calendar}
-          label="في الإجازة"
+          label={tc("في الإجازة", "On Leave")}
           value={onLeave}
-          subtext="إجازة معتمدة اليوم"
+          subtext={tc("إجازة معتمدة اليوم", "Approved leave today")}
         />
         <StatCard
           icon={DollarSign}
-          label="إيرادات اليوم"
+          label={tc("إيرادات اليوم", "Today's Revenue")}
           value={`${todayRevenue.toFixed(0)} ر.س`}
-          subtext={`${todayOrders.length} طلب اليوم`}
+          subtext={`${todayOrders.length} ${tc("طلب اليوم", "orders today")}`}
         />
       </div>
 
@@ -126,26 +128,26 @@ export default function AdminDashboard() {
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              نظرة عامة على الطلبات
+              {tc("نظرة عامة على الطلبات", "Orders Overview")}
             </CardTitle>
-            <CardDescription>جميع الطلبات</CardDescription>
+            <CardDescription>{tc("جميع الطلبات", "All orders")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-background dark:bg-accent/20 rounded-lg">
-                <span className="text-sm font-medium">إجمالي الطلبات</span>
+                <span className="text-sm font-medium">{tc("إجمالي الطلبات", "Total Orders")}</span>
                 <span className="text-2xl font-bold text-accent dark:text-accent">{orders.length}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <span className="text-sm font-medium">طلبات اليوم</span>
+                <span className="text-sm font-medium">{tc("طلبات اليوم", "Today's Orders")}</span>
                 <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{todayOrders.length}</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                <span className="text-sm font-medium">إجمالي الإيرادات</span>
+                <span className="text-sm font-medium">{tc("إجمالي الإيرادات", "Total Revenue")}</span>
                 <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{totalRevenue.toFixed(0)} <SarIcon /></span>
               </div>
               <div className="flex justify-between items-center p-4 bg-primary/10 rounded-lg">
-                <span className="text-sm font-medium">متوسط قيمة الطلب</span>
+                <span className="text-sm font-medium">{tc("متوسط قيمة الطلب", "Average Order Value")}</span>
                 <span className="text-2xl font-bold text-primary">{avgOrderValue.toFixed(2)} <SarIcon /></span>
               </div>
             </div>
@@ -154,7 +156,7 @@ export default function AdminDashboard() {
 
         <Card className="border-0 bg-card">
           <CardHeader className="pb-4">
-            <CardTitle>إجراءات سريعة</CardTitle>
+            <CardTitle>{tc("إجراءات سريعة", "Quick Actions")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
@@ -163,7 +165,7 @@ export default function AdminDashboard() {
               data-testid="button-manage-employees"
             >
               <Users className="w-4 h-4 ml-2" />
-              إدارة الموظفين
+              {tc("إدارة الموظفين", "Manage Employees")}
             </Button>
             <Button
               variant="outline"
@@ -172,7 +174,7 @@ export default function AdminDashboard() {
               data-testid="button-view-attendance"
             >
               <Clock className="w-4 h-4 ml-2" />
-              الحضور والغياب
+              {tc("الحضور والغياب", "Attendance")}
             </Button>
             <Button
               variant="outline"
@@ -181,7 +183,7 @@ export default function AdminDashboard() {
               data-testid="button-view-reports"
             >
               <TrendingUp className="w-4 h-4 ml-2" />
-              التقارير
+              {tc("التقارير", "Reports")}
             </Button>
           </CardContent>
         </Card>
@@ -190,14 +192,14 @@ export default function AdminDashboard() {
       <Card className="border-0 bg-white dark:bg-card">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <CardTitle>الموظفون</CardTitle>
+            <CardTitle>{tc("الموظفون", "Employees")}</CardTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/admin/employees')}
               data-testid="button-view-all-employees"
             >
-              عرض الكل
+              {tc("عرض الكل", "View All")}
             </Button>
           </div>
         </CardHeader>
@@ -207,9 +209,9 @@ export default function AdminDashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-right p-3 font-semibold">الاسم</th>
-                    <th className="text-right p-3 font-semibold">الدور</th>
-                    <th className="text-right p-3 font-semibold">الحالة</th>
+                    <th className="text-right p-3 font-semibold">{tc("الاسم", "Name")}</th>
+                    <th className="text-right p-3 font-semibold">{tc("الدور", "Role")}</th>
+                    <th className="text-right p-3 font-semibold">{tc("الحالة", "Status")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -223,7 +225,7 @@ export default function AdminDashboard() {
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
                             : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-muted-foreground'
                         }`}>
-                          {emp.isActivated === 1 ? 'نشط' : 'معطل'}
+                          {emp.isActivated === 1 ? tc("نشط", "Active") : tc("معطل", "Inactive")}
                         </span>
                       </td>
                     </tr>

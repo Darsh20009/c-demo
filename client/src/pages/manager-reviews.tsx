@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useTranslate } from "@/lib/useTranslate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,7 @@ function StarRating({ rating }: { rating: number }) {
 export default function ManagerReviewsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [ratingFilter, setRatingFilter] = useState("all");
   const [replyDialog, setReplyDialog] = useState<Review | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -88,7 +90,7 @@ export default function ManagerReviewsPage() {
             <ArrowLeft className="w-4 h-4 ml-2" />العودة
           </Button>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Star className="w-7 h-7 text-amber-400" />تقييمات العملاء
+            <Star className="w-7 h-7 text-amber-400" />{tc("تقييمات العملاء", "Customer Reviews")}
           </h1>
           <Button variant="outline" size="sm" onClick={() => refetch()} className="border-border text-muted-foreground">
             تحديث

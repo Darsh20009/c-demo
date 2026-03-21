@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslate } from "@/lib/useTranslate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ function getTierBadge(tier: string) {
 export default function LoyaltyProgram() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Dialogs state
@@ -215,16 +217,16 @@ export default function LoyaltyProgram() {
               <ChevronRight className="w-5 h-5" />
             </Button>
             <Gift className="w-5 h-5 text-primary" />
-            <h1 className="font-black text-xl">برنامج الولاء</h1>
+            <h1 className="font-black text-xl">{tc("برنامج الولاء", "Loyalty Program")}</h1>
           </div>
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={exportCSV} className="gap-2" data-testid="button-export-csv">
               <Download className="w-4 h-4" />
-              تصدير CSV
+              {tc("تصدير CSV", "Export CSV")}
             </Button>
             <Button size="sm" onClick={() => setIsCreateOpen(true)} className="gap-2" data-testid="button-create-card">
               <UserPlus className="w-4 h-4" />
-              بطاقة جديدة
+              {tc("بطاقة جديدة", "New Card")}
             </Button>
           </div>
         </div>
@@ -237,28 +239,28 @@ export default function LoyaltyProgram() {
             <CardContent className="pt-4 pb-4 text-center">
               <Users className="w-6 h-6 text-primary mx-auto mb-1" />
               <p className="text-2xl font-black">{totalMembers}</p>
-              <p className="text-xs text-muted-foreground">إجمالي الأعضاء</p>
+              <p className="text-xs text-muted-foreground">{tc("إجمالي الأعضاء", "Total Members")}</p>
             </CardContent>
           </Card>
           <Card data-testid="stat-active">
             <CardContent className="pt-4 pb-4 text-center">
               <TrendingUp className="w-6 h-6 text-green-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-green-600">{activeCards}</p>
-              <p className="text-xs text-muted-foreground">بطاقات نشطة</p>
+              <p className="text-xs text-muted-foreground">{tc("بطاقات نشطة", "Active Cards")}</p>
             </CardContent>
           </Card>
           <Card data-testid="stat-points">
             <CardContent className="pt-4 pb-4 text-center">
               <Coins className="w-6 h-6 text-amber-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-amber-600">{totalPoints.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">مجموع النقاط</p>
+              <p className="text-xs text-muted-foreground">{tc("مجموع النقاط", "Total Points")}</p>
             </CardContent>
           </Card>
           <Card data-testid="stat-redeemed">
             <CardContent className="pt-4 pb-4 text-center">
               <Coffee className="w-6 h-6 text-purple-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-purple-600">{totalFreeCupsRedeemed}</p>
-              <p className="text-xs text-muted-foreground">مشروبات مجانية</p>
+              <p className="text-xs text-muted-foreground">{tc("مشروبات مجانية", "Free Drinks")}</p>
             </CardContent>
           </Card>
         </div>
@@ -284,11 +286,11 @@ export default function LoyaltyProgram() {
           <TabsList className="w-full">
             <TabsTrigger value="members" className="flex-1 gap-2">
               <Users className="w-4 h-4" />
-              الأعضاء ({totalMembers})
+              {tc("الأعضاء", "Members")} ({totalMembers})
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex-1 gap-2">
               <Settings className="w-4 h-4" />
-              الإعدادات
+              {tc("الإعدادات", "Settings")}
             </TabsTrigger>
           </TabsList>
 

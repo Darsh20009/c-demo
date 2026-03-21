@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import type { Employee } from "@shared/schema";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function ManagerLogin() {
   const [, setLocation] = useLocation();
@@ -14,6 +15,7 @@ export default function ManagerLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const tc = useTranslate();
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
@@ -32,7 +34,7 @@ export default function ManagerLogin() {
     },
     onSuccess: (employee: any) => {
       if (employee.role !== "manager" && employee.role !== "admin") {
-        setError("هذا الحساب ليس حساب مدير");
+        setError(tc("هذا الحساب ليس حساب مدير", "This account does not have manager access"));
         setPassword("");
         return;
       }
@@ -45,7 +47,7 @@ export default function ManagerLogin() {
       setLocation("/manager/dashboard");
     },
     onError: () => {
-      setError("اسم المستخدم أو كلمة المرور غير صحيحة ");
+      setError(tc("اسم المستخدم أو كلمة المرور غير صحيحة", "Invalid username or password"));
       setPassword("");
     },
   });
@@ -55,7 +57,7 @@ export default function ManagerLogin() {
     setError("");
 
     if (!username || !password) {
-      setError("الرجاء إدخال اسم المستخدم وكلمة المرور");
+      setError(tc("الرجاء إدخال اسم المستخدم وكلمة المرور", "Please enter your username and password"));
       return;
     }
 
@@ -70,16 +72,16 @@ export default function ManagerLogin() {
             <img src={qiroxLogoStaff} alt="QIROX Systems" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold font-playfair text-foreground mb-2">QIROX Cafe</h1>
-          <p className="text-muted-foreground font-cairo">تسجيل دخول المدير</p>
+          <p className="text-muted-foreground font-cairo">{tc("تسجيل دخول المدير", "Manager Login")}</p>
         </div>
 
         <Card className="bg-card border-border/50 shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl text-center font-playfair text-foreground">
-              لوحة تحكم المدير
+              {tc("لوحة تحكم المدير", "Manager Dashboard")}
             </CardTitle>
             <CardDescription className="text-center text-muted-foreground">
-              أدخل بيانات حساب المدير للوصول
+              {tc("أدخل بيانات حساب المدير للوصول", "Enter your manager credentials to access")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -89,7 +91,7 @@ export default function ManagerLogin() {
                   <User className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="اسم المستخدم"
+                    placeholder={tc("اسم المستخدم", "Username")}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="pr-10"
@@ -106,7 +108,7 @@ export default function ManagerLogin() {
                   <Lock className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder="كلمة المرور"
+                    placeholder={tc("كلمة المرور", "Password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pr-10 pl-10"
@@ -130,7 +132,7 @@ export default function ManagerLogin() {
                     className="text-xs text-primary hover:text-primary/80 underline"
                     data-testid="link-forgot-password"
                   >
-                    نسيت كلمة المرور؟
+                    {tc("نسيت كلمة المرور؟", "Forgot password?")}
                   </button>
                 </div>
                 {error && (
@@ -149,15 +151,15 @@ export default function ManagerLogin() {
                 {loginMutation.isPending ? (
                   <>
                     <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                    جاري تسجيل الدخول...
+                    {tc("جاري تسجيل الدخول...", "Signing in...")}
                   </>
                 ) : (
-                  "دخول"
+                  tc("دخول", "Sign In")
                 )}
               </Button>
 
               <div className="pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground text-center mb-2">موظف عادي؟</p>
+                <p className="text-sm text-muted-foreground text-center mb-2">{tc("موظف عادي؟", "Regular employee?")}</p>
                 <Button
                   type="button"
                   variant="outline"
@@ -165,7 +167,7 @@ export default function ManagerLogin() {
                   className="w-full"
                   data-testid="button-employee-login"
                 >
-                  تسجيل دخول الموظف
+                  {tc("تسجيل دخول الموظف", "Employee Login")}
                 </Button>
               </div>
             </form>
@@ -178,7 +180,7 @@ export default function ManagerLogin() {
             onClick={() => setLocation("/")}
             data-testid="link-back"
           >
-            رجوع
+            {tc("رجوع", "Back")}
           </Button>
         </div>
       </div>

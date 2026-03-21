@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslate } from "@/lib/useTranslate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import { LoadingState, EmptyState } from "@/components/ui/states";
 import { exportToCSV, exportToPDF } from "@/lib/export-utils";
 
 export default function ReportsPage() {
+  const tc = useTranslate();
   const [selectedBranch, setSelectedBranch] = useState("branch-1");
   const [startDate, setStartDate] = useState(
     new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split("T")[0]
