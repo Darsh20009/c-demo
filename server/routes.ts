@@ -523,6 +523,106 @@ let posDeviceStatus = { connected: false, lastCheck: Date.now() };
 
 import { BusinessConfigModel, AppointmentModel } from "./models";
 
+function getAppBaseUrl(): string {
+  const domain = process.env.REPLIT_DEV_DOMAIN;
+  if (domain) return `https://${domain}`;
+  return `http://localhost:${process.env.PORT || 5000}`;
+}
+
+function generateOrderNotificationSVG(
+  status: string,
+  orderNumber: string,
+  estimatedTimeStr?: string,
+  orderType?: string
+): string {
+  type StageConfig = { icon: string; titleAr: string; stageIdx: number; bg1: string; bg2: string };
+  const stageConfigs: Record<string, StageConfig> = {
+    'pending':           { icon: '&#x1F550;', titleAr: '&#x062A;&#x0645; &#x0627;&#x0633;&#x062A;&#x0644;&#x0627;&#x0645; &#x0637;&#x0644;&#x0628;&#x0643;',    stageIdx: 0, bg1: '#0d3322', bg2: '#1a5c38' },
+    'payment_confirmed': { icon: '&#x2705;',  titleAr: '&#x062A;&#x0645; &#x062A;&#x0623;&#x0643;&#x064A;&#x062F; &#x0637;&#x0644;&#x0628;&#x0643;',    stageIdx: 0, bg1: '#0d3322', bg2: '#1a5c38' },
+    'in_progress':       { icon: '&#x2615;',  titleAr: '&#x062C;&#x0627;&#x0631;&#x0650; &#x0627;&#x0644;&#x062A;&#x062D;&#x0636;&#x064A;&#x0631;',      stageIdx: 1, bg1: '#0d3322', bg2: '#1a5c38' },
+    'ready':             { icon: '&#x1F514;', titleAr: '&#x0637;&#x0644;&#x0628;&#x0643; &#x062C;&#x0627;&#x0647;&#x0632;!',       stageIdx: 2, bg1: '#0a2d1e', bg2: '#16503a' },
+    'completed':         { icon: '&#x1F389;', titleAr: '&#x062A;&#x0645; &#x0627;&#x0644;&#x062A;&#x0633;&#x0644;&#x064A;&#x0645; &#x0628;&#x0646;&#x062C;&#x0627;&#x062D;', stageIdx: 3, bg1: '#0a2d1e', bg2: '#164d35' },
+    'cancelled':         { icon: '&#x274C;',  titleAr: '&#x062A;&#x0645; &#x0625;&#x0644;&#x063A;&#x0627;&#x0621; &#x0627;&#x0644;&#x0637;&#x0644;&#x0628;', stageIdx: -1, bg1: '#1a0a0a', bg2: '#3d1515' },
+  };
+  const cfg = stageConfigs[status] || stageConfigs['pending'];
+  const estimatedTime = estimatedTimeStr ? parseInt(estimatedTimeStr) : 0;
+
+  const dotXPositions = [120, 373, 627, 880];
+  const stageLabels = [
+    '&#x0627;&#x0633;&#x062A;&#x0644;&#x0627;&#x0645;',
+    '&#x062A;&#x062D;&#x0636;&#x064A;&#x0631;',
+    '&#x062C;&#x0627;&#x0647;&#x0632;',
+    '&#x062A;&#x0633;&#x0644;&#x064A;&#x0645;',
+  ];
+  const progressFillWidths = [0, 253, 507, 760];
+  const progressFill = cfg.stageIdx >= 0 ? (progressFillWidths[cfg.stageIdx] || 0) : 0;
+
+  const dotElements = dotXPositions.map((x, i) => {
+    const isDone = i <= cfg.stageIdx;
+    const r = isDone ? 13 : 8;
+    const fill = isDone ? '#7FD4A8' : '#ffffff';
+    const fillOp = isDone ? '1' : '0.25';
+    const labelFill = isDone ? '#7FD4A8' : '#ffffff';
+    const labelOp = isDone ? '1' : '0.35';
+    return `<circle cx="${x}" cy="432" r="${r}" fill="${fill}" fill-opacity="${fillOp}"/>` +
+           `<text x="${x}" y="462" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="${labelFill}" fill-opacity="${labelOp}">${stageLabels[i]}</text>`;
+  }).join('');
+
+  const orderTypeEmojis: Record<string, string> = {
+    'delivery': '&#x1F697; &#x062A;&#x0648;&#x0635;&#x064A;&#x0644;',
+    'car-pickup': '&#x1F697; &#x0633;&#x064A;&#x0627;&#x0631;&#x0629;',
+    'dine-in': '&#x1F37D;&#xFE0F; &#x062F;&#x0627;&#x062E;&#x0644;',
+    'takeaway': '&#x2615; &#x0627;&#x0633;&#x062A;&#x0644;&#x0627;&#x0645;',
+    'scheduled': '&#x1F4C5; &#x0645;&#x062C;&#x062F;&#x0648;&#x0644;',
+  };
+  const orderTypeBadge = orderType ? (orderTypeEmojis[orderType] || '') : '';
+  const orderTypeBadgeEl = orderTypeBadge
+    ? `<text x="950" y="55" text-anchor="end" font-family="Arial,sans-serif" font-size="18" fill="#ffffff" fill-opacity="0.5">${orderTypeBadge}</text>`
+    : '';
+
+  const estimatedEl = (estimatedTime > 0 && status === 'in_progress')
+    ? `<rect x="340" y="358" width="320" height="42" rx="21" fill="#7FD4A8" fill-opacity="0.15"/>` +
+      `<text x="500" y="385" text-anchor="middle" font-family="Arial,sans-serif" font-size="26" fill="#7FD4A8">&#x23F1; &#x0645;&#x062A;&#x0628;&#x0642;&#x064A; ${estimatedTime} &#x062F;&#x0642;&#x064A;&#x0642;&#x0629;</text>`
+    : '';
+
+  const progressEl = progressFill > 0
+    ? `<rect x="120" y="426" width="${progressFill}" height="7" rx="3.5" fill="#7FD4A8"/>`
+    : '';
+
+  const cancelledBanner = status === 'cancelled'
+    ? `<rect x="300" y="345" width="400" height="40" rx="20" fill="#ff4444" fill-opacity="0.2"/>` +
+      `<text x="500" y="372" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="#ff8888">&#x1F4DE; &#x062A;&#x0648;&#x0627;&#x0635;&#x0644; &#x0645;&#x0639;&#x0646;&#x0627; &#x0644;&#x0644;&#x0627;&#x0633;&#x062A;&#x0641;&#x0633;&#x0627;&#x0631;</text>`
+    : '';
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${cfg.bg1}"/>
+      <stop offset="100%" stop-color="${cfg.bg2}"/>
+    </linearGradient>
+    <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5EC99A"/>
+      <stop offset="100%" stop-color="#A8E6C8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="500" fill="url(#bg)"/>
+  <circle cx="880" cy="70" r="180" fill="#ffffff" fill-opacity="0.02"/>
+  <circle cx="100" cy="460" r="130" fill="#ffffff" fill-opacity="0.02"/>
+  <circle cx="500" cy="-40" r="240" fill="#7FD4A8" fill-opacity="0.03"/>
+  <text x="48" y="56" font-family="Arial,sans-serif" font-size="26" fill="#7FD4A8" font-weight="bold" letter-spacing="2">QIROX Cafe</text>
+  ${orderTypeBadgeEl}
+  <line x1="48" y1="72" x2="952" y2="72" stroke="#ffffff" stroke-opacity="0.07" stroke-width="1"/>
+  <text x="500" y="220" text-anchor="middle" font-family="Segoe UI Emoji,Apple Color Emoji,Arial" font-size="100">${cfg.icon}</text>
+  <text x="500" y="298" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="bold" fill="#ffffff">${cfg.titleAr}</text>
+  <text x="500" y="340" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#ffffff" fill-opacity="0.5">&#x0631;&#x0642;&#x0645; &#x0627;&#x0644;&#x0637;&#x0644;&#x0628; #${orderNumber}</text>
+  ${estimatedEl}
+  ${cancelledBanner}
+  <rect x="120" y="426" width="760" height="7" rx="3.5" fill="#ffffff" fill-opacity="0.12"/>
+  ${progressEl}
+  ${dotElements}
+</svg>`;
+}
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   registerObjectStorageRoutes(app);
@@ -565,6 +665,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // --- PUSH NOTIFICATIONS API ---
   app.get("/api/push/vapid-key", (req, res) => {
     res.json({ publicKey: getVapidPublicKey() });
+  });
+
+  // Dynamic notification image endpoint - generates creative SVG for order status push notifications
+  app.get("/api/notification-image", (req, res) => {
+    const { status, orderNumber, t: estimatedTime, type: orderType } = req.query as Record<string, string>;
+    const svg = generateOrderNotificationSVG(
+      status || 'pending',
+      orderNumber || '---',
+      estimatedTime,
+      orderType
+    );
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send(svg);
   });
 
   app.post("/api/push/subscribe", async (req, res) => {
@@ -804,19 +919,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const custId = order.customerId || order.customerInfo?.customerId;
         if (custId) {
-          // console.log(`[PUSH] Sending order confirmation push to customer ${custId}`);
+          const orderNum = String(order.orderNumber || order.dailyNumber || '');
+          const baseUrl = getAppBaseUrl();
           sendPushToCustomer(custId, {
-            title: `✅ تم استلام طلبك #${order.orderNumber || order.dailyNumber}`,
-            body: `${orderItems.length} ${orderItems.length > 1 ? 'منتجات' : 'منتج'} • ${Number(order.totalAmount).toFixed(2)} ر.س`,
+            title: `✅ تم استلام طلبك`,
+            body: `طلب رقم #${orderNum} • ${orderItems.length} ${orderItems.length > 1 ? 'منتجات' : 'منتج'} • ${Number(order.totalAmount).toFixed(2)} ر.س`,
             url: '/my-orders',
-            tag: `order-confirmed-${order.orderNumber}`,
+            tag: `order-${orderNum}`,
             type: 'order_status',
-            orderNumber: String(order.orderNumber || order.dailyNumber || ''),
+            orderNumber: orderNum,
             orderStatus: 'pending',
             totalAmount: order.totalAmount,
             itemCount: orderItems.length,
             items: orderItems.slice(0, 5),
             orderType: order.orderType,
+            image: `${baseUrl}/api/notification-image?status=pending&orderNumber=${encodeURIComponent(orderNum)}&type=${encodeURIComponent(order.orderType || '')}`,
+            actions: [
+              { action: 'track', title: '👁 متابعة الطلب' },
+            ],
+            stageIndex: 0,
+            totalStages: 4,
           }).catch(err => console.error('[PUSH] Customer order confirmation error:', err));
         }
       } catch (pushErr) {
@@ -7766,39 +7888,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // Push notification to customer
+          // Push notification to customer - rich with SVG image and actions
           try {
             const custInfo = typeof updatedOrder.customerInfo === 'string' ? JSON.parse(updatedOrder.customerInfo) : updatedOrder.customerInfo;
             const custId = updatedOrder.customerId || custInfo?.customerId;
             if (custId) {
-              const statusMessages: Record<string, string> = {
-                'payment_confirmed': `تم تأكيد طلبك رقم #${serializedOrder.orderNumber}`,
-                'in_progress': `جاري تحضير طلبك رقم #${serializedOrder.orderNumber}`,
-                'ready': `طلبك جاهز للاستلام! #${serializedOrder.orderNumber}`,
-                'completed': `تم إتمام طلبك رقم #${serializedOrder.orderNumber} بنجاح`,
-                'cancelled': `تم إلغاء طلبك رقم #${serializedOrder.orderNumber}`,
+              type StatusCfg = { title: string; body: string; stageIdx: number; actions: Array<{ action: string; title: string }> };
+              const statusConfig: Record<string, StatusCfg> = {
+                'payment_confirmed': {
+                  title: '✅ تم تأكيد طلبك',
+                  body: `طلب رقم #${serializedOrder.orderNumber} • قيد الانتظار`,
+                  stageIdx: 0,
+                  actions: [{ action: 'track', title: '👁 متابعة الطلب' }],
+                },
+                'in_progress': {
+                  title: '☕ جارِ التحضير',
+                  body: `طلبك #${serializedOrder.orderNumber} يُحضَّر الآن بعناية`,
+                  stageIdx: 1,
+                  actions: [{ action: 'track', title: '📍 تتبع الطلب' }],
+                },
+                'ready': {
+                  title: '🔔 طلبك جاهز!',
+                  body: `طلبك #${serializedOrder.orderNumber} في انتظارك • تفضل بالاستلام`,
+                  stageIdx: 2,
+                  actions: [
+                    { action: 'track', title: '📍 تتبع الطلب' },
+                    { action: 'directions', title: '🗺️ الاتجاهات' },
+                  ],
+                },
+                'completed': {
+                  title: '🎉 تم التسليم!',
+                  body: `طلبك #${serializedOrder.orderNumber} تم تسليمه • شكراً لك`,
+                  stageIdx: 3,
+                  actions: [
+                    { action: 'rate', title: '⭐ قيّم تجربتك' },
+                    { action: 'reorder', title: '🔄 إعادة الطلب' },
+                  ],
+                },
+                'cancelled': {
+                  title: '❌ تم الإلغاء',
+                  body: `تم إلغاء طلبك #${serializedOrder.orderNumber} • تواصل معنا للمساعدة`,
+                  stageIdx: -1,
+                  actions: [{ action: 'track', title: '📞 تواصل معنا' }],
+                },
               };
-              const pushBody = statusMessages[status];
-              if (pushBody) {
+
+              const cfg = statusConfig[status];
+              if (cfg) {
                 const orderItems = Array.isArray(serializedOrder.items) 
                   ? serializedOrder.items.map((item: any) => ({
                       name: item.nameAr || item.name || item.coffeeItem?.nameAr || 'منتج',
                       quantity: item.quantity || 1
                     }))
                   : [];
+                const orderNum = String(serializedOrder.orderNumber || serializedOrder.dailyNumber || '');
+                const orderType = serializedOrder.orderType || '';
+                const estimatedMins = serializedOrder.estimatedPrepTimeInMinutes;
+                const baseUrl = getAppBaseUrl();
+                const imageParams = new URLSearchParams({
+                  status,
+                  orderNumber: orderNum,
+                  type: orderType,
+                  ...(status === 'in_progress' && estimatedMins ? { t: String(estimatedMins) } : {}),
+                });
                 sendPushToCustomer(custId, {
-                  title: 'تحديث الطلب',
-                  body: pushBody,
+                  title: cfg.title,
+                  body: cfg.body,
                   url: '/my-orders',
-                  tag: `order-${serializedOrder.orderNumber}`,
+                  tag: `order-${orderNum}`,
                   type: 'order_status',
-                  orderNumber: serializedOrder.orderNumber || serializedOrder.dailyNumber,
+                  orderNumber: orderNum,
                   orderStatus: status,
                   totalAmount: serializedOrder.totalAmount,
                   itemCount: orderItems.length,
                   items: orderItems.slice(0, 5),
-                  orderType: serializedOrder.orderType,
-                  estimatedTime: status === 'in_progress' ? 5 : undefined,
+                  orderType,
+                  estimatedTime: status === 'in_progress' ? (estimatedMins || 5) : undefined,
+                  image: `${baseUrl}/api/notification-image?${imageParams.toString()}`,
+                  actions: cfg.actions,
+                  stageIndex: cfg.stageIdx,
+                  totalStages: 4,
                 }).catch(err => console.error('[PUSH] Customer notification error:', err));
               }
             }

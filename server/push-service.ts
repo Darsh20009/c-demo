@@ -79,6 +79,10 @@ export interface PushPayload {
   orderType?: string;
   estimatedTime?: number;
   branchName?: string;
+  image?: string;
+  actions?: Array<{ action: string; title: string }>;
+  stageIndex?: number;
+  totalStages?: number;
 }
 
 async function sendPushToSubscriptions(
@@ -102,6 +106,10 @@ async function sendPushToSubscriptions(
     orderType: payload.orderType,
     estimatedTime: payload.estimatedTime,
     branchName: payload.branchName,
+    image: payload.image,
+    actions: payload.actions,
+    stageIndex: payload.stageIndex,
+    totalStages: payload.totalStages,
     timestamp: Date.now(),
   });
 

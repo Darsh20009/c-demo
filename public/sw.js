@@ -1,6 +1,7 @@
-// QIROX Cafe Service Worker - Handles push notifications and offline caching
+// QIROX Cafe Service Worker - Rich Push Notifications + Offline Caching
+// Version: 4.0 - Creative Notifications with Stage Tracking
 
-const CACHE_NAME = 'qirox-cafe-v3';
+const CACHE_NAME = 'qirox-cafe-v4';
 
 // Install: cache essential assets
 self.addEventListener('install', (event) => {
@@ -23,44 +24,149 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Push notification handler - this fires on Android and iOS PWA
+// Build a Unicode progress bar for order stages
+function buildProgressBar(orderStatus) {
+  const stages = ['pending', 'payment_confirmed', 'in_progress', 'ready', 'completed'];
+  const stageLabels = ['📦', '✅', '☕', '🔔', '🎉'];
+  const idx = stages.indexOf(orderStatus);
+  if (idx < 0) return '';
+  return stageLabels.map((icon, i) => (i <= idx ? icon : '◯')).join(' ─ ');
+}
+
+// Build a clean text progress bar using dots
+function buildTextProgress(stageIndex, totalStages) {
+  if (stageIndex < 0 || totalStages < 1) return '';
+  const filled = '●';
+  const empty = '○';
+  const connector = '───';
+  let bar = '';
+  for (let i = 0; i < totalStages; i++) {
+    bar += i <= stageIndex ? filled : empty;
+    if (i < totalStages - 1) bar += connector;
+  }
+  return bar;
+}
+
+// Get stage-specific vibration pattern
+function getVibrationPattern(orderStatus) {
+  const patterns = {
+    'pending':           [100, 50, 100],
+    'payment_confirmed': [150, 80, 150],
+    'in_progress':       [200, 100, 200, 100, 200],
+    'ready':             [300, 100, 300, 100, 300, 100, 300],
+    'completed':         [100, 50, 100, 50, 100, 50, 100, 50, 100],
+    'cancelled':         [500, 200, 500],
+  };
+  return patterns[orderStatus] || [200, 100, 200];
+}
+
+// Push notification handler - rich notifications with image + progress
 self.addEventListener('push', (event) => {
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'QIROX Cafe', body: event.data ? event.data.text() : 'إشعار جديد' };
+    data = {
+      title: 'QIROX Cafe',
+      body: event.data ? event.data.text() : 'إشعار جديد',
+    };
   }
 
-  const title = data.title || 'QIROX Cafe';
+  const title = data.title || 'QIROX Cafe ☕';
+  const orderStatus = data.orderStatus || data.status || '';
+  const isOrderNotification = data.type === 'order_status' || data.type === 'new_order';
+
+  // Build rich body with progress indicator
+  let body = data.body || 'لديك إشعار جديد';
+  if (isOrderNotification && orderStatus) {
+    const progressBar = buildProgressBar(orderStatus);
+    const textBar = (typeof data.stageIndex === 'number' && data.totalStages)
+      ? buildTextProgress(data.stageIndex, data.totalStages)
+      : '';
+
+    if (progressBar) {
+      body = data.body + '\n' + progressBar;
+    }
+    if (data.estimatedTime && orderStatus === 'in_progress') {
+      body += '\n⏱ متبقي حوالي ' + data.estimatedTime + ' دقيقة';
+    }
+  }
+
+  // Build action buttons based on order status
+  let actions = data.actions || [];
+  if (isOrderNotification && !data.actions) {
+    if (orderStatus === 'ready') {
+      actions = [
+        { action: 'track', title: '📍 تتبع الطلب' },
+        { action: 'directions', title: '🗺️ الاتجاهات' },
+      ];
+    } else if (orderStatus === 'completed') {
+      actions = [
+        { action: 'rate', title: '⭐ قيّم تجربتك' },
+        { action: 'reorder', title: '🔄 إعادة الطلب' },
+      ];
+    } else {
+      actions = [{ action: 'track', title: '👁 عرض الطلب' }];
+    }
+  }
+
+  const requireInteraction = ['ready', 'completed', 'cancelled'].includes(orderStatus)
+    || data.requireInteraction !== false;
+
+  const vibrate = getVibrationPattern(orderStatus);
+
   const options = {
-    body: data.body || 'لديك إشعار جديد',
-    icon: data.icon || '/logo.png',
-    badge: '/logo.png',
+    body,
+    icon: '/logo-192.png',
+    badge: '/logo-32.png',
     tag: data.tag || 'qirox-notification',
-    requireInteraction: data.requireInteraction !== false,
-    vibrate: [200, 100, 200, 100, 200],
+    requireInteraction,
+    vibrate,
+    silent: false,
+    timestamp: data.timestamp || Date.now(),
     data: {
-      url: data.url || '/employee/orders',
+      url: data.url || '/my-orders',
+      orderNumber: data.orderNumber,
+      orderStatus,
+      orderType: data.orderType,
       ...data,
     },
-    actions: data.actions || [],
+    actions: actions.slice(0, 2),
   };
+
+  // Include rich notification image if provided (shows large banner below text)
+  if (data.image) {
+    options.image = data.image;
+  }
 
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
 });
 
-// Notification click handler
+// Notification click handler - smart navigation
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const url = (event.notification.data && event.notification.data.url) || '/employee/orders';
+  const notifData = event.notification.data || {};
+  const action = event.action;
+  const orderNumber = notifData.orderNumber;
+  const orderStatus = notifData.orderStatus;
+
+  let url = notifData.url || '/my-orders';
+
+  if (action === 'rate') {
+    url = orderNumber ? `/my-orders?rate=${orderNumber}` : '/my-orders';
+  } else if (action === 'reorder') {
+    url = '/menu';
+  } else if (action === 'track') {
+    url = '/my-orders';
+  } else if (action === 'directions') {
+    url = notifData.url || '/my-orders';
+  }
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // If a window is already open, focus it and navigate
       for (const client of clientList) {
         if ('focus' in client) {
           client.focus();
@@ -70,12 +176,17 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Otherwise open a new window
       if (self.clients.openWindow) {
         return self.clients.openWindow(url);
       }
     })
   );
+});
+
+// Notification close handler (optional analytics)
+self.addEventListener('notificationclose', (event) => {
+  const data = event.notification.data || {};
+  // Could track dismissal analytics here
 });
 
 // Background sync — auto-sync offline POS orders when connectivity returns
