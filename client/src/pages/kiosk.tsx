@@ -31,6 +31,10 @@ function SarIcon() {
   return <span className="font-arabic text-sm font-bold">ر.س</span>;
 }
 
+function itemKey(item: MenuItem): string {
+  return item._id || item.id || '';
+}
+
 export default function KioskPage() {
   const { toast } = useToast();
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -82,8 +86,9 @@ export default function KioskPage() {
   const addToCart = (item: MenuItem) => {
     resetIdle();
     setCart(prev => {
-      const existing = prev.find(c => c.item._id === item._id);
-      if (existing) return prev.map(c => c.item._id === item._id ? { ...c, quantity: c.quantity + 1 } : c);
+      const key = itemKey(item);
+      const existing = prev.find(c => itemKey(c.item) === key);
+      if (existing) return prev.map(c => itemKey(c.item) === key ? { ...c, quantity: c.quantity + 1 } : c);
       return [...prev, { item, quantity: 1 }];
     });
     setSelectedItem(null);
@@ -93,9 +98,9 @@ export default function KioskPage() {
   const removeFromCart = (id: string) => {
     resetIdle();
     setCart(prev => {
-      const existing = prev.find(c => c.item._id === id);
-      if (!existing || existing.quantity <= 1) return prev.filter(c => c.item._id !== id);
-      return prev.map(c => c.item._id === id ? { ...c, quantity: c.quantity - 1 } : c);
+      const existing = prev.find(c => itemKey(c.item) === id);
+      if (!existing || existing.quantity <= 1) return prev.filter(c => itemKey(c.item) !== id);
+      return prev.map(c => itemKey(c.item) === id ? { ...c, quantity: c.quantity - 1 } : c);
     });
   };
 
@@ -207,17 +212,23 @@ export default function KioskPage() {
         )}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
           {filteredItems.map(item => {
-            const cartItem = cart.find(c => c.item._id === item._id);
+            const key = itemKey(item);
+            const cartItem = cart.find(c => itemKey(c.item) === key);
             return (
               <Card
-                key={item._id}
+                key={key}
                 className="overflow-hidden cursor-pointer hover:shadow-xl transition-all active:scale-95 select-none"
                 onClick={() => setSelectedItem(item)}
-                data-testid={`card-kiosk-item-${item._id}`}
+                data-testid={`card-kiosk-item-${key}`}
               >
                 <div className="aspect-square bg-muted relative overflow-hidden">
                   {item.imageUrl ? (
-                    <img src={item.imageUrl} alt={item.nameAr} className="w-full h-full object-cover" />
+                    <img
+                      src={item.imageUrl}
+                      alt={item.nameAr}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-primary/10">
                       <Coffee className="w-16 h-16 text-primary/40" />
@@ -252,10 +263,18 @@ export default function KioskPage() {
             <div className="text-center space-y-4">
               <div className="aspect-video rounded-xl overflow-hidden bg-muted flex items-center justify-center">
                 {selectedItem.imageUrl ? (
-                  <img src={selectedItem.imageUrl} alt={selectedItem.nameAr} className="w-full h-full object-cover" />
-                ) : (
-                  <Coffee className="w-20 h-20 text-primary/30" />
-                )}
+                  <img
+                    src={selectedItem.imageUrl}
+                    alt={selectedItem.nameAr}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const t = e.target as HTMLImageElement;
+                      t.style.display = 'none';
+                      t.parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <Coffee className={`w-20 h-20 text-primary/30 fallback-icon ${selectedItem.imageUrl ? 'hidden' : ''}`} />
               </div>
               <p className="text-muted-foreground">{selectedItem.nameEn}</p>
               <p className="text-3xl font-black text-primary">{selectedItem.price.toFixed(2)} <SarIcon /></p>
@@ -289,13 +308,13 @@ export default function KioskPage() {
             ) : (
               <div className="space-y-3 p-1">
                 {cart.map(c => (
-                  <div key={c.item._id} className="flex items-center gap-3 bg-muted/40 rounded-xl p-3" data-testid={`kiosk-cart-item-${c.item._id}`}>
+                  <div key={itemKey(c.item)} className="flex items-center gap-3 bg-muted/40 rounded-xl p-3" data-testid={`kiosk-cart-item-${itemKey(c.item)}`}>
                     <div className="flex-1">
                       <p className="font-bold">{c.item.nameAr}</p>
                       <p className="text-sm text-muted-foreground">{(c.item.price * c.quantity).toFixed(2)} <SarIcon /></p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => removeFromCart(c.item._id)} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-red-100">
+                      <button onClick={() => removeFromCart(itemKey(c.item))} className="w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-red-100">
                         {c.quantity === 1 ? <Trash2 className="w-4 h-4 text-red-500" /> : <Minus className="w-4 h-4" />}
                       </button>
                       <span className="w-6 text-center font-bold">{c.quantity}</span>
@@ -341,7 +360,7 @@ export default function KioskPage() {
             </div>
             <div className="bg-muted/50 rounded-xl p-4 space-y-2">
               {cart.map(c => (
-                <div key={c.item._id} className="flex justify-between text-sm">
+                <div key={itemKey(c.item)} className="flex justify-between text-sm">
                   <span>{c.item.nameAr} × {c.quantity}</span>
                   <span className="font-bold">{(c.item.price * c.quantity).toFixed(2)}</span>
                 </div>

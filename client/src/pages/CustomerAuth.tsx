@@ -246,6 +246,7 @@ export default function CustomerAuth() {
                     <Input
                       id="login-password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
                       placeholder={i18n.language === 'ar' ? "أدخل كلمة المرور" : "Enter password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}

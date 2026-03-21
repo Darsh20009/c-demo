@@ -697,7 +697,8 @@ export default function MenuPage() {
                         <img 
                           src={offer.imageUrl} 
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                          alt={i18n.language === 'ar' ? offer.nameAr : offer.nameEn || offer.nameAr} 
+                          alt={i18n.language === 'ar' ? offer.nameAr : offer.nameEn || offer.nameAr}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                       </div>
                     )}
@@ -772,9 +773,7 @@ export default function MenuPage() {
                       src={item.imageUrl} 
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                       alt={i18n.language === 'ar' ? item.nameAr : item.nameEn || item.nameAr} 
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/default-coffee.png";
-                      }}
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   </div>
                   <div className="space-y-1.5">
