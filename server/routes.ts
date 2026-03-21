@@ -12815,6 +12815,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save ZATCA settings (vatNumber, crNumber, etc.)
+  app.patch("/api/zatca/settings", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
+      const { vatNumber, crNumber, tradeNameAr, tradeNameEn, address, city, postalCode, buildingNumber } = req.body;
+      const updateFields: any = {};
+      if (vatNumber !== undefined) updateFields.vatNumber = vatNumber;
+      if (crNumber !== undefined) updateFields.crNumber = crNumber;
+      if (tradeNameAr !== undefined) updateFields.tradeNameAr = tradeNameAr;
+      if (tradeNameEn !== undefined) updateFields.tradeNameEn = tradeNameEn;
+      if (address !== undefined) updateFields.address = address;
+      if (city !== undefined) updateFields.city = city;
+      if (postalCode !== undefined) updateFields.postalCode = postalCode;
+      if (buildingNumber !== undefined) updateFields.buildingNumber = buildingNumber;
+      await BusinessConfigModel.findOneAndUpdate(
+        { tenantId },
+        { $set: updateFields },
+        { upsert: true }
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error saving ZATCA settings:", error);
+      res.status(500).json({ error: "فشل في حفظ الإعدادات" });
+    }
+  });
+
+  // Manager point adjustment for loyalty cards
+  app.patch("/api/loyalty/cards/:cardId/adjust", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { cardId } = req.params;
+      const { adjustment, reason } = req.body;
+      if (typeof adjustment !== 'number') return res.status(400).json({ error: "يجب تحديد قيمة التعديل" });
+      const card = await storage.getLoyaltyCard(cardId);
+      if (!card) return res.status(404).json({ error: "البطاقة غير موجودة" });
+      const newPoints = Math.max(0, (card.points || 0) + adjustment);
+      const updated = await storage.updateLoyaltyCard(cardId, { points: newPoints });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ error: "فشل في تعديل النقاط" });
+    }
+  });
+
+  // Create loyalty card from manager panel
+  app.post("/api/loyalty/manager/create-card", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { customerName, phoneNumber } = req.body;
+      if (!phoneNumber) return res.status(400).json({ error: "رقم الهاتف مطلوب" });
+      const cleanPhone = phoneNumber.replace(/\D/g, '').slice(-9);
+      if (cleanPhone.length < 9) return res.status(400).json({ error: "رقم الهاتف يجب أن يكون 9 أرقام" });
+      const existing = await storage.getLoyaltyCardByPhone(cleanPhone);
+      if (existing) return res.status(409).json({ error: "يوجد بطاقة بهذا الرقم مسبقاً" });
+      const card = await storage.createLoyaltyCard({
+        phoneNumber: cleanPhone,
+        customerName: customerName || "عميل",
+        points: 0,
+        stamps: 0,
+        tier: 'bronze',
+        isActive: true,
+      } as any);
+      res.json(card);
+    } catch (error) {
+      res.status(500).json({ error: "فشل في إنشاء البطاقة" });
+    }
+  });
+
   // Create ZATCA-compliant invoice for an order
   app.post("/api/zatca/invoices", requireAuth, async (req: AuthRequest, res) => {
     try {

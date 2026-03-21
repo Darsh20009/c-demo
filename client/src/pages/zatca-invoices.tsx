@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -147,6 +147,12 @@ export default function ZATCAInvoicesPage() {
   const [qrCodeImage, setQrCodeImage] = useState<string>("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Controlled settings form state
+  const [settingsForm, setSettingsForm] = useState({
+    tradeNameAr: "", tradeNameEn: "", vatNumber: "",
+    crNumber: "", address: "", city: "", postalCode: "", buildingNumber: "",
+  });
+
   const { data: invoices = [], isLoading: isInvoicesLoading, refetch } = useQuery<TaxInvoice[]>({
     queryKey: ["/api/zatca/invoices"],
   });
@@ -154,6 +160,21 @@ export default function ZATCAInvoicesPage() {
   const { data: settings } = useQuery<ZATCASettings>({
     queryKey: ["/api/zatca/settings"],
   });
+
+  useEffect(() => {
+    if (settings) {
+      setSettingsForm({
+        tradeNameAr: (settings as any).tradeNameAr || "",
+        tradeNameEn: (settings as any).tradeNameEn || "",
+        vatNumber: settings.vatNumber || "",
+        crNumber: settings.crNumber || "",
+        address: (settings as any).address || "",
+        city: (settings as any).city || "",
+        postalCode: (settings as any).postalCode || "",
+        buildingNumber: (settings as any).buildingNumber || "",
+      });
+    }
+  }, [settings]);
 
   const submitInvoiceMutation = useMutation({
     mutationFn: async (invoiceId: string) => {
@@ -165,6 +186,20 @@ export default function ZATCAInvoicesPage() {
     },
     onError: () => {
       toast({ title: "فشل إرسال الفاتورة", variant: "destructive" });
+    },
+  });
+
+  const saveSettingsMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("PATCH", "/api/zatca/settings", settingsForm);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/zatca/settings"] });
+      setIsSettingsOpen(false);
+      toast({ title: "✓ تم حفظ إعدادات ZATCA" });
+    },
+    onError: (e: any) => {
+      toast({ title: "فشل في حفظ الإعدادات", description: e.message, variant: "destructive" });
     },
   });
 
@@ -771,39 +806,79 @@ export default function ZATCAInvoicesPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>اسم المنشأة (عربي)</Label>
-                  <Input defaultValue={settings?.sellerName} />
+                  <Input
+                    value={settingsForm.tradeNameAr}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, tradeNameAr: e.target.value }))}
+                    placeholder="QIROX Cafe"
+                    data-testid="input-trade-name-ar"
+                  />
                 </div>
                 <div>
                   <Label>اسم المنشأة (إنجليزي)</Label>
-                  <Input defaultValue={settings?.sellerNameEn} />
+                  <Input
+                    value={settingsForm.tradeNameEn}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, tradeNameEn: e.target.value }))}
+                    placeholder="QIROX Cafe"
+                    data-testid="input-trade-name-en"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>الرقم الضريبي (VAT)</Label>
-                  <Input defaultValue={settings?.vatNumber} placeholder="3XXXXXXXXXX0003" />
+                  <Input
+                    value={settingsForm.vatNumber}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, vatNumber: e.target.value }))}
+                    placeholder="3XXXXXXXXXX0003"
+                    data-testid="input-vat-number"
+                  />
                 </div>
                 <div>
                   <Label>رقم السجل التجاري</Label>
-                  <Input defaultValue={settings?.crNumber} />
+                  <Input
+                    value={settingsForm.crNumber}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, crNumber: e.target.value }))}
+                    placeholder="1234567890"
+                    data-testid="input-cr-number"
+                  />
                 </div>
               </div>
               <div>
                 <Label>العنوان</Label>
-                <Input defaultValue={settings?.address} />
+                <Input
+                  value={settingsForm.address}
+                  onChange={(e) => setSettingsForm(f => ({ ...f, address: e.target.value }))}
+                  placeholder="شارع الملك فهد"
+                  data-testid="input-address"
+                />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label>المدينة</Label>
-                  <Input defaultValue={settings?.city} />
+                  <Input
+                    value={settingsForm.city}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, city: e.target.value }))}
+                    placeholder="الرياض"
+                    data-testid="input-city"
+                  />
                 </div>
                 <div>
                   <Label>الرمز البريدي</Label>
-                  <Input defaultValue={settings?.postalCode} />
+                  <Input
+                    value={settingsForm.postalCode}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, postalCode: e.target.value }))}
+                    placeholder="12345"
+                    data-testid="input-postal-code"
+                  />
                 </div>
                 <div>
                   <Label>رقم المبنى</Label>
-                  <Input defaultValue={settings?.buildingNumber} />
+                  <Input
+                    value={settingsForm.buildingNumber}
+                    onChange={(e) => setSettingsForm(f => ({ ...f, buildingNumber: e.target.value }))}
+                    placeholder="1234"
+                    data-testid="input-building-number"
+                  />
                 </div>
               </div>
             </div>
@@ -811,7 +886,13 @@ export default function ZATCAInvoicesPage() {
               <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
                 إلغاء
               </Button>
-              <Button className="bg-primary hover:bg-primary">
+              <Button
+                className="bg-primary hover:bg-primary gap-2"
+                onClick={() => saveSettingsMutation.mutate()}
+                disabled={saveSettingsMutation.isPending}
+                data-testid="button-save-zatca-settings"
+              >
+                {saveSettingsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                 حفظ الإعدادات
               </Button>
             </DialogFooter>
