@@ -203,6 +203,7 @@ export default function EmployeeLogin() {
                       className="pr-10 bg-background border-border"
                       data-testid="input-username"
                       autoFocus
+                      autoComplete="username"
                       disabled={loginMutation.isPending}
                     />
                   </div>
@@ -218,6 +219,7 @@ export default function EmployeeLogin() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="pr-10 pl-10 bg-background border-border"
                       data-testid="input-password"
+                      autoComplete="current-password"
                       disabled={loginMutation.isPending}
                     />
                     <button

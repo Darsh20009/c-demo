@@ -43,13 +43,15 @@ export default function KioskPage() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [idleTimer, setIdleTimer] = useState<NodeJS.Timeout | null>(null);
 
-  const { data: menuItems = [] } = useQuery<MenuItem[]>({
-    queryKey: ["/api/menu"],
+  const { data: menuItems = [], isLoading: menuLoading } = useQuery<MenuItem[]>({
+    queryKey: ["/api/coffee-items"],
   });
 
-  const availableItems = (menuItems as MenuItem[]).filter(i => i.isAvailable !== false);
+  const availableItems = (menuItems as MenuItem[]).filter(i =>
+    i.isAvailable !== false && (i as any).availabilityStatus !== 'out_of_stock'
+  );
 
-  const categories = ["الكل", ...Array.from(new Set(availableItems.map(i => i.category).filter(Boolean)))];
+  const categories = ["الكل", ...Array.from(new Set(availableItems.map(i => i.category).filter((c): c is string => !!c)))];
 
   const filteredItems = selectedCategory === "الكل"
     ? availableItems
@@ -190,6 +192,19 @@ export default function KioskPage() {
 
       {/* Menu Grid */}
       <ScrollArea className="flex-1 p-4">
+        {menuLoading && (
+          <div className="flex flex-col items-center justify-center h-64 gap-4">
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <p className="text-muted-foreground font-medium">جاري تحميل القائمة...</p>
+          </div>
+        )}
+        {!menuLoading && filteredItems.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-64 gap-3">
+            <Coffee className="w-16 h-16 text-primary/30" />
+            <p className="text-muted-foreground font-medium text-lg">لا توجد منتجات متاحة</p>
+            <p className="text-muted-foreground/60 text-sm">يرجى التواصل مع الموظف</p>
+          </div>
+        )}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
           {filteredItems.map(item => {
             const cartItem = cart.find(c => c.item._id === item._id);

@@ -281,7 +281,7 @@ export default function InventoryRecipesPage() {
   });
 
   const { data: coffeeItems = [], isLoading: loadingCoffee } = useQuery<CoffeeItem[]>({
-    queryKey: ["/api/menu"],
+    queryKey: ["/api/coffee-items"],
   });
 
   const { data: rawItems = [] } = useQuery<RawItem[]>({

@@ -41,7 +41,7 @@ const defaultForm = {
   nameAr: "",
   nameEn: "",
   description: "",
-  offerType: "bundle" as const,
+  offerType: "bundle" as "bundle" | "discount" | "bogo",
   originalPrice: "",
   offerPrice: "",
   startDate: "",

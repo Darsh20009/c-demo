@@ -632,6 +632,13 @@ export default function PosSystem() {
         subtotal, tax, total,
       });
 
+      // Play confirmation sound for the cashier who placed the order
+      if (soundEnabled) {
+        import("@/lib/notification-sounds").then(({ testSound }) => {
+          testSound('success', 0.85);
+        });
+      }
+
       setShowReceiptDialog(true);
 
       setOrderItems([]);
