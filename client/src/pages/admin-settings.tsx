@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Shield, Bell, Palette, Database, Plus, Store, Utensils, Coffee, AlertTriangle, Layout, ShieldAlert, Users, Loader2, Trash2, FolderTree, Flame, Snowflake, Star, Cake, Sparkles, GripVertical, Pencil, CreditCard, Wifi, WifiOff, Eye, EyeOff, ExternalLink, CheckCircle, XCircle, Banknote, Smartphone, Gift, Percent, Tag, Ticket, Download, Globe, Package, ChevronDown, ChevronUp, MonitorSmartphone, MapPin, Navigation, FlaskConical } from 'lucide-react';
+import { Save, Shield, Bell, Palette, Database, Plus, Store, Utensils, Coffee, AlertTriangle, Layout, ShieldAlert, Users, Loader2, Trash2, FolderTree, Flame, Snowflake, Star, Cake, Sparkles, GripVertical, Pencil, CreditCard, Wifi, WifiOff, Eye, EyeOff, ExternalLink, CheckCircle, XCircle, Banknote, Smartphone, Gift, Percent, Tag, Ticket, Download, Globe, Package, ChevronDown, ChevronUp, MonitorSmartphone, MapPin, Navigation, FlaskConical, ShoppingBag, Truck, Timer, Car } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -926,6 +926,53 @@ export default function AdminSettings() {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Order Methods Config */}
+        <Card className="hover-elevate border-green-100 dark:border-green-900/30">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                <ShoppingBag className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <CardTitle className="text-lg font-bold">طرق الاستلام</CardTitle>
+                <CardDescription>تحكم في أنواع الطلبات المتاحة للعملاء</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {[
+              { key: 'enableTakeaway', icon: Store, label: 'استلام من الفرع', desc: 'الاستلام المباشر من الفرع', color: 'text-blue-600' },
+              { key: 'enableDineIn', icon: Utensils, label: 'داخل المطعم (طاولة)', desc: 'الجلوس والطلب من الطاولة', color: 'text-orange-600' },
+              { key: 'enableCarPickup', icon: Car, label: 'استلام من السيارة', desc: 'توصيل الطلب للسيارة أمام الفرع', color: 'text-purple-600' },
+              { key: 'enableScheduledPickup', icon: Timer, label: 'طلب مجدول', desc: 'تحديد وقت استلام مسبق', color: 'text-teal-600' },
+              { key: 'enableDelivery', icon: Truck, label: 'توصيل للمنزل', desc: 'توصيل الطلب لعنوان العميل', color: 'text-red-600' },
+            ].map(({ key, icon: Icon, label, desc, color }) => (
+              <div key={key} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
+                <div className="flex items-center gap-3">
+                  <div className={`p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700`}>
+                    <Icon className={`w-4 h-4 ${color}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{label}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
+                  </div>
+                </div>
+                <Switch
+                  checked={config?.orderMethodsConfig?.[key as keyof typeof config.orderMethodsConfig] ?? true}
+                  onCheckedChange={(checked) => mutation.mutate({
+                    orderMethodsConfig: {
+                      ...(config?.orderMethodsConfig || {}),
+                      [key]: checked,
+                    }
+                  })}
+                  disabled={mutation.isPending}
+                  data-testid={`switch-${key}`}
+                />
+              </div>
+            ))}
           </CardContent>
         </Card>
 

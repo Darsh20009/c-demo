@@ -693,6 +693,13 @@ export interface IBusinessConfig extends Document {
   offersConfig?: Record<string, any>;
   menuLayout?: 'classic' | 'cards' | 'list';
   cashierLayout?: 'classic' | 'pos' | 'split';
+  orderMethodsConfig?: {
+    enableDineIn?: boolean;
+    enableCarPickup?: boolean;
+    enableDelivery?: boolean;
+    enableScheduledPickup?: boolean;
+    enableTakeaway?: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -787,6 +794,16 @@ const BusinessConfigSchema = new Schema<IBusinessConfig>({
   offersConfig: { type: Schema.Types.Mixed, default: () => ({}) },
   menuLayout: { type: String, enum: ['classic', 'cards', 'list'], default: 'classic' },
   cashierLayout: { type: String, enum: ['classic', 'pos', 'split'], default: 'classic' },
+  orderMethodsConfig: {
+    type: Schema.Types.Mixed,
+    default: () => ({
+      enableDineIn: true,
+      enableCarPickup: true,
+      enableDelivery: false,
+      enableScheduledPickup: true,
+      enableTakeaway: true,
+    })
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

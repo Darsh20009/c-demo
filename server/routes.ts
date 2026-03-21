@@ -1020,6 +1020,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (updates.offersConfig) {
         config.markModified('offersConfig');
       }
+      if (updates.orderMethodsConfig) {
+        config.markModified('orderMethodsConfig');
+      }
       
       config.updatedAt = new Date();
       await config.save();

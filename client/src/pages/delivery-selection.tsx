@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useCartStore } from '@/lib/cart-store';
 import { useToast } from '@/hooks/use-toast';
-import { Store, MapPin, ArrowRight, Phone, Map, Coffee, AlertCircle, Loader2, Navigation, Clock, Check, Car, Bookmark, Palette, ShoppingBag, Timer } from 'lucide-react';
+import { Store, MapPin, ArrowRight, Phone, Map, Coffee, AlertCircle, Loader2, Navigation, Clock, Check, Car, Bookmark, ShoppingBag, Timer, ChevronLeft, Utensils, Truck, Zap, Star } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useTranslation } from 'react-i18next';
 
@@ -23,7 +23,6 @@ interface Branch {
   location?: {
     lat: number;
     lng: number;
-    // legacy field names — handled via helper
     latitude?: number;
     longitude?: number;
   };
@@ -31,7 +30,6 @@ interface Branch {
   mapsUrl?: string;
 }
 
-// Normalize location coords regardless of field naming (lat/lng vs latitude/longitude)
 function getBranchCoords(branch: Branch): { lat: number; lng: number } | null {
   const loc = branch.location;
   if (!loc) return null;
@@ -41,7 +39,6 @@ function getBranchCoords(branch: Branch): { lat: number; lng: number } | null {
   return { lat, lng };
 }
 
-// Normalize phone number to Saudi format for tel: links
 function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, '');
   if (digits.startsWith('966')) return `+${digits}`;
@@ -49,7 +46,6 @@ function normalizePhone(phone: string): string {
   return `+966${digits}`;
 }
 
-// Open Google Maps directions in the best available app
 function openDirections(lat: number, lng: number) {
   const ua = navigator.userAgent.toLowerCase();
   const isIOS = /iphone|ipad|ipod/.test(ua);
@@ -69,36 +65,138 @@ interface Table {
   isOccupied?: boolean | number;
 }
 
+const CAR_COLORS = [
+  { name: 'أبيض', hex: '#F8F8F8', border: true },
+  { name: 'أسود', hex: '#1a1a1a', border: false },
+  { name: 'فضي', hex: '#C0C0C0', border: true },
+  { name: 'رمادي', hex: '#6B7280', border: false },
+  { name: 'أحمر', hex: '#DC2626', border: false },
+  { name: 'أزرق', hex: '#2563EB', border: false },
+  { name: 'بني', hex: '#92400E', border: false },
+  { name: 'ذهبي', hex: '#D4A017', border: false },
+  { name: 'أخضر', hex: '#16A34A', border: false },
+  { name: 'بيج', hex: '#D2B48C', border: true },
+];
+
+const CAR_BRANDS = ['تويوتا', 'هيونداي', 'نيسان', 'كيا', 'شيفروليه', 'فورد', 'هوندا', 'مرسيدس', 'لكزس', 'BMW'];
+
+function CarSVG({ color, className = '' }: { color: string; className?: string }) {
+  const bodyColor = color || '#6B7280';
+  const darkWindow = '#1a2a3a';
+  const lightWindow = '#b8d4e8';
+
+  return (
+    <svg viewBox="0 0 240 120" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <defs>
+        <filter id="carShadow" x="-10%" y="-10%" width="120%" height="130%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="rgba(0,0,0,0.25)" />
+        </filter>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={bodyColor} stopOpacity="1" />
+          <stop offset="100%" stopColor={bodyColor} stopOpacity="0.7" />
+        </linearGradient>
+        <linearGradient id="roofGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={bodyColor} stopOpacity="0.9" />
+          <stop offset="100%" stopColor={bodyColor} stopOpacity="0.7" />
+        </linearGradient>
+        <linearGradient id="groundGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="transparent" />
+          <stop offset="30%" stopColor="rgba(0,0,0,0.1)" />
+          <stop offset="70%" stopColor="rgba(0,0,0,0.1)" />
+          <stop offset="100%" stopColor="transparent" />
+        </linearGradient>
+      </defs>
+
+      {/* Ground shadow */}
+      <ellipse cx="120" cy="108" rx="90" ry="6" fill="url(#groundGrad)" />
+
+      {/* Body */}
+      <rect x="20" y="55" width="200" height="40" rx="8" fill="url(#bodyGrad)" filter="url(#carShadow)" />
+
+      {/* Roof cabin */}
+      <path d="M65 55 Q72 30 100 28 L148 28 Q168 28 178 55 Z" fill="url(#roofGrad)" />
+
+      {/* Windshield */}
+      <path d="M72 53 Q78 34 100 32 L148 32 Q162 33 168 53 Z" fill={lightWindow} fillOpacity="0.85" />
+
+      {/* Rear window */}
+      <path d="M72 53 Q74 38 82 34 L95 32 Q80 32 77 53 Z" fill={darkWindow} fillOpacity="0.4" />
+
+      {/* Front window */}
+      <path d="M158 53 Q161 38 155 34 L148 32 Q162 32 164 53 Z" fill={darkWindow} fillOpacity="0.4" />
+
+      {/* Side window left */}
+      <rect x="72" y="38" width="32" height="17" rx="3" fill={lightWindow} fillOpacity="0.7" />
+
+      {/* Side window right */}
+      <rect x="138" y="38" width="32" height="17" rx="3" fill={lightWindow} fillOpacity="0.7" />
+
+      {/* Door line */}
+      <line x1="120" y1="55" x2="120" y2="95" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
+
+      {/* Front bumper */}
+      <rect x="210" y="72" width="10" height="14" rx="3" fill={bodyColor} />
+
+      {/* Rear bumper */}
+      <rect x="20" y="72" width="10" height="14" rx="3" fill={bodyColor} />
+
+      {/* Front headlight */}
+      <ellipse cx="217" cy="70" rx="6" ry="4" fill="#FEF3C7" stroke="#F59E0B" strokeWidth="1" />
+      <ellipse cx="217" cy="70" rx="4" ry="2.5" fill="#FBBF24" />
+
+      {/* Rear light */}
+      <ellipse cx="23" cy="70" rx="6" ry="4" fill="#FEE2E2" stroke="#DC2626" strokeWidth="1" />
+      <ellipse cx="23" cy="70" rx="4" ry="2.5" fill="#EF4444" />
+
+      {/* Wheels */}
+      <circle cx="65" cy="96" r="14" fill="#1f2937" />
+      <circle cx="65" cy="96" r="9" fill="#374151" />
+      <circle cx="65" cy="96" r="4" fill="#9CA3AF" />
+      <circle cx="175" cy="96" r="14" fill="#1f2937" />
+      <circle cx="175" cy="96" r="9" fill="#374151" />
+      <circle cx="175" cy="96" r="4" fill="#9CA3AF" />
+
+      {/* Wheel arches */}
+      <path d="M47 88 Q65 80 83 88" stroke={bodyColor} strokeWidth="6" fill="none" strokeLinecap="round" />
+      <path d="M157 88 Q175 80 193 88" stroke={bodyColor} strokeWidth="6" fill="none" strokeLinecap="round" />
+
+      {/* Door handle */}
+      <rect x="90" y="68" width="12" height="4" rx="2" fill="rgba(0,0,0,0.2)" />
+      <rect x="140" y="68" width="12" height="4" rx="2" fill="rgba(0,0,0,0.2)" />
+    </svg>
+  );
+}
+
+type OrderMethod = 'takeaway' | 'car-pickup' | 'dine-in' | 'scheduled';
+
 export default function DeliverySelectionPage() {
   const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const { setDeliveryInfo, cartItems } = useCartStore();
   const { toast } = useToast();
   const [selectedBranchId, setSelectedBranchId] = useState<string>('');
+  const [selectedMethod, setSelectedMethod] = useState<OrderMethod>('takeaway');
 
-  // Set SEO metadata
   useEffect(() => {
     document.title = `${t("nav.branch_selection")} - QIROX Cafe`;
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', t("delivery.subtitle"));
   }, [t]);
-  const [dineIn, setDineIn] = useState<boolean>(false);
-  const [carPickup, setCarPickup] = useState<boolean>(false);
+
   const [saveCarInfo, setSaveCarInfo] = useState<boolean>(false);
   const [carInfo, setCarInfo] = useState(() => {
     try {
       const saved = localStorage.getItem('qirox_saved_car');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { model: parsed.model || '', color: parsed.color || '', plateNumber: parsed.plateNumber || '' };
+        return { model: parsed.model || '', color: parsed.color || '', colorHex: parsed.colorHex || '#6B7280', plateNumber: parsed.plateNumber || '' };
       }
     } catch {}
-    return { model: '', color: '', plateNumber: '' };
+    return { model: '', color: '', colorHex: '#6B7280', plateNumber: '' };
   });
   const [hasSavedCar] = useState(() => {
     try { return !!localStorage.getItem('qirox_saved_car'); } catch { return false; }
   });
-  const [scheduledPickup, setScheduledPickup] = useState<boolean>(false);
   const [scheduledPickupTime, setScheduledPickupTime] = useState<string>('');
   const [userLocation, setUserLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [locationError, setLocationError] = useState<string>('');
@@ -111,16 +209,12 @@ export default function DeliverySelectionPage() {
   const [loadingTables, setLoadingTables] = useState(false);
   const [bookedTable, setBookedTable] = useState<{ tableNumber: string; bookingId: string } | null>(null);
 
-  // Get user location on mount
   useEffect(() => {
     if (navigator.geolocation) {
       setIsGettingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
+          setUserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
           setLocationError('');
           setIsGettingLocation(false);
         },
@@ -136,7 +230,6 @@ export default function DeliverySelectionPage() {
     }
   }, []);
 
-  // Check distance when branch is selected and we have user location
   useEffect(() => {
     if (selectedBranchId && userLocation) {
       checkLocationProximity();
@@ -145,62 +238,44 @@ export default function DeliverySelectionPage() {
     }
   }, [selectedBranchId, userLocation]);
 
-  // Fetch all tables when dine-in is selected
   useEffect(() => {
-    if (dineIn && selectedBranchId) {
+    if (selectedMethod === 'dine-in' && selectedBranchId) {
       fetchAvailableTables();
     } else {
       setAvailableTables([]);
       setSelectedTableId('');
       setBookedTable(null);
     }
-  }, [dineIn, selectedBranchId]);
+  }, [selectedMethod, selectedBranchId]);
 
-  // Book table when both table and arrival time are selected (only if not already booked)
   useEffect(() => {
-    if (selectedTableId && arrivalTime && dineIn && !bookedTable) {
+    if (selectedTableId && arrivalTime && selectedMethod === 'dine-in' && !bookedTable) {
       bookTable();
     }
-  }, [selectedTableId, arrivalTime, dineIn, bookedTable]);
+  }, [selectedTableId, arrivalTime, selectedMethod, bookedTable]);
 
   const fetchAvailableTables = async () => {
     setLoadingTables(true);
     try {
       const response = await fetch(`/api/tables/status?branchId=${selectedBranchId}`);
       const data = await response.json();
-      
-    const tables = Array.isArray(data) ? data : [];
-    
-    // Process tables to ensure they have the expected structure and filter active ones
-    const processedTables = tables
-      .filter((t: any) => t && (t.isActive === 1 || t.isActive === true || t.isActive === undefined))
-      .map((t: any) => {
-        // Handle MongoDB document structure (sometimes data is nested in $__)
-        // We look for _doc or use the object itself
-        const actualData = t._doc || t;
-        
-        // Ensure id is present
-        const id = actualData.id;
-        
-        return {
-          ...actualData,
-          id: id,
-          // Use isAvailable from server (computed correctly from isOccupied)
-          // Server returns isAvailable=true if table is not occupied
-          isAvailable: actualData.isAvailable !== undefined ? actualData.isAvailable : (actualData.isOccupied === 0),
-          isOccupied: actualData.isOccupied !== undefined ? actualData.isOccupied : 0
-        };
-      })
-      .filter((t: any) => t.id); // Ensure only tables with valid IDs are shown
-    
-    setAvailableTables(processedTables);
+      const tables = Array.isArray(data) ? data : [];
+      const processedTables = tables
+        .filter((t: any) => t && (t.isActive === 1 || t.isActive === true || t.isActive === undefined))
+        .map((t: any) => {
+          const actualData = t._doc || t;
+          const id = actualData.id;
+          return {
+            ...actualData,
+            id,
+            isAvailable: actualData.isAvailable !== undefined ? actualData.isAvailable : (actualData.isOccupied === 0),
+            isOccupied: actualData.isOccupied !== undefined ? actualData.isOccupied : 0
+          };
+        })
+        .filter((t: any) => t.id);
+      setAvailableTables(processedTables);
     } catch (error) {
-      console.error('Error fetching tables:', error);
-      toast({
-        title: t("product.error"),
-        description: t("delivery.loading_tables_error") || "Failed to load tables",
-        variant: 'destructive',
-      });
+      toast({ title: t("product.error"), description: "خطأ في تحميل الطاولات", variant: 'destructive' });
     } finally {
       setLoadingTables(false);
     }
@@ -211,58 +286,32 @@ export default function DeliverySelectionPage() {
       const response = await fetch('/api/tables/book', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tableId: selectedTableId,
-          arrivalTime: arrivalTime,
-          branchId: selectedBranchId
-        })
+        body: JSON.stringify({ tableId: selectedTableId, arrivalTime, branchId: selectedBranchId })
       });
-
       const data = await response.json();
-
       if (!response.ok) {
-        toast({
-          title: t("product.error"),
-          description: data.error || t("delivery.booking_error") || 'Failed to book table',
-          variant: 'destructive',
-        });
-        // Don't clear selections on error - user can try again or adjust arrival time
+        toast({ title: t("product.error"), description: data.error || 'فشل في حجز الطاولة', variant: 'destructive' });
         return;
       }
-
-      // Update booked table state with the response
-      setBookedTable({
-        tableNumber: data.tableNumber,
-        bookingId: data.bookingId
-      });
-
-      toast({
-        title: t("product.saved"),
-        description: data.message || t("delivery.booking_success") || 'Table booked successfully',
-      });
+      setBookedTable({ tableNumber: data.tableNumber, bookingId: data.bookingId });
+      toast({ title: t("product.saved"), description: data.message || 'تم حجز الطاولة بنجاح' });
     } catch (error) {
-      // Keep selections - allow retry with same selections
+      console.error('Table booking error:', error);
     }
   };
 
   const checkLocationProximity = async () => {
     if (!selectedBranchId || !userLocation) return;
-
     setIsCheckingLocation(true);
     try {
       const response = await fetch(`/api/branches/${selectedBranchId}/check-location`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude
-        })
+        body: JSON.stringify({ latitude: userLocation.latitude, longitude: userLocation.longitude })
       });
-      
       const data = await response.json();
       setLocationStatus(data);
     } catch (error) {
-      console.error('Error checking location:', error);
       setLocationStatus(null);
     } finally {
       setIsCheckingLocation(false);
@@ -275,15 +324,11 @@ export default function DeliverySelectionPage() {
       setLocationError('');
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
+          setUserLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
           setLocationError('');
           setIsGettingLocation(false);
         },
         (error) => {
-          console.error('Geolocation error:', error);
           setLocationError(t("delivery.location_error"));
           setIsGettingLocation(false);
         },
@@ -291,11 +336,6 @@ export default function DeliverySelectionPage() {
       );
     }
   };
-
-  // Fetch branches (already filtered by backend to only active branches)
-  const { data: branches = [], isLoading } = useQuery<Branch[]>({
-    queryKey: ["/api/branches"],
-  });
 
   const calculateScheduledPrepTime = (pickupTime: string): { prepStartTime: string; holdMinutes: number } | null => {
     if (!pickupTime) return null;
@@ -306,55 +346,43 @@ export default function DeliverySelectionPage() {
       const arrivalDate = new Date();
       arrivalDate.setHours(hours, minutes, 0, 0);
       const prepDate = new Date(arrivalDate.getTime() - holdMinutes * 60 * 1000);
-      const prepHours = prepDate.getHours().toString().padStart(2, '0');
-      const prepMins = prepDate.getMinutes().toString().padStart(2, '0');
-      return { prepStartTime: `${prepHours}:${prepMins}`, holdMinutes };
+      return {
+        prepStartTime: `${prepDate.getHours().toString().padStart(2, '0')}:${prepDate.getMinutes().toString().padStart(2, '0')}`,
+        holdMinutes
+      };
     } catch { return null; }
   };
 
+  const { data: branches = [], isLoading } = useQuery<Branch[]>({
+    queryKey: ["/api/branches"],
+  });
+
+  const { data: businessConfig } = useQuery<any>({
+    queryKey: ["/api/business-config"],
+  });
+
+  const orderMethods = businessConfig?.orderMethodsConfig || {};
+  const enableDineIn = orderMethods.enableDineIn !== false;
+  const enableCarPickup = orderMethods.enableCarPickup !== false;
+  const enableScheduledPickup = orderMethods.enableScheduledPickup !== false;
+  const enableTakeaway = orderMethods.enableTakeaway !== false;
+
   const handleContinue = () => {
-    // Validate cart is not empty
     if (!cartItems || cartItems.length === 0) {
-      toast({
-        title: t("cart.empty_title"),
-        description: t("cart.empty_desc"),
-        variant: 'destructive',
-      });
+      toast({ title: t("cart.empty_title"), description: t("cart.empty_desc"), variant: 'destructive' });
       setLocation('/menu');
       return;
     }
-
     if (!selectedBranchId) {
-      toast({
-        title: t("product.error"),
-        description: t("delivery.select_branch_error") || 'Please select a branch',
-        variant: 'destructive',
-      });
+      toast({ title: t("product.error"), description: 'يرجى اختيار الفرع', variant: 'destructive' });
       return;
     }
-
-    // Distance check removed per user request to allow all orders
-    console.log("Allowing order regardless of distance");
-
-    // If location couldn't be checked (no GPS or error), show warning but allow proceed
-    if (!userLocation && locationError) {
-      toast({
-        title: t("product.error"),
-        description: t("delivery.location_warning") || 'Could not verify location. Please ensure you are near the branch.',
-        variant: 'default',
-      });
-    }
-    
     const branch = branches.find(b => b.id === selectedBranchId);
     if (!branch) return;
 
-    if (carPickup) {
+    if (selectedMethod === 'car-pickup') {
       if (!carInfo.model || !carInfo.color || !carInfo.plateNumber) {
-        toast({
-          title: t("product.error"),
-          description: "يرجى إدخال جميع بيانات السيارة",
-          variant: 'destructive',
-        });
+        toast({ title: t("product.error"), description: "يرجى إدخال جميع بيانات السيارة", variant: 'destructive' });
         return;
       }
       if (saveCarInfo) {
@@ -364,47 +392,30 @@ export default function DeliverySelectionPage() {
       }
     }
 
-    // Validate dine-in reservation if selected
-    if (dineIn) {
-      // Check if table is selected OR already booked
-      const hasTableSelection = selectedTableId || (bookedTable && bookedTable.tableNumber);
-
-      if (!hasTableSelection) {
-        toast({
-          title: t("product.error"),
-          description: t("delivery.select_table_error") || 'Please select a table',
-          variant: 'destructive',
-        });
+    if (selectedMethod === 'dine-in') {
+      if (!selectedTableId && !bookedTable) {
+        toast({ title: t("product.error"), description: 'يرجى اختيار طاولة', variant: 'destructive' });
         return;
       }
-
       if (!arrivalTime) {
-        toast({
-          title: t("product.error"),
-          description: t("delivery.select_arrival_error") || 'Please enter arrival time',
-          variant: 'destructive',
-        });
+        toast({ title: t("product.error"), description: 'يرجى تحديد وقت الوصول', variant: 'destructive' });
         return;
       }
     }
 
-    if (scheduledPickup && !scheduledPickupTime) {
-      toast({
-        title: t("product.error"),
-        description: "يرجى تحديد وقت وصولك المتوقع",
-        variant: 'destructive',
-      });
+    if (selectedMethod === 'scheduled' && !scheduledPickupTime) {
+      toast({ title: t("product.error"), description: "يرجى تحديد وقت وصولك المتوقع", variant: 'destructive' });
       return;
     }
 
     setDeliveryInfo({
-      type: carPickup ? 'car-pickup' : (dineIn ? 'dine-in' : scheduledPickup ? 'scheduled-pickup' : 'pickup'),
+      type: selectedMethod === 'car-pickup' ? 'car-pickup' : selectedMethod === 'scheduled' ? 'scheduled-pickup' : selectedMethod === 'dine-in' ? 'dine-in' : 'pickup',
       branchId: branch.id,
       branchName: branch.nameAr,
       branchAddress: branch.address,
-      dineIn: dineIn,
-      carPickup: carPickup,
-      carInfo: carPickup ? {
+      dineIn: selectedMethod === 'dine-in',
+      carPickup: selectedMethod === 'car-pickup',
+      carInfo: selectedMethod === 'car-pickup' ? {
         carType: carInfo.model,
         carColor: carInfo.color,
         plateNumber: carInfo.plateNumber
@@ -412,583 +423,544 @@ export default function DeliverySelectionPage() {
       tableId: selectedTableId || undefined,
       tableNumber: bookedTable?.tableNumber || undefined,
       arrivalTime: arrivalTime || undefined,
-      scheduledPickupTime: scheduledPickup ? scheduledPickupTime : undefined,
+      scheduledPickupTime: selectedMethod === 'scheduled' ? scheduledPickupTime : undefined,
       deliveryFee: 0,
     });
-    
+
     setLocation('/checkout');
   };
 
+  const selectedBranch = branches.find(b => b.id === selectedBranchId);
+
+  const selectedCarColor = CAR_COLORS.find(c => c.name === carInfo.color);
+  const carHex = selectedCarColor?.hex || '#6B7280';
+
+  const methodCards = [
+    enableTakeaway && {
+      id: 'takeaway' as OrderMethod,
+      icon: Store,
+      emoji: '🏪',
+      label: 'استلام من الفرع',
+      desc: 'استلم طلبك مباشرة',
+      color: 'from-blue-500 to-blue-600',
+      ring: 'ring-blue-500',
+      bg: 'bg-blue-50 dark:bg-blue-950/20',
+    },
+    enableCarPickup && {
+      id: 'car-pickup' as OrderMethod,
+      icon: Car,
+      emoji: '🚗',
+      label: 'استلام من السيارة',
+      desc: 'لا تنزل من سيارتك',
+      color: 'from-purple-500 to-purple-600',
+      ring: 'ring-purple-500',
+      bg: 'bg-purple-50 dark:bg-purple-950/20',
+      badge: 'VIP',
+    },
+    enableDineIn && {
+      id: 'dine-in' as OrderMethod,
+      icon: Utensils,
+      emoji: '🍽️',
+      label: 'داخل المطعم',
+      desc: 'اجلس واطلب من طاولتك',
+      color: 'from-orange-500 to-orange-600',
+      ring: 'ring-orange-500',
+      bg: 'bg-orange-50 dark:bg-orange-950/20',
+    },
+    enableScheduledPickup && {
+      id: 'scheduled' as OrderMethod,
+      icon: Timer,
+      emoji: '⏰',
+      label: 'طلب مجدول',
+      desc: 'حدد وقت وصولك',
+      color: 'from-teal-500 to-teal-600',
+      ring: 'ring-teal-500',
+      bg: 'bg-teal-50 dark:bg-teal-950/20',
+    },
+  ].filter(Boolean) as Array<{
+    id: OrderMethod;
+    icon: any;
+    emoji: string;
+    label: string;
+    desc: string;
+    color: string;
+    ring: string;
+    bg: string;
+    badge?: string;
+  }>;
+
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="container mx-auto max-w-2xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">{t("delivery.title")}</h1>
-          <p className="text-muted-foreground">
-            {t("delivery.subtitle")}
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      {/* Header */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b">
+        <div className="container mx-auto max-w-2xl px-4 py-3 flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => setLocation('/menu')} data-testid="button-back">
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-lg font-bold">{t("delivery.title") || "اختر طريقة الاستلام"}</h1>
+            <p className="text-xs text-muted-foreground">{cartItems.length} منتج في السلة</p>
+          </div>
         </div>
+      </div>
+
+      <div className="container mx-auto max-w-2xl px-4 py-6 space-y-5">
 
         {/* Branch Selection */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-              <Label htmlFor="branch-select" className="text-base font-semibold mb-4 block">
-                <MapPin className="w-4 h-4 inline-block ml-2" />
-                {t("delivery.select_branch")}
-              </Label>
-              
-              {isLoading ? (
-                <p className="text-muted-foreground">{t("delivery.loading_branches") || "Loading..."}</p>
-              ) : branches.length === 0 ? (
-                <p className="text-muted-foreground">{t("delivery.no_branches") || "No branches available"}</p>
-              ) : (
-                <>
-                  <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
-                    <SelectTrigger className="w-full" data-testid="select-branch">
-                      <SelectValue placeholder={t("delivery.select_branch")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {branches.map((branch) => (
-                        <SelectItem key={branch.id} value={branch.id}>
-                          <div className="flex flex-col items-start gap-1" dir="rtl">
-                            <span className="font-semibold">{branch.nameAr}</span>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <MapPin className="w-3 h-3" />
-                              <span>{branch.address}</span>
-                            </div>
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Phone className="w-3 h-3" />
-                              <span dir="ltr">{branch.phone}</span>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Selected Branch Details */}
-                  {selectedBranchId && (() => {
-                    const selectedBranch = branches.find(b => b.id === selectedBranchId);
-                    if (!selectedBranch) return null;
-                    
+        <Card className="border-0 shadow-sm">
+          <CardContent className="p-5">
+            <Label htmlFor="branch-select" className="text-base font-bold mb-3 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">1</div>
+              اختر الفرع
+            </Label>
+
+            {isLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground py-3">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-sm">جاري تحميل الفروع...</span>
+              </div>
+            ) : branches.length === 0 ? (
+              <p className="text-muted-foreground text-sm">لا توجد فروع متاحة</p>
+            ) : (
+              <Select value={selectedBranchId} onValueChange={setSelectedBranchId}>
+                <SelectTrigger className="w-full h-12" data-testid="select-branch">
+                  <SelectValue placeholder="اختر الفرع الأقرب إليك" />
+                </SelectTrigger>
+                <SelectContent>
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id}>
+                      <div className="flex flex-col items-start gap-0.5 py-1" dir="rtl">
+                        <span className="font-semibold">{branch.nameAr}</span>
+                        <span className="text-xs text-muted-foreground">{branch.city} — {branch.address}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Selected branch info */}
+            {selectedBranch && (
+              <div className="mt-4 space-y-3">
+                <div className="flex gap-2 flex-wrap">
+                  {(() => {
+                    const coords = getBranchCoords(selectedBranch);
+                    if (!coords) return null;
                     return (
-                      <div className="mt-4 space-y-3">
-                        {/* Branch Info Card */}
-                        <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                          <div className="flex items-start gap-2">
-                            <MapPin className="w-4 h-4 mt-1 text-primary shrink-0" />
-                            <div>
-                              <p className="text-sm font-medium">{t("delivery.address")}</p>
-                              <p className="text-sm text-muted-foreground">{selectedBranch.address}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <Phone className="w-4 h-4 mt-1 text-primary shrink-0" />
-                            <div>
-                              <p className="text-sm font-medium">{t("delivery.phone")}</p>
-                              <p className="text-sm text-muted-foreground" dir="ltr">{selectedBranch.phone}</p>
-                            </div>
-                          </div>
+                      <Button variant="outline" size="sm" onClick={() => openDirections(coords.lat, coords.lng)} data-testid="button-navigate-to-branch">
+                        <Navigation className="w-3.5 h-3.5 ml-1" />
+                        الاتجاهات
+                      </Button>
+                    );
+                  })()}
+                  {selectedBranch.phone && (
+                    <Button variant="outline" size="sm" onClick={() => window.location.href = normalizePhone(selectedBranch.phone).replace('+', 'tel:+')} data-testid="button-call-branch">
+                      <Phone className="w-3.5 h-3.5 ml-1" />
+                      اتصال
+                    </Button>
+                  )}
+                </div>
+
+                {/* Location status */}
+                {(isCheckingLocation || isGettingLocation) && (
+                  <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 py-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                    <AlertDescription className="text-blue-800 dark:text-blue-200 text-sm">
+                      {t("delivery.check_location")}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {!isCheckingLocation && !isGettingLocation && locationError && (
+                  <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 py-2">
+                    <AlertCircle className="w-4 h-4 text-yellow-600" />
+                    <AlertDescription className="text-yellow-800 dark:text-yellow-200 text-sm flex items-center justify-between gap-2">
+                      <span>{locationError}</span>
+                      <Button variant="outline" size="sm" onClick={refreshLocation}>تحديث</Button>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Method Selection — shown once branch is selected */}
+        {selectedBranchId && methodCards.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">2</div>
+              <span className="text-base font-bold">اختر طريقة الاستلام</span>
+            </div>
+
+            <div className={`grid gap-3 ${methodCards.length === 2 ? 'grid-cols-2' : methodCards.length >= 3 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              {methodCards.map((method) => {
+                const isSelected = selectedMethod === method.id;
+                const Icon = method.icon;
+                return (
+                  <button
+                    key={method.id}
+                    onClick={() => setSelectedMethod(method.id)}
+                    data-testid={`btn-method-${method.id}`}
+                    className={`relative text-right p-4 rounded-2xl border-2 transition-all duration-200 ${
+                      isSelected
+                        ? `border-transparent ring-2 ${method.ring} ${method.bg} shadow-lg scale-[1.02]`
+                        : 'border-border hover:border-primary/30 hover:shadow-md bg-card'
+                    }`}
+                  >
+                    {method.badge && (
+                      <span className={`absolute top-2 left-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white bg-gradient-to-r ${method.color}`}>
+                        {method.badge}
+                      </span>
+                    )}
+                    {isSelected && (
+                      <div className={`absolute top-2 right-2 w-5 h-5 rounded-full bg-gradient-to-br ${method.color} flex items-center justify-center`}>
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                    <div className="text-3xl mb-2">{method.emoji}</div>
+                    <p className={`text-sm font-bold ${isSelected ? '' : 'text-foreground'}`}>{method.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{method.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Car Pickup Details */}
+            {selectedMethod === 'car-pickup' && (
+              <Card className="border-purple-200 dark:border-purple-800 overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-4">
+                  <p className="text-white font-bold text-sm mb-1">🚗 أدخل بيانات سيارتك</p>
+                  <p className="text-purple-200 text-xs">سيقوم موظفونا بإحضار طلبك إليك مباشرة</p>
+                </div>
+
+                {/* Live Car Preview */}
+                <div className="p-4 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center gap-3">
+                  <CarSVG color={carHex} className="w-full max-w-xs h-auto" />
+                  {carInfo.model && carInfo.color && (
+                    <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-full px-4 py-1.5 shadow-sm">
+                      <span
+                        className="w-3 h-3 rounded-full border border-gray-300"
+                        style={{ backgroundColor: carHex }}
+                      />
+                      <span className="text-sm font-semibold">{carInfo.model}</span>
+                      <span className="text-sm text-muted-foreground">—</span>
+                      <span className="text-sm text-muted-foreground">{carInfo.color}</span>
+                    </div>
+                  )}
+                </div>
+
+                <CardContent className="p-4 space-y-5">
+                  {/* Car Brand */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold flex items-center gap-1.5">
+                      <Car className="w-3.5 h-3.5 text-purple-500" />
+                      نوع السيارة
+                    </Label>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {CAR_BRANDS.map((brand) => (
+                        <button
+                          key={brand}
+                          type="button"
+                          onClick={() => setCarInfo({ ...carInfo, model: brand })}
+                          className={`py-2 rounded-xl text-xs font-semibold border-2 transition-all ${
+                            carInfo.model === brand
+                              ? 'border-purple-500 bg-purple-500/10 text-purple-700 dark:text-purple-300'
+                              : 'border-transparent bg-muted hover:border-purple-300 text-foreground'
+                          }`}
+                          data-testid={`btn-car-brand-${brand}`}
+                        >
+                          {brand}
+                        </button>
+                      ))}
+                    </div>
+                    <Input
+                      value={carInfo.model}
+                      onChange={(e) => setCarInfo({ ...carInfo, model: e.target.value })}
+                      placeholder="أو اكتب نوع السيارة..."
+                      data-testid="input-car-model"
+                      className="mt-1 text-sm"
+                    />
+                  </div>
+
+                  {/* Car Color */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-bold">
+                      لون السيارة
+                    </Label>
+                    <div className="grid grid-cols-5 gap-2">
+                      {CAR_COLORS.map((color) => (
+                        <button
+                          key={color.name}
+                          type="button"
+                          onClick={() => setCarInfo({ ...carInfo, color: color.name, colorHex: color.hex })}
+                          className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all ${
+                            carInfo.color === color.name
+                              ? 'border-purple-500 bg-purple-500/5'
+                              : 'border-transparent hover:border-gray-300 bg-muted'
+                          }`}
+                          data-testid={`btn-car-color-${color.name}`}
+                        >
+                          <span
+                            className={`w-7 h-7 rounded-full ${color.border ? 'border border-gray-300' : ''} shadow-sm`}
+                            style={{ backgroundColor: color.hex }}
+                          />
+                          <span className="text-[10px] font-medium leading-tight">{color.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Plate Number */}
+                  <div className="space-y-2">
+                    <Label htmlFor="car-plate" className="text-sm font-bold">
+                      رقم اللوحة
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="car-plate"
+                        placeholder="مثال: أ ب ج 1234"
+                        value={carInfo.plateNumber}
+                        onChange={(e) => setCarInfo({ ...carInfo, plateNumber: e.target.value })}
+                        data-testid="input-car-plate"
+                        className="text-center font-mono text-xl tracking-[0.3em] border-2 h-14 bg-yellow-50 dark:bg-yellow-950/20 border-yellow-300 dark:border-yellow-700"
+                        dir="ltr"
+                      />
+                      <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <div className="w-1 h-10 bg-green-600 rounded-full" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">أدخل الحروف والأرقام كما تظهر على اللوحة</p>
+                  </div>
+
+                  {/* Arrival Time */}
+                  <div className="space-y-2">
+                    <Label htmlFor="arrival-time-car" className="text-sm font-bold flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-purple-500" />
+                      وقت الوصول المتوقع
+                    </Label>
+                    <Input
+                      id="arrival-time-car"
+                      type="time"
+                      value={arrivalTime}
+                      onChange={(e) => setArrivalTime(e.target.value)}
+                      data-testid="input-arrival-time-car"
+                      className="h-12"
+                    />
+                  </div>
+
+                  {/* Save car toggle */}
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+                    <Checkbox
+                      id="save-car-info"
+                      checked={saveCarInfo}
+                      onCheckedChange={(checked) => setSaveCarInfo(checked as boolean)}
+                      data-testid="checkbox-save-car"
+                    />
+                    <Label htmlFor="save-car-info" className="text-sm cursor-pointer flex items-center gap-1.5 flex-1">
+                      <Bookmark className="w-3.5 h-3.5 text-purple-500" />
+                      حفظ بيانات السيارة للطلبات القادمة
+                    </Label>
+                  </div>
+
+                  {/* Car Summary */}
+                  {carInfo.model && carInfo.color && carInfo.plateNumber && (
+                    <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20">
+                      <div className="flex items-center gap-1 mb-2">
+                        <Star className="w-3.5 h-3.5 text-purple-500 fill-purple-500" />
+                        <p className="text-xs font-bold text-purple-700 dark:text-purple-300">ملخص بيانات سيارتك</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-full border-2 border-purple-300 shadow-md"
+                          style={{ backgroundColor: carHex }}
+                        />
+                        <div>
+                          <p className="font-bold text-sm">{carInfo.model} — {carInfo.color}</p>
+                          <p className="text-xs text-muted-foreground font-mono tracking-widest" dir="ltr">{carInfo.plateNumber}</p>
                         </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-                        {/* Location Status */}
-                        {isCheckingLocation || isGettingLocation ? (
-                          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
-                            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                            <AlertDescription className="text-blue-800 dark:text-blue-200">
-                              {t("delivery.check_location")}
-                            </AlertDescription>
-                          </Alert>
-                        ) : locationError ? (
-                          <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-800">
-                            <AlertCircle className="w-4 h-4 text-yellow-600" />
-                            <AlertDescription dir="rtl" className="flex items-center justify-between gap-2">
-                              <span className="text-yellow-800 dark:text-yellow-200">{locationError}</span>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={refreshLocation}
-                                data-testid="button-refresh-location"
-                              >
-                                <Navigation className="w-4 h-4 ml-1" />
-                                {t("delivery.update_location")}
-                              </Button>
-                            </AlertDescription>
-                          </Alert>
-                        ) : locationStatus ? (
-                          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
-                            <MapPin className="w-4 h-4 text-blue-600" />
-                            <AlertDescription dir="rtl" className="text-blue-800 dark:text-blue-200">
-                              <div className="flex items-center justify-between gap-2 flex-wrap">
-                                <span>
-                                  {locationStatus.withinRange 
-                                    ? t("delivery.within_range", { distance: locationStatus.distance })
-                                    : t("delivery.out_of_range", { distance: locationStatus.distance })}
-                                </span>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={refreshLocation}
-                                  data-testid="button-refresh-location-2"
-                                >
-                                  <Navigation className="w-4 h-4 ml-1" />
-                                  {t("delivery.update")}
-                                </Button>
-                              </div>
-                            </AlertDescription>
-                          </Alert>
-                        ) : null}
-
-                        {/* Map Preview Link */}
-                        {(() => {
-                          const coords = getBranchCoords(selectedBranch);
-                          if (!coords) return null;
-                          return (
-                            <button
-                              onClick={() => openDirections(coords.lat, coords.lng)}
-                              className="w-full block rounded-lg overflow-hidden border bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                              data-testid="link-branch-map-preview"
-                            >
-                              <div className="flex flex-col items-center justify-center p-8 gap-3">
-                                <div className="p-4 rounded-full bg-primary/10">
-                                  <Navigation className="w-8 h-8 text-primary" />
-                                </div>
-                                <div className="text-center">
-                                  <p className="font-medium">{t("delivery.view_on_map")}</p>
-                                  <p className="text-sm text-muted-foreground">{t("delivery.google_maps")}</p>
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })()}
-
-
-                        {false && <>
-                          {/* Dine-In Option */}
-                        <Card className="bg-accent/5">
-                          <CardContent className="p-4 space-y-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-start gap-3 flex-1">
-                                <div className="p-2 rounded-lg bg-primary/10 shrink-0">
-                                  <Coffee className="w-5 h-5 text-primary" />
-                                </div>
-                                <div className="flex-1">
-                                  <Label htmlFor="dine-in" className="text-base font-semibold cursor-pointer">
-                                    {t("delivery.dine_in")}
-                                  </Label>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {t("delivery.dine_in_desc")}
-                                  </p>
-                                </div>
-                              </div>
-                              <Checkbox 
-                                id="dine-in"
-                                checked={dineIn} 
-                                onCheckedChange={(checked) => {
-                                  setDineIn(checked as boolean);
-                                  if (checked) setCarPickup(false);
-                                }}
-                                data-testid="checkbox-dine-in"
-                                className="ml-2"
-                              />
-                            </div>
-
-                            {/* Table Selection */}
-                            {dineIn && (
-                              <div className="space-y-3 pt-3 border-t">
-                                {loadingTables ? (
-                                  <div className="text-center py-6">
-                                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-                                    <p className="text-sm text-muted-foreground">{t("delivery.loading_tables")}</p>
-                                  </div>
-                                ) : availableTables.length === 0 ? (
-                                  <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20">
-                                    <AlertCircle className="w-4 h-4 text-yellow-600" />
-                                    <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-                                      {t("delivery.no_tables")}
-                                    </AlertDescription>
-                                  </Alert>
-                                ) : (
-                                  <>
-                                    <div>
-                                      <Label className="text-sm font-semibold">{t("delivery.select_table")}</Label>
-                                      <Select 
-                                        value={selectedTableId} 
-                                        onValueChange={(value) => {
-                                          setSelectedTableId(value);
-                                        }}
-                                      >
-                                        <SelectTrigger className="w-full mt-2" data-testid="select-table">
-                                          <SelectValue placeholder={t("delivery.select_table")} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          {availableTables.map((table) => {
-                                            const tableId = table.id;
-                                            if (!tableId) {
-                                              console.error('[ERROR] Table missing id:', table);
-                                              return null;
-                                            }
-                                            // Use isAvailable directly from server data (it's computed from isOccupied)
-                                            const isAvailable = !!table.isAvailable;
-                                            const statusText = isAvailable ? t("delivery.available") : t("delivery.occupied");
-                                            return (
-                                              <SelectItem key={tableId} value={tableId} disabled={!isAvailable} data-testid={`table-option-${table.tableNumber}`}>
-                                                <span>{t("delivery.table_label", { number: table.tableNumber, capacity: table.capacity || 4 })} {statusText}</span>
-                                              </SelectItem>
-                                            );
-                                          })}
-                                        </SelectContent>
-                                      </Select>
-                                      {selectedTableId && (
-                                        <p className="text-xs text-green-600 dark:text-green-400 mt-2">
-                                          {t("delivery.table_success")}
-                                        </p>
-                                      )}
-                                    </div>
-
-                                    <div>
-                                      <Label htmlFor="arrival-time" className="text-sm font-semibold">
-                                        {t("delivery.arrival_time")}
-                                      </Label>
-                                      <Input
-                                        id="arrival-time"
-                                        type="time"
-                                        value={arrivalTime}
-                                        onChange={(e) => setArrivalTime(e.target.value)}
-                                        data-testid="input-arrival-time"
-                                        className="mt-2"
-                                      />
-                                    </div>
-
-                                    {bookedTable && (
-                                      <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
-                                        <Check className="w-4 h-4 text-green-600" />
-                                        <AlertDescription className="text-green-800 dark:text-green-200">
-                                          {t("delivery.booking_success")}
-                                        </AlertDescription>
-                                      </Alert>
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-
-                        {/* Car Pickup Option */}
-                        <Card 
-                          className={`cursor-pointer transition-all duration-200 ${carPickup ? 'border-purple-500 bg-purple-500/5 ring-1 ring-purple-500/30' : 'bg-accent/5 hover-elevate'}`}
-                          onClick={() => { setCarPickup(!carPickup); if (!carPickup) setDineIn(false); }}
-                          data-testid="card-car-pickup"
-                        >
-                          <CardContent className="p-4 space-y-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-start gap-3 flex-1">
-                                <div className={`p-3 rounded-xl shrink-0 transition-colors ${carPickup ? 'bg-purple-500/20' : 'bg-muted'}`}>
-                                  <Car className={`w-6 h-6 ${carPickup ? 'text-purple-500' : 'text-muted-foreground'}`} />
-                                </div>
-                                <div className="flex-1">
-                                  <p className={`text-base font-bold ${carPickup ? 'text-purple-600 dark:text-purple-400' : ''}`}>
-                                    استلام من السيارة
-                                  </p>
-                                  <p className="text-sm text-muted-foreground mt-0.5">
-                                    استلم طلبك وأنت في سيارتك دون الحاجة للنزول
-                                  </p>
-                                  {hasSavedCar && !carPickup && (
-                                    <p className="text-xs text-purple-500 mt-1 flex items-center gap-1">
-                                      <Bookmark className="w-3 h-3" />
-                                      لديك سيارة محفوظة
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${carPickup ? 'border-purple-500 bg-purple-500' : 'border-muted-foreground/30'}`}>
-                                {carPickup && <Check className="w-3 h-3 text-white" />}
-                              </div>
-                            </div>
-
-                            {carPickup && (
-                              <div className="space-y-4 pt-4 border-t border-purple-500/20" onClick={(e) => e.stopPropagation()}>
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-semibold flex items-center gap-1.5">
-                                    <Car className="w-3.5 h-3.5 text-purple-500" />
-                                    نوع السيارة
-                                  </Label>
-                                  <div className="grid grid-cols-4 gap-2">
-                                    {['تويوتا', 'هيونداي', 'نيسان', 'كيا', 'شيفروليه', 'فورد', 'هوندا', 'مرسيدس'].map((brand) => (
-                                      <button
-                                        key={brand}
-                                        type="button"
-                                        onClick={() => setCarInfo({ ...carInfo, model: brand })}
-                                        className={`p-2 rounded-lg text-xs font-medium text-center border transition-all ${
-                                          carInfo.model === brand 
-                                            ? 'border-purple-500 bg-purple-500/15 text-purple-600 dark:text-purple-400' 
-                                            : 'border-border bg-background hover-elevate'
-                                        }`}
-                                        data-testid={`btn-car-brand-${brand}`}
-                                      >
-                                        {brand}
-                                      </button>
-                                    ))}
-                                  </div>
-                                  <Input
-                                    value={carInfo.model}
-                                    onChange={(e) => setCarInfo({ ...carInfo, model: e.target.value })}
-                                    placeholder="أو اكتب نوع السيارة..."
-                                    data-testid="input-car-model"
-                                    className="mt-1"
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label className="text-sm font-semibold flex items-center gap-1.5">
-                                    <Palette className="w-3.5 h-3.5 text-purple-500" />
-                                    لون السيارة
-                                  </Label>
-                                  <div className="flex gap-2 flex-wrap">
-                                    {[
-                                      { name: 'أبيض', hex: '#FFFFFF', border: true },
-                                      { name: 'أسود', hex: '#1a1a1a', border: false },
-                                      { name: 'فضي', hex: '#C0C0C0', border: true },
-                                      { name: 'رمادي', hex: '#808080', border: false },
-                                      { name: 'أحمر', hex: '#DC2626', border: false },
-                                      { name: 'أزرق', hex: '#2563EB', border: false },
-                                      { name: 'بني', hex: '#92400E', border: false },
-                                      { name: 'ذهبي', hex: '#D4A017', border: false },
-                                    ].map((color) => (
-                                      <button
-                                        key={color.name}
-                                        type="button"
-                                        onClick={() => setCarInfo({ ...carInfo, color: color.name })}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                          carInfo.color === color.name 
-                                            ? 'border-purple-500 ring-1 ring-purple-500/30' 
-                                            : 'border-border hover-elevate'
-                                        }`}
-                                        data-testid={`btn-car-color-${color.name}`}
-                                      >
-                                        <span 
-                                          className={`w-3.5 h-3.5 rounded-full shrink-0 ${color.border ? 'border border-border' : ''}`}
-                                          style={{ backgroundColor: color.hex }}
-                                        />
-                                        {color.name}
-                                      </button>
-                                    ))}
-                                  </div>
-                                  <Input
-                                    value={carInfo.color}
-                                    onChange={(e) => setCarInfo({ ...carInfo, color: e.target.value })}
-                                    placeholder="أو اكتب اللون..."
-                                    data-testid="input-car-color"
-                                    className="mt-1"
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="car-plate" className="text-sm font-semibold">
-                                    رقم اللوحة
-                                  </Label>
-                                  <Input
-                                    id="car-plate"
-                                    placeholder="مثال: أ ب ج 1234"
-                                    value={carInfo.plateNumber}
-                                    onChange={(e) => setCarInfo({ ...carInfo, plateNumber: e.target.value })}
-                                    data-testid="input-car-plate"
-                                    className="text-center font-mono text-lg tracking-widest"
-                                    dir="ltr"
-                                  />
-                                </div>
-
-                                <div className="space-y-2">
-                                  <Label htmlFor="arrival-time-car" className="text-sm font-semibold flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 text-purple-500" />
-                                    وقت الوصول المتوقع
-                                  </Label>
-                                  <Input
-                                    id="arrival-time-car"
-                                    type="time"
-                                    value={arrivalTime}
-                                    onChange={(e) => setArrivalTime(e.target.value)}
-                                    data-testid="input-arrival-time-car"
-                                  />
-                                </div>
-
-                                <div className="flex items-center gap-2 p-3 rounded-lg bg-purple-500/5 border border-purple-500/10">
-                                  <Checkbox
-                                    id="save-car-info"
-                                    checked={saveCarInfo}
-                                    onCheckedChange={(checked) => setSaveCarInfo(checked as boolean)}
-                                    data-testid="checkbox-save-car"
-                                    className="border-purple-500/50"
-                                  />
-                                  <Label htmlFor="save-car-info" className="text-sm cursor-pointer flex items-center gap-1.5 flex-1">
-                                    <Bookmark className="w-3.5 h-3.5 text-purple-500" />
-                                    حفظ بيانات السيارة للطلبات القادمة
-                                  </Label>
-                                </div>
-
-                                {carInfo.model && carInfo.color && carInfo.plateNumber && (
-                                  <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                                    <p className="text-xs text-muted-foreground mb-2">ملخص السيارة:</p>
-                                    <div className="flex items-center gap-3">
-                                      <div className="p-2 rounded-lg bg-purple-500/20">
-                                        <Car className="w-5 h-5 text-purple-500" />
-                                      </div>
-                                      <div>
-                                        <p className="font-bold text-sm">{carInfo.model} - {carInfo.color}</p>
-                                        <p className="text-xs text-muted-foreground font-mono tracking-wider" dir="ltr">{carInfo.plateNumber}</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                        </>}
-
-                        {/* Scheduled Pickup Option */}
-                        <Card
-                          className={`cursor-pointer transition-all duration-200 ${scheduledPickup ? 'border-blue-500 bg-blue-500/5 ring-1 ring-blue-500/30' : 'bg-accent/5 hover-elevate'}`}
-                          onClick={() => { setScheduledPickup(!scheduledPickup); if (!scheduledPickup) { setCarPickup(false); setDineIn(false); } }}
-                          data-testid="card-scheduled-pickup"
-                        >
-                          <CardContent className="p-4 space-y-4">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-start gap-3 flex-1">
-                                <div className={`p-3 rounded-xl shrink-0 transition-colors ${scheduledPickup ? 'bg-blue-500/20' : 'bg-muted'}`}>
-                                  <ShoppingBag className={`w-6 h-6 ${scheduledPickup ? 'text-blue-500' : 'text-muted-foreground'}`} />
-                                </div>
-                                <div className="flex-1">
-                                  <p className={`text-base font-bold ${scheduledPickup ? 'text-blue-600 dark:text-blue-400' : ''}`}>
-                                    استلام من الفرع (مجدول)
-                                  </p>
-                                  <p className="text-sm text-muted-foreground mt-0.5">
-                                    حدد وقت وصولك وسيبدأ تحضير طلبك قبل وصولك بوقت كافٍ
-                                  </p>
-                                </div>
-                              </div>
-                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${scheduledPickup ? 'border-blue-500 bg-blue-500' : 'border-muted-foreground/30'}`}>
-                                {scheduledPickup && <Check className="w-3 h-3 text-white" />}
-                              </div>
-                            </div>
-
-                            {scheduledPickup && (
-                              <div className="space-y-4 pt-4 border-t border-blue-500/20" onClick={(e) => e.stopPropagation()}>
-                                <div className="space-y-2">
-                                  <Label htmlFor="scheduled-pickup-time" className="text-sm font-semibold flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 text-blue-500" />
-                                    وقت وصولك المتوقع
-                                  </Label>
-                                  <Input
-                                    id="scheduled-pickup-time"
-                                    type="time"
-                                    value={scheduledPickupTime}
-                                    onChange={(e) => setScheduledPickupTime(e.target.value)}
-                                    data-testid="input-scheduled-pickup-time"
-                                    className="border-blue-500/30 focus:border-blue-500"
-                                  />
-                                </div>
-
-                                {scheduledPickupTime && (() => {
-                                  const calc = calculateScheduledPrepTime(scheduledPickupTime);
-                                  if (!calc) return null;
-                                  return (
-                                    <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 space-y-2">
-                                      <div className="flex items-center gap-2">
-                                        <Timer className="w-4 h-4 text-blue-500" />
-                                        <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">جدول تحضير طلبك</p>
-                                      </div>
-                                      <div className="space-y-1 text-sm">
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-muted-foreground">وقت وصولك:</span>
-                                          <span className="font-bold text-blue-600 dark:text-blue-400" dir="ltr">{scheduledPickupTime}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-muted-foreground">يبدأ التحضير الساعة:</span>
-                                          <span className="font-bold text-green-600 dark:text-green-400" dir="ltr">{calc.prepStartTime}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                          <span className="text-muted-foreground">مدة التحضير:</span>
-                                          <span className="font-medium">{calc.holdMinutes} دقيقة</span>
-                                        </div>
-                                      </div>
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        سيكون طلبك جاهزاً عند وصولك تماماً 🎯
-                                      </p>
-                                    </div>
-                                  );
-                                })()}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                          {(() => {
-                            const coords = getBranchCoords(selectedBranch);
-                            if (!coords) return null;
+            {/* Dine-In Details */}
+            {selectedMethod === 'dine-in' && (
+              <Card className="border-orange-200 dark:border-orange-800">
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+                  <p className="text-white font-bold text-sm mb-1">🍽️ حجز طاولة</p>
+                  <p className="text-orange-100 text-xs">اختر طاولتك المفضلة وسيكون طلبك جاهزاً عند وصولك</p>
+                </div>
+                <CardContent className="p-4 space-y-4">
+                  {loadingTables ? (
+                    <div className="flex items-center gap-2 py-4 text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">جاري تحميل الطاولات...</span>
+                    </div>
+                  ) : availableTables.length === 0 ? (
+                    <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20">
+                      <AlertCircle className="w-4 h-4 text-yellow-600" />
+                      <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                        لا توجد طاولات متاحة حالياً
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <>
+                      <div>
+                        <Label className="text-sm font-bold mb-2 block">اختر الطاولة</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {availableTables.map((table) => {
+                            const tableId = table.id;
+                            if (!tableId) return null;
+                            const isAvailable = !!table.isAvailable;
+                            const isChosen = selectedTableId === tableId;
                             return (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1"
-                                onClick={() => openDirections(coords.lat, coords.lng)}
-                                data-testid="button-navigate-to-branch"
+                              <button
+                                key={tableId}
+                                onClick={() => isAvailable && setSelectedTableId(tableId)}
+                                disabled={!isAvailable}
+                                data-testid={`table-option-${table.tableNumber}`}
+                                className={`p-3 rounded-xl border-2 text-center transition-all ${
+                                  isChosen
+                                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/20'
+                                    : isAvailable
+                                    ? 'border-border hover:border-orange-300 bg-card cursor-pointer'
+                                    : 'border-border bg-muted opacity-50 cursor-not-allowed'
+                                }`}
                               >
-                                <Navigation className="w-4 h-4 ml-2" />
-                                <span>{t("delivery.navigate")}</span>
-                              </Button>
+                                <div className="text-2xl mb-1">{isAvailable ? '🪑' : '🚫'}</div>
+                                <p className="text-xs font-bold">طاولة {table.tableNumber}</p>
+                                <p className="text-[10px] text-muted-foreground">{isAvailable ? 'متاحة' : 'مشغولة'}</p>
+                              </button>
                             );
-                          })()}
-                          {selectedBranch.mapsUrl && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => window.open(selectedBranch.mapsUrl, '_blank', 'noopener,noreferrer')}
-                              data-testid="button-view-map-branch"
-                            >
-                              <Map className="w-4 h-4 ml-2" />
-                              <span>{t("delivery.view_on_map") || "الخريطة"}</span>
-                            </Button>
-                          )}
-                          {selectedBranch.phone && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => window.location.href = normalizePhone(selectedBranch.phone).replace('+', 'tel:+')}
-                              data-testid="button-call-branch"
-                            >
-                              <Phone className="w-4 h-4 ml-2" />
-                              <span>{t("delivery.call")}</span>
-                            </Button>
-                          )}
+                          })}
                         </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="arrival-time" className="text-sm font-bold mb-2 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-orange-500" />
+                          وقت وصولك
+                        </Label>
+                        <Input
+                          id="arrival-time"
+                          type="time"
+                          value={arrivalTime}
+                          onChange={(e) => setArrivalTime(e.target.value)}
+                          data-testid="input-arrival-time"
+                          className="h-12"
+                        />
+                      </div>
+
+                      {bookedTable && (
+                        <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
+                          <Check className="w-4 h-4 text-green-600" />
+                          <AlertDescription className="text-green-800 dark:text-green-200">
+                            تم حجز الطاولة رقم {bookedTable.tableNumber} بنجاح!
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Scheduled Pickup Details */}
+            {selectedMethod === 'scheduled' && (
+              <Card className="border-teal-200 dark:border-teal-800">
+                <div className="bg-gradient-to-r from-teal-500 to-teal-600 p-4">
+                  <p className="text-white font-bold text-sm mb-1">⏰ طلب مجدول</p>
+                  <p className="text-teal-100 text-xs">سيبدأ تحضير طلبك قبل وصولك بوقت كافٍ ليكون جاهزاً تماماً</p>
+                </div>
+                <CardContent className="p-4 space-y-4">
+                  <div>
+                    <Label htmlFor="scheduled-pickup-time" className="text-sm font-bold mb-2 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-teal-500" />
+                      وقت وصولك المتوقع
+                    </Label>
+                    <Input
+                      id="scheduled-pickup-time"
+                      type="time"
+                      value={scheduledPickupTime}
+                      onChange={(e) => setScheduledPickupTime(e.target.value)}
+                      data-testid="input-scheduled-pickup-time"
+                      className="h-12 border-teal-300 dark:border-teal-700"
+                    />
+                  </div>
+
+                  {scheduledPickupTime && (() => {
+                    const calc = calculateScheduledPrepTime(scheduledPickupTime);
+                    if (!calc) return null;
+                    return (
+                      <div className="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-4 h-4 text-teal-500" />
+                          <p className="text-sm font-bold text-teal-700 dark:text-teal-300">جدول تحضير طلبك</p>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
+                            <span className="text-sm text-muted-foreground">يبدأ التحضير الساعة</span>
+                            <span className="font-bold text-teal-600 dark:text-teal-400" dir="ltr">{calc.prepStartTime}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
+                            <span className="text-sm text-muted-foreground">وقت وصولك</span>
+                            <span className="font-bold" dir="ltr">{scheduledPickupTime}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
+                            <span className="text-sm text-muted-foreground">مدة التحضير</span>
+                            <span className="font-medium">{calc.holdMinutes} دقيقة</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
+                          🎯 طلبك سيكون جاهزاً تماماً عند وصولك!
+                        </p>
                       </div>
                     );
                   })()}
-                </>
-              )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Takeaway info */}
+            {selectedMethod === 'takeaway' && selectedBranch && (
+              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                    <Store className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">{selectedBranch.nameAr}</p>
+                    <p className="text-xs text-muted-foreground">{selectedBranch.address}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Continue Button */}
         <Button
           onClick={handleContinue}
-          className="w-full"
+          className="w-full h-14 text-base font-bold rounded-2xl"
           size="lg"
           disabled={!selectedBranchId || isLoading || isCheckingLocation}
           data-testid="button-continue"
         >
-          <span>
-            {isCheckingLocation ? t("delivery.check_location") : t("delivery.continue")}
-          </span>
-          {!isCheckingLocation && <ArrowRight className="w-5 h-5 mr-2" />}
-          {isCheckingLocation && <Loader2 className="w-5 h-5 mr-2 animate-spin" />}
+          {isCheckingLocation ? (
+            <>
+              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              {t("delivery.check_location")}
+            </>
+          ) : (
+            <>
+              متابعة للدفع
+              <ArrowRight className="w-5 h-5 mr-2" />
+            </>
+          )}
         </Button>
+
       </div>
     </div>
   );
