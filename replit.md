@@ -4,6 +4,25 @@ QIROX Cafe is a comprehensive digital management system for coffee shops. It has
 - **QIROX Cafe** - Customer-facing ordering, loyalty, and delivery
 - **QIROX Systems** - Employee/Manager/Admin portal for operations
 
+## New Features (Session T001–T006)
+
+### Foodics-Parity Additions
+- **T001 – POS Keyboard Shortcuts**: `/` focuses search, `F2` clears search, `Escape` clears cart, `Ctrl+F` focuses search, `Ctrl+P` prints receipt
+- **T002 – Gift Card in Checkout**: `/kiosk`-capable public endpoint `POST /api/gift-cards/:code/redeem-customer`; checkout.tsx has full gift card section: validate → show balance → deduct from total → redeem after order → display in summary and confirm dialog
+- **T003 – Kiosk Mode** (`/kiosk`): Full-screen self-order terminal with category filter, item grid, cart sidebar, checkout modal, auto-reset idle timer (2 min), success screen with order number; no auth required
+- **T004 – Promo Offers Management** (`/manager/promotions`): Full CRUD for bundle/discount/BOGO promo offers; uses existing `/api/admin/promo-offers` endpoints; toggle active; date range; discount % display
+- **T005 – Offline POS Mode**: IndexedDB queue in `client/src/lib/offline-queue.ts`; when offline orders are queued locally; when back online they sync automatically with toast; service worker enhanced with `sync-offline-orders` background sync tag; offline indicator in POS cart panel
+- **T006 – API Management** (`/admin/api`): API key generator (stored in localStorage for demo); public + authenticated endpoint documentation browser; copy endpoint URLs; code examples
+
+### New Files
+- `client/src/pages/kiosk.tsx` — Self-order kiosk
+- `client/src/pages/promotions-management.tsx` — Promo offers CRUD
+- `client/src/pages/api-management.tsx` — API key & docs management
+- `client/src/lib/offline-queue.ts` — IndexedDB offline order queue
+
+### New API Endpoints
+- `POST /api/gift-cards/:code/redeem-customer` — Public gift card redemption for customer checkout
+
 ## Recent Fixes (March 2026)
 
 - **Payment "Coming Soon" Removed**: `comingSoon={false}` in `checkout.tsx` and `checkout-modal.tsx` — payment methods are now fully active

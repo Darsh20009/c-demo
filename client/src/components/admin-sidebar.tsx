@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'wouter';
-import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, FlaskConical } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, FlaskConical, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import { DemoDataManager } from './demo-data-manager';
@@ -15,6 +15,7 @@ export function AdminSidebar() {
     { label: 'التقارير', icon: FileText, path: '/admin/reports' },
     { label: 'إرسال الإشعارات', icon: Bell, path: '/admin/notifications' },
     { label: 'الإعدادات', icon: Settings, path: '/admin/settings' },
+    { label: 'إدارة API', icon: Code2, path: '/admin/api' },
   ];
 
   const handleLogout = async () => {

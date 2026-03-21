@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { useNotifications } from "@/hooks/use-notifications";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queueOfflineOrder, syncOfflineOrders, countPendingOrders } from "@/lib/offline-queue";
 import type { CoffeeItem, Order, Table, Employee } from "@shared/schema";
 import { 
   printSimpleReceipt, 
@@ -82,6 +83,7 @@ export default function PosSystem() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [orderItems, setOrderItems] = useState<any[]>([]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [orderType, setOrderType] = useState<OrderType>("dine_in");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
   const [tableNumber, setTableNumber] = useState("");
@@ -95,6 +97,7 @@ export default function PosSystem() {
   const [soundEnabled, setSoundEnabled] = useState(() => getSoundEnabled('pos'));
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [syncing, setSyncing] = useState(false);
+  const [offlineQueueCount, setOfflineQueueCount] = useState(0);
   const [newOrdersCount, setNewOrdersCount] = useState(0);
   const [showOrdersPanel, setShowOrdersPanel] = useState(false);
   const [ordersFilter, setOrdersFilter] = useState<'all' | 'online' | 'pos'>('all');
@@ -161,6 +164,34 @@ export default function PosSystem() {
     localStorage.setItem("pos-terminal-connected", String(posTerminalConnected));
   }, [posTerminalConnected]);
 
+  // Offline queue: load count on mount, sync when back online
+  useEffect(() => {
+    countPendingOrders().then(setOfflineQueueCount).catch(() => {});
+
+    const handleOnline = async () => {
+      setIsOnline(true);
+      const count = await countPendingOrders().catch(() => 0);
+      if (count > 0) {
+        toast({ title: "🔄 جاري مزامنة الطلبات المعلقة...", description: `${count} طلب في قائمة الانتظار` });
+        const { synced, failed } = await syncOfflineOrders();
+        const newCount = await countPendingOrders().catch(() => 0);
+        setOfflineQueueCount(newCount);
+        if (synced > 0) {
+          queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+          toast({ title: "✅ تمت المزامنة", description: `${synced} طلب تم إرساله${failed > 0 ? `, ${failed} فشل` : ''}` });
+        }
+      }
+    };
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
   useEffect(() => { localStorage.setItem("pos-auto-print", String(autoPrint)); }, [autoPrint]);
   useEffect(() => { localStorage.setItem("pos-show-vat-label", String(showVatLabel)); }, [showVatLabel]);
   useEffect(() => { localStorage.setItem("pos-zoom", String(posZoom)); }, [posZoom]);
@@ -221,6 +252,41 @@ export default function PosSystem() {
       requestPushPermission();
     }
   }, [employee, requestPushPermission]);
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      const isInput = tag === 'input' || tag === 'textarea' || tag === 'select';
+
+      // / or F2 → focus search (from anywhere except other inputs)
+      if ((e.key === '/' || e.key === 'F2') && !isInput) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+      // Escape → clear search or blur
+      if (e.key === 'Escape' && isInput) {
+        setSearchQuery('');
+        (e.target as HTMLElement).blur();
+        return;
+      }
+      // Ctrl+P → print receipt
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p' && orderItems.length > 0) {
+        e.preventDefault();
+        window.print();
+        return;
+      }
+      // Ctrl+F → focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [orderItems.length]);
 
   const { data: productsData, isLoading: isLoadingProducts } = useQuery<CoffeeItem[]>({
     queryKey: ["/api/coffee-items"],
@@ -479,6 +545,20 @@ export default function PosSystem() {
         channel: "pos",
         notes: orderNote || undefined
       };
+
+      // If offline, queue the order locally
+      if (!navigator.onLine) {
+        const localId = await queueOfflineOrder({ ...orderData, totalAmount: total });
+        const newCount = await countPendingOrders().catch(() => 0);
+        setOfflineQueueCount(newCount);
+        toast({ title: "📦 تم حفظ الطلب محلياً", description: "سيُرسل تلقائياً عند استعادة الاتصال" });
+        setOrderItems([]);
+        setCustomerName("");
+        setCustomerPhone("");
+        setOrderNote("");
+        setSyncing(false);
+        return;
+      }
 
       const res = await apiRequest("POST", "/api/orders", orderData);
       const result = await res.json().catch(() => ({}));
@@ -829,7 +909,8 @@ export default function PosSystem() {
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder={t('pos.search_placeholder')}
+                ref={searchInputRef}
+                placeholder={`${t('pos.search_placeholder')}  (/ أو F2)`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pr-10 h-9 sm:h-12 text-sm sm:text-base rounded-xl border-2 focus-visible:ring-primary"
@@ -1129,6 +1210,27 @@ export default function PosSystem() {
                 <span className="font-black text-base sm:text-xl text-primary">{calculateTotal.toFixed(2)} {t('pos.currency')}</span>
               </div>
             </div>
+
+            {/* Offline / Queue Indicator */}
+            {(!isOnline || offlineQueueCount > 0) && (
+              <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${!isOnline ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'}`} data-testid="pos-offline-indicator">
+                {!isOnline ? <WifiOff className="w-4 h-4 shrink-0" /> : <Wifi className="w-4 h-4 shrink-0" />}
+                <span className="flex-1">
+                  {!isOnline ? 'غير متصل — الطلبات تُخزّن محلياً' : `${offlineQueueCount} طلب في انتظار الإرسال`}
+                </span>
+                {isOnline && offlineQueueCount > 0 && (
+                  <button
+                    className="text-xs underline"
+                    onClick={async () => {
+                      const { synced } = await syncOfflineOrders();
+                      const c = await countPendingOrders().catch(() => 0);
+                      setOfflineQueueCount(c);
+                      if (synced > 0) queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+                    }}
+                  >مزامنة</button>
+                )}
+              </div>
+            )}
 
             <Button 
               className="w-full h-11 sm:h-13 text-sm sm:text-base font-black rounded-xl shadow-lg shadow-primary/20 gap-2"

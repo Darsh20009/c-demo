@@ -1,6 +1,6 @@
 import { useLocation } from 'wouter';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, ShoppingCart, ClipboardList, Settings, LogOut, User, BarChart3, Warehouse, Wallet, ChefHat, Table, Coffee, Utensils, Languages, Clock, Truck, Building2, Brain, FileSpreadsheet } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, ClipboardList, Settings, LogOut, User, BarChart3, Warehouse, Wallet, ChefHat, Table, Coffee, Utensils, Languages, Clock, Truck, Building2, Brain, FileSpreadsheet, Tag, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Employee } from '@shared/schema';
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
@@ -29,6 +29,8 @@ const PAGE_ID_TO_PATH: Record<PageId, { path: string; label: string; labelEn: st
   delivery: { path: '/manager/delivery', label: 'إدارة التوصيل', labelEn: 'Delivery', icon: Truck, section: 'manager' },
   unified_reports: { path: '/manager/unified-reports', label: 'التقارير الموحدة', labelEn: 'Unified Reports', icon: Building2, section: 'manager' },
   bi_analytics: { path: '/manager/bi-analytics', label: 'تحليلات BI', labelEn: 'BI Analytics', icon: Brain, section: 'manager' },
+  promotions: { path: '/manager/promotions', label: 'العروض الترويجية', labelEn: 'Promotions', icon: Tag, section: 'manager' },
+  kiosk: { path: '/kiosk', label: 'الكشك (كيوسك)', labelEn: 'Kiosk', icon: Monitor, section: 'manager' },
 };
 
 const ADMIN_ROLES = ['manager', 'owner', 'admin', 'branch_manager'];
@@ -52,8 +54,8 @@ function getAccessiblePages(employee: Employee | null): PageId[] {
     cook: ['dashboard', 'orders', 'kitchen', 'shifts'],
     waiter: ['dashboard', 'cashier', 'orders', 'tables', 'shifts'],
     supervisor: ['dashboard', 'cashier', 'pos', 'shifts', 'orders', 'kitchen', 'tables', 'menu_management', 'reports'],
-    manager: ['dashboard', 'cashier', 'pos', 'shifts', 'orders', 'kitchen', 'tables', 'menu_management', 'inventory', 'reports', 'accounting', 'employees', 'settings', 'delivery', 'unified_reports', 'bi_analytics'],
-    branch_manager: ['dashboard', 'cashier', 'pos', 'shifts', 'orders', 'kitchen', 'tables', 'menu_management', 'inventory', 'reports', 'accounting', 'employees', 'settings', 'delivery', 'unified_reports', 'bi_analytics'],
+    manager: ['dashboard', 'cashier', 'pos', 'shifts', 'orders', 'kitchen', 'tables', 'menu_management', 'inventory', 'reports', 'accounting', 'employees', 'settings', 'delivery', 'unified_reports', 'bi_analytics', 'promotions', 'kiosk'],
+    branch_manager: ['dashboard', 'cashier', 'pos', 'shifts', 'orders', 'kitchen', 'tables', 'menu_management', 'inventory', 'reports', 'accounting', 'employees', 'settings', 'delivery', 'unified_reports', 'bi_analytics', 'promotions', 'kiosk'],
   };
 
   return roleDefaults[role] || ['dashboard', 'cashier', 'orders'];

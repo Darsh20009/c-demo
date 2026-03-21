@@ -78,10 +78,47 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Background sync (for offline order queuing if needed)
+// Background sync — auto-sync offline POS orders when connectivity returns
 self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-orders') {
-    // Future: sync queued offline orders
+  if (event.tag === 'sync-offline-orders') {
+    event.waitUntil(
+      (async () => {
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const req = indexedDB.open('qirox-offline-db', 1);
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+
+          const pending = await new Promise((resolve, reject) => {
+            const tx = db.transaction('offline-orders', 'readonly');
+            const idx = tx.objectStore('offline-orders').index('status');
+            const req = idx.getAll('pending');
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+
+          for (const order of pending) {
+            try {
+              const res = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(order.orderData),
+              });
+              const newStatus = res.ok ? 'synced' : 'failed';
+              const tx2 = db.transaction('offline-orders', 'readwrite');
+              const store = tx2.objectStore('offline-orders');
+              const record = await new Promise(r => { const req = store.get(order.localId); req.onsuccess = () => r(req.result); });
+              if (record) { record.status = newStatus; store.put(record); }
+            } catch {}
+          }
+
+          // Notify all open clients
+          const clients = await self.clients.matchAll({ type: 'window' });
+          clients.forEach(c => c.postMessage({ type: 'OFFLINE_SYNC_COMPLETE' }));
+        } catch {}
+      })()
+    );
   }
 });
 

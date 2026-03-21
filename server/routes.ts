@@ -15932,6 +15932,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for customer gift card redemption (no employee auth needed)
+  app.post("/api/gift-cards/:code/redeem-customer", async (req, res) => {
+    try {
+      const { GiftCardModel } = await import("@shared/schema");
+      const { amount } = req.body;
+      const code = req.params.code.toUpperCase();
+      const card = await GiftCardModel.findOne({ code });
+      if (!card) return res.status(404).json({ error: "بطاقة الهدية غير موجودة" });
+      if (card.status !== 'active') return res.status(400).json({ error: "البطاقة غير نشطة" });
+      if (Number(card.balance) <= 0) return res.status(400).json({ error: "رصيد البطاقة صفر" });
+      const deductAmount = Math.min(Number(amount), Number(card.balance));
+      card.balance = Number(card.balance) - deductAmount;
+      card.updatedAt = new Date();
+      if (card.balance <= 0) card.status = 'used';
+      await card.save();
+      res.json({ success: true, deducted: deductAmount, remainingBalance: card.balance, status: card.status });
+    } catch (error) {
+      res.status(500).json({ error: "فشل استخدام بطاقة الهدية" });
+    }
+  });
+
   app.get("/api/gift-cards/check/:code", async (req, res) => {
     try {
       const { GiftCardModel } = await import("@shared/schema");

@@ -227,6 +227,9 @@ export default function CheckoutPage() {
   const [discountCode, setDiscountCode] = useState("");
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<{code: string, percentage: number, isOffer?: boolean} | null>(null);
+  const [giftCardCode, setGiftCardCode] = useState("");
+  const [appliedGiftCard, setAppliedGiftCard] = useState<{ code: string; balance: number; applied: number } | null>(null);
+  const [isCheckingGiftCard, setIsCheckingGiftCard] = useState(false);
   const [showCouponSuggestions, setShowCouponSuggestions] = useState(false);
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const { card: loyaltyCard, refetch: refetchLoyaltyCard } = useLoyaltyCard();
@@ -259,6 +262,28 @@ export default function CheckoutPage() {
       return Math.max(0, base - pointsDiscountSAR);
     }
     return base;
+  };
+
+  const giftCardDiscount = appliedGiftCard ? Math.min(appliedGiftCard.applied, getFinalTotalWithPoints()) : 0;
+  const getFinalAmount = () => Math.max(0, getFinalTotalWithPoints() - giftCardDiscount);
+
+  const handleCheckGiftCard = async (code?: string) => {
+    const codeToUse = code || giftCardCode.trim();
+    if (!codeToUse) return;
+    setIsCheckingGiftCard(true);
+    try {
+      const res = await fetch(`/api/gift-cards/check/${codeToUse.toUpperCase()}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "بطاقة غير صالحة");
+      const currentTotal = getFinalTotalWithPoints();
+      const applied = Math.min(Number(data.balance), currentTotal);
+      setAppliedGiftCard({ code: data.code, balance: Number(data.balance), applied });
+      toast({ title: "✅ بطاقة هدية مقبولة", description: `سيتم خصم ${applied.toFixed(2)} ريال (الرصيد الكامل: ${data.balance} ريال)` });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "❌ خطأ", description: err.message });
+    } finally {
+      setIsCheckingGiftCard(false);
+    }
   };
   const [isRegistering, setIsRegistering] = useState(false);
   const { customer, setCustomer } = useCustomer();
@@ -464,11 +489,23 @@ export default function CheckoutPage() {
       if (usePointsAsDiscount) {
         try { await refetchLoyaltyCard(); } catch {}
       }
+      // Redeem gift card balance after successful order
+      if (appliedGiftCard && giftCardDiscount > 0) {
+        try {
+          await fetch(`/api/gift-cards/${appliedGiftCard.code}/redeem-customer`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: giftCardDiscount })
+          });
+        } catch {}
+      }
       setOrderDetails(data);
       clearCart();
       customerStorage.clearActiveOffer();
       setShowSuccessPage(true);
       setPointsToRedeem(0);
+      setAppliedGiftCard(null);
+      setGiftCardCode("");
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/loyalty/cards/phone"] });
       refetchLoyaltyCard();
@@ -522,7 +559,7 @@ export default function CheckoutPage() {
   };
 
   const handleProceedPayment = () => {
-    const isFreeOrder = getFinalTotalWithPoints() <= 0;
+    const isFreeOrder = getFinalAmount() <= 0;
 
     if (isFreeOrder) {
       if (!selectedPaymentMethod) {
@@ -572,7 +609,7 @@ export default function CheckoutPage() {
   };
 
   const confirmAndCreateOrder = async () => {
-    let finalTotal = getFinalTotalWithPoints();
+    let finalTotal = getFinalAmount();
 
     if (selectedPaymentMethod === ('wallet' as any) && (customer?.walletBalance || 0) < finalTotal) {
       toast({ variant: "destructive", title: t("points.insufficient_wallet") });
@@ -724,10 +761,19 @@ export default function CheckoutPage() {
                     <span className="font-bold">-{Math.min(pointsDiscountSAR, getBaseTotal()).toFixed(2)} <SarIcon /></span>
                   </div>
                 )}
+                {appliedGiftCard && giftCardDiscount > 0 && (
+                  <div className="flex justify-between items-center gap-2 text-sm text-primary bg-primary/5 border border-primary/20 p-2 rounded">
+                    <span className="flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5" />
+                      بطاقة هدية ({appliedGiftCard.code})
+                    </span>
+                    <span className="font-bold">-{giftCardDiscount.toFixed(2)} <SarIcon /></span>
+                  </div>
+                )}
                 <div className="pt-4 border-t font-bold text-xl flex justify-between gap-2">
                   <span>{t("cart.total")}:</span>
-                  <span className={usePointsAsDiscount && getFinalTotalWithPoints() === 0 ? 'text-green-600' : 'text-primary'}>
-                    {getFinalTotalWithPoints().toFixed(2)} <SarIcon />
+                  <span className={getFinalAmount() === 0 ? 'text-green-600' : 'text-primary'}>
+                    {getFinalAmount().toFixed(2)} <SarIcon />
                   </span>
                 </div>
               </CardContent>
@@ -925,6 +971,50 @@ export default function CheckoutPage() {
                 </div>
                 </ErrorBoundary>
 
+                {/* Gift Card Section */}
+                <div className="border rounded-lg p-4 bg-card space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-primary" />
+                    <Label className="font-semibold">بطاقة الهدية</Label>
+                  </div>
+                  {appliedGiftCard ? (
+                    <div className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2">
+                      <div>
+                        <p className="text-sm font-bold text-primary">{appliedGiftCard.code}</p>
+                        <p className="text-xs text-muted-foreground">خصم {appliedGiftCard.applied.toFixed(2)} ريال من رصيد {appliedGiftCard.balance.toFixed(2)} ريال</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 text-red-500 hover:text-red-700 p-0"
+                        onClick={() => { setAppliedGiftCard(null); setGiftCardCode(""); }}
+                        data-testid="button-remove-gift-card"
+                      >
+                        إزالة
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="أدخل رمز بطاقة الهدية"
+                        value={giftCardCode}
+                        onChange={e => setGiftCardCode(e.target.value.toUpperCase())}
+                        onKeyDown={e => e.key === "Enter" && handleCheckGiftCard()}
+                        className="font-mono uppercase tracking-widest"
+                        data-testid="input-gift-card-code"
+                      />
+                      <Button
+                        onClick={() => handleCheckGiftCard()}
+                        disabled={!giftCardCode.trim() || isCheckingGiftCard}
+                        data-testid="button-apply-gift-card"
+                        className="shrink-0"
+                      >
+                        {isCheckingGiftCard ? "جاري التحقق..." : "تطبيق"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 {customer && loyaltyCard && (
                   <LoyaltyCheckoutCard
                     loyaltyCard={loyaltyCard}
@@ -1031,15 +1121,20 @@ export default function CheckoutPage() {
           </DialogHeader>
           <div className="py-4 text-center space-y-2">
             <p className="text-lg">{t("checkout.confirm_question")}</p>
-            {usePointsAsDiscount && pointsDiscountSAR > 0 ? (
+            {(usePointsAsDiscount && pointsDiscountSAR > 0) || (appliedGiftCard && giftCardDiscount > 0) ? (
               <>
                 <p className="text-sm text-muted-foreground">قبل الخصم: {getBaseTotal().toFixed(2)} <SarIcon /></p>
-                <p className="text-sm text-amber-600 font-semibold">⭐ خصم النقاط: -{Math.min(pointsDiscountSAR, getBaseTotal()).toFixed(2)} <SarIcon /></p>
-                <p className="text-3xl font-black text-primary">{getFinalTotalWithPoints().toFixed(2)} <SarIcon /></p>
-                {getFinalTotalWithPoints() === 0 && <p className="text-sm text-green-600 font-bold">🎉 نقاطك تغطي المبلغ كاملاً!</p>}
+                {usePointsAsDiscount && pointsDiscountSAR > 0 && (
+                  <p className="text-sm text-amber-600 font-semibold">⭐ خصم النقاط: -{Math.min(pointsDiscountSAR, getBaseTotal()).toFixed(2)} <SarIcon /></p>
+                )}
+                {appliedGiftCard && giftCardDiscount > 0 && (
+                  <p className="text-sm text-primary font-semibold">🎁 بطاقة هدية: -{giftCardDiscount.toFixed(2)} <SarIcon /></p>
+                )}
+                <p className="text-3xl font-black text-primary">{getFinalAmount().toFixed(2)} <SarIcon /></p>
+                {getFinalAmount() === 0 && <p className="text-sm text-green-600 font-bold">🎉 تغطية كاملة!</p>}
               </>
             ) : (
-              <p className="text-2xl font-bold text-primary">{getFinalTotalWithPoints().toFixed(2)} <SarIcon /></p>
+              <p className="text-2xl font-bold text-primary">{getFinalAmount().toFixed(2)} <SarIcon /></p>
             )}
           </div>
           <DialogFooter className="gap-2">
