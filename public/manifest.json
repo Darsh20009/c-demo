@@ -5,13 +5,20 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "background_color": "#0d3322",
   "theme_color": "#2D9B6E",
   "orientation": "any",
   "lang": "ar",
   "dir": "rtl",
-  "categories": ["food", "productivity"],
+  "categories": [
+    "food",
+    "productivity"
+  ],
   "prefer_related_applications": false,
   "screenshots": [
     {
@@ -42,7 +49,7 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/logo.png",
+      "src": "/logo-1024.png",
       "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any"
@@ -53,13 +60,23 @@
       "name": "قائمة الطعام",
       "short_name": "Menu",
       "url": "/menu",
-      "icons": [{ "src": "/logo-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "طلباتي",
       "short_name": "Orders",
       "url": "/my-orders",
-      "icons": [{ "src": "/logo-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
