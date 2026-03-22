@@ -16825,6 +16825,38 @@ ${existingIngredients ? `المكونات الحالية: ${existingIngredients}
     }
   });
 
+  // ─── QIROX Studio External API Proxy ───────────────────────────────────────
+  const QIROX_STUDIO_BASE = "https://qiroxstudio.online/api/v1";
+  const qiroxStudioHeaders = () => ({
+    Authorization: `Bearer ${process.env.QIROX_STUDIO_API_KEY || ""}`,
+    "Content-Type": "application/json",
+  });
+
+  const qiroxStudioProxy = async (endpoint: string, res: any) => {
+    try {
+      const response = await fetch(`${QIROX_STUDIO_BASE}${endpoint}`, {
+        headers: qiroxStudioHeaders(),
+      });
+      if (!response.ok) {
+        return res.status(response.status).json({ error: `QIROX Studio API error: ${response.statusText}` });
+      }
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error(`QIROX Studio proxy error (${endpoint}):`, error.message);
+      res.status(500).json({ error: "فشل الاتصال بـ QIROX Studio API" });
+    }
+  };
+
+  app.get("/api/qirox-studio/me", async (_req, res) => qiroxStudioProxy("/me", res));
+  app.get("/api/qirox-studio/stats", async (_req, res) => qiroxStudioProxy("/stats", res));
+  app.get("/api/qirox-studio/orders", async (_req, res) => qiroxStudioProxy("/orders", res));
+  app.get("/api/qirox-studio/projects", async (_req, res) => qiroxStudioProxy("/projects", res));
+  app.get("/api/qirox-studio/invoices", async (_req, res) => qiroxStudioProxy("/invoices", res));
+  app.get("/api/qirox-studio/wallet", async (_req, res) => qiroxStudioProxy("/wallet", res));
+  app.get("/api/qirox-studio/customers", async (_req, res) => qiroxStudioProxy("/customers", res));
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const httpServer = createServer(app);
   
   // Setup WebSocket for real-time order updates
