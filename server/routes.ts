@@ -919,28 +919,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }).catch(err => console.error('[PUSH] Employee new order notification error:', err));
 
         const custId = order.customerId || order.customerInfo?.customerId;
+        const orderNum = String(order.orderNumber || order.dailyNumber || '');
+        const baseUrl = getAppBaseUrl();
+        const customerPushPayload = {
+          title: `✅ تم استلام طلبك`,
+          body: `طلب رقم #${orderNum} • ${orderItems.length} ${orderItems.length > 1 ? 'منتجات' : 'منتج'} • ${Number(order.totalAmount).toFixed(2)} ر.س`,
+          url: '/my-orders',
+          tag: `order-${orderNum}`,
+          type: 'order_status' as const,
+          orderNumber: orderNum,
+          orderStatus: 'pending',
+          totalAmount: order.totalAmount,
+          itemCount: orderItems.length,
+          items: orderItems.slice(0, 5),
+          orderType: order.orderType,
+          image: `${baseUrl}/api/notification-image?status=pending&orderNumber=${encodeURIComponent(orderNum)}&type=${encodeURIComponent(order.orderType || '')}`,
+          actions: [{ action: 'track', title: '👁 متابعة الطلب' }],
+          stageIndex: 0,
+          totalStages: 4,
+        };
         if (custId) {
-          const orderNum = String(order.orderNumber || order.dailyNumber || '');
-          const baseUrl = getAppBaseUrl();
-          sendPushToCustomer(custId, {
-            title: `✅ تم استلام طلبك`,
-            body: `طلب رقم #${orderNum} • ${orderItems.length} ${orderItems.length > 1 ? 'منتجات' : 'منتج'} • ${Number(order.totalAmount).toFixed(2)} ر.س`,
-            url: '/my-orders',
-            tag: `order-${orderNum}`,
-            type: 'order_status',
-            orderNumber: orderNum,
-            orderStatus: 'pending',
-            totalAmount: order.totalAmount,
-            itemCount: orderItems.length,
-            items: orderItems.slice(0, 5),
-            orderType: order.orderType,
-            image: `${baseUrl}/api/notification-image?status=pending&orderNumber=${encodeURIComponent(orderNum)}&type=${encodeURIComponent(order.orderType || '')}`,
-            actions: [
-              { action: 'track', title: '👁 متابعة الطلب' },
-            ],
-            stageIndex: 0,
-            totalStages: 4,
-          }).catch(err => console.error('[PUSH] Customer order confirmation error:', err));
+          sendPushToCustomer(custId, customerPushPayload)
+            .catch(err => console.error('[PUSH] Customer order confirmation error:', err));
+        } else {
+          // Fallback: POS order with phone only — look up customer by phone and send push
+          const custPhone = order.customerPhone || order.customerInfo?.customerPhone;
+          if (custPhone) {
+            const cleanPhone = custPhone.replace(/\D/g, '').replace(/^966/, '0').replace(/^9665/, '05');
+            storage.getCustomerByPhone(cleanPhone).then(customer => {
+              if (customer) {
+                const mongoId = (customer as any)._id?.toString() || (customer as any).id;
+                if (mongoId) {
+                  sendPushToCustomer(mongoId, customerPushPayload)
+                    .catch(err => console.error('[PUSH] POS phone-based customer push error:', err));
+                }
+              }
+            }).catch(() => {});
+          }
         }
       } catch (pushErr) {
         console.error('[PUSH] Error sending push for new order:', pushErr);
@@ -5506,7 +5521,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { "customerInfo.phoneNumber": identifier },
         { "customerInfo.phoneNumber": cleanPhone },
         { "phone": identifier },
-        { "phone": cleanPhone }
+        { "phone": cleanPhone },
+        { "customerPhone": identifier },
+        { "customerPhone": cleanPhone },
       ];
       
       // Add customerId conditions

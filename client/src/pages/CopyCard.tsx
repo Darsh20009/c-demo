@@ -207,6 +207,7 @@ export default function CopyCard() {
   const availableFreeDrinks = Math.max(0, freeCupsEarned - freeCupsRedeemed);
   const tier = loyaltyCard?.tier || 'bronze';
   const points = loyaltyCard?.points || customer.points || 0;
+  const pendingPoints = loyaltyCard?.pendingPoints || 0;
 
   const tierNames: Record<string, string> = {
     bronze: tc('برونزي', 'Bronze'),
@@ -868,6 +869,19 @@ export default function CopyCard() {
             </div>
           </div>
 
+          {/* Pending Points Banner */}
+          {pendingPoints > 0 && (
+            <div className="flex items-center gap-3 bg-gradient-to-l from-orange-950/60 to-amber-950/60 border border-orange-500/30 rounded-2xl px-4 py-3">
+              <div className="w-9 h-9 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                <span className="text-lg">⏳</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-orange-300">{pendingPoints.toLocaleString()} نقطة قيد المعالجة</p>
+                <p className="text-[10px] text-orange-400/60 mt-0.5 leading-snug">ستُضاف لرصيدك فور اكتمال طلبك • 20 نقطة = 1 ريال</p>
+              </div>
+            </div>
+          )}
+
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-2 md:gap-3">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 md:p-4 text-center border border-white/10">
@@ -918,21 +932,40 @@ export default function CopyCard() {
             );
           })()}
 
-          {/* How to use */}
-          <div className="bg-gradient-to-br from-amber-950/40 to-stone-900/40 rounded-2xl p-4 border border-amber-500/20">
-            <p className="text-xs font-bold text-amber-400 mb-2 flex items-center gap-1.5">⭐ كيف تستخدم نقاطك؟</p>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-black text-[10px] flex-shrink-0">١</span>
-                أضف منتجاتك لعربة التسوق وانتقل للدفع
+          {/* Earn & Use guide */}
+          <div className="space-y-2">
+            <div className="bg-gradient-to-br from-green-950/40 to-emerald-900/30 rounded-2xl p-4 border border-green-500/20">
+              <p className="text-xs font-bold text-green-400 mb-2.5 flex items-center gap-1.5">☕ كيف تكسب النقاط؟</p>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-[11px] text-white/60">
+                  <span className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-black text-[10px] flex-shrink-0 mt-0.5">١</span>
+                  <span>اطلب من التطبيق أو أعطِ الكاشير رقم جوالك — تُضاف نقاط لكل مشروب تطلبه</span>
+                </div>
+                <div className="flex items-start gap-2 text-[11px] text-white/60">
+                  <span className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-black text-[10px] flex-shrink-0 mt-0.5">٢</span>
+                  <span>النقاط تظهر أولاً كـ"قيد المعالجة" ⏳ وتُصبح نشطة فور اكتمال الطلب</span>
+                </div>
+                <div className="flex items-start gap-2 text-[11px] text-white/60">
+                  <span className="w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-black text-[10px] flex-shrink-0 mt-0.5">٣</span>
+                  <span><span className="text-green-400 font-bold">20 نقطة = 1 ريال</span> يمكن خصمها من طلباتك القادمة</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-black text-[10px] flex-shrink-0">٢</span>
-                في صفحة الدفع، اختر عدد النقاط التي تريد استخدامها
-              </div>
-              <div className="flex items-center gap-2 text-[11px] text-white/60">
-                <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-black text-[10px] flex-shrink-0">٣</span>
-                تُخصم قيمة النقاط من إجمالي طلبك تلقائياً (20 نقطة = 1 ريال)
+            </div>
+            <div className="bg-gradient-to-br from-amber-950/40 to-stone-900/40 rounded-2xl p-4 border border-amber-500/20">
+              <p className="text-xs font-bold text-amber-400 mb-2.5 flex items-center gap-1.5">⭐ كيف تستخدم نقاطك؟</p>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-[11px] text-white/60">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-black text-[10px] flex-shrink-0 mt-0.5">١</span>
+                  <span>أضف منتجاتك لعربة التسوق وانتقل للدفع</span>
+                </div>
+                <div className="flex items-start gap-2 text-[11px] text-white/60">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-black text-[10px] flex-shrink-0 mt-0.5">٢</span>
+                  <span>في صفحة الدفع، اختر عدد النقاط التي تريد استخدامها</span>
+                </div>
+                <div className="flex items-start gap-2 text-[11px] text-white/60">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-black text-[10px] flex-shrink-0 mt-0.5">٣</span>
+                  <span>تُخصم قيمة النقاط من إجمالي طلبك تلقائياً <span className="text-amber-400 font-bold">(20 نقطة = 1 ريال)</span></span>
+                </div>
               </div>
             </div>
           </div>
