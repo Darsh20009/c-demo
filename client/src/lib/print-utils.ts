@@ -110,20 +110,22 @@ function openPrintWindow(html: string, title: string, config: PrintConfig = {}):
       };
     }
   } else {
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 0; height: 0;';
-    document.body.appendChild(iframe);
-    
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (iframeDoc) {
-      iframeDoc.open();
-      iframeDoc.write(modifiedHtml);
-      iframeDoc.close();
-      
-      setTimeout(() => {
-        iframe.contentWindow?.print();
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-      }, 500);
+    // Popup was blocked — open a new tab instead so main page doesn't freeze
+    const fallbackWindow = window.open('', '_blank');
+    if (fallbackWindow) {
+      fallbackWindow.document.write(modifiedHtml);
+      fallbackWindow.document.close();
+      fallbackWindow.document.title = title;
+      if (autoPrint) {
+        fallbackWindow.onload = function() {
+          setTimeout(() => {
+            fallbackWindow.print();
+            if (autoClose) {
+              setTimeout(() => fallbackWindow.close(), 1000);
+            }
+          }, 300);
+        };
+      }
     }
   }
   return printWindow;

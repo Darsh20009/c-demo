@@ -112,7 +112,7 @@ export default function PosSystem() {
   const [selectedTableForBill, setSelectedTableForBill] = useState<any>(null);
   const [billPaymentMethod, setBillPaymentMethod] = useState<PaymentMethod>("cash");
   const [showPOSSettings, setShowPOSSettings] = useState(false);
-  const [autoPrint, setAutoPrint] = useState(() => localStorage.getItem("pos-auto-print") !== "false");
+  const [autoPrint, setAutoPrint] = useState(() => localStorage.getItem("pos-auto-print") === "true");
   const [showVatLabel, setShowVatLabel] = useState(() => localStorage.getItem("pos-show-vat-label") === "true");
   const [posCustomizationItem, setPosCustomizationItem] = useState<{ item: CoffeeItem; group: CoffeeItem[] } | null>(null);
   const [showOrderReview, setShowOrderReview] = useState(false);

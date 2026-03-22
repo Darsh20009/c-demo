@@ -84,6 +84,18 @@ export function GlobalPrompts() {
     }
   }, [showNotif]);
 
+  function getCustomerUserId(): string {
+    try {
+      const stored = localStorage.getItem("qahwa-customer") || localStorage.getItem("currentCustomer");
+      if (stored) {
+        const cust = JSON.parse(stored);
+        if (cust?.id || cust?._id) return cust.id || cust._id;
+        if (cust?.phone) return `phone:${cust.phone}`;
+      }
+    } catch {}
+    return "visitor";
+  }
+
   const handleNotifEnable = async () => {
     setNotifLoading(true);
     try {
@@ -100,17 +112,19 @@ export function GlobalPrompts() {
             const arr = new Uint8Array(rawData.length);
             for (let i = 0; i < rawData.length; i++) arr[i] = rawData.charCodeAt(i);
 
-            const subscription = await registration.pushManager.subscribe({
+            const existingSub = await registration.pushManager.getSubscription();
+            const subscription = existingSub || await registration.pushManager.subscribe({
               userVisibleOnly: true,
               applicationServerKey: arr,
             });
+            const userId = getCustomerUserId();
             await fetch("/api/push/subscribe", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 subscription: subscription.toJSON(),
                 userType: "customer",
-                userId: "visitor",
+                userId,
               }),
             });
           }

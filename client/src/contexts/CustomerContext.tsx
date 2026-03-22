@@ -2,6 +2,27 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import type { Customer } from "@shared/schema";
 import { customerStorage } from "@/lib/customer-storage";
 
+async function syncPushSubscription(customerId: string) {
+  try {
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription) return;
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: subscription.toJSON(),
+        userType: 'customer',
+        userId: customerId,
+      }),
+    });
+  } catch {
+    // silently ignore
+  }
+}
+
 interface CustomerContextType {
   customer: Customer | null;
   setCustomer: (customer: Customer | null) => void;
@@ -46,6 +67,11 @@ export function CustomerProvider({ children }: { children: ReactNode }) {
   };
 
   const isAuthenticated = !!customer;
+
+  useEffect(() => {
+    if (!customer?.id) return;
+    syncPushSubscription(customer.id).catch(() => {});
+  }, [customer?.id]);
 
   return (
     <CustomerContext.Provider value={{ customer, setCustomer, logout, isAuthenticated }}>
