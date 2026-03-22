@@ -1,4 +1,4 @@
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -94,7 +94,7 @@ interface Branch {
   nameAr: string;
 }
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+const statusLabels: Record<string, { labelAr: string; labelEn: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   draft: { labelAr: "مسودة", labelEn: "Draft", variant: "secondary" },
   pending: { labelAr: "قيد الانتظار", labelEn: "Pending", variant: "outline" },
   approved: { labelAr: "معتمدة", labelEn: "Approved", variant: "default" },
@@ -102,7 +102,7 @@ const statusLabels: Record<string, { label: string; variant: "default" | "second
   cancelled: { labelAr: "ملغاة", labelEn: "Cancelled", variant: "destructive" },
 };
 
-const paymentStatusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+const paymentStatusLabels: Record<string, { labelAr: string; labelEn: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   unpaid: { labelAr: "غير مدفوعة", labelEn: "Unpaid", variant: "destructive" },
   partial: { labelAr: "مدفوعة جزئياً", labelEn: "Partial", variant: "secondary" },
   paid: { labelAr: "مدفوعة", labelEn: "Paid", variant: "default" },
@@ -394,8 +394,8 @@ export default function InventoryPurchasesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{tc("جميع الحالات", "All Statuses")}</SelectItem>
-                {Object.entries(statusLabels).map(([key, { label }]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                {Object.entries(statusLabels).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{tc(cfg.labelAr, cfg.labelEn)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -758,13 +758,13 @@ export default function InventoryPurchasesPage() {
                 <div>
                   <Label className="text-muted-foreground">الحالة</Label>
                   <Badge variant={statusLabels[selectedInvoice.status]?.variant || "secondary"}>
-                    {statusLabels[selectedInvoice.status]?.label || selectedInvoice.status}
+                    {tc(statusLabels[selectedInvoice.status]?.labelAr, statusLabels[selectedInvoice.status]?.labelEn) || selectedInvoice.status}
                   </Badge>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">حالة الدفع</Label>
                   <Badge variant={paymentStatusLabels[selectedInvoice.paymentStatus]?.variant || "secondary"}>
-                    {paymentStatusLabels[selectedInvoice.paymentStatus]?.label || selectedInvoice.paymentStatus}
+                    {tc(paymentStatusLabels[selectedInvoice.paymentStatus]?.labelAr, paymentStatusLabels[selectedInvoice.paymentStatus]?.labelEn) || selectedInvoice.paymentStatus}
                   </Badge>
                 </div>
               </div>

@@ -30,6 +30,7 @@ export interface DeliveryInfo {
     carType: string;
     carColor: string;
     plateNumber: string;
+    parkingSlot?: string;
   };
   address?: {
     fullAddress: string;

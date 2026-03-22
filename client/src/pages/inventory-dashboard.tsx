@@ -1,4 +1,4 @@
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -407,9 +407,9 @@ export default function InventoryDashboardPage() {
             <Tabs value={categoryFilter} onValueChange={setCategoryFilter} className="w-auto">
               <TabsList className="bg-muted/50 p-1 rounded-xl">
                 <TabsTrigger value="all" className="rounded-lg px-4">الكل</TabsTrigger>
-                {Object.entries(categoryLabels).map(([key, { label }]) => (
+                {Object.entries(categoryLabels).map(([key, cat]) => (
                   <TabsTrigger key={key} value={key} className="rounded-lg px-3">
-                    {label}
+                    {tc(cat.labelAr, cat.labelEn)}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -457,7 +457,7 @@ export default function InventoryDashboardPage() {
                             variant="outline" 
                             className={`${stockStatus.textColor} border-current shrink-0`}
                           >
-                            {stockStatus.labelAr}
+                            {stockStatus.label}
                           </Badge>
                         </div>
 

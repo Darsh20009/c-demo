@@ -33,7 +33,7 @@ import {
   Eye
 } from "lucide-react";
 import { format } from "date-fns";
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { ar } from "date-fns/locale";
 
 interface StockAlert {
@@ -287,8 +287,8 @@ export default function InventoryAlertsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{tc("جميع الأنواع", "All Types")}</SelectItem>
-                {Object.entries(alertTypeConfig).map(([key, { label }]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                {Object.entries(alertTypeConfig).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{tc(cfg.labelAr, cfg.labelEn)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

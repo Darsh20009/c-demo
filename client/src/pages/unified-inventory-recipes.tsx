@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";

@@ -1,4 +1,4 @@
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -196,7 +196,7 @@ const expenseCategories = [
   { value: "other", label: tc("أخرى", "Other") },
 ];
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+const statusLabels: Record<string, { labelAr: string; labelEn: string; label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   pending: { labelAr: "قيد الانتظار", labelEn: "Pending", label: "Pending", variant: "secondary" },
   approved: { labelAr: "معتمد", labelEn: "Approved", label: "Approved", variant: "default" },
   rejected: { labelAr: "مرفوض", labelEn: "Rejected", label: "Rejected", variant: "destructive" },

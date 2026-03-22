@@ -46,7 +46,7 @@ import {
   XCircle
 } from "lucide-react";
 import { format } from "date-fns";
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { ar } from "date-fns/locale";
 
 interface StockTransfer {
@@ -316,8 +316,8 @@ export default function InventoryTransfersPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{tc("جميع الحالات", "All Statuses")}</SelectItem>
-                {Object.entries(statusLabels).map(([key, { label }]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                {Object.entries(statusLabels).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{tc(cfg.labelAr, cfg.labelEn)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -563,7 +563,7 @@ export default function InventoryTransfersPage() {
                 <div>
                   <Label className="text-muted-foreground">الحالة</Label>
                   <Badge variant={statusLabels[selectedTransfer.status]?.variant || "secondary"}>
-                    {statusLabels[selectedTransfer.status]?.label || selectedTransfer.status}
+                    {tc(statusLabels[selectedTransfer.status]?.labelAr, statusLabels[selectedTransfer.status]?.labelEn) || selectedTransfer.status}
                   </Badge>
                 </div>
                 <div>

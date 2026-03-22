@@ -121,8 +121,8 @@ export default function ExecutiveDashboard() {
     const methods: Record<string, number> = {};
     filteredOrders.forEach(o => {
       const method = o.paymentMethod === 'cash' ? tc('نقدي', 'Cash') : 
-                     : o.paymentMethod === 'card' ? tc('بطاقة', 'Card') : 
-                     : o.paymentMethod === 'mada' ? tc('مدى', 'Mada') : o.paymentMethod;
+                     o.paymentMethod === 'card' ? tc('بطاقة', 'Card') : 
+                     o.paymentMethod === 'mada' ? tc('مدى', 'Mada') : o.paymentMethod;
       methods[method] = (methods[method] || 0) + Number(o.totalAmount || 0);
     });
     return Object.entries(methods).map(([name, value]) => ({ name, value: Number(value.toFixed(2)) }));
@@ -244,12 +244,12 @@ export default function ExecutiveDashboard() {
     return {
       byRole: Object.entries(roles).map(([role, data]) => ({
         role: role === 'cashier' ? tc('كاشير', 'Cashier') : 
-              : role === 'barista' ? tc('باريستا', 'Barista') :
-              : role === 'manager' ? tc('مدير', 'Manager') :
-              : role === 'admin' ? tc('مشرف', 'Admin') :
-              : role === 'driver' ? tc('سائق', 'Driver') :
-              : role === 'kitchen' ? tc('مطبخ', 'Kitchen') :
-              : role === 'waiter' ? tc('نادل', 'Waiter') : role,
+              role === 'barista' ? tc('باريستا', 'Barista') :
+              role === 'manager' ? tc('مدير', 'Manager') :
+              role === 'admin' ? tc('مشرف', 'Admin') :
+              role === 'driver' ? tc('سائق', 'Driver') :
+              role === 'kitchen' ? tc('مطبخ', 'Kitchen') :
+              role === 'waiter' ? tc('نادل', 'Waiter') : role,
         ...data
       })),
       totalCost: totalMonthlyLaborCost,

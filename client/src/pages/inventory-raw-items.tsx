@@ -1,4 +1,4 @@
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -312,11 +312,11 @@ export default function InventoryRawItemsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{tc("جميع الفئات", "All Categories")}</SelectItem>
-                {Object.entries(categoryLabels).map(([key, { label, icon: Icon }]) => (
+                {Object.entries(categoryLabels).map(([key, { labelAr, labelEn, icon: Icon }]) => (
                   <SelectItem key={key} value={key}>
                     <div className="flex items-center gap-2">
                       <Icon className="h-4 w-4" />
-                      {label}
+                      {tc(labelAr, labelEn)}
                     </div>
                   </SelectItem>
                 ))}
@@ -377,7 +377,7 @@ export default function InventoryRawItemsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className={categoryInfo.color}>
-                            {categoryInfo.label}
+                            {tc(categoryInfo.labelAr, categoryInfo.labelEn)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -483,11 +483,11 @@ export default function InventoryRawItemsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(categoryLabels).map(([key, { label, icon: Icon }]) => (
+                    {Object.entries(categoryLabels).map(([key, { labelAr, labelEn, icon: Icon }]) => (
                       <SelectItem key={key} value={key}>
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
-                          {label}
+                          {tc(labelAr, labelEn)}
                         </div>
                       </SelectItem>
                     ))}
@@ -624,11 +624,11 @@ export default function InventoryRawItemsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(categoryLabels).map(([key, { label, icon: Icon }]) => (
+                    {Object.entries(categoryLabels).map(([key, { labelAr, labelEn, icon: Icon }]) => (
                       <SelectItem key={key} value={key}>
                         <div className="flex items-center gap-2">
                           <Icon className="h-4 w-4" />
-                          {label}
+                          {tc(labelAr, labelEn)}
                         </div>
                       </SelectItem>
                     ))}

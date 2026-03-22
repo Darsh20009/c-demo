@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { useTranslate } from "@/lib/useTranslate";
+import { useTranslate, tc } from "@/lib/useTranslate";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Lock, Eye, Trash2 } from "lucide-react";
 
