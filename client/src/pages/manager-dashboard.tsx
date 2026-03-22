@@ -33,7 +33,7 @@ import {
 import type { Employee, Order, Customer } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
 import { DemoDataManager } from "@/components/demo-data-manager";
-import { FlaskConical } from "lucide-react";
+import { FlaskConical, Sparkles, Brain } from "lucide-react";
 import { useTranslate } from "@/lib/useTranslate";
 
 interface EmployeeWithStats extends Employee {
@@ -864,6 +864,27 @@ export default function ManagerDashboard() {
              <div className="text-[#555] text-xs mt-1">الموظفون</div>
            </div>
          </div>
+
+         {/* ── AI BANNER ── */}
+         <button
+           onClick={() => setLocation("/manager/ai")}
+           className="w-full group relative overflow-hidden bg-gradient-to-l from-violet-950/40 to-purple-950/20 border border-violet-500/20 rounded-2xl p-4 flex items-center gap-4 hover:border-violet-500/40 transition-all"
+         >
+           <div className="absolute inset-0 bg-gradient-to-l from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+           <div className="w-12 h-12 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shrink-0">
+             <Brain className="w-6 h-6 text-violet-400" />
+           </div>
+           <div className="text-right flex-1 min-w-0">
+             <div className="flex items-center gap-2 flex-wrap">
+               <div className="text-white font-bold text-sm">مركز الذكاء الاصطناعي</div>
+               <span className="text-[10px] bg-violet-500/20 text-violet-400 border border-violet-500/30 px-2 py-0.5 rounded-full font-medium">جديد</span>
+             </div>
+             <div className="text-[#666] text-xs mt-0.5">تحليل مبيعاتك، احصل على رؤى ذكية، اسأل المساعد الـ AI عن أي شيء</div>
+           </div>
+           <div className="text-violet-400 group-hover:translate-x-[-4px] transition-transform">
+             <Sparkles className="w-5 h-5" />
+           </div>
+         </button>
 
          {/* ── CHARTS ── */}
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

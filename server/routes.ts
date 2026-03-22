@@ -16436,7 +16436,208 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // AI MENU ASSISTANT  (OpenRouter / OpenAI-compatible)
+  // ─── AI Chat with Business Context ──────────────────────────────────────
+  app.post("/api/ai/chat", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { message, history } = req.body;
+      if (!message) return res.status(400).json({ error: "الرسالة مطلوبة" });
+
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "مفتاح الذكاء الاصطناعي غير مضبوط - يرجى إضافة OPENAI_API_KEY في الإعدادات" });
+
+      // Gather business context
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      let businessContext = "";
+      try {
+        const allOrders = await storage.getOrders(500);
+        const todayOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= todayStart);
+        const weekOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= weekStart);
+
+        const todayRevenue = todayOrders.reduce((s: number, o: any) => s + (o.totalAmount || 0), 0);
+        const weekRevenue = weekOrders.reduce((s: number, o: any) => s + (o.totalAmount || 0), 0);
+
+        // Top selling items
+        const itemCounts: Record<string, { count: number; revenue: number }> = {};
+        weekOrders.forEach((o: any) => {
+          (o.items || []).forEach((item: any) => {
+            const name = item.nameAr || item.name || "بدون اسم";
+            if (!itemCounts[name]) itemCounts[name] = { count: 0, revenue: 0 };
+            itemCounts[name].count += item.quantity || 1;
+            itemCounts[name].revenue += (item.price || 0) * (item.quantity || 1);
+          });
+        });
+        const topItems = Object.entries(itemCounts).sort((a, b) => b[1].count - a[1].count).slice(0, 5);
+
+        // Day performance
+        const dayRevenue: Record<string, number> = {};
+        weekOrders.forEach((o: any) => {
+          const day = new Date(o.createdAt).toLocaleDateString("ar-SA", { weekday: "long" });
+          dayRevenue[day] = (dayRevenue[day] || 0) + (o.totalAmount || 0);
+        });
+        const bestDay = Object.entries(dayRevenue).sort((a, b) => b[1] - a[1])[0];
+
+        const allEmployees = await storage.getEmployees();
+        const products = await storage.getProducts();
+
+        businessContext = `
+معلومات الكافيه (محدثة الآن):
+- إجمالي مبيعات اليوم: ${todayRevenue.toFixed(2)} ريال (${todayOrders.length} طلب)
+- إجمالي مبيعات الأسبوع: ${weekRevenue.toFixed(2)} ريال (${weekOrders.length} طلب)
+- عدد الموظفين: ${allEmployees.length}
+- عدد المنتجات في المنيو: ${products.length}
+- متوسط قيمة الطلب (هذا الأسبوع): ${weekOrders.length > 0 ? (weekRevenue / weekOrders.length).toFixed(2) : 0} ريال
+- أفضل يوم هذا الأسبوع: ${bestDay ? `${bestDay[0]} (${bestDay[1].toFixed(2)} ريال)` : "غير متاح"}
+- أكثر 5 منتجات مبيعاً هذا الأسبوع:
+${topItems.map((item, i) => `  ${i + 1}. ${item[0]}: ${item[1].count} طلب (${item[1].revenue.toFixed(2)} ريال)`).join("\n") || "  لا بيانات"}
+`;
+      } catch {
+        businessContext = "لم تتوفر بيانات المبيعات الآن.";
+      }
+
+      const systemPrompt = `أنت مساعد ذكاء اصطناعي متخصص لإدارة المقاهي والمطاعم، تعمل لصالح نظام QIROX Cafe.
+أنت خبير في:
+- تحليل المبيعات والأرباح
+- تحسين قائمة الطعام والتسعير
+- إدارة الموظفين وجدولة الوردايات
+- استراتيجيات التسويق والعروض الترويجية
+- تحسين تجربة العملاء
+- إدارة المخزون والتكاليف
+
+${businessContext}
+
+قواعد الإجابة:
+- أجب دائماً بالعربية ما لم يسألك المستخدم بالإنجليزية
+- كن موجزاً ومفيداً وعملياً
+- استخدم الأرقام والبيانات المتاحة في إجاباتك
+- قدم توصيات قابلة للتنفيذ
+- استخدم الإيموجي لتحسين القراءة`;
+
+      const messages = [
+        { role: "system", content: systemPrompt },
+        ...(Array.isArray(history) ? history.slice(-10) : []),
+        { role: "user", content: message },
+      ];
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://qirox.cafe",
+          "X-Title": "QIROX Café AI Chat",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-flash-1.5",
+          messages,
+          max_tokens: 1000,
+          temperature: 0.7,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("OpenRouter AI chat error:", errText);
+        return res.status(500).json({ error: "فشل الاتصال بالذكاء الاصطناعي" });
+      }
+
+      const data = await response.json() as any;
+      const reply = data.choices?.[0]?.message?.content || "";
+      res.json({ reply, model: data.model });
+    } catch (error: any) {
+      console.error("AI chat error:", error);
+      res.status(500).json({ error: error.message || "خطأ في الذكاء الاصطناعي" });
+    }
+  });
+
+  // ─── AI Quick Insights (auto-generated) ──────────────────────────────────
+  app.get("/api/ai/insights", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) return res.status(500).json({ error: "OPENAI_API_KEY غير مضبوط" });
+
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      const allOrders = await storage.getOrders(500);
+      const todayOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= todayStart);
+      const weekOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= weekStart);
+      const prevWeekStart = new Date(weekStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const prevWeekOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= prevWeekStart && new Date(o.createdAt) < weekStart);
+
+      const todayRevenue = todayOrders.reduce((s: number, o: any) => s + (o.totalAmount || 0), 0);
+      const weekRevenue = weekOrders.reduce((s: number, o: any) => s + (o.totalAmount || 0), 0);
+      const prevWeekRevenue = prevWeekOrders.reduce((s: number, o: any) => s + (o.totalAmount || 0), 0);
+      const growthPct = prevWeekRevenue > 0 ? ((weekRevenue - prevWeekRevenue) / prevWeekRevenue * 100).toFixed(1) : null;
+
+      const itemCounts: Record<string, number> = {};
+      weekOrders.forEach((o: any) => {
+        (o.items || []).forEach((item: any) => {
+          const name = item.nameAr || item.name || "؟";
+          itemCounts[name] = (itemCounts[name] || 0) + (item.quantity || 1);
+        });
+      });
+      const topItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, c]) => `${n} (${c}x)`).join("، ");
+
+      const hourCounts: Record<number, number> = {};
+      weekOrders.forEach((o: any) => {
+        const h = new Date(o.createdAt).getHours();
+        hourCounts[h] = (hourCounts[h] || 0) + 1;
+      });
+      const peakHour = Object.entries(hourCounts).sort((a, b) => Number(b[1]) - Number(a[1]))[0];
+
+      const prompt = `أنت مستشار أعمال لمقهى. حلل هذه البيانات وأعطني 4 رؤى استراتيجية قصيرة ومفيدة:
+
+بيانات هذا الأسبوع:
+- المبيعات: ${weekRevenue.toFixed(0)} ريال (${weekOrders.length} طلب)
+${growthPct ? `- النمو مقارنة بالأسبوع الماضي: ${growthPct}%` : ""}
+- مبيعات اليوم: ${todayRevenue.toFixed(0)} ريال (${todayOrders.length} طلب)
+- أكثر المنتجات طلباً: ${topItems || "لا بيانات"}
+- وقت الذروة: ${peakHour ? `الساعة ${peakHour[0]}:00 (${peakHour[1]} طلب)` : "غير محدد"}
+
+أعطني 4 رؤى مختلفة بهذا الشكل (JSON array فقط):
+[
+  {"icon": "📈", "title": "عنوان قصير", "insight": "جملة واحدة مفيدة"},
+  ...
+]
+لا تضف أي نص خارج الـ JSON.`;
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://qirox.cafe",
+          "X-Title": "QIROX AI Insights",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-flash-1.5",
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 500,
+          temperature: 0.6,
+        }),
+      });
+
+      if (!response.ok) return res.status(500).json({ error: "فشل الاتصال بالذكاء الاصطناعي" });
+
+      const data = await response.json() as any;
+      const content = (data.choices?.[0]?.message?.content || "").trim();
+
+      try {
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        const insights = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+        res.json({ insights, stats: { todayRevenue, todayOrders: todayOrders.length, weekRevenue, weekOrders: weekOrders.length, growthPct } });
+      } catch {
+        res.json({ insights: [], stats: { todayRevenue, todayOrders: todayOrders.length, weekRevenue, weekOrders: weekOrders.length, growthPct } });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "خطأ في الذكاء الاصطناعي" });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────────
   app.post("/api/ai/menu-assist", async (req, res) => {
     try {

@@ -8,7 +8,8 @@ import {
   HardDrive, Code2, Store, Handshake, Shield, HeadphonesIcon,
   TrendingUp, MapPin, Receipt, ChevronDown, ChevronRight,
   LogOut, Menu, X, BarChart2, Zap, Box, FlaskConical, 
-  ArrowRightLeft, Bell, Table, BookOpen, UserCheck, CreditCard, Monitor
+  ArrowRightLeft, Bell, Table, BookOpen, UserCheck, CreditCard, Monitor,
+  Sparkles, MessageSquare
 } from "lucide-react";
 import { brand } from "@/lib/brand";
 import { cn } from "@/lib/utils";
@@ -83,6 +84,12 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
       { label: "إدارة التوصيل", labelEn: "Delivery", icon: Truck, path: "/manager/delivery", color: "#06b6d4" },
       { label: "السائقون", labelEn: "Drivers", icon: MapPin, path: "/manager/drivers", color: "#22d3ee" },
       { label: "حالة التوصيل", labelEn: "Delivery Status", icon: Zap, path: "/manager/delivery-services", color: "#67e8f9" },
+    ]
+  },
+  {
+    label: "🤖 الذكاء الاصطناعي", labelEn: "AI Center", color: "#a855f7",
+    items: [
+      { label: "مركز الذكاء الاصطناعي", labelEn: "AI Center", icon: Sparkles, path: "/manager/ai", color: "#a855f7" },
     ]
   },
   {
