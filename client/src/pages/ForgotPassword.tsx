@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PhoneInput } from "@/components/phone-input";
-import { Coffee, Mail, Phone, User, ArrowRight, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Mail, Phone, User, ArrowRight, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslate } from "@/lib/useTranslate";
@@ -207,10 +208,8 @@ export default function ForgotPassword() {
     >
       <Card className="w-full max-w-md border-primary/30 bg-card backdrop-blur shadow-xl">
         <CardHeader className="space-y-3 text-center pb-4">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-              <Coffee className="w-8 h-8 text-white" />
-            </div>
+          <div className="flex justify-center mb-1">
+            <img src={qiroxLogoStaff} alt="QIROX" className="h-12 object-contain" />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">{titles[step]}</CardTitle>
           <CardDescription className="text-muted-foreground">{descs[step]}</CardDescription>

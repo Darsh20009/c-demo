@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslate } from "@/lib/useTranslate";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 
 export default function EmployeeForgotPassword() {
   const [, navigate] = useLocation();
@@ -89,23 +90,18 @@ export default function EmployeeForgotPassword() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        background: "linear-gradient(135deg, #1a1410 0%, #2d1810 50%, #1a1410 100%)",
-      }}
+      className="min-h-screen flex items-center justify-center p-4 bg-gray-50"
       dir="rtl"
     >
-      <Card className="w-full max-w-md border-primary/30 bg-gradient-to-br from-stone-900/95 to-stone-950/95 backdrop-blur shadow-2xl">
+      <Card className="w-full max-w-md border border-border bg-card shadow-xl">
         <CardHeader className="space-y-3 text-center pb-6">
-          <div className="flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-              <Coffee className="w-10 h-10 text-white" />
-            </div>
+          <div className="flex justify-center mb-1">
+            <img src={qiroxLogoStaff} alt="QIROX" className="h-12 object-contain" />
           </div>
-          <CardTitle className="text-3xl font-bold text-accent">
+          <CardTitle className="text-2xl font-bold text-foreground">
             {tc("نسيت كلمة المرور؟", "Forgot Password?")}
           </CardTitle>
-          <CardDescription className="text-accent/70 text-lg">
+          <CardDescription className="text-muted-foreground">
             {step === 'username' && tc('أدخل اسم المستخدم لتغيير كلمة المرور', 'Enter your username to change your password')}
             {step === 'password' && tc('أدخل كلمة المرور الجديدة', 'Enter your new password')}
           </CardDescription>
@@ -115,14 +111,14 @@ export default function EmployeeForgotPassword() {
           {step === 'username' && (
             <form onSubmit={handleUsernameSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-accent">{tc("اسم المستخدم", "Username")}</Label>
+                <Label htmlFor="username" className="text-foreground">{tc("اسم المستخدم", "Username")}</Label>
                 <Input
                   id="username"
                   type="text"
                   placeholder={tc("أدخل اسم المستخدم الخاص بك", "Enter your username")}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30"
+                  className="bg-secondary border-border focus:border-primary focus:ring-primary/30"
                   data-testid="input-username"
                   required
                 />
@@ -130,7 +126,7 @@ export default function EmployeeForgotPassword() {
 
               <Button
                 type="submit"
-                className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-12 text-base font-bold"
                 data-testid="button-submit"
               >
                 <div className="flex items-center gap-2">
@@ -144,7 +140,7 @@ export default function EmployeeForgotPassword() {
           {step === 'password' && (
             <form onSubmit={handlePasswordSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-accent">{tc("كلمة المرور الجديدة", "New Password")}</Label>
+                <Label htmlFor="newPassword" className="text-foreground">{tc("كلمة المرور الجديدة", "New Password")}</Label>
                 <div className="relative">
                   <Input
                     id="newPassword"
@@ -152,14 +148,14 @@ export default function EmployeeForgotPassword() {
                     placeholder={tc("أدخل كلمة المرور الجديدة", "Enter new password")}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30 pl-10"
+                    className="bg-secondary border-border focus:border-primary focus:ring-primary/30 pl-10"
                     data-testid="input-new-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute left-3 top-2.5 text-accent hover:text-accent"
+                    className="absolute left-3 top-2.5 text-muted-foreground hover:text-foreground"
                     data-testid="button-toggle-new-password"
                   >
                     {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -168,7 +164,7 @@ export default function EmployeeForgotPassword() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-accent">{tc("تأكيد كلمة المرور", "Confirm Password")}</Label>
+                <Label htmlFor="confirmPassword" className="text-foreground">{tc("تأكيد كلمة المرور", "Confirm Password")}</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -176,20 +172,20 @@ export default function EmployeeForgotPassword() {
                     placeholder={tc("أعد إدخال كلمة المرور", "Re-enter password")}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30 pl-10"
+                    className="bg-secondary border-border focus:border-primary focus:ring-primary/30 pl-10"
                     data-testid="input-confirm-password"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute left-3 top-2.5 text-accent hover:text-accent"
+                    className="absolute left-3 top-2.5 text-muted-foreground hover:text-foreground"
                     data-testid="button-toggle-confirm-password"
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-accent/50 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {tc("كلمة المرور يجب أن تكون على الأقل 4 أحرف", "Password must be at least 4 characters")}
                 </p>
               </div>
@@ -197,7 +193,7 @@ export default function EmployeeForgotPassword() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
+                className="w-full h-12 text-base font-bold"
                 data-testid="button-reset-password"
               >
                 {loading ? tc("جارٍ التغيير...", "Changing...") : tc("تغيير كلمة المرور", "Change Password")}

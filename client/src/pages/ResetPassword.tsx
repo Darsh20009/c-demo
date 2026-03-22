@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, CheckCircle, Eye, EyeOff } from "lucide-react";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslate } from "@/lib/useTranslate";
@@ -146,14 +147,14 @@ export default function ResetPassword() {
     >
       <Card className="w-full max-w-md border-primary/30 bg-card backdrop-blur shadow-xl">
         <CardHeader className="space-y-3 text-center pb-6">
-          <div className="flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/30">
-              {resetSuccess ? (
-                <CheckCircle className="w-10 h-10 text-white" />
-              ) : (
-                <Coffee className="w-10 h-10 text-white" />
-              )}
-            </div>
+          <div className="flex justify-center mb-1">
+            {resetSuccess ? (
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-primary" />
+              </div>
+            ) : (
+              <img src={qiroxLogoStaff} alt="QIROX" className="h-12 object-contain" />
+            )}
           </div>
           <CardTitle className="text-3xl font-bold text-foreground">
             {resetSuccess ? tc("تم التغيير بنجاح!", "Changed Successfully!") : tc("إعادة تعيين كلمة المرور", "Reset Password")}
