@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -238,6 +239,7 @@ export default function ZATCAInvoicesPage() {
   const totalVat = invoices.filter(i => i.status === 'accepted').reduce((sum, i) => sum + i.vatAmount, 0);
 
   return (
+    <PlanGate feature="zatcaCompliance">
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -902,5 +904,6 @@ export default function ZATCAInvoicesPage() {
         </Dialog>
       </div>
     </div>
+    </PlanGate>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
   import { useQuery, useMutation } from "@tanstack/react-query";
   import { queryClient, apiRequest } from "@/lib/queryClient";
   import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -60,6 +61,7 @@ import { useState } from "react";
     };
 
     return (
+      <PlanGate feature="b2bMarketplace">
       <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Header */}
@@ -178,6 +180,7 @@ import { useState } from "react";
           </Dialog>
         </div>
       </div>
+      </PlanGate>
     );
   }
   

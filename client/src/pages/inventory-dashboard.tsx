@@ -1,4 +1,5 @@
 import { useTranslate, tc } from "@/lib/useTranslate";
+import { PlanGate } from "@/components/plan-gate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -281,6 +282,7 @@ export default function InventoryDashboardPage() {
   }
 
   return (
+    <PlanGate feature="inventoryManagement">
     <div className="p-6 space-y-6 bg-background" dir="rtl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
@@ -706,5 +708,6 @@ export default function InventoryDashboardPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </PlanGate>
   );
 }

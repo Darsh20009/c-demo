@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -208,6 +209,7 @@ export default function LoyaltyProgram() {
   };
 
   return (
+    <PlanGate feature="loyaltyProgram">
     <div dir="rtl" className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b">
@@ -686,5 +688,6 @@ export default function LoyaltyProgram() {
         </DialogContent>
       </Dialog>
     </div>
+    </PlanGate>
   );
 }

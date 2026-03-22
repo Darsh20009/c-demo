@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useTranslate, tc } from "@/lib/useTranslate";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -110,6 +111,7 @@ export default function AdvancedAnalyticsPage() {
   };
 
   return (
+    <PlanGate feature="advancedAnalytics">
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -415,5 +417,6 @@ export default function AdvancedAnalyticsPage() {
         )}
       </div>
     </div>
+    </PlanGate>
   );
 }

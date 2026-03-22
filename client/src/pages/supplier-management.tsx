@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useTranslate, tc } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -336,6 +337,7 @@ export default function SupplierManagementPage() {
   };
 
   return (
+    <PlanGate feature="supplierManagement">
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -873,5 +875,6 @@ export default function SupplierManagementPage() {
         </Dialog>
       </div>
     </div>
+    </PlanGate>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ export default function PayrollManagementPage() {
   const years = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
 
   return (
+    <PlanGate feature="payrollManagement">
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-5xl">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -187,5 +189,6 @@ export default function PayrollManagementPage() {
         )}
       </div>
     </div>
+    </PlanGate>
   );
 }

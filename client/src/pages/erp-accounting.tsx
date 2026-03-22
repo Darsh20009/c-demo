@@ -1,4 +1,5 @@
 import { useTranslate, tc } from "@/lib/useTranslate";
+import { PlanGate } from "@/components/plan-gate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -535,6 +536,7 @@ export default function ErpAccountingPage() {
   const totalCredit = trialBalance.reduce((sum, item) => sum + item.creditBalance, 0);
 
   return (
+    <PlanGate feature="erpIntegration">
     <div dir="rtl" className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1940,5 +1942,6 @@ export default function ErpAccountingPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </PlanGate>
   );
 }

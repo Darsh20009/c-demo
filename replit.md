@@ -47,6 +47,34 @@ This is the **single source of truth** for ALL branding across the entire system
 ### New API Endpoints
 - `POST /api/gift-cards/:code/redeem-customer` — Public gift card redemption for customer checkout
 
+## Plan-Based Feature Gating System (March 2026)
+
+### Architecture
+- **`client/src/lib/plan-features.ts`** — Defines `ALL_FEATURES` (30+ features with `key`, `nameAr`, `nameEn`, `icon`, `category`, `categoryAr`, `plan: "lite"|"pro"|"infinity"`). Also exports `PLAN_INFO` (colors, icons, names, prices for each tier), `isFeatureInPlan()` helper, and `PlanName` type.
+- **`client/src/hooks/usePlan.ts`** — React hook that reads `subscription.plan` from `/api/business-config`. Returns `{ plan, loading, hasFeature(key) }`.
+- **`client/src/components/plan-gate.tsx`** — `<PlanGate feature="...">` wrapper component. If the user's plan doesn't include that feature, shows a branded upgrade UI with the required plan color, price, and a link to qirox.cafe/pricing.
+
+### Subscription Tiers
+| Tier | Price | Branches | Employees | Products |
+|------|-------|----------|-----------|----------|
+| Lite ⚡ | 499 SAR/mo | 1 | 5 | 50 |
+| Pro 🚀 | 1,499 SAR/mo | 5 | 30 | 500 |
+| Infinity ♾️ | 3,999 SAR/mo | ∞ | ∞ | ∞ |
+
+### Pages Gated by Plan (16 total)
+- **Infinity**: b2b-marketplace, partner-program, hardware-management, erp-accounting, bi-analytics, api-management, warehouse-management
+- **Pro**: zatca-invoices, accounting-dashboard, gift-cards, loyalty-program, payroll, supplier-management, inventory-smart/dashboard, advanced-analytics
+
+### Backend
+- `server/qirox-admin.ts` has `PLAN_DEFAULTS` with full feature lists per tier and `SubscriptionConfigModel`.
+- `POST /api/qirox/subscriptions` assigns plans to businesses.
+- `GET /api/business-config` returns `subscription.plan` used by `usePlan()`.
+
+### qirox-dashboard SubscriptionsTab
+Fully dynamic plan management UI in the QIROX super admin panel:
+- 3 plan cards (Lite/Pro/Infinity) with per-plan feature lists scrollable, color-coded badges, branch/employee/product limits at a glance.
+- Full feature matrix table grouped by `category`, using `ALL_FEATURES` and `isFeatureInPlan()` — always in sync with `plan-features.ts`, no duplication.
+
 ## Recent Fixes (March 2026)
 
 - **Payment "Coming Soon" Removed**: `comingSoon={false}` in `checkout.tsx` and `checkout-modal.tsx` — payment methods are now fully active

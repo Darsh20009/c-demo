@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useTranslate, tc } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -133,6 +134,7 @@ export default function ApiManagement() {
   const baseUrl = window.location.origin;
 
   return (
+    <PlanGate feature="apiAccess">
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
@@ -321,5 +323,6 @@ const order = await fetch('${baseUrl}/api/orders', {
         </DialogContent>
       </Dialog>
     </div>
+    </PlanGate>
   );
 }

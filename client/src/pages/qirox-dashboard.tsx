@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { ALL_FEATURES, PLAN_INFO, isFeatureInPlan, type PlanName } from "@/lib/plan-features";
 
 interface DashboardData {
   stats: {
@@ -463,16 +464,24 @@ function TenantsTab({ tenants, onAssignPlan, loading, onRefresh }: {
 }
 
 function SubscriptionsTab() {
+  const categories = [...new Set(ALL_FEATURES.map(f => f.category))];
+  const LIMITS: Record<PlanName, Record<string, string>> = {
+    lite:     { branches: "١ فرع", employees: "٥ موظفين", products: "٥٠ منتج" },
+    pro:      { branches: "٥ فروع", employees: "٣٠ موظف", products: "٥٠٠ منتج" },
+    infinity: { branches: "غير محدود", employees: "غير محدود", products: "غير محدود" },
+  };
+
   return (
     <div className="space-y-8">
       <div>
         <h2 className="text-xl font-bold">Subscription Plans</h2>
-        <p className="text-[#666] text-sm">Feature comparison across all plan tiers</p>
+        <p className="text-[#666] text-sm">مميزات كل باقة وجدول المقارنة الشامل</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(["lite", "pro", "infinity"] as const).map((plan) => {
-          const info = PLAN_FEATURES[plan];
+          const info = PLAN_INFO[plan];
+          const planFeatures = ALL_FEATURES.filter(f => isFeatureInPlan(f.plan, plan));
           const isPopular = plan === "pro";
           return (
             <div
@@ -491,22 +500,29 @@ function SubscriptionsTab() {
                 </div>
               )}
 
-              <div className="text-center mb-6 pt-2">
+              <div className="text-center mb-4 pt-2">
                 <span className="text-4xl mb-3 block">{info.icon}</span>
-                <h3 className="text-2xl font-bold">{info.name}</h3>
-                <p className="text-[#888] text-sm">{info.nameAr}</p>
-                <p className="text-3xl font-bold mt-4" style={{ color: info.color }}>
-                  {info.price}
+                <h3 className="text-2xl font-bold">{info.nameEn}</h3>
+                <p className="text-[#888] text-sm font-arabic">{info.nameAr}</p>
+                <p className="text-3xl font-bold mt-3" style={{ color: info.color }}>
+                  {info.priceEn}
                 </p>
+                <p className="text-[#666] text-xs mt-1">{info.priceAr}</p>
               </div>
 
-              <div className="space-y-3 border-t border-[#1e1e1e] pt-6">
-                {info.features.map((f, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm">
-                    <svg className="w-4 h-4 flex-shrink-0" style={{ color: info.color }} fill="currentColor" viewBox="0 0 20 20">
+              <div className="bg-[#0d0d0d] rounded-xl p-3 mb-4 grid grid-cols-3 gap-2 text-center text-xs">
+                <div><div className="text-[#666]">Branches</div><div className="font-bold" style={{ color: info.color }}>{LIMITS[plan].branches}</div></div>
+                <div><div className="text-[#666]">Employees</div><div className="font-bold" style={{ color: info.color }}>{LIMITS[plan].employees}</div></div>
+                <div><div className="text-[#666]">Products</div><div className="font-bold" style={{ color: info.color }}>{LIMITS[plan].products}</div></div>
+              </div>
+
+              <div className="space-y-2 border-t border-[#1e1e1e] pt-4 max-h-64 overflow-y-auto pr-1">
+                {planFeatures.map((f) => (
+                  <div key={f.key} className="flex items-start gap-2 text-xs">
+                    <svg className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: info.color }} fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-[#ccc]">{f}</span>
+                    <span className="text-[#bbb]">{f.icon} {f.nameAr}</span>
                   </div>
                 ))}
               </div>
@@ -516,62 +532,80 @@ function SubscriptionsTab() {
       </div>
 
       <div className="bg-[#111] border border-[#1e1e1e] rounded-xl overflow-hidden">
-        <div className="p-6 border-b border-[#1e1e1e]">
-          <h3 className="text-lg font-semibold">Feature Matrix</h3>
+        <div className="p-4 border-b border-[#1e1e1e] flex items-center justify-between">
+          <h3 className="text-lg font-semibold">🗂️ مقارنة المميزات الكاملة</h3>
+          <span className="text-[#666] text-xs">{ALL_FEATURES.length} ميزة</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1e1e1e]">
-                <th className="text-left px-6 py-3 text-[#888] font-medium">Feature</th>
-                <th className="text-center px-6 py-3 text-[#888] font-medium">Lite</th>
-                <th className="text-center px-6 py-3 text-[#2D9B6E] font-medium">Pro</th>
-                <th className="text-center px-6 py-3 text-purple-400 font-medium">Infinity</th>
+              <tr className="border-b border-[#1e1e1e] bg-[#0d0d0d]">
+                <th className="text-right px-4 py-3 text-[#888] font-medium">الميزة</th>
+                <th className="text-center px-4 py-3 text-[#888] font-medium">⚡ لايت</th>
+                <th className="text-center px-4 py-3 font-bold" style={{ color: "#2D9B6E" }}>🚀 برو</th>
+                <th className="text-center px-4 py-3 font-bold text-purple-400">♾️ إنفينيتي</th>
               </tr>
             </thead>
             <tbody>
-              {[
-                ["POS System", true, true, true],
-                ["Kitchen Display", true, true, true],
-                ["Customer App", true, true, true],
-                ["Multi-Language", true, true, true],
-                ["Max Branches", "1", "5", "Unlimited"],
-                ["Max Employees", "5", "30", "Unlimited"],
-                ["Max Products", "50", "500", "Unlimited"],
-                ["Custom Branding", false, true, true],
-                ["Inventory Management", false, true, true],
-                ["Recipe Management", false, true, true],
-                ["Accounting Module", false, true, true],
-                ["Delivery Management", false, true, true],
-                ["Loyalty Program", false, true, true],
-                ["Gift Cards", false, true, true],
-                ["Table Management", false, true, true],
-                ["Payroll Management", false, true, true],
-                ["Supplier Management", false, true, true],
-                ["ZATCA Compliance", false, true, true],
-                ["Advanced Analytics", false, true, true],
-                ["API Access", false, false, true],
-                ["ERP Integration", false, false, true],
-                ["Warehouse Management", false, false, true],
-                ["Dedicated Support", false, false, true],
-              ].map(([feature, lite, pro, infinity], i) => (
-                <tr key={i} className="border-b border-[#1e1e1e]/50 hover:bg-[#1a1a1a]">
-                  <td className="px-6 py-3 text-[#ccc]">{feature as string}</td>
-                  {[lite, pro, infinity].map((val, j) => (
-                    <td key={j} className="text-center px-6 py-3">
-                      {typeof val === "boolean" ? (
-                        val ? (
-                          <svg className="w-5 h-5 mx-auto text-[#2D9B6E]" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5 mx-auto text-[#444]" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                          </svg>
-                        )
-                      ) : (
-                        <span className="text-[#ccc] font-medium">{val as string}</span>
-                      )}
+              {categories.map(cat => {
+                const catFeatures = ALL_FEATURES.filter(f => f.category === cat);
+                const catInfo = catFeatures[0];
+                return (
+                  <>
+                    <tr key={`cat-${cat}`} className="bg-[#0a0a0a] border-b border-[#1e1e1e]">
+                      <td colSpan={4} className="px-4 py-2">
+                        <span className="text-[#666] text-xs font-bold uppercase tracking-wider">{catInfo?.categoryAr || cat}</span>
+                      </td>
+                    </tr>
+                    {catFeatures.map(f => (
+                      <tr key={f.key} className="border-b border-[#1e1e1e]/40 hover:bg-[#161616]">
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div>
+                              <div className="text-[#ddd] text-xs">{f.nameAr}</div>
+                              <div className="text-[#555] text-xs">{f.nameEn}</div>
+                            </div>
+                            <span className="text-base">{f.icon}</span>
+                          </div>
+                        </td>
+                        {(["lite", "pro", "infinity"] as PlanName[]).map(plan => {
+                          const has = isFeatureInPlan(f.plan, plan);
+                          const planColor = PLAN_INFO[plan].color;
+                          return (
+                            <td key={plan} className="text-center px-4 py-3">
+                              {has ? (
+                                <svg className="w-4 h-4 mx-auto" style={{ color: planColor }} fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4 mx-auto text-[#333]" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </>
+                );
+              })}
+              <tr className="bg-[#0a0a0a] border-b border-[#1e1e1e]">
+                <td colSpan={4} className="px-4 py-2">
+                  <span className="text-[#666] text-xs font-bold uppercase tracking-wider">الحدود</span>
+                </td>
+              </tr>
+              {([
+                ["فروع", "1", "5", "∞"],
+                ["موظفون", "5", "30", "∞"],
+                ["منتجات", "50", "500", "∞"],
+                ["الدعم", "أساسي", "أولوية", "مخصص 24/7"],
+              ] as [string, string, string, string][]).map(([label, l, p, i]) => (
+                <tr key={label} className="border-b border-[#1e1e1e]/40 hover:bg-[#161616]">
+                  <td className="px-4 py-3 text-right text-[#888] text-xs">{label}</td>
+                  {[l, p, i].map((val, idx) => (
+                    <td key={idx} className="text-center px-4 py-3">
+                      <span className="font-bold text-xs" style={{ color: PLAN_INFO[(['lite','pro','infinity'] as PlanName[])[idx]].color }}>{val}</span>
                     </td>
                   ))}
                 </tr>

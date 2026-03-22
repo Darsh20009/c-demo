@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useTranslate, tc } from "@/lib/useTranslate";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -114,6 +115,7 @@ export default function BIAnalytics() {
   }, [data]);
 
   return (
+    <PlanGate feature="biAnalytics">
     <div className="p-4 md:p-6 space-y-6 bg-background min-h-screen" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
@@ -474,5 +476,6 @@ export default function BIAnalytics() {
         </Tabs>
       )}
     </div>
+    </PlanGate>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
 import { useTranslate, tc } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -85,6 +86,7 @@ export default function GiftCardsManagementPage() {
   };
 
   return (
+    <PlanGate feature="giftCards">
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
@@ -225,5 +227,6 @@ export default function GiftCardsManagementPage() {
         )}
       </div>
     </div>
+    </PlanGate>
   );
 }

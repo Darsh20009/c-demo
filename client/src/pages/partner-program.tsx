@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PlanGate } from "@/components/plan-gate";
   import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
   import { Button } from "@/components/ui/button";
   import { Badge } from "@/components/ui/badge";
@@ -62,6 +63,7 @@ import { useState } from "react";
     const tierBadgeColors: Record<string, string> = { silver: 'bg-slate-500/20 text-slate-400 border-slate-500/30', gold: 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30', platinum: 'bg-cyan-500/20 text-cyan-500 border-cyan-500/30', diamond: 'bg-purple-500/20 text-purple-500 border-purple-500/30' };
 
     return (
+      <PlanGate feature="partnerProgram">
       <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
         <div className="max-w-5xl mx-auto space-y-6">
           <div className="flex items-center gap-3">
@@ -232,6 +234,7 @@ import { useState } from "react";
           </Dialog>
         </div>
       </div>
+      </PlanGate>
     );
   }
   

@@ -1,4 +1,5 @@
 import { useTranslate, tc } from "@/lib/useTranslate";
+import { PlanGate } from "@/components/plan-gate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -523,6 +524,7 @@ export default function AccountingDashboardPage() {
     : [];
 
   return (
+    <PlanGate feature="accountingModule">
     <div className="min-h-screen bg-background" dir="rtl">
       <div className="container mx-auto p-4 md:p-6 max-w-7xl">
         <div className="flex items-center justify-between gap-4 mb-6">
@@ -1827,5 +1829,6 @@ export default function AccountingDashboardPage() {
         </Dialog>
       </div>
     </div>
+    </PlanGate>
   );
 }
