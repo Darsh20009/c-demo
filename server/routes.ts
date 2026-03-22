@@ -6268,6 +6268,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get coffee items by category (optimized)
+  // Returns array of coffeeItemIds that have at least one addon — used by POS to open customization dialog
+  app.get("/api/coffee-items/with-addons", async (req: any, res) => {
+    try {
+      const links = await CoffeeItemAddonModel.find({}).select("coffeeItemId").lean().exec();
+      const ids = [...new Set(links.map((l: any) => l.coffeeItemId).filter(Boolean))];
+      res.set('Cache-Control', 'public, max-age=60');
+      res.json(ids);
+    } catch (error) {
+      res.json([]);
+    }
+  });
+
   app.get("/api/coffee-items/category/:category", async (req: any, res) => {
     try {
       res.set('Cache-Control', 'public, max-age=120');

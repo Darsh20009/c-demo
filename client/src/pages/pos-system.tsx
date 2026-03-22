@@ -304,6 +304,12 @@ export default function PosSystem() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: itemsWithAddons = [] } = useQuery<string[]>({
+    queryKey: ["/api/coffee-items/with-addons"],
+    staleTime: 5 * 60 * 1000,
+  });
+  const itemsWithAddonsSet = useMemo(() => new Set(itemsWithAddons), [itemsWithAddons]);
+
   const { data: liveOrders } = useQuery<Order[]>({
     queryKey: ["/api/orders/live"],
     refetchInterval: 20000,
@@ -634,7 +640,7 @@ export default function PosSystem() {
         };
         // Delay print by 200ms so UI updates (clear cart, show receipt) render first
         setTimeout(() => {
-          try { printTaxInvoice(printSnapshot); } catch (e) {
+          try { printTaxInvoice(printSnapshot, { autoPrint: false }); } catch (e) {
             console.warn('[POS] Auto-print failed silently:', e);
           }
         }, 200);
@@ -969,7 +975,8 @@ export default function PosSystem() {
                       const group = groupedItemsMap[groupKey] || [item];
                       const hasVariants = group.length > 1;
                       const hasSizes = item.availableSizes && item.availableSizes.length > 0;
-                      if (!hasVariants && !hasSizes) {
+                      const hasAddons = itemsWithAddonsSet.has(item.id);
+                      if (!hasVariants && !hasSizes && !hasAddons) {
                         addToOrder(item);
                       } else {
                         setPosCustomizationItem({ item, group });
@@ -997,13 +1004,21 @@ export default function PosSystem() {
                       {(() => {
                         const groupKey = getGroupingKey(item);
                         const groupCount = (groupedItemsMap[groupKey] || [item]).length;
-                        return groupCount > 1 ? (
-                          <div className="absolute top-1.5 right-1.5">
-                            <Badge className="text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-primary/90 text-white font-bold">
-                              {groupCount} {i18n.language === 'ar' ? 'خيارات' : 'options'}
-                            </Badge>
+                        const hasAddonsBadge = itemsWithAddonsSet.has(item.id);
+                        return (
+                          <div className="absolute top-1.5 right-1.5 flex flex-col gap-1">
+                            {groupCount > 1 && (
+                              <Badge className="text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-primary/90 text-white font-bold">
+                                {groupCount} {i18n.language === 'ar' ? 'خيارات' : 'options'}
+                              </Badge>
+                            )}
+                            {hasAddonsBadge && (
+                              <Badge className="text-[9px] sm:text-[10px] px-1.5 py-0.5 bg-orange-500/90 text-white font-bold">
+                                + {i18n.language === 'ar' ? 'إضافات' : 'Addons'}
+                              </Badge>
+                            )}
                           </div>
-                        ) : null;
+                        );
                       })()}
                     </div>
                     <CardContent className="p-2 sm:p-3">
