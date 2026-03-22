@@ -16530,7 +16530,7 @@ ${businessContext}
           "X-Title": "QIROX Café AI Chat",
         },
         body: JSON.stringify({
-          model: "google/gemini-flash-1.5",
+          model: "google/gemini-2.0-flash-001",
           messages,
           max_tokens: 1000,
           temperature: 0.7,
@@ -16614,7 +16614,7 @@ ${growthPct ? `- النمو مقارنة بالأسبوع الماضي: ${growth
           "X-Title": "QIROX AI Insights",
         },
         body: JSON.stringify({
-          model: "google/gemini-flash-1.5",
+          model: "google/gemini-2.0-flash-001",
           messages: [{ role: "user", content: prompt }],
           max_tokens: 500,
           temperature: 0.6,
@@ -16749,7 +16749,7 @@ ${existingIngredients ? `المكونات الحالية: ${existingIngredients}
           "X-Title": "QIROX Café AI Assistant",
         },
         body: JSON.stringify({
-          model: "google/gemini-flash-1.5",
+          model: "google/gemini-2.0-flash-001",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },

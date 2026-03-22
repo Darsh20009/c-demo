@@ -123,6 +123,7 @@ const DriverPortal = lazy(() => import("@/pages/driver-portal"));
 const DriverLogin = lazy(() => import("@/pages/driver-login"));
 const DeliveryTracking = lazy(() => import("@/pages/delivery-tracking"));
 const WelcomePage = lazy(() => import("@/pages/welcome"));
+const PricingPage = lazy(() => import("@/pages/pricing"));
 const EmployeeHome = lazy(() => import("@/pages/employee-home"));
 const QiroxLogin = lazy(() => import("@/pages/qirox-login"));
 const QiroxDashboard = lazy(() => import("@/pages/qirox-dashboard"));
@@ -178,6 +179,7 @@ function AppRouter() {
       
       {/* Public routes */}
       <Route path="/welcome"><WelcomePage /></Route>
+      <Route path="/pricing"><PricingPage /></Route>
       <Route path="/" component={WelcomePage} />
       <Route path="/0"><EmployeeSplash /></Route>
       <Route path="/tenant/signup"><TenantSignup /></Route>

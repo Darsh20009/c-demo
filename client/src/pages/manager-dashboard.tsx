@@ -716,7 +716,7 @@ export default function ManagerDashboard() {
 
  return (
  <>
- <div className="flex h-screen overflow-hidden bg-[#070707]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+ <div className="flex h-screen overflow-hidden bg-background" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
 
    {/* ─── SIDEBAR ─── */}
    <ManagerSidebar
@@ -731,17 +731,17 @@ export default function ManagerDashboard() {
    <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
      {/* TOP HEADER */}
-     <header className="flex-shrink-0 bg-[#0a0a0a] border-b border-[#1a1a1a] px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+     <header className="flex-shrink-0 bg-background border-b border-border px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
        <div className="flex items-center gap-3">
          <button
-           className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-[#1a1a1a] text-[#888] hover:text-white"
+           className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-muted text-muted-foreground hover:text-foreground"
            onClick={() => setMobileMenuOpen(true)}
          >
            <Menu className="w-5 h-5" />
          </button>
          <div className="hidden sm:block">
            <div className="flex items-center gap-2">
-             <div className="text-white font-bold text-sm">{greeting}، <span className="text-[#2D9B6E]">{manager.fullName}</span></div>
+             <div className="text-foreground font-bold text-sm">{greeting}، <span className="text-[#2D9B6E]">{manager.fullName}</span></div>
              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
                manager.role === 'admin' ? 'bg-purple-500/15 text-purple-400 border-purple-500/30' :
                manager.role === 'owner' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' :
@@ -751,27 +751,27 @@ export default function ManagerDashboard() {
                {manager.role === 'admin' ? 'مدير عام' : manager.role === 'owner' ? 'مالك' : manager.role === 'branch_manager' ? 'مدير فرع' : 'مدير'}
              </span>
            </div>
-           <div className="text-[#555] text-xs">{todayLabel}</div>
+           <div className="text-muted-foreground text-xs">{todayLabel}</div>
          </div>
        </div>
        <div className="flex items-center gap-2">
          <Select value={dateFilter} onValueChange={(value: any) => setDateFilter(value)}>
-           <SelectTrigger className="h-8 w-32 text-xs bg-[#111] border-[#222] text-[#aaa]">
+           <SelectTrigger className="h-8 w-32 text-xs bg-muted/50 border-border text-foreground/70">
              <Calendar className="w-3 h-3 ml-1" />
              <SelectValue />
            </SelectTrigger>
-           <SelectContent className="bg-[#111] border-[#222]">
+           <SelectContent className="bg-card border-border">
              <SelectItem value="today" className="text-xs">اليوم</SelectItem>
              <SelectItem value="week" className="text-xs">آخر أسبوع</SelectItem>
              <SelectItem value="month" className="text-xs">آخر شهر</SelectItem>
              <SelectItem value="all" className="text-xs">كل الفترات</SelectItem>
            </SelectContent>
          </Select>
-         <Button variant="outline" size="sm" onClick={() => setDemoManagerOpen(true)} className="h-8 text-xs border-[#222] bg-[#111] text-[#888] hover:text-white hidden sm:flex">
+         <Button variant="outline" size="sm" onClick={() => setDemoManagerOpen(true)} className="h-8 text-xs border-border bg-muted/50 text-muted-foreground hover:text-foreground hidden sm:flex">
            <FlaskConical className="w-3 h-3 ml-1" />
            تجريبي
          </Button>
-         <Button variant="outline" size="sm" onClick={handleExportData} className="h-8 text-xs border-[#222] bg-[#111] text-[#888] hover:text-white">
+         <Button variant="outline" size="sm" onClick={handleExportData} className="h-8 text-xs border-border bg-muted/50 text-muted-foreground hover:text-foreground">
            <Download className="w-3 h-3 ml-1" />
            Excel
          </Button>
@@ -790,8 +790,8 @@ export default function ManagerDashboard() {
              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#2D9B6E22" }}>
                <DollarSign className="w-5 h-5" style={{ color: "#2D9B6E" }} />
              </div>
-             <div className="text-[#666] text-xs mb-1">إجمالي المبيعات</div>
-             <div className="text-2xl lg:text-3xl font-bold text-white">{totalRevenue.toLocaleString('ar-SA', { maximumFractionDigits: 0 })}</div>
+             <div className="text-muted-foreground text-xs mb-1">إجمالي المبيعات</div>
+             <div className="text-2xl lg:text-3xl font-bold text-foreground">{totalRevenue.toLocaleString('ar-SA', { maximumFractionDigits: 0 })}</div>
              <div className="text-[#2D9B6E] text-xs mt-1 flex items-center gap-1">
                <SarIcon />
                <span>ريال سعودي</span>
@@ -809,11 +809,11 @@ export default function ManagerDashboard() {
              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#3b82f622" }}>
                <ShoppingBag className="w-5 h-5 text-blue-400" />
              </div>
-             <div className="text-[#666] text-xs mb-1">الطلبات</div>
-             <div className="text-2xl lg:text-3xl font-bold text-white">{filteredOrders.length.toLocaleString('ar-SA')}</div>
+             <div className="text-muted-foreground text-xs mb-1">الطلبات</div>
+             <div className="text-2xl lg:text-3xl font-bold text-foreground">{filteredOrders.length.toLocaleString('ar-SA')}</div>
              <div className="text-blue-400 text-xs mt-1 flex items-center gap-1">
                <span>{completedOrders.length} مكتمل</span>
-               <span className="text-[#444] mx-1">•</span>
+               <span className="text-muted-foreground mx-1">•</span>
                <span className="text-amber-400">{filteredOrders.length - completedOrders.length} معلق</span>
              </div>
            </div>
@@ -824,8 +824,8 @@ export default function ManagerDashboard() {
              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#8b5cf622" }}>
                <Users className="w-5 h-5 text-purple-400" />
              </div>
-             <div className="text-[#666] text-xs mb-1">العملاء</div>
-             <div className="text-2xl lg:text-3xl font-bold text-white">{customers.length.toLocaleString('ar-SA')}</div>
+             <div className="text-muted-foreground text-xs mb-1">العملاء</div>
+             <div className="text-2xl lg:text-3xl font-bold text-foreground">{customers.length.toLocaleString('ar-SA')}</div>
              <div className="text-purple-400 text-xs mt-1">عميل مسجل</div>
            </div>
 
@@ -835,8 +835,8 @@ export default function ManagerDashboard() {
              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#f59e0b22" }}>
                <Target className="w-5 h-5 text-amber-400" />
              </div>
-             <div className="text-[#666] text-xs mb-1">متوسط الطلب</div>
-             <div className="text-2xl lg:text-3xl font-bold text-white">
+             <div className="text-muted-foreground text-xs mb-1">متوسط الطلب</div>
+             <div className="text-2xl lg:text-3xl font-bold text-foreground">
                {filteredOrders.length > 0 ? (totalRevenue / filteredOrders.length).toFixed(1) : '0'}
              </div>
              <div className="text-amber-400 text-xs mt-1 flex items-center gap-1"><SarIcon /> ريال / طلب</div>
@@ -845,17 +845,17 @@ export default function ManagerDashboard() {
 
          {/* ── TODAY MINI STATS ── */}
          <div className="grid grid-cols-3 gap-3">
-           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-3 text-center">
+           <div className="bg-card border border-border rounded-xl p-3 text-center">
              <div className="text-[#2D9B6E] font-bold text-xl">{todayOrders.length}</div>
-             <div className="text-[#555] text-xs mt-1">طلبات اليوم</div>
+             <div className="text-muted-foreground text-xs mt-1">طلبات اليوم</div>
            </div>
-           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-3 text-center">
+           <div className="bg-card border border-border rounded-xl p-3 text-center">
              <div className="text-[#3b82f6] font-bold text-xl">{todayRevenue.toFixed(0)}</div>
-             <div className="text-[#555] text-xs mt-1">مبيعات اليوم (ر.س)</div>
+             <div className="text-muted-foreground text-xs mt-1">مبيعات اليوم (ر.س)</div>
            </div>
-           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-3 text-center">
+           <div className="bg-card border border-border rounded-xl p-3 text-center">
              <div className="text-[#f59e0b] font-bold text-xl">{employees.length}</div>
-             <div className="text-[#555] text-xs mt-1">الموظفون</div>
+             <div className="text-muted-foreground text-xs mt-1">الموظفون</div>
            </div>
          </div>
 
@@ -870,10 +870,10 @@ export default function ManagerDashboard() {
            </div>
            <div className="text-right flex-1 min-w-0">
              <div className="flex items-center gap-2 flex-wrap">
-               <div className="text-white font-bold text-sm">مركز الذكاء الاصطناعي</div>
+               <div className="text-foreground font-bold text-sm">مركز الذكاء الاصطناعي</div>
                <span className="text-[10px] bg-violet-500/20 text-violet-400 border border-violet-500/30 px-2 py-0.5 rounded-full font-medium">جديد</span>
              </div>
-             <div className="text-[#666] text-xs mt-0.5">تحليل مبيعاتك، احصل على رؤى ذكية، اسأل المساعد الـ AI عن أي شيء</div>
+             <div className="text-muted-foreground text-xs mt-0.5">تحليل مبيعاتك، احصل على رؤى ذكية، اسأل المساعد الـ AI عن أي شيء</div>
            </div>
            <div className="text-violet-400 group-hover:translate-x-[-4px] transition-transform">
              <Sparkles className="w-5 h-5" />
@@ -883,11 +883,11 @@ export default function ManagerDashboard() {
          {/* ── CHARTS ── */}
          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
            {/* Revenue Chart */}
-           <div className="lg:col-span-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+           <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-4">
              <div className="flex items-center justify-between mb-4">
                <div>
-                 <div className="text-white font-bold text-sm">📈 المبيعات اليومية</div>
-                 <div className="text-[#555] text-xs">الاتجاه خلال الفترة المحددة</div>
+                 <div className="text-foreground font-bold text-sm">📈 المبيعات اليومية</div>
+                 <div className="text-muted-foreground text-xs">الاتجاه خلال الفترة المحددة</div>
                </div>
                <div className="w-8 h-8 rounded-lg bg-[#2D9B6E]/10 flex items-center justify-center">
                  <TrendingUp className="w-4 h-4 text-[#2D9B6E]" />
@@ -902,10 +902,10 @@ export default function ManagerDashboard() {
                        <stop offset="95%" stopColor="#2D9B6E" stopOpacity={0} />
                      </linearGradient>
                    </defs>
-                   <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                    <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
                    <YAxis tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
-                   <Tooltip contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '12px', color: '#fff', fontSize: 12 }} />
+                   <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 12 }} />
                    <Area type="monotone" dataKey="revenue" stroke="#2D9B6E" strokeWidth={2} fill="url(#mgRevGrad)" dot={false} />
                  </AreaChart>
                </ResponsiveContainer>
@@ -913,11 +913,11 @@ export default function ManagerDashboard() {
            </div>
 
            {/* Payment Methods */}
-           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+           <div className="bg-card border border-border rounded-2xl p-4">
              <div className="flex items-center justify-between mb-4">
                <div>
-                 <div className="text-white font-bold text-sm">💳 طرق الدفع</div>
-                 <div className="text-[#555] text-xs">توزيع المعاملات</div>
+                 <div className="text-foreground font-bold text-sm">💳 طرق الدفع</div>
+                 <div className="text-muted-foreground text-xs">توزيع المعاملات</div>
                </div>
              </div>
              <div className="h-[180px]">
@@ -928,7 +928,7 @@ export default function ManagerDashboard() {
                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
                      ))}
                    </Pie>
-                   <Tooltip contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '12px', color: '#fff', fontSize: 11 }} />
+                   <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 11 }} />
                    <Legend wrapperStyle={{ fontSize: 10, color: '#888' }} />
                  </PieChart>
                </ResponsiveContainer>
@@ -938,9 +938,9 @@ export default function ManagerDashboard() {
 
          {/* ── TOP ITEMS ── */}
          {topItemsData.length > 0 && (
-           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+           <div className="bg-card border border-border rounded-2xl p-4">
              <div className="flex items-center justify-between mb-4">
-               <div className="text-white font-bold text-sm">🏆 الأكثر مبيعاً</div>
+               <div className="text-foreground font-bold text-sm">🏆 الأكثر مبيعاً</div>
                <Button variant="ghost" size="sm" onClick={() => setLocation("/manager/analytics")} className="text-[#2D9B6E] hover:text-[#2D9B6E] text-xs h-7">
                  التفاصيل ←
                </Button>
@@ -948,10 +948,10 @@ export default function ManagerDashboard() {
              <div className="h-[180px]">
                <ResponsiveContainer width="100%" height="100%">
                  <RechartsBar data={topItemsData.slice(0, 5)} layout="vertical" barSize={12}>
-                   <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" horizontal={false} />
+                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
                    <XAxis type="number" tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
                    <YAxis dataKey="name" type="category" tick={{ fill: '#aaa', fontSize: 10 }} axisLine={false} tickLine={false} width={80} />
-                   <Tooltip contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '12px', color: '#fff', fontSize: 11 }} />
+                   <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px', fontSize: 11 }} />
                    <Bar dataKey="revenue" name="المبيعات" radius={[0, 6, 6, 0]}>
                      {topItemsData.slice(0, 5).map((_, i) => (
                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -964,8 +964,8 @@ export default function ManagerDashboard() {
          )}
 
          {/* ── QUICK ACTIONS GRID ── */}
-         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
-           <div className="text-white font-bold text-sm mb-4">⚡ وصول سريع</div>
+         <div className="bg-card border border-border rounded-2xl p-4">
+           <div className="text-foreground font-bold text-sm mb-4">⚡ وصول سريع</div>
            <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
              {[
                { label: "نقطة البيع", icon: "🛒", path: "/employee/pos", color: "#2D9B6E" },
@@ -988,26 +988,26 @@ export default function ManagerDashboard() {
                <button
                  key={item.path}
                  onClick={() => setLocation(item.path)}
-                 className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-[#111] hover:bg-[#1a1a1a] border border-[#1a1a1a] hover:border-[#2a2a2a] transition-all group"
+                 className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-muted/50 hover:bg-muted border border-border hover:border-border transition-all group"
                >
                  <span className="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
-                 <span className="text-[10px] text-[#888] group-hover:text-[#aaa] text-center leading-tight">{item.label}</span>
+                 <span className="text-[10px] text-muted-foreground group-hover:text-foreground/70 text-center leading-tight">{item.label}</span>
                </button>
              ))}
            </div>
          </div>
 
          {/* ── TABS (DETAILED SECTIONS) ── */}
-         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl overflow-hidden">
+         <div className="bg-card border border-border rounded-2xl overflow-hidden">
          <Tabs defaultValue="orders" className="w-full">
-           <div className="border-b border-[#1a1a1a] overflow-x-auto">
+           <div className="border-b border-border overflow-x-auto">
              <TabsList className="h-12 bg-transparent rounded-none px-2 gap-1 flex-nowrap min-w-max">
-               <TabsTrigger value="orders" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#2D9B6E] text-[#666] text-xs rounded-lg px-3 h-8">📋 الطلبات</TabsTrigger>
-               <TabsTrigger value="employees" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-blue-400 text-[#666] text-xs rounded-lg px-3 h-8">👥 الموظفون</TabsTrigger>
-               <TabsTrigger value="branches" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-amber-400 text-[#666] text-xs rounded-lg px-3 h-8">🏢 الفروع</TabsTrigger>
-               <TabsTrigger value="coupons" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-pink-400 text-[#666] text-xs rounded-lg px-3 h-8">🎟️ الكوبونات</TabsTrigger>
-               <TabsTrigger value="delivery" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-cyan-400 text-[#666] text-xs rounded-lg px-3 h-8">🚚 التوصيل</TabsTrigger>
-               <TabsTrigger value="erp" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-purple-400 text-[#666] text-xs rounded-lg px-3 h-8">📚 ERP</TabsTrigger>
+               <TabsTrigger value="orders" className="data-[state=active]:bg-muted data-[state=active]:text-[#2D9B6E] text-muted-foreground text-xs rounded-lg px-3 h-8">📋 الطلبات</TabsTrigger>
+               <TabsTrigger value="employees" className="data-[state=active]:bg-muted data-[state=active]:text-blue-400 text-muted-foreground text-xs rounded-lg px-3 h-8">👥 الموظفون</TabsTrigger>
+               <TabsTrigger value="branches" className="data-[state=active]:bg-muted data-[state=active]:text-amber-400 text-muted-foreground text-xs rounded-lg px-3 h-8">🏢 الفروع</TabsTrigger>
+               <TabsTrigger value="coupons" className="data-[state=active]:bg-muted data-[state=active]:text-pink-400 text-muted-foreground text-xs rounded-lg px-3 h-8">🎟️ الكوبونات</TabsTrigger>
+               <TabsTrigger value="delivery" className="data-[state=active]:bg-muted data-[state=active]:text-cyan-400 text-muted-foreground text-xs rounded-lg px-3 h-8">🚚 التوصيل</TabsTrigger>
+               <TabsTrigger value="erp" className="data-[state=active]:bg-muted data-[state=active]:text-purple-400 text-muted-foreground text-xs rounded-lg px-3 h-8">📚 ERP</TabsTrigger>
              </TabsList>
            </div>
 
@@ -1196,7 +1196,7 @@ export default function ManagerDashboard() {
  {tc("إضافة فرع", "Add Branch")}
  </Button>
  <Dialog open={isAddBranchOpen} onOpenChange={setIsAddBranchOpen}>
- <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-[#708f87]">
+ <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-card">
  <DialogHeader>
  <DialogTitle className="text-primary text-xl">{tc("إضافة فرع جديد", "Add New Branch")}</DialogTitle>
  </DialogHeader>
