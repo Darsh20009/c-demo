@@ -16516,7 +16516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const bestDay = Object.entries(dayRevenue).sort((a, b) => b[1] - a[1])[0];
 
         const allEmployees = await storage.getEmployees();
-        const products = await storage.getProducts();
+        const products = await storage.getCoffeeItems();
 
         businessContext = `
 معلومات الكافيه (محدثة الآن):
