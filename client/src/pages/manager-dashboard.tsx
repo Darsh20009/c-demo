@@ -712,14 +712,7 @@ export default function ManagerDashboard() {
 
  const hourNow = new Date().getHours();
  const greeting = hourNow < 12 ? "صباح الخير" : hourNow < 17 ? "مساء الخير" : "مساء النور";
- const today = new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
- const todayOrders = orders.filter(o => {
-   if (!o.createdAt) return false;
-   const d = new Date(o.createdAt);
-   const now = new Date();
-   return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
- });
- const todayRevenue = todayOrders.reduce((s, o) => s + Number(o.totalAmount || 0), 0);
+ const todayLabel = new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
  return (
  <>
@@ -758,7 +751,7 @@ export default function ManagerDashboard() {
                {manager.role === 'admin' ? 'مدير عام' : manager.role === 'owner' ? 'مالك' : manager.role === 'branch_manager' ? 'مدير فرع' : 'مدير'}
              </span>
            </div>
-           <div className="text-[#555] text-xs">{today}</div>
+           <div className="text-[#555] text-xs">{todayLabel}</div>
          </div>
        </div>
        <div className="flex items-center gap-2">
