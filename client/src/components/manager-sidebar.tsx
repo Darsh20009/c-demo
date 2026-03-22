@@ -19,6 +19,7 @@ interface ManagerSidebarProps {
   onLogout: () => void;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  role?: string;
 }
 
 interface NavItem {
@@ -29,6 +30,7 @@ interface NavItem {
   children?: NavItem[];
   color?: string;
   badge?: string;
+  roles?: string[];
 }
 
 const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavItem[] }[] = [
@@ -65,9 +67,8 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
     label: "المالية", labelEn: "Finance", color: "#8b5cf6",
     items: [
       { label: "المحاسبة", labelEn: "Accounting", icon: Wallet, path: "/manager/accounting", color: "#8b5cf6" },
-      { label: "ZATCA فاتورة", labelEn: "ZATCA", icon: Shield, path: "/manager/zatca", color: "#a78bfa" },
-      { label: "ERP المحاسبة", labelEn: "ERP Accounting", icon: BookOpen, path: "/erp/accounting", color: "#c4b5fd" },
-      { label: "الرواتب", labelEn: "Payroll", icon: Banknote, path: "/manager/payroll", color: "#7c3aed" },
+      { label: "ZATCA فاتورة", labelEn: "ZATCA", icon: Shield, path: "/manager/zatca", color: "#a78bfa", roles: ["admin", "owner"] },
+      { label: "ERP المحاسبة", labelEn: "ERP Accounting", icon: BookOpen, path: "/erp/accounting", color: "#c4b5fd", roles: ["admin", "owner"] },
     ]
   },
   {
@@ -75,7 +76,6 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
     items: [
       { label: "الموظفون", labelEn: "Employees", icon: Users, path: "/admin/employees", color: "#ec4899" },
       { label: "الحضور", labelEn: "Attendance", icon: UserCheck, path: "/manager/attendance", color: "#f472b6" },
-      { label: "التقييمات", labelEn: "Reviews", icon: Star, path: "/manager/reviews", color: "#f9a8d4" },
     ]
   },
   {
@@ -97,7 +97,6 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
     items: [
       { label: "التقارير", labelEn: "Reports", icon: FileText, path: "/admin/reports", color: "#14b8a6" },
       { label: "التقارير الموحدة", labelEn: "Unified Reports", icon: Building2, path: "/manager/unified-reports", color: "#2dd4bf" },
-      { label: "التحليلات المتقدمة", labelEn: "Advanced Analytics", icon: TrendingUp, path: "/manager/analytics", color: "#5eead4" },
       { label: "تحليلات BI", labelEn: "BI Analytics", icon: Brain, path: "/manager/bi-analytics", color: "#99f6e4" },
     ]
   },
@@ -105,7 +104,6 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
     label: "التسويق", labelEn: "Marketing", color: "#f43f5e",
     items: [
       { label: "برنامج الولاء", labelEn: "Loyalty", icon: CreditCard, path: "/manager/loyalty", color: "#f43f5e" },
-      { label: "بطاقات الهدايا", labelEn: "Gift Cards", icon: Gift, path: "/manager/gift-cards", color: "#fb7185" },
       { label: "العروض الترويجية", labelEn: "Promotions", icon: Tag, path: "/manager/promotions", color: "#fda4af" },
       { label: "الموردون", labelEn: "Suppliers", icon: Handshake, path: "/manager/suppliers", color: "#fecdd3" },
     ]
@@ -113,20 +111,20 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
   {
     label: "الإعدادات", labelEn: "Settings", color: "#64748b",
     items: [
-      { label: "إعدادات الفروع", labelEn: "Branches", icon: Building2, path: "/admin/branches", color: "#64748b" },
+      { label: "إعدادات الفروع", labelEn: "Branches", icon: Building2, path: "/admin/branches", color: "#64748b", roles: ["admin", "owner"] },
       { label: "الإعدادات", labelEn: "Settings", icon: Settings, path: "/admin/settings", color: "#94a3b8" },
-      { label: "التكاملات", labelEn: "Integrations", icon: Globe, path: "/manager/integrations", color: "#cbd5e1" },
+      { label: "التكاملات", labelEn: "Integrations", icon: Globe, path: "/manager/integrations", color: "#cbd5e1", roles: ["admin", "owner"] },
       { label: "الدعم الفني", labelEn: "Support", icon: HeadphonesIcon, path: "/manager/support", color: "#e2e8f0" },
     ]
   },
   {
     label: "المتقدمة", labelEn: "Advanced", color: "#7c3aed",
     items: [
-      { label: "سوق B2B", labelEn: "B2B Market", icon: Store, path: "/manager/b2b", color: "#7c3aed" },
-      { label: "برنامج الشركاء", labelEn: "Partners", icon: Handshake, path: "/manager/partners", color: "#9333ea" },
-      { label: "إدارة الأجهزة", labelEn: "Hardware", icon: HardDrive, path: "/manager/hardware", color: "#a855f7" },
+      { label: "سوق B2B", labelEn: "B2B Market", icon: Store, path: "/manager/b2b", color: "#7c3aed", roles: ["admin", "owner"] },
+      { label: "برنامج الشركاء", labelEn: "Partners", icon: Handshake, path: "/manager/partners", color: "#9333ea", roles: ["admin", "owner"] },
+      { label: "إدارة الأجهزة", labelEn: "Hardware", icon: HardDrive, path: "/manager/hardware", color: "#a855f7", roles: ["admin", "owner"] },
       { label: "إدارة المستودع", labelEn: "Warehouse", icon: Warehouse, path: "/manager/warehouse", color: "#c084fc" },
-      { label: "إدارة API", labelEn: "API Mgmt", icon: Code2, path: "/admin/api", color: "#d8b4fe" },
+      { label: "إدارة API", labelEn: "API Mgmt", icon: Code2, path: "/admin/api", color: "#d8b4fe", roles: ["admin", "owner"] },
     ]
   },
 ];
@@ -191,11 +189,20 @@ function SidebarNavItem({ item, collapsed, depth = 0 }: { item: NavItem; collaps
   );
 }
 
-export function ManagerSidebar({ manager, onLogout, mobileOpen, onMobileClose }: ManagerSidebarProps) {
+export function ManagerSidebar({ manager, onLogout, mobileOpen, onMobileClose, role }: ManagerSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["الرئيسية", "العمليات"]));
   const { i18n } = useTranslation();
   const isAr = i18n.language === "ar";
+  const userRole = role || manager?.role || "manager";
+
+  const filterItemsByRole = (items: NavItem[]) =>
+    items.filter(item => !item.roles || item.roles.includes(userRole));
+
+  const visibleGroups = NAV_GROUPS.map(group => ({
+    ...group,
+    items: filterItemsByRole(group.items),
+  })).filter(group => group.items.length > 0);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => {
@@ -231,7 +238,7 @@ export function ManagerSidebar({ manager, onLogout, mobileOpen, onMobileClose }:
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-2 space-y-1 scrollbar-thin scrollbar-thumb-[#222] scrollbar-track-transparent px-2">
-        {NAV_GROUPS.map(group => (
+        {visibleGroups.map(group => (
           <div key={group.label}>
             {!collapsed && (
               <button

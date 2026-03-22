@@ -78,7 +78,16 @@ export default function EmployeeLogin() {
       localStorage.setItem("currentEmployee", JSON.stringify(employee));
       // Pre-cache menu and config for offline use
       preCacheOnLogin().catch(() => {});
-      window.location.href = "/employee/dashboard";
+      const role = employee.role;
+      if (role === "admin") {
+        window.location.href = "/admin/dashboard";
+      } else if (role === "owner") {
+        window.location.href = "/owner/dashboard";
+      } else if (role === "manager" || role === "branch_manager") {
+        window.location.href = "/manager/dashboard";
+      } else {
+        window.location.href = "/employee/dashboard";
+      }
     },
     onError: (err: any) => {
       setError(err?.message || tc("بيانات تسجيل الدخول غير صحيحة", "Invalid login credentials"));

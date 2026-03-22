@@ -320,7 +320,7 @@ function AppRouter() {
       <Route path="/executive"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><ExecutiveDashboard /></AuthGuard></Route>
 
       {/* Admin protected routes */}
-      <Route path="/admin/dashboard"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminDashboard /></AdminLayout></AuthGuard></Route>
+      <Route path="/admin/dashboard"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminDashboard /></AuthGuard></Route>
       <Route path="/admin/employees"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminEmployees /></AdminLayout></AuthGuard></Route>
       <Route path="/admin/reports"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminReports /></AdminLayout></AuthGuard></Route>
       <Route path="/admin/settings"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminSettings /></AdminLayout></AuthGuard></Route>

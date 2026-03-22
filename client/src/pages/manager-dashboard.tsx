@@ -731,6 +731,7 @@ export default function ManagerDashboard() {
      onLogout={handleLogout}
      mobileOpen={mobileMenuOpen}
      onMobileClose={() => setMobileMenuOpen(false)}
+     role={manager?.role}
    />
 
    {/* ─── MAIN CONTENT ─── */}

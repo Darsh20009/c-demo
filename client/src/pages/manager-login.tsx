@@ -33,7 +33,8 @@ export default function ManagerLogin() {
       return response.json() as Promise<Employee>;
     },
     onSuccess: (employee: any) => {
-      if (employee.role !== "manager" && employee.role !== "admin") {
+      const managerRoles = ["admin", "owner", "manager", "branch_manager"];
+      if (!managerRoles.includes(employee.role)) {
         setError(tc("هذا الحساب ليس حساب مدير", "This account does not have manager access"));
         setPassword("");
         return;
@@ -44,7 +45,14 @@ export default function ManagerLogin() {
         delete employee.restoreKey;
       }
       localStorage.setItem("currentEmployee", JSON.stringify(employee));
-      setLocation("/manager/dashboard");
+
+      if (employee.role === "admin") {
+        setLocation("/admin/dashboard");
+      } else if (employee.role === "owner") {
+        setLocation("/owner/dashboard");
+      } else {
+        setLocation("/manager/dashboard");
+      }
     },
     onError: () => {
       setError(tc("اسم المستخدم أو كلمة المرور غير صحيحة", "Invalid username or password"));
