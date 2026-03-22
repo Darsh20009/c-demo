@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import QRCode from "qrcode";
 import qiroxLogo from "@assets/qirox-logo-customer.png";
+import { brand as sysBrand } from "@/lib/brand";
 
 interface TableQRCardProps {
   tableNumber: string;
@@ -177,7 +178,7 @@ export function TableQRCard({ tableNumber, qrToken, branchName, tableUrl }: Tabl
           ctx.font = "bold 42px 'Georgia', serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("QIROX", logoCenterX, logoCenterY);
+          ctx.fillText(sysBrand.shortNameEn, logoCenterX, logoCenterY);
 
           ctx.font = "16px 'Georgia', serif";
           ctx.fillStyle = BRAND.white;
@@ -190,7 +191,7 @@ export function TableQRCard({ tableNumber, qrToken, branchName, tableUrl }: Tabl
         ctx.fillStyle = BRAND.textDark;
         ctx.font = "bold 54px 'Georgia', 'Playfair Display', serif";
         ctx.textAlign = "center";
-        ctx.fillText("QIROX Cafe", width / 2, 340);
+        ctx.fillText(sysBrand.nameEn, width / 2, 340);
 
         ctx.strokeStyle = BRAND.sage;
         ctx.lineWidth = 1.5;
@@ -381,7 +382,7 @@ export function TableQRCard({ tableNumber, qrToken, branchName, tableUrl }: Tabl
             ctx.fillStyle = BRAND.textMuted;
             ctx.font = "14px 'Segoe UI', Arial, sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("Powered by QIROX Systems", width / 2, height - 60);
+            ctx.fillText(`Powered by ${sysBrand.platformNameEn}`, width / 2, height - 60);
           };
           qrImage.src = qrCodeDataUrl;
         } catch (error) {

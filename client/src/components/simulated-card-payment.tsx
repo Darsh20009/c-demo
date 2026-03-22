@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { brand as sysConfig } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Lock, Shield, ArrowLeft, Wifi } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -310,7 +311,7 @@ export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: Si
               <p className="text-white/50 text-[10px] text-center mt-1">اضغط لإدخال رمز CVV</p>
             </div>
             <div className="absolute bottom-4 left-5 right-5 flex justify-between items-center">
-              <p className="text-white/30 text-[9px]">QIROX Cafe</p>
+              <p className="text-white/30 text-[9px]">{sysConfig.nameEn}</p>
               <CardBrandLogo brand={brand} />
             </div>
           </div>

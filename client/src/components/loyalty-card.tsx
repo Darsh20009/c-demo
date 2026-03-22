@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Download, Wallet, Coffee, Award, Sparkles, Gift, Star, CreditCard, TrendingUp, Crown } from "lucide-react";
 import type { LoyaltyCard } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
+import { brand } from "@/lib/brand";
 
 interface LoyaltyCardProps {
   card: LoyaltyCard;
@@ -135,11 +136,11 @@ export default function LoyaltyCardComponent({ card, showActions = true, compact
     ctx.fillStyle = '#4a3728';
     ctx.font = 'bold 48px Cairo, Arial';
     ctx.textAlign = 'right';
-    ctx.fillText('QIROX Cafe', canvas.width - 50, 70);
+    ctx.fillText(brand.nameEn, canvas.width - 50, 70);
 
     ctx.font = '24px Georgia, serif';
     ctx.fillStyle = '#6b4f3c';
-    ctx.fillText('QIROX Cafe Loyalty', canvas.width - 50, 105);
+    ctx.fillText(brand.loyaltyTaglineEn, canvas.width - 50, 105);
 
     const tierColors: Record<string, string> = {
       bronze: '#cd7f32',
@@ -306,7 +307,7 @@ export default function LoyaltyCardComponent({ card, showActions = true, compact
                 <Coffee className="w-7 h-7" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold" data-testid="text-brand">QIROX Cafe</h3>
+                <h3 className="text-2xl font-bold" data-testid="text-brand">{brand.nameEn}</h3>
                 <p className="text-sm opacity-80">بطاقة الولاء الذكية</p>
               </div>
             </div>

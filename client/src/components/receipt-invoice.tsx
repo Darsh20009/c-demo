@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Printer } from "lucide-react";
 import type { Order } from "@shared/schema";
 import logoImage from "../assets/qirox-logo.png";
+import { brand } from "@/lib/brand";
 import { useRef, useState, useEffect } from "react";
 import QRCode from "qrcode";
 import SarIcon from "@/components/sar-icon";
@@ -217,7 +218,7 @@ export function ReceiptInvoice({ order, variant = "button" }: ReceiptInvoiceProp
       >
         {/* Header */}
         <div className="text-center mb-4 pb-2 border-b border-black">
-          <p className="text-[12px] font-black uppercase tracking-wider">QIROX Cafe</p>
+          <p className="text-[12px] font-black uppercase tracking-wider">{brand.nameEn}</p>
           <p className="text-[9px] font-bold uppercase tracking-tight opacity-70">Tax Invoice - فاتورة ضريبية</p>
         </div>
 

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, Loader2, Copy, Check, ChevronRight, RefreshCw, Wand2, Star, BookOpen, Layers, Palette, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { brand } from "@/lib/brand";
 
 interface AIMenuAssistantProps {
   nameAr: string;
@@ -244,7 +245,7 @@ export function AIMenuAssistant({
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-white font-bold">مساعد QIROX الذكي</span>
+                  <span className="text-white font-bold">{brand.aiAssistantNameAr}</span>
                   <p className="text-purple-300/80 text-sm font-normal mt-0.5">AI Content Generator</p>
                 </div>
               </DialogTitle>

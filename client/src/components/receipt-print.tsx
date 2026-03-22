@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useState } from "react";
 import QRCode from "qrcode";
 import JsBarcode from "jsbarcode";
 import qiroxLogo from "@assets/qirox-logo-customer.png";
+import { brand } from "@/lib/brand";
 import SarIcon from "@/components/sar-icon";
 
 interface OrderItem {
@@ -39,8 +40,8 @@ interface ReceiptProps {
 
 const TAX_RATE = 0.15;
 const VAT_NUMBER = "311234567890003";
-const COMPANY_NAME = "كيروكس";
-const COMPANY_NAME_EN = "QIROX Cafe";
+const COMPANY_NAME = brand.shortNameAr;
+const COMPANY_NAME_EN = brand.nameEn;
 const COMPANY_CR = "1010123456";
 const COMPANY_VAT_NAME = "شركة كيروكس للخدمات الغذائية"; // Added for ZATCA compliance
 const DEFAULT_BRANCH = "فرع الرباط";
@@ -436,11 +437,11 @@ export const ReceiptPrint = forwardRef<HTMLDivElement, ReceiptProps>(
             <div className="bg-gray-100 rounded-lg p-2 mb-3 text-xs">
               <p className="text-gray-600">جميع الأسعار شاملة ضريبة القيمة المضافة 15%</p>
               <p className="text-gray-500">All prices include 15% VAT</p>
-              <p className="font-bold text-amber-700 mt-1">www.qiroxstudio.online</p>
+              <p className="font-bold text-amber-700 mt-1">{brand.website}</p>
             </div>
             <div className="text-xs text-gray-500">
               <p>تابعونا على وسائل التواصل الاجتماعي</p>
-              <p className="font-mono font-bold text-amber-700">@QIROX Cafe</p>
+              <p className="font-mono font-bold text-amber-700">{brand.social.instagram}</p>
             </div>
             <div className="mt-3 pt-2 border-t border-gray-300 text-[9px] text-gray-400">
               <p>تم إنشاء هذه الفاتورة إلكترونياً</p>

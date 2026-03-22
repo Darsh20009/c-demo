@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { applyBrandColors } from "./lib/brand";
+
+// Apply brand colors from the central brand config to CSS variables
+applyBrandColors();
 
 createRoot(document.getElementById("root")!).render(<App />);
 

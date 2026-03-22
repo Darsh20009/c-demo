@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { brand } from "@/lib/brand";
 import { useQuery } from "@tanstack/react-query";
 import { SiInstagram, SiX as SiXIcon, SiFacebook, SiSnapchat, SiTiktok, SiWhatsapp } from "react-icons/si";
 import * as SiIcons from "react-icons/si";
@@ -75,7 +76,7 @@ export function CustomerFooter() {
           </div>
 
           <div className="flex flex-col items-center justify-center gap-2 text-center">
-            <div className="text-xl font-bold text-primary tracking-tighter">QIROX Cafe</div>
+            <div className="text-xl font-bold text-primary tracking-tighter">{brand.nameEn}</div>
             <div className="text-xs text-muted-foreground/60 font-ibm-arabic max-w-[200px]">
               {t("footer.tagline") || "نقدم لك تجربة قهوة لا تُنسى في قلب الرياض"}
             </div>
@@ -94,7 +95,7 @@ export function CustomerFooter() {
         {/* Copyright */}
         <div className="flex flex-col items-center gap-2">
           <div className="text-[11px] font-medium text-muted-foreground/40 text-center uppercase tracking-[0.2em]">
-            &copy; {new Date().getFullYear()} QIROX Systems . ALL RIGHTS RESERVED
+            {brand.copyrightEn.toUpperCase()}
           </div>
           <div className="h-1 w-8 bg-primary/20 rounded-full" />
         </div>

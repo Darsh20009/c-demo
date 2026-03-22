@@ -4,6 +4,7 @@ import { LayoutDashboard, ShoppingCart, ClipboardList, Settings, LogOut, User, B
 import { Button } from '@/components/ui/button';
 import type { Employee } from '@shared/schema';
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { brand } from "@/lib/brand";
 
 interface EmployeeSidebarProps {
   employee: Employee | null;
@@ -95,11 +96,11 @@ export function EmployeeSidebar({ employee, onLogout }: EmployeeSidebarProps) {
         <div className="flex items-center gap-3 mb-2">
           <img 
             src={qiroxLogoStaff} 
-            alt="QIROX Systems" 
+            alt={brand.platformNameEn}
             className="w-10 h-10 object-contain rounded-lg"
           />
           <div>
-            <h2 className="text-lg font-bold text-foreground">QIROX Systems</h2>
+            <h2 className="text-lg font-bold text-foreground">{brand.platformNameAr}</h2>
             <p className="text-xs text-muted-foreground">{t('sidebar.employee_system')}</p>
           </div>
         </div>

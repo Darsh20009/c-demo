@@ -1,8 +1,32 @@
 ## Overview
 
 QIROX Cafe is a comprehensive digital management system for coffee shops. It has two portals:
-- **QIROX Cafe** - Customer-facing ordering, loyalty, and delivery
-- **QIROX Systems** - Employee/Manager/Admin portal for operations
+
+## ⚡ Master Brand Configuration
+
+**File:** `client/src/lib/brand.ts`
+
+This is the **single source of truth** for ALL branding across the entire system. To rebrand the system, only this one file needs to be changed:
+
+- `brand.nameEn` / `brand.nameAr` — System name (English + Arabic)
+- `brand.shortNameEn` / `brand.shortNameAr` — Short name for tight spaces
+- `brand.platformNameEn` / `brand.platformNameAr` — Staff/admin portal name
+- `brand.taglineEn` / `brand.taglineAr` — Tagline shown under logo
+- `brand.logoCustomer` — Customer-facing logo path (`/logo.png`)
+- `brand.logoStaff` — Staff/employee portal logo path (`/employee-logo.png`)
+- `brand.colors.primary` — Primary brand color (HSL values, auto-applied to CSS at startup)
+- `brand.colors.accent` / `brand.colors.background` — Accent & background colors
+- `brand.themeColor` — PWA/browser theme color (hex)
+- `brand.website` / `brand.social` — Contact & social links
+- `brand.pointsBrandEn` / `brand.pointsBrandAr` — Loyalty points program name
+- `brand.cardBrandEn` / `brand.cardBrandAr` — Loyalty card name
+- `brand.aiAssistantNameAr` — AI assistant name shown in the AI modal
+
+**How it works:** `applyBrandColors()` is called in `main.tsx` and injects CSS custom properties from `brand.colors` at runtime, ensuring color changes in `brand.ts` instantly affect the entire UI without touching CSS files.
+
+**Files connected to brand.ts:** admin-sidebar, employee-sidebar, customer-footer, receipt-print, tax-invoice-print, loyalty-card, global-prompts, CardCarousel, receipt-invoice, payment-methods, simulated-card-payment, table-qr-card, AIMenuAssistant, export-utils.
+
+**Note for server-side branding** (email templates in `server/mail-service.ts`): These contain hardcoded brand strings that should be manually kept in sync with `brand.ts` values.
 
 ## New Features (Session T001–T006)
 

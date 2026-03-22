@@ -3,6 +3,7 @@ import { useLocation } from 'wouter';
 import { LayoutDashboard, Users, FileText, Settings, LogOut, Bell, FlaskConical, Code2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { brand } from "@/lib/brand";
 import { DemoDataManager } from './demo-data-manager';
 
 export function AdminSidebar() {
@@ -32,11 +33,11 @@ export function AdminSidebar() {
           <div className="flex items-center gap-3 mb-1">
             <img
               src={qiroxLogoStaff}
-              alt="QIROX Systems"
+              alt={brand.platformNameEn}
               className="w-10 h-10 object-contain rounded-lg"
             />
             <div>
-              <h2 className="text-lg font-bold text-foreground">QIROX Systems</h2>
+              <h2 className="text-lg font-bold text-foreground">{brand.platformNameAr}</h2>
               <p className="text-xs text-muted-foreground">لوحة التحكم الإدارية</p>
             </div>
           </div>

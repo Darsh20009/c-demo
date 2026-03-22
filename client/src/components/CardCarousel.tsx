@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { LoyaltyCard } from "@shared/schema";
+import { brand } from "@/lib/brand";
 
 interface CardCarouselProps {
   cards: LoyaltyCard[];
@@ -81,7 +82,7 @@ export default function CardCarousel({ cards, activeCard, onSelectCard }: CardCa
               </div>
 
               <div className="relative z-10">
-                <h4 className="text-2xl font-black mb-2">QIROX Cafe</h4>
+                <h4 className="text-2xl font-black mb-2">{brand.nameEn}</h4>
                 <p className="text-sm opacity-90">{designColor.label}</p>
               </div>
 
