@@ -78,7 +78,7 @@ import {
 } from "./mail-service";
 import { appendOrderToSheet } from "./google-sheets";
 import { getVapidPublicKey, saveSubscription, removeSubscription, sendPushToEmployee, sendPushToCustomer } from "./push-service";
-import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { registerObjectStorageRoutes } from "./qirox_studio_integrations/object_storage";
 
   // Ensure upload directories exist
   const uploadDirs = [
@@ -3677,7 +3677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      const { ObjectStorageService } = await import("./replit_integrations/object_storage");
+      const { ObjectStorageService } = await import("./qirox_studio_integrations/object_storage");
       const storageService = new ObjectStorageService();
 
       try {
@@ -10663,7 +10663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No image file uploaded" });
       }
 
-      const { ObjectStorageService } = await import("./replit_integrations/object_storage");
+      const { ObjectStorageService } = await import("./qirox_studio_integrations/object_storage");
       const storageService = new ObjectStorageService();
 
       try {
@@ -10734,7 +10734,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No image file uploaded" });
       }
 
-      const { ObjectStorageService } = await import("./replit_integrations/object_storage");
+      const { ObjectStorageService } = await import("./qirox_studio_integrations/object_storage");
       const storageService = new ObjectStorageService();
 
       try {

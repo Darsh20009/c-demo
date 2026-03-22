@@ -269,10 +269,10 @@ app.use(mongoSanitize({
 // 5. HTTP Parameter Pollution protection
 app.use(hpp());
 
-// Trust proxy - required for Render, Replit, and other reverse proxy services
+// Trust proxy - required for QIROX Studio and other reverse proxy services
 app.set('trust proxy', 1);
 
-// Configure allowed hosts for Replit and Render
+// Configure allowed hosts for QIROX Studio
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
