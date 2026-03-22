@@ -89,16 +89,25 @@ export default function CashierTableOrders() {
       const newOrderIds = [...currentOrderIds].filter(id => !previousOrderIdsRef.current.has(id));
       
       if (newOrderIds.length > 0 && previousOrderIdsRef.current.size > 0) {
-        // Play notification sound for new orders
+        // Check if any new orders are online (from customer website)
+        const newOrders = unassignedOrders.filter((o: any) => newOrderIds.includes(o.id));
+        const hasOnlineOrder = newOrders.some((o: any) =>
+          o.channel === 'online' || o.channel === 'web' || o.orderType === 'online' || !o.channel
+        );
+
         if (soundEnabled) {
-          playNotificationSound('cashierOrder', 0.6);
+          if (hasOnlineOrder) {
+            playNotificationSound('cashierOrder', 0.8);
+          } else {
+            playNotificationSound('newOrder', 0.6);
+          }
         }
         
         toast({
-          title: `طلب جديد من الطاولة`,
+          title: hasOnlineOrder ? `🌐 طلب جديد أونلاين` : `طلب جديد من الطاولة`,
           description: `لديك ${newOrderIds.length} ${newOrderIds.length === 1 ? 'طلب جديد' : 'طلبات جديدة'}`,
           duration: 6000,
-          className: "bg-green-600 text-white border-green-700",
+          className: hasOnlineOrder ? "bg-violet-600 text-white border-violet-700" : "bg-green-600 text-white border-green-700",
         });
       }
       

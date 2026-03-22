@@ -119,8 +119,9 @@ export default function KitchenDisplay() {
   const handleNewOrder = useCallback((order: Order) => {
     queryClient.invalidateQueries({ queryKey: ["/api/orders/kitchen"] });
     if (soundEnabled) {
-      const isOnlineOrder = order?.channel === 'online' || order?.channel === 'web';
-      playNotificationSound(isOnlineOrder ? 'onlineOrderVoice' : 'newOrder', 0.7);
+      const isOnlineOrder = order?.channel === 'online' || order?.channel === 'web'
+        || order?.orderType === 'online' || !order?.channel;
+      playNotificationSound(isOnlineOrder ? 'cashierOrder' : 'newOrder', 0.8);
       toast({
         title: tc("طلب جديد!","New Order!"),
         description: `${tc("وصل طلب جديد","New order arrived")} ${order.orderNumber}`,

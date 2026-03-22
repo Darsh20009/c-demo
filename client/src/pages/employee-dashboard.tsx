@@ -98,11 +98,12 @@ export default function EmployeeDashboard() {
         setTimeout(() => setNewOrderAlert(null), 15000);
       }
       if (order?.channel !== 'pos') {
-        const isOnline = order?.channel === 'online' || order?.channel === 'web';
+        const isOnline = order?.channel === 'online' || order?.channel === 'web'
+          || order?.orderType === 'online' || !order?.channel;
         if (isOnline) {
-          playNotificationSound('onlineOrderVoice', 1.0);
+          playNotificationSound('cashierOrder', 1.0);
         } else {
-          playNotificationSound('newOrder', 1.0);
+          playNotificationSound('newOrder', 0.85);
         }
       }
     },
