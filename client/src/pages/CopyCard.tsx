@@ -86,6 +86,16 @@ export default function CopyCard() {
     refetchInterval: 30000, // Refetch every 30 seconds to get updated order data
   });
 
+  const { data: loyaltySettings } = useQuery<{
+    pointsForFreeDrink: number;
+    pointsPerSar: number;
+    pointsValueInSar: number;
+    pointsPerDrink: number;
+  }>({
+    queryKey: ["/api/public/loyalty-settings"],
+    staleTime: 5 * 60 * 1000,
+  });
+
   useEffect(() => {
     const barcodeValue = loyaltyCard?.cardNumber || loyaltyCard?.qrToken || customer?.phone;
     if (barcodeSvgRef.current && barcodeValue) {
@@ -868,6 +878,46 @@ export default function CopyCard() {
               <span className="text-xs text-amber-900/60">قيمة النقاط (ريال)</span>
             </div>
           </div>
+
+          {/* Free Drink Progress */}
+          {(() => {
+            const threshold = loyaltySettings?.pointsForFreeDrink || 500;
+            const progress = Math.min(100, Math.round((points / threshold) * 100));
+            const remaining = Math.max(0, threshold - points);
+            const sarValue = (threshold / (loyaltySettings?.pointsPerSar || 20)).toFixed(0);
+            return (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">☕</span>
+                    <p className="text-xs font-bold text-white/80">المشروب المجاني</p>
+                  </div>
+                  <div className="text-left">
+                    {progress >= 100 ? (
+                      <span className="text-[10px] font-black text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full">✓ جاهز للاسترداد!</span>
+                    ) : (
+                      <span className="text-[10px] text-white/40">{remaining.toLocaleString()} نقطة متبقية</span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${progress}%`,
+                      background: progress >= 100
+                        ? 'linear-gradient(90deg, #22c55e, #4ade80)'
+                        : 'linear-gradient(90deg, #d97706, #f59e0b)',
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between mt-1.5">
+                  <span className="text-[9px] text-white/30">{points.toLocaleString()} نقطة</span>
+                  <span className="text-[9px] text-amber-400/60">{threshold.toLocaleString()} نقطة ≈ {sarValue} ريال</span>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Pending Points Banner */}
           {pendingPoints > 0 && (

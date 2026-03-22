@@ -625,6 +625,27 @@ function generateOrderNotificationSVG(
 }
 
 
+/**
+ * Calculate the free-drink points threshold dynamically.
+ * Threshold = avg(product prices in SAR) × pointsPerSar
+ * Falls back to the config value or 500 if no products found.
+ */
+async function calcFreeDrinkThreshold(tenantId: string, pointsPerSar = 20, fallback = 500): Promise<number> {
+  try {
+    const items = await CoffeeItemModel.find({
+      $or: [{ tenantId }, { tenantId: { $exists: false } }],
+      isActive: { $ne: false },
+      price: { $gt: 0 },
+    }).select('price').lean().exec();
+    if (!items || items.length === 0) return fallback;
+    const avg = items.reduce((sum: number, i: any) => sum + (Number(i.price) || 0), 0) / items.length;
+    if (avg <= 0) return fallback;
+    return Math.round(avg * pointsPerSar);
+  } catch {
+    return fallback;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   registerObjectStorageRoutes(app);
 
@@ -785,7 +806,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const phoneVariants = [cPhone, cardPhone, `+966${cPhone.slice(1)}`, `966${cPhone.slice(1)}`];
         const { BusinessConfigModel: BizCfg, LoyaltyCardModel: LCM } = await import("@shared/schema");
         const bizCfg = await BizCfg.findOne({ tenantId }).lean() as any;
-        const ptsForFree = Number(bizCfg?.loyaltyConfig?.pointsForFreeDrink) || 500;
+        const ptsPerSar = Number(bizCfg?.loyaltyConfig?.pointsPerSar) || 20;
+        const cfgFallback = Number(bizCfg?.loyaltyConfig?.pointsForFreeDrink) || 500;
+        const ptsForFree = await calcFreeDrinkThreshold(tenantId, ptsPerSar, cfgFallback);
         const loyCard = await LCM.findOne({ phoneNumber: { $in: phoneVariants } });
         if (!loyCard) {
           return res.status(400).json({ error: "لا توجد بطاقة ولاء مرتبطة بهذا الرقم" });
@@ -1767,17 +1790,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public loyalty settings (no auth required) for customer-facing pages
   app.get("/api/public/loyalty-settings", async (req, res) => {
     try {
-      const config = await storage.getBusinessConfig('demo-tenant');
+      const tenantId = 'demo-tenant';
+      const config = await storage.getBusinessConfig(tenantId);
       const loyaltyConfig = (config as any)?.loyaltyConfig || {};
+      const pointsPerSar = loyaltyConfig.pointsPerSar ?? 20;
+      const cfgFallback = loyaltyConfig.pointsForFreeDrink ?? 500;
+      const pointsForFreeDrink = await calcFreeDrinkThreshold(tenantId, pointsPerSar, cfgFallback);
       res.json({
         enabled: loyaltyConfig.enabled ?? true,
         pointsPerDrink: loyaltyConfig.pointsPerDrink ?? 10,
-        pointsPerSar: loyaltyConfig.pointsPerSar ?? 20,
+        pointsPerSar,
         pointsEarnedPerSar: loyaltyConfig.pointsEarnedPerSar ?? 1,
         minPointsForRedemption: loyaltyConfig.minPointsForRedemption ?? 100,
         pointsValueInSar: loyaltyConfig.pointsValueInSar ?? 0.05,
         redemptionRate: loyaltyConfig.redemptionRate ?? 100,
-        pointsForFreeDrink: loyaltyConfig.pointsForFreeDrink ?? 500,
+        pointsForFreeDrink,
       });
     } catch (error) {
       res.json({
@@ -1795,17 +1822,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/loyalty-config", async (req, res) => {
     try {
-      const config = await storage.getBusinessConfig('demo-tenant');
+      const tenantId = 'demo-tenant';
+      const config = await storage.getBusinessConfig(tenantId);
       const loyaltyConfig = (config as any)?.loyaltyConfig || {};
+      const pointsPerSar = loyaltyConfig.pointsPerSar ?? 20;
+      const cfgFallback = loyaltyConfig.pointsForFreeDrink ?? 500;
+      const pointsForFreeDrink = await calcFreeDrinkThreshold(tenantId, pointsPerSar, cfgFallback);
       res.json({
         enabled: loyaltyConfig.enabled ?? true,
         pointsPerDrink: loyaltyConfig.pointsPerDrink ?? 10,
-        pointsPerSar: loyaltyConfig.pointsPerSar ?? 20,
+        pointsPerSar,
         pointsEarnedPerSar: loyaltyConfig.pointsEarnedPerSar ?? 1,
         minPointsForRedemption: loyaltyConfig.minPointsForRedemption ?? 100,
         pointsValueInSar: loyaltyConfig.pointsValueInSar ?? 0.05,
         redemptionRate: loyaltyConfig.redemptionRate ?? 100,
-        pointsForFreeDrink: loyaltyConfig.pointsForFreeDrink ?? 500,
+        pointsForFreeDrink,
       });
     } catch (error) {
       res.json({
@@ -1833,10 +1864,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const config = await storage.getBusinessConfig('demo-tenant');
       const loyaltyConfig = (config as any)?.loyaltyConfig || {};
-      const pointsForFreeDrink = loyaltyConfig.pointsForFreeDrink ?? 500;
+      const pointsPerSar = loyaltyConfig.pointsPerSar ?? 20;
+      const cfgFallback = loyaltyConfig.pointsForFreeDrink ?? 500;
+      const pointsForFreeDrink = await calcFreeDrinkThreshold('demo-tenant', pointsPerSar, cfgFallback);
 
       if ((card.points || 0) < pointsForFreeDrink) {
-        return res.status(400).json({ error: "النقاط غير كافية للحصول على مشروب مجاني" });
+        return res.status(400).json({
+          error: "النقاط غير كافية للحصول على مشروب مجاني",
+          currentPoints: card.points || 0,
+          requiredPoints: pointsForFreeDrink,
+        });
       }
 
       const cardId = (card as any)._id?.toString() || (card as any).id;
