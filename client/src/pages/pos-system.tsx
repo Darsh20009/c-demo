@@ -588,39 +588,41 @@ export default function PosSystem() {
         tableNumber: orderType === "dine_in" ? tableNumber : undefined,
         orderType,
       });
+      // ✅ Defer print to avoid blocking the UI thread after checkout
       if (autoPrint) {
-        try {
-          printTaxInvoice({
-            orderNumber: result.orderNumber || result.dailyNumber || result._id?.slice(-4) || '—',
-            customerName: customerName || t('pos.customer_cash'),
-            customerPhone: customerPhone || '',
-            items: orderItems.map(item => {
-              const addonsPrice = (item.customization?.selectedItemAddons || []).reduce((s: number, a: any) => s + (Number(a.price) || 0), 0);
-              const inlineNames = (item.customization?.selectedItemAddons || []).map((a: any) => a.nameAr).join('، ');
-              return {
-                coffeeItem: {
-                  nameAr: (item.coffeeItem?.nameAr || '') + (inlineNames ? ` (${inlineNames})` : ''),
-                  nameEn: item.coffeeItem?.nameEn || '',
-                  price: String(Number(item.coffeeItem?.price || 0) + addonsPrice),
-                },
-                quantity: item.quantity,
-                customization: item.customization,
-              };
-            }),
-            subtotal: subtotal.toFixed(2),
-            total: total.toFixed(2),
-            paymentMethod: PAYMENT_METHOD_LABELS[paymentMethod] || paymentMethod,
-            employeeName: employee?.fullName || t('pos.employee_fallback'),
-            tableNumber: orderType === "dine_in" ? tableNumber : undefined,
-            orderType: orderType as any,
-            date: new Date().toISOString(),
-            crNumber: businessConfig?.commercialRegistration,
-            vatNumber: businessConfig?.vatNumber,
-          });
-          toast({ title: t('pos.bill_closed'), description: t('pos.order_done_desc') });
-        } catch (printErr) {
-          console.warn('[POS] Auto-print failed silently:', printErr);
-        }
+        const printSnapshot = {
+          orderNumber: result.orderNumber || result.dailyNumber || result._id?.slice(-4) || '—',
+          customerName,
+          customerPhone,
+          items: orderItems.map(item => {
+            const addonsPrice = (item.customization?.selectedItemAddons || []).reduce((s: number, a: any) => s + (Number(a.price) || 0), 0);
+            const inlineNames = (item.customization?.selectedItemAddons || []).map((a: any) => a.nameAr).join('، ');
+            return {
+              coffeeItem: {
+                nameAr: (item.coffeeItem?.nameAr || '') + (inlineNames ? ` (${inlineNames})` : ''),
+                nameEn: item.coffeeItem?.nameEn || '',
+                price: String(Number(item.coffeeItem?.price || 0) + addonsPrice),
+              },
+              quantity: item.quantity,
+              customization: item.customization,
+            };
+          }),
+          subtotal: subtotal.toFixed(2),
+          total: total.toFixed(2),
+          paymentMethod: PAYMENT_METHOD_LABELS[paymentMethod] || paymentMethod,
+          employeeName: employee?.fullName || t('pos.employee_fallback'),
+          tableNumber: orderType === "dine_in" ? tableNumber : undefined,
+          orderType: orderType as any,
+          date: new Date().toISOString(),
+          crNumber: businessConfig?.commercialRegistration,
+          vatNumber: businessConfig?.vatNumber,
+        };
+        // Delay print by 200ms so UI updates (clear cart, show receipt) render first
+        setTimeout(() => {
+          try { printTaxInvoice(printSnapshot); } catch (e) {
+            console.warn('[POS] Auto-print failed silently:', e);
+          }
+        }, 200);
       }
       broadcastToDisplay("payment_success", {
         orderNumber: result.orderNumber || result.dailyNumber || '',
