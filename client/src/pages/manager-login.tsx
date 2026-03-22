@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import { AtSign, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import type { Employee } from "@shared/schema";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import { useTranslate } from "@/lib/useTranslate";
@@ -88,15 +88,15 @@ export default function ManagerLogin() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
-                  <User className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
+                  <AtSign className="absolute right-3 top-3 h-5 w-5 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder={tc("اسم المستخدم", "Username")}
+                    placeholder={tc("اسم المستخدم أو البريد الإلكتروني", "Username or Email")}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="pr-10"
                     data-testid="input-username"
-                    autoComplete="username"
+                    autoComplete="username email"
                     autoFocus
                     disabled={loginMutation.isPending}
                   />

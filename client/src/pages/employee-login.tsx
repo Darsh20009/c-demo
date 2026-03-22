@@ -5,7 +5,7 @@ import { preCacheOnLogin } from "@/lib/offline-cashier";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Lock, Loader2, Eye, EyeOff, QrCode, Download } from "lucide-react";
+import { AtSign, Lock, Loader2, Eye, EyeOff, QrCode, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { Employee } from "@shared/schema";
 import { Html5QrcodeScanner } from "html5-qrcode";
@@ -196,16 +196,16 @@ export default function EmployeeLogin() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <div className="relative">
-                    <User className="absolute right-3 top-3 h-5 w-5 text-primary" />
+                    <AtSign className="absolute right-3 top-3 h-5 w-5 text-primary" />
                     <Input
                       type="text"
-                      placeholder={tc("اسم المستخدم", "Username")}
+                      placeholder={tc("اسم المستخدم أو البريد الإلكتروني", "Username or Email")}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="pr-10 bg-background border-border"
                       data-testid="input-username"
                       autoFocus
-                      autoComplete="username"
+                      autoComplete="username email"
                       disabled={loginMutation.isPending}
                     />
                   </div>

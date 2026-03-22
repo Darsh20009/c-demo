@@ -2324,6 +2324,7 @@ export interface IEmployee extends Document {
   id: string;
   tenantId?: string;
   username: string;
+  email?: string;
   password?: string;
   fullName: string;
   role: string;
@@ -2365,6 +2366,7 @@ const EmployeeSchema = new Schema<IEmployee>({
   id: { type: String, required: true, unique: true },
   tenantId: { type: String },
   username: { type: String, required: true, unique: true },
+  email: { type: String, sparse: true },
   password: { type: String },
   fullName: { type: String, required: true },
   role: { type: String, required: true },

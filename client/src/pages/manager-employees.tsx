@@ -208,6 +208,7 @@ export default function ManagerEmployees() {
  username: username,
  fullName: formData.get("fullName") as string,
  phone: formData.get("phone") as string,
+ email: (formData.get("email") as string)?.trim().toLowerCase() || undefined,
  jobTitle: formData.get("jobTitle") as string,
  role: selectedRole,
  branchId: branchId,
@@ -234,6 +235,7 @@ export default function ManagerEmployees() {
  const employeeData = {
  fullName: formData.get("fullName") as string,
  phone: formData.get("phone") as string,
+ email: (formData.get("email") as string)?.trim().toLowerCase() || undefined,
  jobTitle: formData.get("jobTitle") as string,
  permissions: selectedPermissions,
  allowedPages: selectedPages,
@@ -412,6 +414,19 @@ export default function ManagerEmployees() {
  data-testid="input-phone"
  />
  </div>
+ <div>
+ <Label htmlFor="email" className="text-gray-300">البريد الإلكتروني</Label>
+ <Input
+ id="email"
+ name="email"
+ type="email"
+ className="bg-[#1a1410] border-primary/30 text-white"
+ data-testid="input-email"
+ placeholder="example@email.com"
+ />
+ </div>
+ </div>
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
  <div>
  <Label htmlFor="jobTitle" className="text-gray-300">الوظيفة*</Label>
  <Select name="jobTitle" required>
@@ -778,6 +793,18 @@ export default function ManagerEmployees() {
  </div>
 
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+ <div>
+ <Label htmlFor="edit-email" className="text-gray-300">البريد الإلكتروني</Label>
+ <Input
+ id="edit-email"
+ name="email"
+ type="email"
+ defaultValue={(editingEmployee as any).email || ""}
+ className="bg-[#1a1410] border-primary/30 text-white"
+ data-testid="input-edit-email"
+ placeholder="example@email.com"
+ />
+ </div>
  <div>
  <Label htmlFor="edit-jobTitle" className="text-gray-300">الوظيفة*</Label>
  <Select name="jobTitle" defaultValue={editingEmployee.jobTitle} required>

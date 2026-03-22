@@ -3776,11 +3776,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { username, password } = req.body;
 
       if (!username || !password) {
-        return res.status(400).json({ error: "الرجاء إدخال اسم المستخدم وكلمة المرور" });
+        return res.status(400).json({ error: "الرجاء إدخال اسم المستخدم أو البريد الإلكتروني وكلمة المرور" });
       }
 
       console.log(`[AUTH] Login attempt for: ${username}`);
-      const employee = await EmployeeModel.findOne({ username });
+      // Support login by username OR email
+      const isEmail = username.includes("@");
+      const employee = await EmployeeModel.findOne(
+        isEmail ? { email: username.toLowerCase().trim() } : { username }
+      );
 
       if (!employee || !employee.password) {
         console.log(`[AUTH] Employee not found or no password: ${username}`);
