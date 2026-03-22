@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslate } from "@/lib/useTranslate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ interface Employee {
 }
 
 export default function AdminEmployees() {
+  const tc = useTranslate();
   const [, navigate] = useLocation();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
@@ -256,8 +258,8 @@ export default function AdminEmployees() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">إدارة الموظفين</h1>
-          <p className="text-muted-foreground mt-1">إدارة بيانات الموظفين والأدوار والصلاحيات</p>
+          <h1 className="text-3xl font-bold">{tc("إدارة الموظفين", "Employee Management")}</h1>
+          <p className="text-muted-foreground mt-1">{tc("إدارة بيانات الموظفين والأدوار والصلاحيات", "Manage employee data, roles, and permissions")}</p>
         </div>
         <Button 
           onClick={() => {
@@ -277,7 +279,7 @@ export default function AdminEmployees() {
           data-testid="button-add-employee"
         >
           <Plus className="w-4 h-4 ml-2" />
-          إضافة موظف
+          {tc("إضافة موظف", "Add Employee")}
         </Button>
       </div>
 
@@ -285,22 +287,22 @@ export default function AdminEmployees() {
       {(showAddForm || editingId) && (
         <Card className="border-primary/30 bg-background dark:bg-accent/10">
           <CardHeader className="pb-4">
-            <CardTitle>{editingId ? 'تعديل الموظف' : 'إضافة موظف جديد'}</CardTitle>
+            <CardTitle>{editingId ? tc('تعديل الموظف', 'Edit Employee') : tc('إضافة موظف جديد', 'Add New Employee')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">الاسم الكامل</label>
+                  <label className="block text-sm font-medium mb-1">{tc("الاسم الكامل", "Full Name")}</label>
                   <Input
-                    placeholder="أحمد محمد"
+                    placeholder={tc("أحمد محمد", "Ahmed Mohammed")}
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     data-testid="input-fullname"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">اسم المستخدم</label>
+                  <label className="block text-sm font-medium mb-1">{tc("اسم المستخدم", "Username")}</label>
                   <Input
                     placeholder="ahmed123"
                     value={formData.username}
@@ -309,7 +311,7 @@ export default function AdminEmployees() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">رقم الهاتف</label>
+                  <label className="block text-sm font-medium mb-1">{tc("رقم الهاتف", "Phone Number")}</label>
                   <Input
                     placeholder="0501234567"
                     value={formData.phone}
@@ -318,26 +320,26 @@ export default function AdminEmployees() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">المسمى الوظيفي</label>
+                  <label className="block text-sm font-medium mb-1">{tc("المسمى الوظيفي", "Job Title")}</label>
                   <Input
-                    placeholder="كاشير"
+                    placeholder={tc("كاشير", "Cashier")}
                     value={formData.jobTitle}
                     onChange={(e) => setFormData({ ...formData, jobTitle: e.target.value })}
                     data-testid="input-jobtitle"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">الدور</label>
+                  <label className="block text-sm font-medium mb-1">{tc("الدور", "Role")}</label>
                   <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
                     <SelectTrigger data-testid="select-role">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cashier">كاشير</SelectItem>
-                      <SelectItem value="barista">باريستا</SelectItem>
-                      <SelectItem value="manager">مدير</SelectItem>
-                      <SelectItem value="admin">مسؤول</SelectItem>
-                      <SelectItem value="driver">سائق</SelectItem>
+                      <SelectItem value="cashier">{tc("كاشير", "Cashier")}</SelectItem>
+                      <SelectItem value="barista">{tc("باريستا", "Barista")}</SelectItem>
+                      <SelectItem value="manager">{tc("مدير", "Manager")}</SelectItem>
+                      <SelectItem value="admin">{tc("مسؤول", "Admin")}</SelectItem>
+                      <SelectItem value="driver">{tc("سائق", "Driver")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -348,13 +350,13 @@ export default function AdminEmployees() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="block text-sm font-bold flex items-center gap-2">
                     <ChevronDown className="w-4 h-4" />
-                    الصفحات المسموحة
+                    {tc("الصفحات المسموحة", "Allowed Pages")}
                   </label>
                   <span className="text-xs text-muted-foreground">
-                    {formData.allowedPages.length === 0 ? 'الافتراضي حسب الدور' : `${formData.allowedPages.length} صفحة`}
+                    {formData.allowedPages.length === 0 ? tc('الافتراضي حسب الدور', 'Default by role') : `${formData.allowedPages.length} ${tc('صفحة', 'pages')}`}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">اتركها فارغة لاستخدام الافتراضي حسب الدور، أو خصّص الصفحات يدوياً</p>
+                <p className="text-xs text-muted-foreground mb-3">{tc("اتركها فارغة لاستخدام الافتراضي حسب الدور، أو خصّص الصفحات يدوياً", "Leave empty to use defaults by role, or customize pages manually")}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {AVAILABLE_PAGES.map(page => (
                     <label key={page.id} className="flex items-center gap-2 p-2 hover:bg-background rounded cursor-pointer transition-colors border border-transparent hover:border-border">
@@ -385,7 +387,7 @@ export default function AdminEmployees() {
                     className="mt-2 text-xs text-muted-foreground"
                     onClick={() => setFormData({ ...formData, allowedPages: [] })}
                   >
-                    إعادة للافتراضي
+                    {tc("إعادة للافتراضي", "Reset to Default")}
                   </Button>
                 )}
               </div>
@@ -395,13 +397,13 @@ export default function AdminEmployees() {
                 <div className="flex items-center justify-between mb-3">
                   <label className="block text-sm font-bold flex items-center gap-2">
                     <ChevronDown className="w-4 h-4" />
-                    صلاحيات تفصيلية
+                    {tc("صلاحيات تفصيلية", "Granular Permissions")}
                   </label>
                   <span className="text-xs text-muted-foreground">
-                    {formData.permissions.length === 0 ? 'الافتراضي حسب الدور' : `${formData.permissions.length} صلاحية إضافية`}
+                    {formData.permissions.length === 0 ? tc('الافتراضي حسب الدور', 'Default by role') : `${formData.permissions.length} ${tc('صلاحية إضافية', 'extra permissions')}`}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">أضف صلاحيات إضافية فوق الافتراضي حسب الدور</p>
+                <p className="text-xs text-muted-foreground mb-3">{tc("أضف صلاحيات إضافية فوق الافتراضي حسب الدور", "Add extra permissions on top of the role defaults")}</p>
                 <div className="space-y-4">
                   {PERMISSION_GROUPS.map(group => (
                     <div key={group.category}>
@@ -439,25 +441,17 @@ export default function AdminEmployees() {
                     className="mt-2 text-xs text-muted-foreground"
                     onClick={() => setFormData({ ...formData, permissions: [] })}
                   >
-                    مسح الصلاحيات الإضافية
+                    {tc("مسح الصلاحيات الإضافية", "Clear Extra Permissions")}
                   </Button>
                 )}
               </div>
 
               <div className="flex gap-3 pt-2">
                 <Button type="submit" className="bg-accent hover:bg-accent" data-testid="button-save-employee">
-                  {editingId ? 'تحديث' : 'إضافة'}
+                  {editingId ? tc('تحديث', 'Update') : tc('إضافة', 'Add')}
                 </Button>
-                <Button 
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setEditingId(null);
-                  }}
-                  data-testid="button-cancel"
-                >
-                  إلغاء
+                <Button type="button" variant="outline" onClick={() => { setShowAddForm(false); setEditingId(null); }} data-testid="button-cancel">
+                  {tc("إلغاء", "Cancel")}
                 </Button>
               </div>
             </form>
@@ -468,15 +462,10 @@ export default function AdminEmployees() {
       {/* Bulk Actions & Filters */}
       {selectedEmployees.size > 0 && (
         <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <span className="text-sm font-medium">{selectedEmployees.size} موظف مختار</span>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleBulkDelete}
-            data-testid="button-bulk-delete"
-          >
+          <span className="text-sm font-medium">{selectedEmployees.size} {tc("موظف مختار", "employees selected")}</span>
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} data-testid="button-bulk-delete">
             <Trash className="w-4 h-4 ml-2" />
-            حذف المختارين
+            {tc("حذف المختارين", "Delete Selected")}
           </Button>
         </div>
       )}
@@ -485,7 +474,7 @@ export default function AdminEmployees() {
         <div className="flex-1 relative">
           <Search className="absolute right-3 top-2.5 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="ابحث برقم الهاتف أو الاسم..."
+            placeholder={tc("ابحث برقم الهاتف أو الاسم...", "Search by phone or name...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-4"
@@ -497,11 +486,11 @@ export default function AdminEmployees() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">جميع الأدوار</SelectItem>
-            <SelectItem value="cashier">كاشير</SelectItem>
-            <SelectItem value="barista">باريستا</SelectItem>
-            <SelectItem value="manager">مدير</SelectItem>
-            <SelectItem value="driver">سائق</SelectItem>
+            <SelectItem value="all">{tc("جميع الأدوار", "All Roles")}</SelectItem>
+            <SelectItem value="cashier">{tc("كاشير", "Cashier")}</SelectItem>
+            <SelectItem value="barista">{tc("باريستا", "Barista")}</SelectItem>
+            <SelectItem value="manager">{tc("مدير", "Manager")}</SelectItem>
+            <SelectItem value="driver">{tc("سائق", "Driver")}</SelectItem>
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -509,9 +498,9 @@ export default function AdminEmployees() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">جميع الحالات</SelectItem>
-            <SelectItem value="active">نشط</SelectItem>
-            <SelectItem value="inactive">معطل</SelectItem>
+            <SelectItem value="all">{tc("جميع الحالات", "All Statuses")}</SelectItem>
+            <SelectItem value="active">{tc("نشط", "Active")}</SelectItem>
+            <SelectItem value="inactive">{tc("معطل", "Inactive")}</SelectItem>
           </SelectContent>
         </Select>
         <Button
@@ -520,7 +509,7 @@ export default function AdminEmployees() {
           data-testid="button-export-csv"
         >
           <Download className="w-4 h-4 ml-2" />
-          تصدير
+          {tc("تصدير", "Export")}
         </Button>
       </div>
 
@@ -528,7 +517,7 @@ export default function AdminEmployees() {
       <Card className="border-0 bg-card">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">
-            الموظفون ({filteredEmployees.length})
+            {tc("الموظفون", "Employees")} ({filteredEmployees.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -546,12 +535,12 @@ export default function AdminEmployees() {
                         data-testid="checkbox-select-all"
                       />
                     </th>
-                    <th className="text-right p-4 font-semibold">الاسم</th>
-                    <th className="text-right p-4 font-semibold">رقم الهاتف</th>
-                    <th className="text-right p-4 font-semibold">المسمى الوظيفي</th>
-                    <th className="text-right p-4 font-semibold">الدور</th>
-                    <th className="text-right p-4 font-semibold">الحالة</th>
-                    <th className="text-right p-4 font-semibold">الإجراءات</th>
+                    <th className="text-right p-4 font-semibold">{tc("الاسم", "Name")}</th>
+                    <th className="text-right p-4 font-semibold">{tc("رقم الهاتف", "Phone")}</th>
+                    <th className="text-right p-4 font-semibold">{tc("المسمى الوظيفي", "Job Title")}</th>
+                    <th className="text-right p-4 font-semibold">{tc("الدور", "Role")}</th>
+                    <th className="text-right p-4 font-semibold">{tc("الحالة", "Status")}</th>
+                    <th className="text-right p-4 font-semibold">{tc("الإجراءات", "Actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -571,7 +560,7 @@ export default function AdminEmployees() {
                       <td className="p-4 text-muted-foreground">{emp.jobTitle}</td>
                       <td className="p-4">
                         <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                          {emp.role === 'cashier' ? 'كاشير' : emp.role === 'barista' ? 'باريستا' : emp.role === 'manager' ? 'مدير' : emp.role === 'driver' ? 'سائق' : emp.role}
+                          {emp.role === 'cashier' ? tc('كاشير','Cashier') : emp.role === 'barista' ? tc('باريستا','Barista') : emp.role === 'manager' ? tc('مدير','Manager') : emp.role === 'driver' ? tc('سائق','Driver') : emp.role}
                         </span>
                       </td>
                       <td className="p-4">
@@ -580,7 +569,7 @@ export default function AdminEmployees() {
                             ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'
                             : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                         }`}>
-                          {emp.isActivated === 1 ? 'نشط' : 'معطل'}
+                          {emp.isActivated === 1 ? tc('نشط','Active') : tc('معطل','Inactive')}
                         </span>
                       </td>
                       <td className="p-4">
@@ -623,8 +612,8 @@ export default function AdminEmployees() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <h3 className="text-lg font-semibold mb-2">لا توجد موظفون</h3>
-              <p className="text-muted-foreground">ابدأ بإضافة موظف جديد</p>
+              <h3 className="text-lg font-semibold mb-2">{tc("لا توجد موظفون", "No employees found")}</h3>
+              <p className="text-muted-foreground">{tc("ابدأ بإضافة موظف جديد", "Start by adding a new employee")}</p>
             </div>
           )}
         </CardContent>

@@ -112,17 +112,17 @@ export default function ManagerDashboard() {
    onSuccess: (_, ids) => {
      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
      setSelectedOrderIds(new Set());
-     toast({ title: `تم حذف ${ids.length} طلب بنجاح`, variant: "default" });
+     toast({ title: tc(`تم حذف ${ids.length} طلب بنجاح`, `Deleted ${ids.length} orders successfully`), variant: "default" });
    },
    onError: () => {
-     toast({ title: "خطأ في حذف الطلبات", variant: "destructive" });
+     toast({ title: tc("خطأ في حذف الطلبات", "Error deleting orders"), variant: "destructive" });
    },
  });
 
  const handleBulkDelete = () => {
    const ids = Array.from(selectedOrderIds);
    if (ids.length === 0) return;
-   if (!window.confirm(`هل تريد حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
+   if (!window.confirm(tc(`هل تريد حذف ${ids.length} طلب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.`, `Delete ${ids.length} orders permanently? This cannot be undone.`))) return;
    deleteOrdersMutation.mutate(ids);
  };
 
@@ -310,14 +310,14 @@ export default function ManagerDashboard() {
  setSelectedManagerId("");
  setNewManagerForm({ fullName: "", username: "", phone: "" });
  toast({
- title: "تم إضافة الفرع بنجاح",
- description: "تم إضافة الفرع الجديد إلى النظام",
+ title: tc("تم إضافة الفرع بنجاح", "Branch added successfully"),
+ description: tc("تم إضافة الفرع الجديد إلى النظام", "The new branch has been added to the system"),
  });
  },
  onError: (error: any) => {
  toast({
- title: "خطأ في إضافة الفرع",
- description: error.message || "حدث خطأ أثناء إضافة الفرع",
+ title: tc("خطأ في إضافة الفرع", "Error adding branch"),
+ description: error.message || tc("حدث خطأ أثناء إضافة الفرع", "An error occurred while adding the branch"),
  variant: "destructive",
  });
  },
@@ -331,14 +331,14 @@ export default function ManagerDashboard() {
  onSuccess: () => {
  queryClient.invalidateQueries({ queryKey: ["/api/branches"] });
  toast({
- title: "تم حذف الفرع بنجاح",
- description: "تم إزالة الفرع من النظام",
+ title: tc("تم حذف الفرع بنجاح", "Branch deleted successfully"),
+ description: tc("تم إزالة الفرع من النظام", "The branch has been removed from the system"),
  });
  },
  onError: (error: any) => {
  toast({
- title: "خطأ في حذف الفرع",
- description: error.message || "حدث خطأ أثناء حذف الفرع",
+ title: tc("خطأ في حذف الفرع", "Error deleting branch"),
+ description: error.message || tc("حدث خطأ أثناء حذف الفرع", "An error occurred while deleting the branch"),
  variant: "destructive",
  });
  },
@@ -395,14 +395,14 @@ export default function ManagerDashboard() {
  longitude: 46.6753,
  });
  toast({
- title: "تم تحديث الفرع بنجاح",
- description: "تم تحديث بيانات الفرع",
+ title: tc("تم تحديث الفرع بنجاح", "Branch updated successfully"),
+ description: tc("تم تحديث بيانات الفرع", "Branch data has been updated"),
  });
  },
  onError: (error: any) => {
  toast({
- title: "خطأ في تحديث الفرع",
- description: error.message || "حدث خطأ أثناء تحديث الفرع",
+ title: tc("خطأ في تحديث الفرع", "Error updating branch"),
+ description: error.message || tc("حدث خطأ أثناء تحديث الفرع", "An error occurred while updating the branch"),
  variant: "destructive",
  });
  },
@@ -416,8 +416,8 @@ export default function ManagerDashboard() {
  const handleCreateBranch = () => {
  if (!branchForm.nameAr || !branchForm.address || !branchForm.city || !branchForm.phone) {
  toast({
- title: "بيانات ناقصة",
- description: "الرجاء إدخال جميع البيانات المطلوبة",
+ title: tc("بيانات ناقصة", "Missing data"),
+ description: tc("الرجاء إدخال جميع البيانات المطلوبة", "Please enter all required fields"),
  variant: "destructive",
  });
  return;
@@ -425,8 +425,8 @@ export default function ManagerDashboard() {
  
  if (managerAssignmentType === "new" && (!newManagerForm.fullName || !newManagerForm.username || !newManagerForm.phone)) {
  toast({
- title: "بيانات المدير ناقصة",
- description: "الرجاء إدخال جميع بيانات المدير الجديد",
+ title: tc("بيانات المدير ناقصة", "Manager data missing"),
+ description: tc("الرجاء إدخال جميع بيانات المدير الجديد", "Please enter all new manager details"),
  variant: "destructive",
  });
  return;
@@ -448,8 +448,8 @@ export default function ManagerDashboard() {
  if (!editingBranch) return;
  if (!branchForm.nameAr || !branchForm.address || !branchForm.city || !branchForm.phone) {
  toast({
- title: "بيانات ناقصة",
- description: "الرجاء إدخال جميع البيانات المطلوبة",
+ title: tc("بيانات ناقصة", "Missing data"),
+ description: tc("الرجاء إدخال جميع البيانات المطلوبة", "Please enter all required fields"),
  variant: "destructive",
  });
  return;
@@ -525,13 +525,13 @@ export default function ManagerDashboard() {
  XLSX.writeFile(wb, fileName);
 
  toast({
- title: "تم التصدير بنجاح",
- description: "تم تصدير البيانات إلى ملف Excel",
+ title: tc("تم التصدير بنجاح", "Exported successfully"),
+ description: tc("تم تصدير البيانات إلى ملف Excel", "Data has been exported to Excel"),
  });
  } catch (error) {
  toast({
- title: "خطأ في التصدير",
- description: "حدث خطأ أثناء تصدير البيانات",
+ title: tc("خطأ في التصدير", "Export error"),
+ description: tc("حدث خطأ أثناء تصدير البيانات", "An error occurred while exporting data"),
  variant: "destructive",
  });
  }
@@ -551,22 +551,22 @@ export default function ManagerDashboard() {
      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
      queryClient.invalidateQueries({ queryKey: ["/api/customers"] });
      toast({
-       title: "تم بنجاح",
+       title: tc("تم بنجاح", "Done"),
        description: data.message,
        variant: "destructive",
      });
    },
    onError: () => {
      toast({
-       title: "خطأ",
-       description: "فشل تنظيف البيانات",
+       title: tc("خطأ", "Error"),
+       description: tc("فشل تنظيف البيانات", "Failed to clear data"),
        variant: "destructive",
      });
    },
  });
 
  if (!manager) {
- return <LoadingState message="جاري التحميل..." />;
+ return <LoadingState message={tc("جاري التحميل...", "Loading...")} />;
  }
 
  const getFilteredOrders = () => {
@@ -920,7 +920,7 @@ export default function ManagerDashboard() {
  <div className="flex items-center justify-between flex-wrap gap-3">
  <div>
  <CardTitle>{tc("سجل الطلبات", "Orders Log")}</CardTitle>
- <CardDescription>آخر {filteredOrders.length} طلب مسجل في النظام</CardDescription>
+ <CardDescription>{tc(`آخر ${filteredOrders.length} طلب`, `Last ${filteredOrders.length} orders`)}</CardDescription>
  </div>
  <div className="flex items-center gap-2">
  {selectedOrderIds.size > 0 && (
@@ -933,7 +933,7 @@ export default function ManagerDashboard() {
  className="gap-2"
  >
  <Trash2 className="w-4 h-4" />
- حذف المحدد ({selectedOrderIds.size})
+ {tc("حذف المحدد", "Delete selected")} ({selectedOrderIds.size})
  </Button>
  )}
  <Button
@@ -953,7 +953,7 @@ export default function ManagerDashboard() {
  checked={filteredOrders.length > 0 && selectedOrderIds.size === filteredOrders.length}
  className="pointer-events-none"
  />
- {selectedOrderIds.size === filteredOrders.length && filteredOrders.length > 0 ? 'إلغاء الكل' : 'تحديد الكل'}
+ {selectedOrderIds.size === filteredOrders.length && filteredOrders.length > 0 ? tc('إلغاء الكل', 'Deselect all') : tc('تحديد الكل', 'Select all')}
  </Button>
  </div>
  </div>
@@ -961,7 +961,7 @@ export default function ManagerDashboard() {
  <CardContent>
  <div className="space-y-3">
  {filteredOrders.length === 0 ? (
- <EmptyState title="لا يوجد طلبات" description="لم يتم العثور على طلبات في هذه الفترة" />
+ <EmptyState title={tc("لا يوجد طلبات", "No orders")} description={tc("لم يتم العثور على طلبات في هذه الفترة", "No orders found in this period")} />
  ) : (
  <>
  {filteredOrders.slice(0, ordersDisplayLimit).map((order) => {
@@ -997,11 +997,11 @@ export default function ManagerDashboard() {
  <Receipt className="w-5 h-5 text-primary" />
  </div>
  <div>
- <p className="font-bold text-foreground">طلب {order.orderNumber}</p>
+ <p className="font-bold text-foreground">{tc("طلب", "Order")} {order.orderNumber}</p>
  <div className="flex items-center gap-2 text-xs text-muted-foreground">
  <span>{order.createdAt ? new Date(order.createdAt).toLocaleString('ar-SA') : ''}</span>
  <span>•</span>
- <span>{order.customerInfo?.name || employee?.fullName || 'عميل'}</span>
+ <span>{order.customerInfo?.name || employee?.fullName || tc('عميل', 'Customer')}</span>
  </div>
  </div>
  </div>
@@ -1026,7 +1026,7 @@ export default function ManagerDashboard() {
  onClick={() => setOrdersDisplayLimit(prev => prev + 20)}
  data-testid="button-show-more-orders"
  >
- عرض المزيد ({filteredOrders.length - ordersDisplayLimit} طلب متبقٍ)
+ {tc("عرض المزيد", "Show more")} ({filteredOrders.length - ordersDisplayLimit} {tc("طلب متبقٍ", "remaining")})
  </Button>
  )}
  </>
@@ -1039,16 +1039,16 @@ export default function ManagerDashboard() {
  <TabsContent value="analytics" className="space-y-4">
  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
    <Button variant="outline" onClick={() => setLocation("/manager/analytics")} className="flex flex-col h-16 gap-1" data-testid="btn-advanced-analytics">
-     <BarChart3 className="w-5 h-5 text-cyan-500" /><span className="text-xs">تحليلات متقدمة</span>
+     <BarChart3 className="w-5 h-5 text-cyan-500" /><span className="text-xs">{tc("تحليلات متقدمة", "Analytics")}</span>
    </Button>
    <Button variant="outline" onClick={() => setLocation("/manager/gift-cards")} className="flex flex-col h-16 gap-1" data-testid="btn-gift-cards">
-     <Gift className="w-5 h-5 text-pink-500" /><span className="text-xs">بطاقات الهدايا</span>
+     <Gift className="w-5 h-5 text-pink-500" /><span className="text-xs">{tc("بطاقات الهدايا", "Gift Cards")}</span>
    </Button>
    <Button variant="outline" onClick={() => setLocation("/manager/payroll")} className="flex flex-col h-16 gap-1" data-testid="btn-payroll">
-     <Banknote className="w-5 h-5 text-green-500" /><span className="text-xs">كشف الرواتب</span>
+     <Banknote className="w-5 h-5 text-green-500" /><span className="text-xs">{tc("كشف الرواتب", "Payroll")}</span>
    </Button>
    <Button variant="outline" onClick={() => setLocation("/manager/reviews")} className="flex flex-col h-16 gap-1" data-testid="btn-reviews">
-     <Star className="w-5 h-5 text-amber-500" /><span className="text-xs">تقييمات العملاء</span>
+     <Star className="w-5 h-5 text-amber-500" /><span className="text-xs">{tc("تقييمات العملاء", "Reviews")}</span>
    </Button>
  </div>
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -1069,7 +1069,7 @@ export default function ManagerDashboard() {
  <XAxis dataKey="date" />
  <YAxis />
  <Tooltip />
- <Area type="monotone" dataKey="revenue" name="المبيعات" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" />
+ <Area type="monotone" dataKey="revenue" name={tc("المبيعات", "Revenue")} stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" />
  </AreaChart>
  </ResponsiveContainer>
  </CardContent>
@@ -1118,7 +1118,7 @@ export default function ManagerDashboard() {
  <XAxis type="number" />
  <YAxis dataKey="name" type="category" width={100} />
  <Tooltip />
- <Bar dataKey="count" name="عدد المبيعات" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+ <Bar dataKey="count" name={tc("عدد المبيعات", "Sales Count")} fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
  </RechartsBar>
  </ResponsiveContainer>
  </div>
@@ -1183,26 +1183,26 @@ export default function ManagerDashboard() {
  className="bg-accent hover:bg-accent"
  >
  <Plus className="w-4 h-4 ml-2" />
- إضافة فرع
+ {tc("إضافة فرع", "Add Branch")}
  </Button>
  <Dialog open={isAddBranchOpen} onOpenChange={setIsAddBranchOpen}>
  <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto bg-[#708f87]">
  <DialogHeader>
- <DialogTitle className="text-primary text-xl">إضافة فرع جديد</DialogTitle>
+ <DialogTitle className="text-primary text-xl">{tc("إضافة فرع جديد", "Add New Branch")}</DialogTitle>
  </DialogHeader>
  <div className="grid gap-4 py-4">
  <div className="grid gap-2">
- <Label htmlFor="nameAr">اسم الفرع (عربي) *</Label>
+ <Label htmlFor="nameAr">{tc("اسم الفرع (عربي) *", "Branch Name (Arabic) *")}</Label>
  <Input
  id="nameAr"
  value={branchForm.nameAr}
  onChange={(e) => setBranchForm({ ...branchForm, nameAr: e.target.value })}
- placeholder="مثال: فرع الرياض"
+ placeholder={tc("مثال: فرع الرياض", "e.g. Riyadh Branch")}
  data-testid="input-branch-name-ar"
  />
  </div>
  <div className="grid gap-2">
- <Label htmlFor="nameEn">اسم الفرع (إنجليزي)</Label>
+ <Label htmlFor="nameEn">{tc("اسم الفرع (إنجليزي)", "Branch Name (English)")}</Label>
  <Input
  id="nameEn"
  value={branchForm.nameEn}
@@ -1211,39 +1211,39 @@ export default function ManagerDashboard() {
  />
  </div>
  <div className="grid gap-2">
- <Label htmlFor="address">العنوان *</Label>
+ <Label htmlFor="address">{tc("العنوان *", "Address *")}</Label>
  <Input
  id="address"
  value={branchForm.address}
  onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })}
- placeholder="مثال: شارع الملك فهد"
+ placeholder={tc("مثال: شارع الملك فهد", "e.g. King Fahd St")}
  data-testid="input-branch-address"
  />
  </div>
  <div className="grid gap-2">
- <Label htmlFor="city">المدينة*</Label>
+ <Label htmlFor="city">{tc("المدينة*", "City *")}</Label>
  <Input
  id="city"
  value={branchForm.city}
  onChange={(e) => setBranchForm({ ...branchForm, city: e.target.value })}
- placeholder="مثال: الرياض"
+ placeholder={tc("مثال: الرياض", "e.g. Riyadh")}
  data-testid="input-branch-city"
  />
  </div>
  <div className="grid gap-2">
- <Label htmlFor="phone">رقم الهاتف *</Label>
+ <Label htmlFor="phone">{tc("رقم الهاتف *", "Phone *")}</Label>
  <Input
  id="phone"
  value={branchForm.phone}
  onChange={(e) => setBranchForm({ ...branchForm, phone: e.target.value })}
- placeholder="مثال: 0501234567"
+ placeholder={tc("مثال: 0501234567", "e.g. 0501234567")}
  data-testid="input-branch-phone"
  />
  </div>
  <div className="space-y-4 border border-border rounded-lg p-4 bg-muted">
  <Label className="text-primary font-semibold flex items-center gap-2">
  <UserCheck className="w-4 h-4" />
- تعيين مدير الفرع
+ {tc("تعيين مدير الفرع", "Assign Branch Manager")}
  </Label>
  
  <div className="flex gap-4">
@@ -1256,7 +1256,7 @@ export default function ManagerDashboard() {
  className="w-4 h-4 accent-primary"
  data-testid="radio-existing-manager"
  />
- <span className="text-foreground">تعيين مدير موجود</span>
+ <span className="text-foreground">{tc("تعيين مدير موجود", "Assign existing manager")}</span>
  </label>
  <label className="flex items-center gap-2 cursor-pointer">
  <input
@@ -1267,20 +1267,20 @@ export default function ManagerDashboard() {
  className="w-4 h-4 accent-primary"
  data-testid="radio-new-manager"
  />
- <span className="text-foreground">إنشاء مدير جديد</span>
+ <span className="text-foreground">{tc("إنشاء مدير جديد", "Create new manager")}</span>
  </label>
  </div>
  
  {managerAssignmentType === "existing" ? (
  <div className="grid gap-2">
- <Label>اختر المدير</Label>
+ <Label>{tc("اختر المدير", "Select manager")}</Label>
  <Select value={selectedManagerId} onValueChange={setSelectedManagerId}>
  <SelectTrigger data-testid="select-existing-manager">
- <SelectValue placeholder="اختر مديراً موجوداً" />
+ <SelectValue placeholder={tc("اختر مديراً موجوداً", "Select an existing manager")} />
  </SelectTrigger>
  <SelectContent>
  {availableManagers.length === 0 ? (
- <SelectItem value="none" disabled>لا يوجد مديرون متاحون</SelectItem>
+ <SelectItem value="none" disabled>{tc("لا يوجد مديرون متاحون", "No managers available")}</SelectItem>
  ) : (
  availableManagers.map((emp) => (
  <SelectItem key={emp.id} value={emp.id || ""}>
@@ -1291,38 +1291,38 @@ export default function ManagerDashboard() {
  </SelectContent>
  </Select>
  {availableManagers.length === 0 && (
- <p className="text-xs text-muted-foreground">لا يوجد مديرون متاحون. يمكنك إنشاء مدير جديد.</p>
+ <p className="text-xs text-muted-foreground">{tc("لا يوجد مديرون متاحون. يمكنك إنشاء مدير جديد.", "No managers available. You can create a new manager.")}</p>
  )}
  </div>
  ) : (
  <div className="grid gap-3">
  <div className="grid gap-1.5">
- <Label htmlFor="mgr-name">الاسم الكامل *</Label>
+ <Label htmlFor="mgr-name">{tc("الاسم الكامل *", "Full Name *")}</Label>
  <Input
  id="mgr-name"
  value={newManagerForm.fullName}
  onChange={(e) => setNewManagerForm({ ...newManagerForm, fullName: e.target.value })}
- placeholder="الاسم الكامل للمدير"
+ placeholder={tc("الاسم الكامل للمدير", "Manager's full name")}
  data-testid="input-new-manager-name"
  />
  </div>
  <div className="grid gap-1.5">
- <Label htmlFor="mgr-user">اسم المستخدم *</Label>
+ <Label htmlFor="mgr-user">{tc("اسم المستخدم *", "Username *")}</Label>
  <Input
  id="mgr-user"
  value={newManagerForm.username}
  onChange={(e) => setNewManagerForm({ ...newManagerForm, username: e.target.value })}
- placeholder="اسم المستخدم للدخول"
+ placeholder={tc("اسم المستخدم للدخول", "Login username")}
  data-testid="input-new-manager-username"
  />
  </div>
  <div className="grid gap-1.5">
- <Label htmlFor="mgr-phone">رقم الجوال *</Label>
+ <Label htmlFor="mgr-phone">{tc("رقم الجوال *", "Phone *")}</Label>
  <Input
  id="mgr-phone"
  value={newManagerForm.phone}
  onChange={(e) => setNewManagerForm({ ...newManagerForm, phone: e.target.value })}
- placeholder="مثال: 05XXXXXXXX"
+ placeholder={tc("مثال: 05XXXXXXXX", "e.g. 05XXXXXXXX")}
  data-testid="input-new-manager-phone"
  />
  </div>
@@ -1332,11 +1332,11 @@ export default function ManagerDashboard() {
  
  <div className="grid gap-4">
  <div className="grid gap-2 relative">
- <Label>اسم الفرع - ابحث عن الموقع</Label>
+ <Label>{tc("اسم الفرع - ابحث عن الموقع", "Branch Location - Search")}</Label>
  <div className="relative">
  <Input
  type="text"
- placeholder="ابحث عن الفرع... (مثال: الرياض، الدمام)"
+ placeholder={tc("ابحث عن الفرع... (مثال: الرياض، الدمام)", "Search location... (e.g. Riyadh)")}
  value={branchSearchQuery}
  onChange={(e) => handleBranchSearchChange(e.target.value)}
  onFocus={() => branchSearchQuery && setShowBranchResults(true)}
@@ -1369,14 +1369,14 @@ export default function ManagerDashboard() {
 
  {showBranchResults && branchSearchResults.length === 0 && branchSearchQuery && !isSearchingBranch && (
  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-card border border-border rounded-md shadow-lg z-50 p-3">
- <p className="text-sm text-muted-foreground text-right">لم يتم العثور على نتائج</p>
+ <p className="text-sm text-muted-foreground text-right">{tc("لم يتم العثور على نتائج", "No results found")}</p>
  </div>
  )}
  </div>
  </div>
 
  <div className="grid gap-2">
- <Label>موقع الفرع على الخريطة</Label>
+ <Label>{tc("موقع الفرع على الخريطة", "Branch Location on Map")}</Label>
  <div className="h-[250px] rounded-lg overflow-hidden border border-border">
  <BranchLocationPicker
  initialLat={branchForm.latitude}
@@ -1385,8 +1385,8 @@ export default function ManagerDashboard() {
  />
  </div>
  <div className="flex gap-4 text-xs text-muted-foreground">
- <span>خط العرض: 24.713600</span>
- <span>خط الطول: 46.675300</span>
+ <span>{tc("خط العرض", "Lat")}: 24.713600</span>
+ <span>{tc("خط الطول", "Lng")}: 46.675300</span>
  </div>
  </div>
  </div>
@@ -1397,7 +1397,7 @@ export default function ManagerDashboard() {
  className="w-full h-12 text-lg"
  data-testid="button-save-branch"
  >
- {createBranchMutation.isPending ? "جاري الحفظ..." : "حفظ الفرع"}
+ {createBranchMutation.isPending ? tc("جاري الحفظ...", "Saving...") : tc("حفظ الفرع", "Save Branch")}
  </Button>
  </div>
  </DialogContent>
@@ -1407,22 +1407,22 @@ export default function ManagerDashboard() {
  <Dialog open={isEditBranchOpen} onOpenChange={setIsEditBranchOpen}>
  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
- <DialogTitle className="text-2xl font-bold">تعديل الفرع</DialogTitle>
+ <DialogTitle className="text-2xl font-bold">{tc("تعديل الفرع", "Edit Branch")}</DialogTitle>
  </DialogHeader>
  <div className="grid gap-4 py-4">
  <div className="grid grid-cols-2 gap-4">
  <div className="grid gap-1.5">
- <Label htmlFor="edit-name-ar">اسم الفرع بالعربية *</Label>
+ <Label htmlFor="edit-name-ar">{tc("اسم الفرع بالعربية *", "Branch Name (Arabic) *")}</Label>
  <Input
  id="edit-name-ar"
  value={branchForm.nameAr}
  onChange={(e) => setBranchForm({ ...branchForm, nameAr: e.target.value })}
- placeholder="مثال: فرع الرياض"
+ placeholder={tc("مثال: فرع الرياض", "e.g. Riyadh Branch")}
  data-testid="input-edit-name-ar"
  />
  </div>
  <div className="grid gap-1.5">
- <Label htmlFor="edit-name-en">اسم الفرع بالإنجليزية</Label>
+ <Label htmlFor="edit-name-en">{tc("اسم الفرع بالإنجليزية", "Branch Name (English)")}</Label>
  <Input
  id="edit-name-en"
  value={branchForm.nameEn}
@@ -1434,19 +1434,19 @@ export default function ManagerDashboard() {
  </div>
 
  <div className="grid gap-1.5">
- <Label htmlFor="edit-address">العنوان *</Label>
+ <Label htmlFor="edit-address">{tc("العنوان *", "Address *")}</Label>
  <Input
  id="edit-address"
  value={branchForm.address}
  onChange={(e) => setBranchForm({ ...branchForm, address: e.target.value })}
- placeholder="العنوان الكامل"
+ placeholder={tc("العنوان الكامل", "Full address")}
  data-testid="input-edit-address"
  />
  </div>
 
  <div className="grid grid-cols-2 gap-4">
  <div className="grid gap-1.5">
- <Label htmlFor="edit-phone">رقم الجوال *</Label>
+ <Label htmlFor="edit-phone">{tc("رقم الجوال *", "Phone *")}</Label>
  <Input
  id="edit-phone"
  value={branchForm.phone}
@@ -1456,35 +1456,35 @@ export default function ManagerDashboard() {
  />
  </div>
  <div className="grid gap-1.5">
- <Label htmlFor="edit-city">المدينة *</Label>
+ <Label htmlFor="edit-city">{tc("المدينة *", "City *")}</Label>
  <Input
  id="edit-city"
  value={branchForm.city}
  onChange={(e) => setBranchForm({ ...branchForm, city: e.target.value })}
- placeholder="المدينة"
+ placeholder={tc("المدينة", "City")}
  data-testid="input-edit-city"
  />
  </div>
  </div>
 
  <div className="grid gap-1.5">
- <Label htmlFor="edit-manager-name">اسم المدير</Label>
+ <Label htmlFor="edit-manager-name">{tc("اسم المدير", "Manager Name")}</Label>
  <Input
  id="edit-manager-name"
  value={branchForm.managerName}
  onChange={(e) => setBranchForm({ ...branchForm, managerName: e.target.value })}
- placeholder="اسم مدير الفرع"
+ placeholder={tc("اسم مدير الفرع", "Branch manager name")}
  data-testid="input-edit-manager-name"
  />
  </div>
 
  <div className="grid gap-4">
  <div className="grid gap-2 relative">
- <Label>اسم الفرع - ابحث عن الموقع</Label>
+ <Label>{tc("اسم الفرع - ابحث عن الموقع", "Branch Location - Search")}</Label>
  <div className="relative">
  <Input
  type="text"
- placeholder="ابحث عن الفرع... (مثال: الرياض، الدمام)"
+ placeholder={tc("ابحث عن الفرع... (مثال: الرياض، الدمام)", "Search location... (e.g. Riyadh)")}
  value={branchSearchQuery}
  onChange={(e) => handleBranchSearchChange(e.target.value)}
  onFocus={() => branchSearchQuery && setShowBranchResults(true)}
@@ -1517,14 +1517,14 @@ export default function ManagerDashboard() {
 
  {showBranchResults && branchSearchResults.length === 0 && branchSearchQuery && !isSearchingBranch && (
  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-card border border-border rounded-md shadow-lg z-50 p-3">
- <p className="text-sm text-muted-foreground text-right">لم يتم العثور على نتائج</p>
+ <p className="text-sm text-muted-foreground text-right">{tc("لم يتم العثور على نتائج", "No results found")}</p>
  </div>
  )}
  </div>
  </div>
 
  <div className="grid gap-2">
- <Label>موقع الفرع على الخريطة</Label>
+ <Label>{tc("موقع الفرع على الخريطة", "Branch Location on Map")}</Label>
  <div className="h-[250px] rounded-lg overflow-hidden border border-border">
  <BranchLocationPicker
  initialLat={branchForm.latitude}
@@ -1533,8 +1533,8 @@ export default function ManagerDashboard() {
  />
  </div>
  <div className="flex gap-4 text-xs text-muted-foreground">
- <span>خط العرض: {branchForm.latitude.toFixed(6)}</span>
- <span>خط الطول: {branchForm.longitude.toFixed(6)}</span>
+ <span>{tc("خط العرض", "Lat")}: {branchForm.latitude.toFixed(6)}</span>
+ <span>{tc("خط الطول", "Lng")}: {branchForm.longitude.toFixed(6)}</span>
  </div>
  </div>
  </div>
@@ -1545,7 +1545,7 @@ export default function ManagerDashboard() {
  className="w-full h-12 text-lg"
  data-testid="button-save-edit-branch"
  >
- {updateBranchMutation.isPending ? "جاري التحديث..." : "تحديث الفرع"}
+ {updateBranchMutation.isPending ? tc("جاري التحديث...", "Updating...") : tc("تحديث الفرع", "Update Branch")}
  </Button>
  </div>
  </DialogContent>
@@ -1558,7 +1558,7 @@ export default function ManagerDashboard() {
  <CardContent>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
  {branches.length === 0 ? (
- <EmptyState title="لا يوجد فروع" description="لم يتم العثور على فروع مسجلة" />
+ <EmptyState title={tc("لا يوجد فروع", "No branches")} description={tc("لم يتم العثور على فروع مسجلة", "No registered branches found")} />
  ) : (
  branches.map((branch) => (
  <Card key={branch.id} className="border-border/50 hover:border-primary/50 transition-colors">
@@ -1574,13 +1574,13 @@ export default function ManagerDashboard() {
  </div>
  </div>
  <Badge variant={branch.isActive === 1 || branch.isActive === true ? "default" : "secondary"}>
- {branch.isActive === 1 || branch.isActive === true ? "نشط" : "غير نشط"}
+ {branch.isActive === 1 || branch.isActive === true ? tc("نشط", "Active") : tc("غير نشط", "Inactive")}
  </Badge>
  </div>
  <div className="space-y-2 text-sm text-muted-foreground">
  <div className="flex items-center gap-2">
  <Users className="w-4 h-4" />
- <span>{branch.managerName || 'لا يوجد مدير'}</span>
+ <span>{branch.managerName || tc('لا يوجد مدير', 'No manager')}</span>
  </div>
  <div className="flex items-center gap-2">
  <Activity className="w-4 h-4" />
@@ -1602,14 +1602,14 @@ export default function ManagerDashboard() {
  data-testid="button-edit-branch"
  >
  <Edit2 className="w-4 h-4 ml-2" />
- تعديل
+ {tc("تعديل", "Edit")}
  </Button>
  <Button 
  variant="outline" 
  size="sm" 
  className="flex-1"
  onClick={() => {
- if (confirm('هل أنت متأكد من حذف هذا الفرع؟')) {
+ if (confirm(tc('هل أنت متأكد من حذف هذا الفرع؟', 'Are you sure you want to delete this branch?'))) {
  deleteBranchMutation.mutate(branch.id);
  }
  }}
@@ -1617,7 +1617,7 @@ export default function ManagerDashboard() {
  data-testid="button-delete-branch"
  >
  <Trash2 className="w-4 h-4 ml-2" />
- حذف
+ {tc("حذف", "Delete")}
  </Button>
  </div>
  )}

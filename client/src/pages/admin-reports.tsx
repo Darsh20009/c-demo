@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useTranslate } from "@/lib/useTranslate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -19,6 +20,7 @@ import {
 const COLORS = ['#f97316', '#fbbf24', '#34d399', '#60a5fa', '#a78bfa', '#f472b6'];
 
 export default function AdminReports() {
+  const tc = useTranslate();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [timePeriod, setTimePeriod] = useState('month');
@@ -157,7 +159,7 @@ export default function AdminReports() {
         {trend && (
           <div className="flex items-center gap-1 mt-2 text-emerald-600 dark:text-emerald-400 text-sm">
             <ArrowUp className="w-4 h-4" />
-            <span>{trend}% من الشهر الماضي</span>
+            <span>{trend}% {tc("من الشهر الماضي", "vs last month")}</span>
           </div>
         )}
       </CardContent>
@@ -179,7 +181,7 @@ export default function AdminReports() {
     },
     onSuccess: () => {
       refetchConfig();
-      toast({ title: "تم تحديث الإعدادات" });
+      toast({ title: tc("تم تحديث الإعدادات", "Settings updated") });
     }
   });
 
@@ -198,12 +200,12 @@ export default function AdminReports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold">التقارير والتحليلات</h1>
-          <p className="text-muted-foreground mt-1">تحليل شامل لأداء المبيعات والعمليات</p>
+          <h1 className="text-4xl font-bold">{tc("التقارير والتحليلات", "Reports & Analytics")}</h1>
+          <p className="text-muted-foreground mt-1">{tc("تحليل شامل لأداء المبيعات والعمليات", "Comprehensive analysis of sales performance and operations")}</p>
         </div>
         <div className="flex gap-3">
           <Card className="flex items-center gap-4 px-4 py-2">
-            <span className="text-sm font-medium">فاتورة الموظف (ملخص)</span>
+            <span className="text-sm font-medium">{tc("فاتورة الموظف (ملخص)", "Employee Invoice (Summary)")}</span>
             <input 
               type="checkbox" 
               checked={businessConfig?.employeeInvoiceEnabled || false} 
@@ -213,7 +215,7 @@ export default function AdminReports() {
           </Card>
           <Button variant="outline" data-testid="button-export-report">
             <Download className="w-4 h-4 ml-2" />
-            تصدير
+            {tc("تصدير", "Export")}
           </Button>
         </div>
       </div>
@@ -221,10 +223,10 @@ export default function AdminReports() {
       {/* Bulk Print Actions */}
       {selectedOrders.length > 0 && (
         <Card className="p-4 bg-primary/5 border-primary/20 flex justify-between items-center">
-          <span className="font-medium">{selectedOrders.length} طلبات مختارة</span>
+          <span className="font-medium">{selectedOrders.length} {tc("طلبات مختارة", "orders selected")}</span>
           <Button onClick={handleBulkPrint} size="sm">
             <Printer className="w-4 h-4 ml-2" />
-            طباعة فواتير الموظفين
+            {tc("طباعة فواتير الموظفين", "Print Employee Invoices")}
           </Button>
         </Card>
       )}
@@ -237,19 +239,19 @@ export default function AdminReports() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="week">هذا الأسبوع</SelectItem>
-            <SelectItem value="month">هذا الشهر</SelectItem>
-            <SelectItem value="year">هذا العام</SelectItem>
+            <SelectItem value="week">{tc("هذا الأسبوع", "This Week")}</SelectItem>
+            <SelectItem value="month">{tc("هذا الشهر", "This Month")}</SelectItem>
+            <SelectItem value="year">{tc("هذا العام", "This Year")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatBox label="إجمالي الإيرادات" value={`${totalRevenue.toFixed(0)} ر.س`} trend="12" />
-        <StatBox label="عدد الطلبات" value={totalOrders} trend="8" />
-        <StatBox label="متوسط الطلب" value={`${averageOrderValue.toFixed(2)} ر.س`} trend="5" />
-        <StatBox label="عدد الموظفين النشطين" value={employees.filter((e: any) => e.isActivated === 1).length} />
+        <StatBox label={tc("إجمالي الإيرادات", "Total Revenue")} value={`${totalRevenue.toFixed(0)} ${tc("ر.س","SAR")}`} trend="12" />
+        <StatBox label={tc("عدد الطلبات", "Total Orders")} value={totalOrders} trend="8" />
+        <StatBox label={tc("متوسط الطلب", "Avg Order Value")} value={`${averageOrderValue.toFixed(2)} ${tc("ر.س","SAR")}`} trend="5" />
+        <StatBox label={tc("عدد الموظفين النشطين", "Active Employees")} value={employees.filter((e: any) => e.isActivated === 1).length} />
       </div>
 
       {/* Charts Section */}
@@ -257,7 +259,7 @@ export default function AdminReports() {
         {/* Revenue Trend */}
         <Card className="border-0 bg-white dark:bg-card">
           <CardHeader className="pb-4">
-            <CardTitle>اتجاه الإيرادات</CardTitle>
+            <CardTitle>{tc("اتجاه الإيرادات", "Revenue Trend")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -279,7 +281,7 @@ export default function AdminReports() {
                   stroke="#f97316"
                   strokeWidth={2}
                   dot={{ fill: '#f97316', r: 4 }}
-                  name="الإيرادات (ر.س)"
+                  name={tc("الإيرادات (ر.س)", "Revenue (SAR)")}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -289,7 +291,7 @@ export default function AdminReports() {
         {/* Orders Count */}
         <Card className="border-0 bg-white dark:bg-card">
           <CardHeader className="pb-4">
-            <CardTitle>عدد الطلبات اليومية</CardTitle>
+            <CardTitle>{tc("عدد الطلبات اليومية", "Daily Orders")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -305,7 +307,7 @@ export default function AdminReports() {
                   }}
                 />
                 <Legend />
-                <Bar dataKey="orders" fill="#f97316" name="الطلبات" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="orders" fill="#f97316" name={tc("الطلبات", "Orders")} radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -317,7 +319,7 @@ export default function AdminReports() {
         {/* Top Products */}
         <Card className="border-0 bg-white dark:bg-card">
           <CardHeader className="pb-4">
-            <CardTitle>أفضل المنتجات مبيعاً</CardTitle>
+            <CardTitle>{tc("أفضل المنتجات مبيعاً", "Top Selling Products")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -332,7 +334,7 @@ export default function AdminReports() {
                     borderRadius: '8px',
                   }}
                 />
-                <Bar dataKey="sold" fill="#f97316" name="المبيعات" />
+                <Bar dataKey="sold" fill="#f97316" name={tc("المبيعات", "Sales")} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -341,7 +343,7 @@ export default function AdminReports() {
         {/* Employee Performance */}
         <Card className="border-0 bg-white dark:bg-card">
           <CardHeader className="pb-4">
-            <CardTitle>أداء الموظفين</CardTitle>
+            <CardTitle>{tc("أداء الموظفين", "Employee Performance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -349,7 +351,7 @@ export default function AdminReports() {
                 <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                   <div>
                     <p className="font-medium">{emp.name}</p>
-                    <p className="text-sm text-muted-foreground">{emp.orders} طلب</p>
+                    <p className="text-sm text-muted-foreground">{emp.orders} {tc("طلب", "orders")}</p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-accent dark:text-accent">{emp.revenue.toFixed(0)} <SarIcon /></p>
@@ -364,7 +366,7 @@ export default function AdminReports() {
       {/* Product Distribution */}
       <Card className="border-0 bg-white dark:bg-card">
         <CardHeader className="pb-4">
-          <CardTitle>توزيع المبيعات حسب الفئة</CardTitle>
+          <CardTitle>{tc("توزيع المبيعات حسب الفئة", "Sales Distribution by Category")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
@@ -406,11 +408,11 @@ export default function AdminReports() {
               <thead>
                 <tr className="border-b-2 border-accent dark:border-accent/30">
                   <th className="p-4 w-10"></th>
-                  <th className="text-right p-4 font-semibold">رقم الطلب</th>
-                  <th className="text-right p-4 font-semibold">العميل</th>
-                  <th className="text-right p-4 font-semibold">الموظف</th>
-                  <th className="text-right p-4 font-semibold">المبلغ</th>
-                  <th className="text-right p-4 font-semibold">التاريخ</th>
+                  <th className="text-right p-4 font-semibold">{tc("رقم الطلب", "Order #")}</th>
+                  <th className="text-right p-4 font-semibold">{tc("العميل", "Customer")}</th>
+                  <th className="text-right p-4 font-semibold">{tc("الموظف", "Employee")}</th>
+                  <th className="text-right p-4 font-semibold">{tc("المبلغ", "Amount")}</th>
+                  <th className="text-right p-4 font-semibold">{tc("التاريخ", "Date")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -430,7 +432,7 @@ export default function AdminReports() {
                         />
                       </td>
                       <td className="p-4">{order.orderNumber}</td>
-                      <td className="p-4 text-muted-foreground">{order.customerInfo?.name || 'زائر'}</td>
+                      <td className="p-4 text-muted-foreground">{order.customerInfo?.name || tc('زائر', 'Guest')}</td>
                       <td className="p-4">{emp?.fullName || '-'}</td>
                       <td className="p-4 font-bold text-accent dark:text-accent">{order.totalAmount?.toFixed(2)} <SarIcon /></td>
                       <td className="p-4 text-muted-foreground">{new Date(order.createdAt).toLocaleDateString('ar-SA')}</td>

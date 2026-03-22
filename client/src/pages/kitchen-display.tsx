@@ -41,9 +41,9 @@ import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 // Set global SEO metadata on mount
 if (typeof document !== 'undefined') {
-  document.title = "شاشة المطبخ - QIROX Cafe | إدارة الطلبات";
+  document.title = "Kitchen Display - QIROX Cafe | Order Management";
   const metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) metaDesc.setAttribute('content', 'شاشة المطبخ لـ QIROX Cafe - إدارة سهلة وسريعة للطلبات المدخلة');
+  if (metaDesc) metaDesc.setAttribute('content', 'Kitchen Display for QIROX Cafe - Easy and fast order management');
 }
 
 interface OrderItem {
@@ -122,8 +122,8 @@ export default function KitchenDisplay() {
       const isOnlineOrder = order?.channel === 'online' || order?.channel === 'web';
       playNotificationSound(isOnlineOrder ? 'onlineOrderVoice' : 'newOrder', 0.7);
       toast({
-        title: "طلب جديد!",
-        description: `وصل طلب جديد ${order.orderNumber}`,
+        title: tc("طلب جديد!","New Order!"),
+        description: `${tc("وصل طلب جديد","New order arrived")} ${order.orderNumber}`,
       });
     }
   }, [soundEnabled, toast]);
@@ -166,15 +166,15 @@ export default function KitchenDisplay() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders/kitchen"] });
       toast({
-        title: "تم تحديث الحالة",
-        description: "تم تحديث حالة الطلب بنجاح",
+        title: tc("تم تحديث الحالة","Status Updated"),
+        description: tc("تم تحديث حالة الطلب بنجاح","Order status updated successfully"),
       });
     },
     onError: (error: any) => {
       console.error("[KDS] Status update failed:", error);
       toast({
-        title: "خطأ",
-        description: error?.message || "فشل تحديث حالة الطلب",
+        title: tc("خطأ","Error"),
+        description: error?.message || tc("فشل تحديث حالة الطلب","Failed to update order status"),
         variant: "destructive",
       });
     },
@@ -203,14 +203,14 @@ export default function KitchenDisplay() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/orders/kitchen"] });
       toast({
-        title: "تم تحديث الوقت",
-        description: "تم إضافة وقت إضافي وإبلاغ العميل",
+        title: tc("تم تحديث الوقت","Time Updated"),
+        description: tc("تم إضافة وقت إضافي وإبلاغ العميل","Extra time added and customer notified"),
       });
     },
     onError: () => {
       toast({
-        title: "خطأ",
-        description: "فشل تحديث الوقت",
+        title: tc("خطأ","Error"),
+        description: tc("فشل تحديث الوقت","Failed to update prep time"),
         variant: "destructive",
       });
     },
@@ -285,8 +285,8 @@ export default function KitchenDisplay() {
     newAlerts.forEach(o => alertedPrepNowIds.current.add(o.id));
     playNotificationSound('cashierOrder', 0.9);
     toast({
-      title: "⏰ حان وقت التحضير!",
-      description: `${newAlerts.length} طلب مجدول يحتاج للتحضير الآن`,
+      title: tc("⏰ حان وقت التحضير!","⏰ Time to prepare!"),
+      description: `${newAlerts.length} ${tc("طلب مجدول يحتاج للتحضير الآن","scheduled order(s) need preparation now")}`,
     });
   }, [needsPrepNowOrders, soundEnabled]);
 
@@ -310,7 +310,7 @@ export default function KitchenDisplay() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center" dir="rtl">
-        <LoadingState message="جاري تحميل الطلبات..." />
+        <LoadingState message={tc("جاري تحميل الطلبات...","Loading orders...")} />
       </div>
     );
   }
@@ -339,19 +339,19 @@ export default function KitchenDisplay() {
               {needsPrepNowOrders.length > 0 && (
                 <Badge className="bg-orange-500 text-white animate-pulse">
                   <AlertTriangle className="h-3 w-3 ml-1" />
-                  {needsPrepNowOrders.length} يحتاج تحضير الآن!
+                  {needsPrepNowOrders.length} {tc("يحتاج تحضير الآن!","need prep now!")}
                 </Badge>
               )}
               {scheduledOrders.length > 0 && (
                 <Badge className="bg-blue-500 text-white">
                   <Clock className="h-3 w-3 ml-1" />
-                  {scheduledOrders.length} مجدول
+                  {scheduledOrders.length} {tc("مجدول","scheduled")}
                 </Badge>
               )}
               {delayedCount > 0 && (
                 <Badge className="bg-destructive text-destructive-foreground animate-pulse">
                   <AlertTriangle className="h-3 w-3 ml-1" />
-                  {delayedCount} طلب متأخر
+                  {delayedCount} {tc("طلب متأخر","delayed orders")}
                 </Badge>
               )}
               
@@ -361,49 +361,49 @@ export default function KitchenDisplay() {
                 data-testid="badge-ws-status"
               >
                 {isConnected ? <Wifi className="h-3 w-3 ml-1" /> : <WifiOff className="h-3 w-3 ml-1" />}
-                {isConnected ? "متصل" : "غير متصل"}
+                {isConnected ? tc("متصل","Connected") : tc("غير متصل","Disconnected")}
               </Badge>
 
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                  انتظار: {pendingOrders.length}
+                  {tc("انتظار","Waiting")}: {pendingOrders.length}
                 </Badge>
                 <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
-                  تحضير: {preparingOrders.length}
+                  {tc("تحضير","Preparing")}: {preparingOrders.length}
                 </Badge>
                 <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20">
-                  جاهز: {readyOrders.length}
+                  {tc("جاهز","Ready")}: {readyOrders.length}
                 </Badge>
               </div>
               
               <Select value={deliveryTypeFilter} onValueChange={setDeliveryTypeFilter}>
                 <SelectTrigger className="w-32" data-testid="select-delivery-filter">
-                  <SelectValue placeholder="نوع الطلب" />
+                  <SelectValue placeholder={tc("نوع الطلب","Order Type")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="all">{tc("الكل","All")}</SelectItem>
                   <SelectItem value="dine-in">
                     <div className="flex items-center gap-2">
                       <Store className="h-4 w-4" />
-                      محلي
+                      {tc("محلي","Dine-in")}
                     </div>
                   </SelectItem>
                   <SelectItem value="pickup">
                     <div className="flex items-center gap-2">
                       <ShoppingBag className="h-4 w-4" />
-                      سفري
+                      {tc("سفري","Takeaway")}
                     </div>
                   </SelectItem>
                   <SelectItem value="delivery">
                     <div className="flex items-center gap-2">
                       <Truck className="h-4 w-4" />
-                      توصيل
+                      {tc("توصيل","Delivery")}
                     </div>
                   </SelectItem>
                   <SelectItem value="car-pickup">
                     <div className="flex items-center gap-2">
                       <Navigation className="h-4 w-4" />
-                      استلام من السيارة
+                      {tc("استلام من السيارة","Car Pickup")}
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -423,7 +423,7 @@ export default function KitchenDisplay() {
                 data-testid="button-toggle-auto-refresh"
               >
                 <RefreshCw className={`h-4 w-4 ml-1 ${autoRefresh ? "animate-spin" : ""}`} />
-                {autoRefresh ? "تحديث تلقائي" : "تحديث يدوي"}
+                {autoRefresh ? tc("تحديث تلقائي","Auto Refresh") : tc("تحديث يدوي","Manual Refresh")}
               </Button>
               
               <Button
@@ -474,13 +474,13 @@ export default function KitchenDisplay() {
             {getFilteredOrders().length === 0 ? (
               <Card className="p-12 text-center">
                 <CheckCircle2 className="h-16 w-16 mx-auto text-green-500 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">لا توجد طلبات</h3>
+                <h3 className="text-xl font-semibold mb-2">{tc("لا توجد طلبات","No Orders")}</h3>
                 <p className="text-muted-foreground">
                   {activeTab === "all" 
-                    ? "لا توجد طلبات حالياً" 
-                    : `لا توجد طلبات في حالة ${
-                        activeTab === "pending" ? "الانتظار" : 
-                        activeTab === "preparing" ? "التحضير" : "جاهز"
+                    ? tc("لا توجد طلبات حالياً","No orders at the moment")
+                    : `${tc("لا توجد طلبات في حالة","No orders in")} ${
+                        activeTab === "pending" ? tc("الانتظار","Waiting") : 
+                        activeTab === "preparing" ? tc("التحضير","Preparing") : tc("جاهز","Ready")
                       }`
                   }
                 </p>

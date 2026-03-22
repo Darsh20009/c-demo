@@ -189,10 +189,10 @@ export default function DeliverySelectionPage() {
       const saved = localStorage.getItem('qirox_saved_car');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { model: parsed.model || '', color: parsed.color || '', colorHex: parsed.colorHex || '#6B7280', plateNumber: parsed.plateNumber || '' };
+        return { model: parsed.model || '', color: parsed.color || '', colorHex: parsed.colorHex || '#6B7280', plateNumber: parsed.plateNumber || '', parkingSlot: parsed.parkingSlot || '' };
       }
     } catch {}
-    return { model: '', color: '', colorHex: '#6B7280', plateNumber: '' };
+    return { model: '', color: '', colorHex: '#6B7280', plateNumber: '', parkingSlot: '' };
   });
   const [hasSavedCar] = useState(() => {
     try { return !!localStorage.getItem('qirox_saved_car'); } catch { return false; }
@@ -418,7 +418,8 @@ export default function DeliverySelectionPage() {
       carInfo: selectedMethod === 'car-pickup' ? {
         carType: carInfo.model,
         carColor: carInfo.color,
-        plateNumber: carInfo.plateNumber
+        plateNumber: carInfo.plateNumber,
+        parkingSlot: carInfo.parkingSlot
       } : undefined,
       tableId: selectedTableId || undefined,
       tableNumber: bookedTable?.tableNumber || undefined,
@@ -762,6 +763,118 @@ export default function DeliverySelectionPage() {
                     </Label>
                   </div>
 
+                  {/* Parking Slot Selector */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-bold flex items-center gap-1.5">
+                      <span className="text-lg">🅿️</span>
+                      {tc("موقف سيارتك", "Your Parking Spot")}
+                      {carInfo.parkingSlot && (
+                        <span className="mr-auto text-xs font-normal px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: carHex }}>
+                          {tc("موقف", "Slot")} {carInfo.parkingSlot}
+                        </span>
+                      )}
+                    </Label>
+                    <p className="text-xs text-muted-foreground -mt-1">{tc("اختر رقم الموقف الذي تقف فيه حتى يجدك الموظف بسرعة", "Select your parking slot so staff can find you quickly")}</p>
+
+                    {/* Parking lot visual */}
+                    <div className="rounded-2xl overflow-hidden border-2 border-purple-200 dark:border-purple-800 bg-gray-100 dark:bg-gray-900 p-3">
+                      {/* Entrance sign */}
+                      <div className="flex justify-center mb-2">
+                        <div className="bg-purple-600 text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-wider flex items-center gap-1">
+                          <span>▼</span> {tc("مدخل الكافيه", "Cafe Entrance")} <span>▼</span>
+                        </div>
+                      </div>
+
+                      {/* Slot rows */}
+                      <div className="flex gap-1">
+                        {/* Left column (odd: 1,3,5,7,9,11) */}
+                        <div className="flex-1 grid grid-cols-3 gap-1">
+                          {[1, 3, 5, 7, 9, 11].map((slot) => {
+                            const isSelected = carInfo.parkingSlot === String(slot);
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() => setCarInfo({ ...carInfo, parkingSlot: isSelected ? '' : String(slot) })}
+                                data-testid={`btn-parking-slot-${slot}`}
+                                className="relative flex flex-col items-center justify-center rounded-xl h-14 text-sm font-bold transition-all duration-200 border-2"
+                                style={{
+                                  borderColor: isSelected ? carHex : 'transparent',
+                                  backgroundColor: isSelected ? `${carHex}22` : 'rgba(255,255,255,0.6)',
+                                  boxShadow: isSelected ? `0 0 12px ${carHex}55` : undefined,
+                                  color: isSelected ? carHex : undefined,
+                                }}
+                              >
+                                {isSelected && (
+                                  <svg viewBox="0 0 40 20" className="w-8 h-4 mb-0.5" fill={carHex}>
+                                    <rect x="4" y="4" width="32" height="12" rx="4"/>
+                                    <rect x="8" y="2" width="10" height="8" rx="2"/>
+                                    <rect x="22" y="2" width="10" height="8" rx="2"/>
+                                    <circle cx="10" cy="16" r="3" fill="#222"/>
+                                    <circle cx="30" cy="16" r="3" fill="#222"/>
+                                  </svg>
+                                )}
+                                <span className={`text-xs ${isSelected ? 'font-black' : 'text-gray-500 dark:text-gray-400'}`}>{slot}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Central lane */}
+                        <div className="w-5 flex flex-col justify-around items-center py-1">
+                          {[...Array(5)].map((_, i) => (
+                            <div key={i} className="w-1.5 h-3 rounded-full bg-yellow-400 opacity-80" />
+                          ))}
+                        </div>
+
+                        {/* Right column (even: 2,4,6,8,10,12) */}
+                        <div className="flex-1 grid grid-cols-3 gap-1">
+                          {[2, 4, 6, 8, 10, 12].map((slot) => {
+                            const isSelected = carInfo.parkingSlot === String(slot);
+                            return (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() => setCarInfo({ ...carInfo, parkingSlot: isSelected ? '' : String(slot) })}
+                                data-testid={`btn-parking-slot-${slot}`}
+                                className="relative flex flex-col items-center justify-center rounded-xl h-14 text-sm font-bold transition-all duration-200 border-2"
+                                style={{
+                                  borderColor: isSelected ? carHex : 'transparent',
+                                  backgroundColor: isSelected ? `${carHex}22` : 'rgba(255,255,255,0.6)',
+                                  boxShadow: isSelected ? `0 0 12px ${carHex}55` : undefined,
+                                  color: isSelected ? carHex : undefined,
+                                }}
+                              >
+                                {isSelected && (
+                                  <svg viewBox="0 0 40 20" className="w-8 h-4 mb-0.5" fill={carHex}>
+                                    <rect x="4" y="4" width="32" height="12" rx="4"/>
+                                    <rect x="8" y="2" width="10" height="8" rx="2"/>
+                                    <rect x="22" y="2" width="10" height="8" rx="2"/>
+                                    <circle cx="10" cy="16" r="3" fill="#222"/>
+                                    <circle cx="30" cy="16" r="3" fill="#222"/>
+                                  </svg>
+                                )}
+                                <span className={`text-xs ${isSelected ? 'font-black' : 'text-gray-500 dark:text-gray-400'}`}>{slot}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Legend */}
+                      <div className="flex justify-center gap-4 mt-2">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded-sm bg-white border border-gray-300" />
+                          <span className="text-[10px] text-muted-foreground">{tc("فارغ", "Empty")}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded-sm border-2" style={{ borderColor: carHex, backgroundColor: `${carHex}22` }} />
+                          <span className="text-[10px] text-muted-foreground">{tc("موقفك", "Your spot")}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Car Summary */}
                   {carInfo.model && carInfo.color && carInfo.plateNumber && (
                     <div className="p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-purple-600/10 border border-purple-500/20">
@@ -777,6 +890,9 @@ export default function DeliverySelectionPage() {
                         <div>
                           <p className="font-bold text-sm">{carInfo.model} — {carInfo.color}</p>
                           <p className="text-xs text-muted-foreground font-mono tracking-widest" dir="ltr">{carInfo.plateNumber}</p>
+                          {carInfo.parkingSlot && (
+                            <p className="text-xs font-semibold mt-0.5" style={{ color: carHex }}>🅿️ {tc("موقف", "Slot")} {carInfo.parkingSlot}</p>
+                          )}
                         </div>
                       </div>
                     </div>

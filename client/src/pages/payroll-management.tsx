@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, DollarSign, Users, TrendingDown, Calendar, Loader2, UserCheck, AlertCircle } from "lucide-react";
 import SarIcon from "@/components/sar-icon";
 import { useTranslate } from "@/lib/useTranslate";
+import { useTranslation } from "react-i18next";
 
 interface PayrollEmployee {
   employeeId: string;
@@ -38,9 +39,12 @@ interface PayrollReport {
 }
 
 const MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const MONTHS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 export default function PayrollManagementPage() {
   const tc = useTranslate();
+  const { i18n } = useTranslation();
+  const MONTHS = i18n.language === 'ar' ? MONTHS_AR : MONTHS_EN;
   const [, setLocation] = useLocation();
   const now = new Date();
   const [month, setMonth] = useState(String(now.getMonth() + 1));
@@ -69,7 +73,7 @@ export default function PayrollManagementPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MONTHS_AR.map((m, i) => (
+                {MONTHS.map((m, i) => (
                   <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>
                 ))}
               </SelectContent>
@@ -124,7 +128,7 @@ export default function PayrollManagementPage() {
 
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground text-sm">{tc("تقرير","Report")} {MONTHS_AR[data.month - 1]} {data.year}</span>
+              <span className="text-muted-foreground text-sm">{tc("تقرير","Report")} {MONTHS[data.month - 1]} {data.year}</span>
             </div>
 
             {data.employees.length === 0 ? (

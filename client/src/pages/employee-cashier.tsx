@@ -206,8 +206,8 @@ export default function EmployeeCashier() {
  : 0;
  
  toast({
- title: "عميل مسجل",
- description: `مرحباً ${data.customer.name}! لديك ${data.customer.points || 0} نقطة${availableStamps > 0 ? ` و ${availableStamps} أختام متاحة` : ''}`,
+ title: tc("عميل مسجل", "Customer Found"),
+ description: `${tc("مرحباً", "Welcome")} ${data.customer.name}! ${tc("لديك", "You have")} ${data.customer.points || 0} ${tc("نقطة", "pts")}${availableStamps > 0 ? ` ${tc("و", "and")} ${availableStamps} ${tc("أختام متاحة", "stamps")}` : ''}`,
  className: "bg-green-600 text-white",
  });
  } else {
@@ -267,8 +267,8 @@ export default function EmployeeCashier() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
       // Show customer details for confirmation
-      const pmLabels: Record<string, string> = { cash: "نقداً", pos: "شبكة", "pos-network": "شبكة", "qahwa-card": "بطاقة كيروكس", "loyalty-card": "بطاقة ولاء" };
-      const pmLabel = pmLabels[orderData.paymentMethod] || "شبكة";
+      const pmLabels: Record<string, string> = { cash: tc("نقداً","Cash"), pos: tc("شبكة","Network"), "pos-network": tc("شبكة","Network"), "qahwa-card": tc("بطاقة كيروكس","QIROX Card"), "loyalty-card": tc("بطاقة ولاء","Loyalty Card") };
+      const pmLabel = pmLabels[orderData.paymentMethod] || tc("شبكة","Network");
       const confirmMessage = `تأكيد الدفع (${pmLabel}) للعميل: ${orderData.customerInfo.customerName}\nرقم الجوال: ${orderData.customerInfo.phoneNumber}\nالإجمالي: ${orderData.totalAmount} ريال`;
       if (!window.confirm(confirmMessage)) {
         throw new Error("تم إلغاء تأكيد الدفع");
@@ -288,12 +288,12 @@ export default function EmployeeCashier() {
       return response.json();
     },
  onSuccess: async (order) => {
- const paymentMethodAr = paymentMethod === "cash" ? "نقدي" : 
- paymentMethod === "qahwa-card" || paymentMethod === "loyalty-card" ? "بطاقة كيروكس" :
- "شبكة";
+ const paymentMethodAr = paymentMethod === "cash" ? tc("نقدي","Cash") : 
+ paymentMethod === "qahwa-card" || paymentMethod === "loyalty-card" ? tc("بطاقة كيروكس","QIROX Card") :
+ tc("شبكة","Network");
  
- const orderTypeAr = orderType === 'dine-in' ? 'في الكافيه' :
- orderType === 'pickup' ? 'استلام' : 'توصيل';
+ const orderTypeAr = orderType === 'dine-in' ? tc('في الكافيه','Dine-in') :
+ orderType === 'pickup' ? tc('استلام','Pickup') : tc('توصيل','Delivery');
  
  setLastOrder({
  orderNumber: order.orderNumber,
@@ -328,8 +328,8 @@ export default function EmployeeCashier() {
  window.open(whatsappLink, '_blank');
  
  toast({
- title: "تم إنشاء الطلب بنجاح",
- description: `رقم الطلب: ${order.orderNumber}`,
+ title: tc("تم إنشاء الطلب بنجاح", "Order created successfully"),
+ description: `${tc("رقم الطلب","Order #")}: ${order.orderNumber}`,
  className: "bg-green-600 text-white",
  });
  
@@ -340,8 +340,8 @@ export default function EmployeeCashier() {
  },
  onError: () => {
  toast({
- title: "خطأ",
- description: "فشل إنشاء الطلب. يرجى المحاولة مرة أخرى",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل إنشاء الطلب. يرجى المحاولة مرة أخرى", "Failed to create order. Please try again"),
  variant: "destructive",
  });
  },
@@ -357,7 +357,7 @@ export default function EmployeeCashier() {
  
  if (!response.ok) {
  const error = await response.json();
- throw new Error(error.error || "فشل تسجيل العميل");
+ throw new Error(error.error || tc("فشل تسجيل العميل", "Failed to register customer"));
  }
  
  return response.json();
@@ -368,8 +368,8 @@ export default function EmployeeCashier() {
  setShowRegisterDialog(false);
  
  toast({
- title: "تم تسجيل العميل بنجاح",
- description: `تم تسجيل ${customer.name} في النظام. يمكن للعميل تفعيل الحساب لاحقاً عبر نظام استعادة كلمة المرور.`,
+ title: tc("تم تسجيل العميل بنجاح", "Customer registered"),
+ description: `${tc("تم تسجيل","Registered")} ${customer.name} ${tc("في النظام","in the system")}`,
  className: "bg-green-600 text-white",
  });
 
@@ -386,7 +386,7 @@ export default function EmployeeCashier() {
  },
  onError: (error: Error) => {
  toast({
- title: "خطأ في التسجيل",
+ title: tc("خطأ في التسجيل", "Registration Error"),
  description: error.message,
  variant: "destructive",
  });
@@ -396,8 +396,8 @@ export default function EmployeeCashier() {
  const handleRegisterCustomer = () => {
  if (!customerName.trim()) {
  toast({
- title: "خطأ",
- description: "يرجى إدخال اسم العميل",
+ title: tc("خطأ", "Error"),
+ description: tc("يرجى إدخال اسم العميل", "Please enter customer name"),
  variant: "destructive",
  });
  return;
@@ -498,8 +498,8 @@ export default function EmployeeCashier() {
  const validateDiscountCode = async () => {
  if (!discountCode.trim()) {
  toast({
- title: "خطأ",
- description: "يرجى إدخال كود الخصم",
+ title: tc("خطأ", "Error"),
+ description: tc("يرجى إدخال كود الخصم", "Please enter a discount code"),
  variant: "destructive",
  });
  return;
@@ -518,8 +518,8 @@ export default function EmployeeCashier() {
  data = await response.json();
  } catch (parseError) {
  toast({
- title: "خطأ",
- description: "فشل قراءةاستجابةالخادم",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل قراءة استجابة الخادم", "Failed to read server response"),
  variant: "destructive",
  });
  setIsValidatingDiscount(false);
@@ -528,8 +528,8 @@ export default function EmployeeCashier() {
 
  if (!response.ok || !data.valid) {
  toast({
- title: "كود خصم غير صالح",
- description: data.error || "الكود المدخل غير صحيح أو منتهي الصلاحية",
+ title: tc("كود خصم غير صالح", "Invalid discount code"),
+ description: data.error || tc("الكود المدخل غير صحيح أو منتهي الصلاحية", "The code entered is incorrect or expired"),
  variant: "destructive",
  });
  setAppliedDiscount(null);
@@ -544,15 +544,15 @@ export default function EmployeeCashier() {
  });
 
  toast({
- title: "تم تطبيق الخصم بنجاح",
+ title: tc("تم تطبيق الخصم بنجاح", "Discount applied"),
  description: `${data.reason} - ${data.discountPercentage}%`,
  className: "bg-green-600 text-white",
  });
  } catch (error) {
  console.error('Error validating discount code:', error);
  toast({
- title: "خطأ",
- description: "فشل التحقق من كود الخصم",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل التحقق من كود الخصم", "Failed to validate discount code"),
  variant: "destructive",
  });
  } finally {
@@ -564,16 +564,16 @@ export default function EmployeeCashier() {
  setDiscountCode("");
  setAppliedDiscount(null);
  toast({
- title: "تم إزالةالخصم",
- description: "تم إلغاء الخصم من الطلب",
+ title: tc("تم إزالة الخصم", "Discount removed"),
+ description: tc("تم إلغاء الخصم من الطلب", "Discount has been removed from the order"),
  });
  };
 
  const handlePrintReceipt = async () => {
    if (!lastOrder) {
      toast({
-       title: "خطأ",
-       description: "لا يوجد طلب للطباعة",
+       title: tc("خطأ", "Error"),
+       description: tc("لا يوجد طلب للطباعة", "No order available to print"),
        variant: "destructive",
      });
      return;
@@ -594,15 +594,15 @@ export default function EmployeeCashier() {
        date: lastOrder.date,
      });
      toast({
-       title: "تم فتح نافذة الطباعة",
-       description: "يمكنك الآن طباعة الإيصال",
+       title: tc("تم فتح نافذة الطباعة", "Print window opened"),
+       description: tc("يمكنك الآن طباعة الإيصال", "You can now print the receipt"),
        className: "bg-green-600 text-white",
      });
    } catch (error) {
      console.error("Error printing receipt:", error);
      toast({
-       title: "خطأ",
-       description: "فشل في فتح نافذة الطباعة",
+       title: tc("خطأ", "Error"),
+       description: tc("فشل في فتح نافذة الطباعة", "Failed to open print window"),
        variant: "destructive",
      });
    }
@@ -611,8 +611,8 @@ export default function EmployeeCashier() {
  const handlePrintTaxInvoice = async () => {
    if (!lastOrder) {
      toast({
-       title: "خطأ",
-       description: "لا يوجد طلب للطباعة",
+       title: tc("خطأ", "Error"),
+       description: tc("لا يوجد طلب للطباعة", "No order available to print"),
        variant: "destructive",
      });
      return;
@@ -635,15 +635,15 @@ export default function EmployeeCashier() {
        vatNumber: businessConfig?.vatNumber,
      });
      toast({
-       title: "تم فتح نافذة الطباعة",
-       description: "يمكنك الآن طباعة الفاتورة الضريبية",
+       title: tc("تم فتح نافذة الطباعة", "Print window opened"),
+       description: tc("يمكنك الآن طباعة الفاتورة الضريبية", "You can now print the tax invoice"),
        className: "bg-green-600 text-white",
      });
    } catch (error) {
      console.error("Error printing tax invoice:", error);
      toast({
-       title: "خطأ",
-       description: "فشل في فتح نافذة الطباعة",
+       title: tc("خطأ", "Error"),
+       description: tc("فشل في فتح نافذة الطباعة", "Failed to open print window"),
        variant: "destructive",
      });
    }
@@ -652,8 +652,8 @@ export default function EmployeeCashier() {
  const handlePrintAllReceipts = async () => {
    if (!lastOrder) {
      toast({
-       title: "خطأ",
-       description: "لا يوجد طلب للطباعة",
+       title: tc("خطأ", "Error"),
+       description: tc("لا يوجد طلب للطباعة", "No order available to print"),
        variant: "destructive",
      });
      return;
@@ -676,15 +676,15 @@ export default function EmployeeCashier() {
        date: lastOrder.date,
      });
      toast({
-       title: "تم فتح نوافذ الطباعة",
-       description: "طباعة 3 إيصالات: فاتورة ضريبية، إيصال استلام، نسخة الكاشير",
+       title: tc("تم فتح نوافذ الطباعة", "Print windows opened"),
+       description: tc("طباعة 3 إيصالات: فاتورة ضريبية، إيصال استلام، نسخة الكاشير", "Printing 3 receipts: tax invoice, receipt, cashier copy"),
        className: "bg-green-600 text-white",
      });
    } catch (error) {
      console.error("Error printing all receipts:", error);
      toast({
-       title: "خطأ",
-       description: "فشل في فتح نوافذ الطباعة",
+       title: tc("خطأ", "Error"),
+       description: tc("فشل في فتح نوافذ الطباعة", "Failed to open print windows"),
        variant: "destructive",
      });
    }
@@ -700,22 +700,22 @@ export default function EmployeeCashier() {
      
      if (response.ok) {
        toast({
-         title: "تم فتح الخزانة",
-         description: "تم فتح درج النقود بنجاح",
+         title: tc("تم فتح الخزانة", "Drawer opened"),
+         description: tc("تم فتح درج النقود بنجاح", "Cash drawer opened successfully"),
          className: "bg-green-600 text-white",
        });
      } else {
        toast({
-         title: "خطأ",
-         description: "فشل فتح الخزانة",
+         title: tc("خطأ", "Error"),
+         description: tc("فشل فتح الخزانة", "Failed to open cash drawer"),
          variant: "destructive",
        });
      }
    } catch (error) {
      console.error('Error opening cash drawer:', error);
      toast({
-       title: "خطأ",
-       description: "فشل الاتصال بالخادم",
+       title: tc("خطأ", "Error"),
+       description: tc("فشل الاتصال بالخادم", "Failed to connect to server"),
        variant: "destructive",
      });
    }
@@ -734,22 +734,22 @@ export default function EmployeeCashier() {
  const data = await response.json();
  setPosConnected(data.connected);
  toast({
- title: data.connected ? "تم الاتصال بجهاز POS" : "تم قطع الاتصال",
- description: data.connected ? "الجهاز جاهز للدفع الإلكتروني" : "تم إيقاف الاتصال بجهاز POS",
+ title: data.connected ? tc("تم الاتصال بجهاز POS", "POS connected") : tc("تم قطع الاتصال", "POS disconnected"),
+ description: data.connected ? tc("الجهاز جاهز للدفع الإلكتروني", "Device ready for payment") : tc("تم إيقاف الاتصال بجهاز POS", "POS connection stopped"),
  className: data.connected ? "bg-green-600 text-white" : undefined,
  });
  } else {
  toast({
- title: "خطأ",
- description: "فشل تغيير حالة الاتصال بجهاز POS",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل تغيير حالة الاتصال بجهاز POS", "Failed to toggle POS connection"),
  variant: "destructive",
  });
  }
  } catch (error) {
  console.error('Error toggling POS:', error);
  toast({
- title: "خطأ",
- description: "فشل الاتصال بالخادم",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل الاتصال بالخادم", "Failed to connect to server"),
  variant: "destructive",
  });
  } finally {
@@ -760,8 +760,8 @@ export default function EmployeeCashier() {
  const handleSubmitOrder = async () => {
    if (orderItems.length === 0) {
      toast({
-       title: "خطأ",
-       description: "يرجى إضافة عناصر للطلب",
+       title: tc("خطأ", "Error"),
+       description: tc("يرجى إضافة عناصر للطلب", "Please add items to the order"),
        variant: "destructive",
      });
      return;
@@ -803,8 +803,8 @@ export default function EmployeeCashier() {
      // Handle Printing after success
      if (order) {
        toast({
-         title: "تم الطلب",
-         description: "جاري تحضير الفواتير...",
+         title: tc("تم الطلب", "Order placed"),
+         description: tc("جاري تحضير الفواتير...", "Preparing invoices..."),
        });
        
        // Update lastOrder state for manual printing if needed
@@ -820,7 +820,7 @@ export default function EmployeeCashier() {
            amount: calculateDiscount().toFixed(2)
          } : undefined,
          total: order.totalAmount,
-         paymentMethod: paymentMethod === "cash" ? "نقدي" : "إلكتروني",
+         paymentMethod: paymentMethod === "cash" ? tc("نقدي","Cash") : tc("إلكتروني","Electronic"),
          employeeName: employee?.fullName || "",
          tableNumber: tableNumber || undefined,
          deliveryType: orderType,
@@ -968,7 +968,7 @@ export default function EmployeeCashier() {
  onClick={handleOpenCashDrawer}
  className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-open-drawer"
- title="فتح الخزانة"
+ title={tc("فتح الخزانة", "Open Cash Drawer")}
  >
  <Wallet className="w-5 h-5" />
  </Button>
@@ -979,7 +979,7 @@ export default function EmployeeCashier() {
  data-testid="button-back-dashboard"
  >
  <ArrowRight className="w-4 h-4 ml-2" />
- العودة
+ {tc("العودة", "Back")}
  </Button>
  </div>
  </div>
@@ -1066,7 +1066,7 @@ export default function EmployeeCashier() {
  </h4>
  </div>
  <p className="text-gray-400 text-xs">
- {Number(item.coffeeItem.price).toFixed(2)} ريال
+ {Number(item.coffeeItem.price).toFixed(2)} {tc("ريال","SAR")}
  </p>
  </div>
  <Button
@@ -1112,7 +1112,7 @@ export default function EmployeeCashier() {
    }
    const addonsExtra = ((item.customization as any)?.selectedItemAddons || []).reduce((s: number, a: any) => s + (Number(a.price) || 0), 0);
    return ((price + addonsExtra) * item.quantity).toFixed(2);
- })()} ريال
+ })()} {tc("ريال","SAR")}
  </span>
  </div>
  </div>
@@ -1177,8 +1177,8 @@ export default function EmployeeCashier() {
  }
  setShowBarcodeScanner(false);
  toast({
- title: "تم العثور على العميل",
- description: `${result.card.customerName || 'عميل'} - ${result.card.phoneNumber}`,
+ title: tc("تم العثور على العميل", "Customer found"),
+ description: `${result.card.customerName || tc('عميل','Customer')} - ${result.card.phoneNumber}`,
  });
  }
  }}
@@ -1197,7 +1197,7 @@ export default function EmployeeCashier() {
  <p className="text-blue-300 text-sm text-right">{tc("عميل غير مسجل - يمكنك تسجيله الآن","Unregistered customer — you can register them now")}</p>
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block text-xs">
- البريد الإلكتروني (اختياري)
+ {tc("البريد الإلكتروني (اختياري)", "Email (optional)")}
  </Label>
  <Input
  value={customerEmail}
@@ -1214,10 +1214,10 @@ export default function EmployeeCashier() {
  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
  data-testid="button-register-customer"
  >
- {isRegisteringCustomer ? "جاري التسجيل..." : "تسجيل العميل"}
+ {isRegisteringCustomer ? tc("جاري التسجيل...", "Registering...") : tc("تسجيل العميل", "Register Customer")}
  </Button>
  <p className="text-xs text-gray-400 text-right">
- سيتمكن العميل من تفعيل حسابه لاحقاً عبر نظام استعادة كلمة المرور
+ {tc("سيتمكن العميل من تفعيل حسابه لاحقاً", "Customer can activate their account later")}
  </p>
  </div>
  )}
@@ -1226,11 +1226,11 @@ export default function EmployeeCashier() {
  <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 p-4 rounded-lg border border-purple-500/30 space-y-3">
  <div className="flex items-center justify-between">
  <Badge variant="outline" className="border-purple-400 text-purple-300">
- {customerPoints} نقطة
+ {customerPoints} {tc("نقطة", "pts")}
  </Badge>
  <div className="text-right">
-   <span className="text-purple-300 text-sm block">نقاط العميل</span>
-   <span className="text-purple-400 text-xs">≈ {pointsToSar(customerPoints).toFixed(2)} ريال</span>
+   <span className="text-purple-300 text-sm block">{tc("نقاط العميل", "Customer Points")}</span>
+   <span className="text-purple-400 text-xs">≈ {pointsToSar(customerPoints).toFixed(2)} {tc("ريال","SAR")}</span>
  </div>
  </div>
  {!usePointsDiscount ? (
@@ -1242,7 +1242,7 @@ export default function EmployeeCashier() {
          max={customerPoints}
          value={pointsToRedeem || ''}
          onChange={(e) => setPointsToRedeem(Math.min(parseInt(e.target.value) || 0, customerPoints))}
-         placeholder="عدد النقاط"
+         placeholder={tc("عدد النقاط", "Points to use")}
          className="bg-[#1a1410] border-purple-500/30 text-white text-center flex-1"
          data-testid="input-points-to-redeem"
        />
@@ -1254,12 +1254,12 @@ export default function EmployeeCashier() {
          data-testid="button-apply-points-discount"
        >
          <Wallet className="w-4 h-4 ml-1" />
-         تطبيق
+         {tc("تطبيق", "Apply")}
        </Button>
      </div>
      {pointsToRedeem > 0 && (
        <p className="text-xs text-purple-400 text-right">
-         خصم: {pointsToSar(pointsToRedeem).toFixed(2)} ريال
+         {tc("خصم", "Discount")}: {pointsToSar(pointsToRedeem).toFixed(2)} {tc("ريال","SAR")}
        </p>
      )}
    </div>
@@ -1272,11 +1272,11 @@ export default function EmployeeCashier() {
        className="text-red-400 hover:text-red-300 text-xs"
        data-testid="button-cancel-points-discount"
      >
-       إلغاء
+       {tc("إلغاء", "Cancel")}
      </Button>
      <div className="text-right">
-       <p className="text-purple-300 text-sm font-medium">تم تطبيق {pointsToRedeem} نقطة</p>
-       <p className="text-green-400 text-xs">خصم {pointsToSar(pointsToRedeem).toFixed(2)} ريال</p>
+       <p className="text-purple-300 text-sm font-medium">{tc("تم تطبيق","Applied")} {pointsToRedeem} {tc("نقطة","pts")}</p>
+       <p className="text-green-400 text-xs">{tc("خصم","Discount")} {pointsToSar(pointsToRedeem).toFixed(2)} {tc("ريال","SAR")}</p>
      </div>
    </div>
  )}
@@ -1474,7 +1474,7 @@ export default function EmployeeCashier() {
  <Input
  value={discountCode}
  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
- placeholder="مثال: WELCOME10"
+ placeholder={tc("مثال: WELCOME10", "e.g. WELCOME10")}
  className="bg-[#1a1410] border-green-500/30 text-white text-right flex-1 focus:border-green-500"
  data-testid="input-discount-code"
  />
@@ -1531,7 +1531,7 @@ export default function EmployeeCashier() {
  <div className="flex justify-between items-center text-sm">
  <span className="text-gray-400">{tc("المجموع الفرعي:","Subtotal:")}</span>
  <span className="text-gray-300" data-testid="text-subtotal">
- {calculateSubtotal().toFixed(2)} ريال
+ {calculateSubtotal().toFixed(2)} {tc("ريال","SAR")}
  </span>
  </div>
  
@@ -1539,7 +1539,7 @@ export default function EmployeeCashier() {
  <div className="flex justify-between items-center text-sm">
  <span className="text-green-400">{tc("الخصم","Discount")} ({appliedDiscount.percentage}%):</span>
  <span className="text-green-400" data-testid="text-discount-amount">
- -{calculateDiscount().toFixed(2)} ريال
+ -{calculateDiscount().toFixed(2)} {tc("ريال","SAR")}
  </span>
  </div>
  )}
@@ -1548,7 +1548,7 @@ export default function EmployeeCashier() {
  <div className="flex justify-between items-center text-sm">
  <span className="text-purple-400">{tc("خصم النقاط","Points Discount")} ({pointsToRedeem} {tc("نقطة","pts")}):</span>
  <span className="text-purple-400" data-testid="text-points-discount-amount">
- -{pointsToSar(pointsToRedeem).toFixed(2)} ريال
+ -{pointsToSar(pointsToRedeem).toFixed(2)} {tc("ريال","SAR")}
  </span>
  </div>
  )}
@@ -1558,7 +1558,7 @@ export default function EmployeeCashier() {
  <div className="flex justify-between items-center text-lg font-bold">
  <span className="text-accent">{tc("الإجمالي:","Total:")}</span>
  <span className="text-accent" data-testid="text-total">
- {calculateTotal()} ريال
+ {calculateTotal()} {tc("ريال","SAR")}
  </span>
  </div>
  </div>

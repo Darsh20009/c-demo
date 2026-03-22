@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
+import { useTranslate } from "@/lib/useTranslate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ interface DistanceError {
 }
 
 export default function EmployeeAttendance() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [employee, setEmployee] = useState<Employee | null>(null);
@@ -84,7 +86,7 @@ export default function EmployeeAttendance() {
   const getLocation = useCallback(() => {
     setLocationError(null);
     if (!navigator.geolocation) {
-      setLocationError("المتصفح لا يدعم تحديد الموقع");
+      setLocationError(tc("المتصفح لا يدعم تحديد الموقع", "Browser does not support geolocation"));
       return;
     }
 
@@ -98,16 +100,16 @@ export default function EmployeeAttendance() {
       (error) => {
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            setLocationError("تم رفض إذن تحديد الموقع. يرجى السماح بتحديد الموقع من إعدادات المتصفح.");
+            setLocationError(tc("تم رفض إذن تحديد الموقع. يرجى السماح بتحديد الموقع من إعدادات المتصفح.", "Location permission denied. Please allow location access in browser settings."));
             break;
           case error.POSITION_UNAVAILABLE:
-            setLocationError("معلومات الموقع غير متوفرة.");
+            setLocationError(tc("معلومات الموقع غير متوفرة.", "Location information unavailable."));
             break;
           case error.TIMEOUT:
-            setLocationError("انتهت مهلة طلب الموقع.");
+            setLocationError(tc("انتهت مهلة طلب الموقع.", "Location request timed out."));
             break;
           default:
-            setLocationError("حدث خطأ غير معروف.");
+            setLocationError(tc("حدث خطأ غير معروف.", "An unknown error occurred."));
         }
       },
       {
@@ -134,8 +136,8 @@ export default function EmployeeAttendance() {
       }
     } catch (error) {
       toast({
-        title: "خطأ",
-        description: "لا يمكن الوصول للكاميرا",
+        title: tc("خطأ", "Error"),
+        description: tc("لا يمكن الوصول للكاميرا", "Cannot access the camera"),
         variant: "destructive"
       });
       setIsCapturing(false);
@@ -182,8 +184,8 @@ export default function EmployeeAttendance() {
       }
     } catch (error) {
       toast({
-        title: "خطأ",
-        description: "فشل رفع الصورة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل رفع الصورة", "Failed to upload photo"),
         variant: "destructive"
       });
     }
@@ -198,8 +200,8 @@ export default function EmployeeAttendance() {
   const handleCheckIn = async () => {
     if (!location) {
       toast({
-        title: "خطأ",
-        description: "يرجى تحديد الموقع أولاً",
+        title: tc("خطأ", "Error"),
+        description: tc("يرجى تحديد الموقع أولاً", "Please get your location first"),
         variant: "destructive"
       });
       return;
@@ -207,8 +209,8 @@ export default function EmployeeAttendance() {
 
     if (!photoUrl) {
       toast({
-        title: "خطأ",
-        description: "يرجى التقاط صورة أولاً",
+        title: tc("خطأ", "Error"),
+        description: tc("يرجى التقاط صورة أولاً", "Please take a photo first"),
         variant: "destructive"
       });
       return;
@@ -236,8 +238,8 @@ export default function EmployeeAttendance() {
           });
         } else {
           toast({
-            title: "خطأ",
-            description: data.error || "فشل التحضير",
+            title: tc("خطأ", "Error"),
+            description: data.error || tc("فشل التحضير", "Check-in failed"),
             variant: "destructive",
             duration: 10000
           });
@@ -246,7 +248,7 @@ export default function EmployeeAttendance() {
       }
 
       toast({
-        title: "تم التحضير",
+        title: tc("تم التحضير", "Checked in"),
         description: data.message
       });
 
@@ -255,8 +257,8 @@ export default function EmployeeAttendance() {
       setPhotoUrl(null);
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "فشل التحضير",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل التحضير", "Check-in failed"),
         variant: "destructive",
         duration: 10000
       });
@@ -268,8 +270,8 @@ export default function EmployeeAttendance() {
   const handleCheckOut = async () => {
     if (!location) {
       toast({
-        title: "خطأ",
-        description: "يرجى تحديد الموقع أولاً",
+        title: tc("خطأ", "Error"),
+        description: tc("يرجى تحديد الموقع أولاً", "Please get your location first"),
         variant: "destructive"
       });
       return;
@@ -277,8 +279,8 @@ export default function EmployeeAttendance() {
 
     if (!photoUrl) {
       toast({
-        title: "خطأ",
-        description: "يرجى التقاط صورة أولاً",
+        title: tc("خطأ", "Error"),
+        description: tc("يرجى التقاط صورة أولاً", "Please take a photo first"),
         variant: "destructive"
       });
       return;
@@ -306,8 +308,8 @@ export default function EmployeeAttendance() {
           });
         } else {
           toast({
-            title: "خطأ",
-            description: data.error || "فشل الانصراف",
+            title: tc("خطأ", "Error"),
+            description: data.error || tc("فشل الانصراف", "Check-out failed"),
             variant: "destructive",
             duration: 10000
           });
@@ -316,7 +318,7 @@ export default function EmployeeAttendance() {
       }
 
       toast({
-        title: "تم الانصراف",
+        title: tc("تم الانصراف", "Checked out"),
         description: data.message
       });
 
@@ -325,8 +327,8 @@ export default function EmployeeAttendance() {
       setPhotoUrl(null);
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "فشل الانصراف",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل الانصراف", "Check-out failed"),
         variant: "destructive",
         duration: 10000
       });
@@ -361,7 +363,7 @@ export default function EmployeeAttendance() {
               <Coffee className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-primary">تسجيل الحضور</h1>
+              <h1 className="text-xl font-bold text-primary">{tc("تسجيل الحضور", "Attendance")}</h1>
               <p className="text-muted-foreground text-xs">{formattedDate}</p>
             </div>
           </div>
@@ -388,7 +390,7 @@ export default function EmployeeAttendance() {
                 <h2 className="text-lg font-bold font-playfair text-foreground" data-testid="text-employee-name">
                   {employee.fullName}
                 </h2>
-                <p className="text-muted-foreground text-sm">{employee.jobTitle || 'موظف'}</p>
+                <p className="text-muted-foreground text-sm">{employee.jobTitle || tc('موظف', 'Employee')}</p>
               </div>
             </div>
           </CardContent>
@@ -412,7 +414,7 @@ export default function EmployeeAttendance() {
             <CardHeader className="pb-2">
               <CardTitle className="text-primary flex items-center gap-2">
                 <Calendar className="w-5 h-5" />
-                حالة اليوم والاجازات
+                {tc("حالة اليوم والاجازات", "Today's Status & Leaves")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -421,26 +423,26 @@ export default function EmployeeAttendance() {
                 {attendanceStatus.hasCheckedOut ? (
                   <div className="flex items-center gap-2 text-green-600">
                     <CheckCircle2 className="w-5 h-5" />
-                    <span>تم الانصراف</span>
+                    <span>{tc("تم الانصراف", "Checked out")}</span>
                   </div>
                 ) : attendanceStatus.hasCheckedIn ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-primary">
                       <Clock className="w-5 h-5" />
                       <span>
-                        وقت الحضور: {new Date(attendanceStatus.attendance?.checkInTime || '').toLocaleTimeString('ar-SA')}
+                        {tc("وقت الحضور:", "Check-in:")} {new Date(attendanceStatus.attendance?.checkInTime || '').toLocaleTimeString('ar-SA')}
                       </span>
                     </div>
                     {attendanceStatus.attendance?.isLate === 1 && (
                       <Badge variant="destructive" className="text-xs">
-                        تأخير {attendanceStatus.attendance.lateMinutes} دقيقة
+                        {tc("تأخير", "Late")} {attendanceStatus.attendance.lateMinutes} {tc("دقيقة", "min")}
                       </Badge>
                     )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <XCircle className="w-5 h-5" />
-                    <span>لم يتم التحضير بعد</span>
+                    <span>{tc("لم يتم التحضير بعد", "Not checked in yet")}</span>
                   </div>
                 )}
               </div>
@@ -451,19 +453,19 @@ export default function EmployeeAttendance() {
               {/* Check-in & Check-out Times */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-primary/5 rounded-lg p-3">
-                  <p className="text-muted-foreground text-xs mb-1">وقت الحضور</p>
+                  <p className="text-muted-foreground text-xs mb-1">{tc("وقت الحضور", "Check-in Time")}</p>
                   <p className="text-primary font-semibold" data-testid="text-checkin-time">
                     {attendanceStatus.todayCheckIn 
                       ? new Date(attendanceStatus.todayCheckIn).toLocaleTimeString('ar-SA')
-                      : 'لم يسجل بعد'}
+                      : tc('لم يسجل بعد', 'Not recorded')}
                   </p>
                 </div>
                 <div className="bg-primary/5 rounded-lg p-3">
-                  <p className="text-muted-foreground text-xs mb-1">وقت الانصراف</p>
+                  <p className="text-muted-foreground text-xs mb-1">{tc("وقت الانصراف", "Check-out Time")}</p>
                   <p className="text-primary font-semibold" data-testid="text-checkout-time">
                     {attendanceStatus.todayCheckOut 
                       ? new Date(attendanceStatus.todayCheckOut).toLocaleTimeString('ar-SA')
-                      : 'لم يسجل بعد'}
+                      : tc('لم يسجل بعد', 'Not recorded')}
                   </p>
                 </div>
               </div>
@@ -476,15 +478,15 @@ export default function EmployeeAttendance() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-primary">
                     <Briefcase className="w-5 h-5" />
-                    <span className="text-sm">رصيد الاجازات</span>
+                    <span className="text-sm">{tc("رصيد الاجازات", "Leave Balance")}</span>
                   </div>
                   <Badge className="bg-primary/10 text-primary border-primary/20">
-                    {attendanceStatus.leaveBalance || 0} يوم
+                    {attendanceStatus.leaveBalance || 0} {tc("يوم", "days")}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>إجمالي الاجازات السنوية</span>
-                  <span>{attendanceStatus.totalLeaves || 0} يوم</span>
+                  <span>{tc("إجمالي الاجازات السنوية", "Total Annual Leaves")}</span>
+                  <span>{attendanceStatus.totalLeaves || 0} {tc("يوم", "days")}</span>
                 </div>
               </div>
 
@@ -495,7 +497,7 @@ export default function EmployeeAttendance() {
                 data-testid="button-apply-leave"
               >
                 <FileText className="w-4 h-4" />
-                التقديم على اجازة
+                {tc("التقديم على اجازة", "Apply for Leave")}
               </Button>
             </CardContent>
           </Card>
@@ -505,7 +507,7 @@ export default function EmployeeAttendance() {
           <CardHeader className="pb-2">
             <CardTitle className="text-primary flex items-center gap-2">
               <MapPin className="w-5 h-5" />
-              الموقع
+              {tc("الموقع", "Location")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -523,18 +525,18 @@ export default function EmployeeAttendance() {
                   data-testid="button-retry-location"
                 >
                   <RefreshCw className="w-4 h-4 ml-1" />
-                  إعادة
+                  {tc("إعادة", "Retry")}
                 </Button>
               </div>
             ) : location ? (
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle2 className="w-5 h-5" />
-                <span>تم تحديد الموقع</span>
+                <span>{tc("تم تحديد الموقع", "Location obtained")}</span>
               </div>
             ) : (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>جاري تحديد الموقع...</span>
+                <span>{tc("جاري تحديد الموقع...", "Getting location...")}</span>
               </div>
             )}
           </CardContent>
@@ -544,10 +546,10 @@ export default function EmployeeAttendance() {
           <CardHeader className="pb-2">
             <CardTitle className="text-primary flex items-center gap-2">
               <Camera className="w-5 h-5" />
-              صورة الحضور
+              {tc("صورة الحضور", "Attendance Photo")}
             </CardTitle>
             <CardDescription className="text-muted-foreground text-xs">
-              التقط صورة سيلفي للتأكيد
+              {tc("التقط صورة سيلفي للتأكيد", "Take a selfie to confirm")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -566,7 +568,7 @@ export default function EmployeeAttendance() {
                   data-testid="button-capture"
                 >
                   <Camera className="w-4 h-4 ml-2" />
-                  التقاط
+                  {tc("التقاط", "Capture")}
                 </Button>
               </div>
             ) : capturedPhoto ? (
@@ -583,12 +585,12 @@ export default function EmployeeAttendance() {
                     className="flex-1 border-primary/50 text-primary"
                     data-testid="button-retake"
                   >
-                    إعادة التقاط
+                    {tc("إعادة التقاط", "Retake")}
                   </Button>
                   {photoUrl && (
                     <div className="flex items-center text-green-600 text-sm">
                       <CheckCircle2 className="w-4 h-4 ml-1" />
-                      تم الرفع
+                      {tc("تم الرفع", "Uploaded")}
                     </div>
                   )}
                 </div>
@@ -601,7 +603,7 @@ export default function EmployeeAttendance() {
                 data-testid="button-start-camera"
               >
                 <Camera className="w-4 h-4 ml-2" />
-                فتح الكاميرا
+                {tc("فتح الكاميرا", "Open Camera")}
               </Button>
             )}
             <canvas ref={canvasRef} className="hidden" />
@@ -622,7 +624,7 @@ export default function EmployeeAttendance() {
                 ) : (
                   <CheckCircle2 className="w-5 h-5 ml-2" />
                 )}
-                تسجيل الحضور
+                {tc("تسجيل الحضور", "Check In")}
               </Button>
             ) : (
               <Button
@@ -636,7 +638,7 @@ export default function EmployeeAttendance() {
                 ) : (
                   <ArrowRight className="w-5 h-5 ml-2" />
                 )}
-                تسجيل الانصراف
+                {tc("تسجيل الانصراف", "Check Out")}
               </Button>
             )}
           </div>
@@ -649,7 +651,7 @@ export default function EmployeeAttendance() {
             className="w-full text-muted-foreground hover:text-primary"
             data-testid="button-back-dashboard"
           >
-            العودة للوحة التحكم
+            {tc("العودة للوحة التحكم", "Back to Dashboard")}
           </Button>
         </div>
       </div>

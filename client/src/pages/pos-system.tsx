@@ -57,16 +57,15 @@ const PAYMENT_METHODS = [
   { id: "qahwa-card", icon: Wallet, tKey: "pos.payment_loyalty" },
 ];
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
-  cash: "نقدي",
-  card: "شبكة",
-  "qahwa-card": "بطاقة كيروكس",
-};
-
 export default function PosSystem() {
   const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { t, i18n } = useTranslation();
+  const PAYMENT_METHOD_LABELS: Record<string, string> = {
+    cash: tc("نقدي","Cash"),
+    card: tc("شبكة","Network"),
+    "qahwa-card": tc("بطاقة كيروكس","QIROX Card"),
+  };
   const dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
   const employee = useMemo(() => {
     try {
@@ -169,13 +168,13 @@ export default function PosSystem() {
       setIsOnline(true);
       const count = await countPendingOrders().catch(() => 0);
       if (count > 0) {
-        toast({ title: "🔄 جاري مزامنة الطلبات المعلقة...", description: `${count} طلب في قائمة الانتظار` });
+        toast({ title: tc("🔄 جاري مزامنة الطلبات المعلقة...", "🔄 Syncing pending orders..."), description: `${count} ${tc("طلب في قائمة الانتظار","orders in queue")}` });
         const { synced, failed } = await syncOfflineOrders();
         const newCount = await countPendingOrders().catch(() => 0);
         setOfflineQueueCount(newCount);
         if (synced > 0) {
           queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-          toast({ title: "✅ تمت المزامنة", description: `${synced} طلب تم إرساله${failed > 0 ? `, ${failed} فشل` : ''}` });
+          toast({ title: tc("✅ تمت المزامنة","✅ Sync complete"), description: `${synced} ${tc("طلب تم إرساله","orders sent")}${failed > 0 ? `, ${failed} ${tc("فشل","failed")}` : ''}` });
         }
       }
     };
@@ -548,7 +547,7 @@ export default function PosSystem() {
         const localId = await queueOfflineOrder({ ...orderData, totalAmount: total });
         const newCount = await countPendingOrders().catch(() => 0);
         setOfflineQueueCount(newCount);
-        toast({ title: "📦 تم حفظ الطلب محلياً", description: "سيُرسل تلقائياً عند استعادة الاتصال" });
+        toast({ title: tc("📦 تم حفظ الطلب محلياً","📦 Order saved locally"), description: tc("سيُرسل تلقائياً عند استعادة الاتصال","Will be sent automatically when connection is restored") });
         setOrderItems([]);
         setCustomerName("");
         setCustomerPhone("");
@@ -561,7 +560,7 @@ export default function PosSystem() {
       const result = await res.json().catch(() => ({}));
 
       if (!result || result.error) {
-        throw new Error(result?.error || 'فشل إنشاء الطلب');
+        throw new Error(result?.error || tc('فشل إنشاء الطلب','Failed to create order'));
       }
 
       setLastOrder({
@@ -912,7 +911,7 @@ export default function PosSystem() {
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 ref={searchInputRef}
-                placeholder={`${t('pos.search_placeholder')}  (/ أو F2)`}
+                placeholder={`${t('pos.search_placeholder')}  (/ ${tc('أو','or')} F2)`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pr-10 h-9 sm:h-12 text-sm sm:text-base rounded-xl border-2 focus-visible:ring-primary"
@@ -1218,7 +1217,7 @@ export default function PosSystem() {
               <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold ${!isOnline ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800' : 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800'}`} data-testid="pos-offline-indicator">
                 {!isOnline ? <WifiOff className="w-4 h-4 shrink-0" /> : <Wifi className="w-4 h-4 shrink-0" />}
                 <span className="flex-1">
-                  {!isOnline ? 'غير متصل — الطلبات تُخزّن محلياً' : `${offlineQueueCount} طلب في انتظار الإرسال`}
+                  {!isOnline ? tc('غير متصل — الطلبات تُخزّن محلياً','Offline — Orders saved locally') : `${offlineQueueCount} ${tc('طلب في انتظار الإرسال','orders pending upload')}`}
                 </span>
                 {isOnline && offlineQueueCount > 0 && (
                   <button
@@ -2049,7 +2048,7 @@ export default function PosSystem() {
                   <button
                     onClick={() => testSound('newOrder', 0.8)}
                     className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                    title="اختبار الصوت"
+                    title={tc("اختبار الصوت","Test sound")}
                     data-testid="button-test-sound-settings"
                   >
                     <PlayCircle className="w-4 h-4" />
@@ -2106,7 +2105,7 @@ export default function PosSystem() {
                 </Button>
               </div>
               <p className="text-[10px] text-muted-foreground text-center">
-                قلل الحجم لتناسب الشاشات الصغيرة دون تشويه
+                {tc("قلل الحجم لتناسب الشاشات الصغيرة دون تشويه","Reduce size to fit small screens without distortion")}
               </p>
             </div>
             <Separator />

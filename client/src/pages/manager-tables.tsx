@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -57,6 +58,7 @@ interface IBranch {
 }
 
 export default function ManagerTables() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [bulkCount, setBulkCount] = useState("10");
@@ -165,14 +167,14 @@ export default function ManagerTables() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tables"] });
       toast({
-        title: "تم إنشاء الطاولة",
-        description: "تم إنشاء الطاولة بنجاح",
+        title: tc("تم إنشاء الطاولة", "Table created"),
+        description: tc("تم إنشاء الطاولة بنجاح", "Table was created successfully"),
       });
     },
     onError: () => {
       toast({
-        title: "خطأ",
-        description: "فشل إنشاء الطاولة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل إنشاء الطاولة", "Failed to create table"),
         variant: "destructive",
       });
     },
@@ -210,8 +212,8 @@ export default function ManagerTables() {
       
       const createdCount = data.details?.created?.length || data.results?.created?.length || 0;
       toast({
-        title: "تم إنشاء الطاولات",
-        description: `تم إنشاء ${createdCount} طاولة بنجاح`,
+        title: tc("تم إنشاء الطاولات", "Tables created"),
+        description: `${tc("تم إنشاء", "Created")} ${createdCount} ${tc("طاولة بنجاح", "tables successfully")}`,
       });
       setBulkCount("10");
       
@@ -221,8 +223,8 @@ export default function ManagerTables() {
     onError: (error: Error) => {
       console.error("Bulk create mutation error:", error);
       toast({
-        title: "خطأ",
-        description: error.message || "فشل إنشاء الطاولات",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل إنشاء الطاولات", "Failed to create tables"),
         variant: "destructive",
       });
     },
@@ -245,14 +247,14 @@ export default function ManagerTables() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tables"] });
       toast({
-        title: "تم تحديث الحالة",
-        description: "تم تحديث حالة الطاولة بنجاح",
+        title: tc("تم تحديث الحالة", "Status updated"),
+        description: tc("تم تحديث حالة الطاولة بنجاح", "Table status updated successfully"),
       });
     },
     onError: () => {
       toast({
-        title: "خطأ",
-        description: "فشل تحديث حالة الطاولة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل تحديث حالة الطاولة", "Failed to update table status"),
         variant: "destructive",
       });
     },
@@ -275,14 +277,14 @@ export default function ManagerTables() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tables"] });
       toast({
-        title: "تم إفراغ الطاولة",
-        description: "الطاولة الآن متاحة للزبائن الجدد",
+        title: tc("تم إفراغ الطاولة", "Table emptied"),
+        description: tc("الطاولة الآن متاحة للزبائن الجدد", "Table is now available for new customers"),
       });
     },
     onError: () => {
       toast({
-        title: "خطأ",
-        description: "فشل إفراغ الطاولة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل إفراغ الطاولة", "Failed to empty table"),
         variant: "destructive",
       });
     },
@@ -304,14 +306,14 @@ export default function ManagerTables() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/tables"] });
       toast({
-        title: "تم حذف الطاولة",
-        description: "تم حذف الطاولة بنجاح",
+        title: tc("تم حذف الطاولة", "Table deleted"),
+        description: tc("تم حذف الطاولة بنجاح", "Table was deleted successfully"),
       });
     },
     onError: () => {
       toast({
-        title: "خطأ",
-        description: "فشل حذف الطاولة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل حذف الطاولة", "Failed to delete table"),
         variant: "destructive",
       });
     },
@@ -335,8 +337,8 @@ export default function ManagerTables() {
     onError: (error: Error) => {
       console.error("QR Code error:", error);
       toast({
-        title: "خطأ",
-        description: error.message || "فشل تحميل رمز QR",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل تحميل رمز QR", "Failed to load QR code"),
         variant: "destructive",
       });
     },
@@ -346,16 +348,16 @@ export default function ManagerTables() {
     const count = parseInt(bulkCount);
     if (isNaN(count) || count < 1 || count > 100) {
       toast({
-        title: "خطأ",
-        description: "يجب أن يكون العدد بين 1 و 100",
+        title: tc("خطأ", "Error"),
+        description: tc("يجب أن يكون العدد بين 1 و 100", "Count must be between 1 and 100"),
         variant: "destructive",
       });
       return;
     }
     if (!selectedBranch || selectedBranch === "none") {
       toast({
-        title: "خطأ",
-        description: "يجب اختيار الفرع أولاً",
+        title: tc("خطأ", "Error"),
+        description: tc("يجب اختيار الفرع أولاً", "Please select a branch first"),
         variant: "destructive",
       });
       return;
@@ -400,7 +402,7 @@ export default function ManagerTables() {
 
   const handleDeleteAll = () => {
     if (!selectedBranch || selectedBranch === "none") return;
-    if (window.confirm("هل أنت متأكد من رغبتك في حذف جميع طاولات هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.")) {
+    if (window.confirm(tc("هل أنت متأكد من رغبتك في حذف جميع طاولات هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.", "Are you sure you want to delete all tables in this branch? This action cannot be undone."))) {
       deleteAllTablesMutation.mutate(selectedBranch);
     }
   };
@@ -413,28 +415,28 @@ export default function ManagerTables() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <TableIcon className="w-8 h-8" />
-              إدارة الطاولات
+              {tc("إدارة الطاولات", "Table Management")}
             </h1>
-            <p className="text-muted-foreground">إدارة طاولات المقهى وإنشاء رموز QR</p>
+            <p className="text-muted-foreground">{tc("إدارة طاولات المقهى وإنشاء رموز QR", "Manage cafe tables and generate QR codes")}</p>
           </div>
           <Button variant="outline" className="" onClick={() => setLocation("/manager/dashboard")}>
-            العودة للوحة التحكم
+            {tc("العودة للوحة التحكم", "Back to Dashboard")}
           </Button>
         </div>
 
         {/* Bulk Create Section */}
         <Card>
           <CardHeader>
-            <CardTitle>إنشاء طاولات جديدة</CardTitle>
-            <CardDescription>أنشئ طاولات متعددة دفعة واحدة</CardDescription>
+            <CardTitle>{tc("إنشاء طاولات جديدة", "Create New Tables")}</CardTitle>
+            <CardDescription>{tc("أنشئ طاولات متعددة دفعة واحدة", "Create multiple tables at once")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap items-end gap-4">
               <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="branch">اختر الفرع</Label>
+                <Label htmlFor="branch">{tc("اختر الفرع", "Select Branch")}</Label>
                 <Select value={selectedBranch} onValueChange={setSelectedBranch}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر الفرع" />
+                    <SelectValue placeholder={tc("اختر الفرع", "Select branch")} />
                   </SelectTrigger>
                   <SelectContent>
                     {branches?.map((branch) => (
@@ -446,7 +448,7 @@ export default function ManagerTables() {
                 </Select>
               </div>
               <div className="flex-1 min-w-[200px]">
-                <Label htmlFor="bulkCount">عدد الطاولات</Label>
+                <Label htmlFor="bulkCount">{tc("عدد الطاولات", "Number of Tables")}</Label>
                 <Input
                   id="bulkCount"
                   type="number"
@@ -464,7 +466,7 @@ export default function ManagerTables() {
                 data-testid="button-bulk-create"
               >
                 <Plus className="w-4 h-4 ml-2" />
-                إنشاء الطاولات
+                {tc("إنشاء الطاولات", "Create Tables")}
               </Button>
               <Button
                 variant="destructive"
@@ -473,7 +475,7 @@ export default function ManagerTables() {
                 data-testid="button-delete-all-tables"
               >
                 <Trash2 className="w-4 h-4 ml-2" />
-                حذف الكل
+                {tc("حذف الكل", "Delete All")}
               </Button>
             </div>
           </CardContent>
@@ -482,31 +484,31 @@ export default function ManagerTables() {
         {/* Tables List */}
         <Card>
           <CardHeader>
-            <CardTitle>الطاولات الحالية ({tables?.length || 0})</CardTitle>
+            <CardTitle>{tc("الطاولات الحالية", "Current Tables")} ({tables?.length || 0})</CardTitle>
             <CardDescription>
               {selectedBranch 
-                ? `طاولات الفرع المختار` 
-                : "اختر فرعاً لعرض الطاولات"}
+                ? tc("طاولات الفرع المختار", "Tables for selected branch")
+                : tc("اختر فرعاً لعرض الطاولات", "Select a branch to view tables")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-8">جاري التحميل...</div>
+              <div className="text-center py-8">{tc("جاري التحميل...", "Loading...")}</div>
             ) : !tables || tables.length === 0 ? (
               <div className="text-center py-8 space-y-4">
                 {selectedBranch && userBranchId && selectedBranch !== userBranchId ? (
                   <div className="text-muted-foreground">
                     <div className="text-lg font-semibold text-red-600 mb-2">
-                      ⛔ أنت لست مدير هذا الفرع
+                      ⛔ {tc("أنت لست مدير هذا الفرع", "You are not the manager of this branch")}
                     </div>
                     <div className="space-y-1">
-                      <p><span className="font-semibold">الفرع:</span> {currentBranchName}</p>
-                      <p><span className="font-semibold">مدير الفرع:</span> {currentBranchManager}</p>
+                      <p><span className="font-semibold">{tc("الفرع:", "Branch:")}</span> {currentBranchName}</p>
+                      <p><span className="font-semibold">{tc("مدير الفرع:", "Branch Manager:")}</span> {currentBranchManager}</p>
                     </div>
                   </div>
                 ) : (
                   <div className="text-muted-foreground">
-                    لا توجد طاولات. أنشئ طاولات جديدة للبدء.
+                    {tc("لا توجد طاولات. أنشئ طاولات جديدة للبدء.", "No tables found. Create new tables to get started.")}
                   </div>
                 )}
               </div>
@@ -514,17 +516,17 @@ export default function ManagerTables() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">رقم الطاولة</TableHead>
-                    <TableHead className="text-right">الحالة</TableHead>
-                    <TableHead className="text-right">حالة الإشغال</TableHead>
-                    <TableHead className="text-right">الإجراءات</TableHead>
+                    <TableHead className="text-right">{tc("رقم الطاولة", "Table #")}</TableHead>
+                    <TableHead className="text-right">{tc("الحالة", "Status")}</TableHead>
+                    <TableHead className="text-right">{tc("حالة الإشغال", "Occupancy")}</TableHead>
+                    <TableHead className="text-right">{tc("الإجراءات", "Actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {tables.map((table) => (
                     <TableRow key={table.id}>
                       <TableCell className="font-medium">
-                        طاولة {table.tableNumber}
+                        {tc("طاولة", "Table")} {table.tableNumber}
                       </TableCell>
                       <TableCell>
                         <Button
@@ -536,7 +538,7 @@ export default function ManagerTables() {
                           data-testid={`button-toggle-active-${table.tableNumber}`}
                         >
                           <Power className="w-3 h-3 ml-1" />
-                          {table.isActive ? "نشطة" : "غير نشطة"}
+                          {table.isActive ? tc("نشطة", "Active") : tc("غير نشطة", "Inactive")}
                         </Button>
                       </TableCell>
                       <TableCell>
@@ -544,7 +546,7 @@ export default function ManagerTables() {
                           <div className={`w-2 h-2 rounded-full ${table.isOccupied ? 'bg-red-500' : 'bg-emerald-500'}`} />
                           {table.isOccupied ? (
                             <div className="flex items-center gap-2">
-                              <Badge variant="destructive" className="bg-red-600 hover:bg-red-700">محجوزة</Badge>
+                              <Badge variant="destructive" className="bg-red-600 hover:bg-red-700">{tc("محجوزة", "Occupied")}</Badge>
                               <Button 
                                 size="sm" 
                                 variant="outline" 
@@ -552,11 +554,11 @@ export default function ManagerTables() {
                                 onClick={() => emptyTableMutation.mutate(table.id)}
                                 disabled={emptyTableMutation.isPending}
                               >
-                                إفراغ
+                                {tc("إفراغ", "Empty")}
                               </Button>
                             </div>
                           ) : (
-                            <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white">متاحة</Badge>
+                            <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white">{tc("متاحة", "Available")}</Badge>
                           )}
                         </div>
                       </TableCell>
@@ -575,17 +577,17 @@ export default function ManagerTables() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              const newNum = window.prompt("أدخل رقم الطاولة الجديد:", table.tableNumber);
+                              const newNum = window.prompt(tc("أدخل رقم الطاولة الجديد:", "Enter new table number:"), table.tableNumber);
                               if (newNum && newNum !== table.tableNumber) {
                                 apiRequest("PATCH", `/api/tables/${table.id}`, { tableNumber: newNum })
                                   .then(() => {
                                     queryClient.invalidateQueries({ queryKey: ["/api/tables"] });
-                                    toast({ title: "تم التحديث", description: "تم تغيير رقم الطاولة بنجاح" });
+                                    toast({ title: tc("تم التحديث", "Updated"), description: tc("تم تغيير رقم الطاولة بنجاح", "Table number changed successfully") });
                                   })
                                   .catch((error) => {
                                     toast({ 
-                                      title: "خطأ", 
-                                      description: "فشل تحديث الطاولة", 
+                                      title: tc("خطأ", "Error"), 
+                                      description: tc("فشل تحديث الطاولة", "Failed to update table"), 
                                       variant: "destructive" 
                                     });
                                   });
@@ -599,12 +601,12 @@ export default function ManagerTables() {
                             size="sm"
                             variant="destructive"
                             onClick={() => {
-                              if (window.confirm(`هل أنت متأكد من حذف الطاولة ${table.tableNumber}؟`)) {
+                              if (window.confirm(`${tc("هل أنت متأكد من حذف الطاولة", "Are you sure you want to delete table")} ${table.tableNumber}?`)) {
                                 deleteTableMutation.mutate(table.id);
                               }
                             }}
                             disabled={deleteTableMutation.isPending || table.isOccupied === 1}
-                            title={table.isOccupied === 1 ? "لا يمكن حذف طاولة مشغولة" : "حذف الطاولة"}
+                            title={table.isOccupied === 1 ? tc("لا يمكن حذف طاولة مشغولة", "Cannot delete an occupied table") : tc("حذف الطاولة", "Delete table")}
                             data-testid={`button-delete-${table.tableNumber}`}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -624,10 +626,10 @@ export default function ManagerTables() {
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-card" dir="rtl">
             <DialogHeader>
               <DialogTitle>
-                بطاقة QR للطاولة {selectedTable?.tableNumber}
+                {tc("بطاقة QR للطاولة", "QR Card for Table")} {selectedTable?.tableNumber}
               </DialogTitle>
               <DialogDescription>
-                اطبع أو احفظ هذه البطاقة لوضعها على الطاولة
+                {tc("اطبع أو احفظ هذه البطاقة لوضعها على الطاولة", "Print or save this card to place on the table")}
               </DialogDescription>
             </DialogHeader>
             {qrCodeData && selectedTable && (
@@ -649,7 +651,7 @@ export default function ManagerTables() {
                   data-testid="button-download-qr"
                 >
                   <Download className="w-4 h-4 ml-2" />
-                  تحميل البطاقة
+                  {tc("تحميل البطاقة", "Download Card")}
                 </Button>
               </div>
             )}

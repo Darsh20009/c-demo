@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,7 @@ function formatCurrency(amount: number) {
 }
 
 export default function ManagerDelivery() {
+  const tc = useTranslate();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const [period, setPeriod] = useState("today");
@@ -78,10 +80,10 @@ export default function ManagerDelivery() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/delivery/orders"] });
       queryClient.invalidateQueries({ queryKey: ["/api/delivery/stats"] });
-      toast({ title: "تم تعيين سائق بنجاح", className: "bg-green-600 text-white" });
+      toast({ title: tc("تم تعيين سائق بنجاح", "Driver assigned successfully"), className: "bg-green-600 text-white" });
     },
     onError: (err: any) => {
-      toast({ title: err.message || "فشل التعيين", variant: "destructive" });
+      toast({ title: err.message || tc("فشل التعيين", "Assignment failed"), variant: "destructive" });
     },
   });
 
@@ -101,9 +103,9 @@ export default function ManagerDelivery() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Truck className="w-7 h-7 text-[#2D9B6E]" />
-              إدارة التوصيل
+              {tc("إدارة التوصيل", "Delivery Management")}
             </h1>
-            <p className="text-sm text-muted-foreground">لوحة تحكم شاملة لإدارة الطلبات والسائقين وتطبيقات التوصيل</p>
+            <p className="text-sm text-muted-foreground">{tc("لوحة تحكم شاملة لإدارة الطلبات والسائقين وتطبيقات التوصيل", "Comprehensive dashboard for orders, drivers, and delivery apps")}</p>
           </div>
         </div>
         <Select value={period} onValueChange={setPeriod}>
@@ -111,19 +113,19 @@ export default function ManagerDelivery() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="today">اليوم</SelectItem>
-            <SelectItem value="week">الأسبوع</SelectItem>
-            <SelectItem value="month">الشهر</SelectItem>
+            <SelectItem value="today">{tc("اليوم", "Today")}</SelectItem>
+            <SelectItem value="week">{tc("الأسبوع", "Week")}</SelectItem>
+            <SelectItem value="month">{tc("الشهر", "Month")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-4 w-full max-w-lg">
-          <TabsTrigger value="dashboard">لوحة التحكم</TabsTrigger>
-          <TabsTrigger value="orders">الطلبات النشطة</TabsTrigger>
-          <TabsTrigger value="settings">الإعدادات</TabsTrigger>
-          <TabsTrigger value="integrations">الربط</TabsTrigger>
+          <TabsTrigger value="dashboard">{tc("لوحة التحكم", "Dashboard")}</TabsTrigger>
+          <TabsTrigger value="orders">{tc("الطلبات النشطة", "Active Orders")}</TabsTrigger>
+          <TabsTrigger value="settings">{tc("الإعدادات", "Settings")}</TabsTrigger>
+          <TabsTrigger value="integrations">{tc("الربط", "Integrations")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -132,28 +134,28 @@ export default function ManagerDelivery() {
               <CardContent className="p-4 text-center">
                 <Package className="w-8 h-8 mx-auto mb-2 text-[#2D9B6E]" />
                 <p className="text-2xl font-bold">{stats?.totalOrders || 0}</p>
-                <p className="text-xs text-muted-foreground">إجمالي الطلبات</p>
+                <p className="text-xs text-muted-foreground">{tc("إجمالي الطلبات", "Total Orders")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <Truck className="w-8 h-8 mx-auto mb-2 text-orange-500" />
                 <p className="text-2xl font-bold">{stats?.activeOrders || 0}</p>
-                <p className="text-xs text-muted-foreground">طلبات نشطة</p>
+                <p className="text-xs text-muted-foreground">{tc("طلبات نشطة", "Active Orders")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-500" />
                 <p className="text-2xl font-bold">{stats?.completedOrders || 0}</p>
-                <p className="text-xs text-muted-foreground">تم التوصيل</p>
+                <p className="text-xs text-muted-foreground">{tc("تم التوصيل", "Delivered")}</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
                 <Clock className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                <p className="text-2xl font-bold">{stats?.avgDeliveryTime || 0} د</p>
-                <p className="text-xs text-muted-foreground">متوسط وقت التوصيل</p>
+                <p className="text-2xl font-bold">{stats?.avgDeliveryTime || 0} {tc("د", "min")}</p>
+                <p className="text-xs text-muted-foreground">{tc("متوسط وقت التوصيل", "Avg Delivery Time")}</p>
               </CardContent>
             </Card>
           </div>
@@ -162,20 +164,20 @@ export default function ManagerDelivery() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" /> الإيرادات
+                  <TrendingUp className="w-4 h-4" /> {tc("الإيرادات", "Revenue")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">إجمالي المبيعات</span>
+                  <span className="text-sm text-muted-foreground">{tc("إجمالي المبيعات", "Total Sales")}</span>
                   <span className="font-bold">{formatCurrency(stats?.totalRevenue || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">رسوم التوصيل</span>
+                  <span className="text-sm text-muted-foreground">{tc("رسوم التوصيل", "Delivery Fees")}</span>
                   <span className="font-bold">{formatCurrency(stats?.totalDeliveryFees || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">طلبات ملغية</span>
+                  <span className="text-sm text-muted-foreground">{tc("طلبات ملغية", "Cancelled Orders")}</span>
                   <span className="font-bold text-red-500">{stats?.cancelledOrders || 0}</span>
                 </div>
               </CardContent>
@@ -184,29 +186,29 @@ export default function ManagerDelivery() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Users className="w-4 h-4" /> السائقين
+                  <Users className="w-4 h-4" /> {tc("السائقين", "Drivers")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">إجمالي</span>
+                  <span className="text-sm text-muted-foreground">{tc("إجمالي", "Total")}</span>
                   <span className="font-bold">{stats?.driverStats?.total || 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">
-                    <Badge variant="outline" className="bg-green-500/10 text-green-600 text-xs">متاح</Badge>
+                    <Badge variant="outline" className="bg-green-500/10 text-green-600 text-xs">{tc("متاح", "Available")}</Badge>
                   </span>
                   <span className="font-bold text-green-600">{stats?.driverStats?.online || 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">
-                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 text-xs">مشغول</Badge>
+                    <Badge variant="outline" className="bg-orange-500/10 text-orange-600 text-xs">{tc("مشغول", "Busy")}</Badge>
                   </span>
                   <span className="font-bold text-orange-600">{stats?.driverStats?.busy || 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm">
-                    <Badge variant="outline" className="bg-gray-500/10 text-gray-500 text-xs">غير متصل</Badge>
+                    <Badge variant="outline" className="bg-gray-500/10 text-gray-500 text-xs">{tc("غير متصل", "Offline")}</Badge>
                   </span>
                   <span className="font-bold text-gray-500">{stats?.driverStats?.offline || 0}</span>
                 </div>
@@ -218,7 +220,7 @@ export default function ManagerDelivery() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Globe className="w-4 h-4" /> حسب مصدر الطلب
+                  <Globe className="w-4 h-4" /> {tc("حسب مصدر الطلب", "By Order Source")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -239,17 +241,17 @@ export default function ManagerDelivery() {
             <Card className="border-orange-500/30">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2 text-orange-600">
-                  <Zap className="w-4 h-4 animate-pulse" /> طلبات تحتاج تعيين ({pendingOrders.length})
+                  <Zap className="w-4 h-4 animate-pulse" /> {tc("طلبات تحتاج تعيين", "Orders Needing Assignment")} ({pendingOrders.length})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 {pendingOrders.slice(0, 5).map((order: any) => (
                   <div key={order.id} className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/10 rounded-lg">
                     <div>
-                      <p className="font-bold text-sm">{order.customerName || 'عميل'}</p>
+                      <p className="font-bold text-sm">{order.customerName || tc('عميل', 'Customer')}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        {order.customerAddress || 'عنوان غير محدد'}
+                        {order.customerAddress || tc('عنوان غير محدد', 'Address not specified')}
                       </p>
                       {order.externalProvider && (
                         <Badge variant="outline" className="text-xs mt-1">
@@ -266,7 +268,7 @@ export default function ManagerDelivery() {
                         className="bg-[#2D9B6E] hover:bg-[#258a5e]"
                       >
                         <Zap className="w-3 h-3 ml-1" />
-                        تعيين تلقائي
+                        {tc("تعيين تلقائي", "Auto Assign")}
                       </Button>
                     </div>
                   </div>
@@ -280,7 +282,7 @@ export default function ManagerDelivery() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold flex items-center gap-2">
               <Package className="w-5 h-5" />
-              الطلبات النشطة ({activeOrders.length})
+              {tc("الطلبات النشطة", "Active Orders")} ({activeOrders.length})
             </h2>
             <Button
               variant="outline"
@@ -290,7 +292,7 @@ export default function ManagerDelivery() {
               }}
             >
               <RefreshCw className="w-4 h-4 ml-1" />
-              تحديث
+              {tc("تحديث", "Refresh")}
             </Button>
           </div>
 
@@ -298,7 +300,7 @@ export default function ManagerDelivery() {
             <Card>
               <CardContent className="p-8 text-center text-muted-foreground">
                 <Truck className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p>لا توجد طلبات نشطة حالياً</p>
+                <p>{tc("لا توجد طلبات نشطة حالياً", "No active orders at the moment")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -311,14 +313,14 @@ export default function ManagerDelivery() {
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="font-bold">{order.customerName || 'عميل'}</p>
+                            <p className="font-bold">{order.customerName || tc('عميل', 'Customer')}</p>
                             <Badge className={`${statusInfo.color} text-white text-xs`}>
                               {statusInfo.label}
                             </Badge>
                           </div>
                           <p className="text-xs text-muted-foreground flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            {order.customerAddress || 'عنوان غير محدد'}
+                            {order.customerAddress || tc('عنوان غير محدد', 'Address not specified')}
                           </p>
                           {order.externalProvider && (
                             <Badge variant="outline" className="text-xs mt-1">
@@ -329,7 +331,7 @@ export default function ManagerDelivery() {
                         <div className="text-left">
                           <p className="font-bold">{formatCurrency(order.totalAmount || 0)}</p>
                           {order.deliveryFee > 0 && (
-                            <p className="text-xs text-muted-foreground">توصيل: {formatCurrency(order.deliveryFee)}</p>
+                            <p className="text-xs text-muted-foreground">{tc("توصيل:", "Delivery:")} {formatCurrency(order.deliveryFee)}</p>
                           )}
                         </div>
                       </div>
@@ -351,7 +353,7 @@ export default function ManagerDelivery() {
                             className="bg-[#2D9B6E] hover:bg-[#258a5e]"
                           >
                             <Zap className="w-3 h-3 ml-1" />
-                            تعيين تلقائي
+                            {tc("تعيين تلقائي", "Auto Assign")}
                           </Button>
                         </div>
                       )}
@@ -359,7 +361,7 @@ export default function ManagerDelivery() {
                       {order.estimatedDeliveryTime && (
                         <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          التوصيل المتوقع: {new Date(order.estimatedDeliveryTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                          {tc("التوصيل المتوقع:", "Est. delivery:")} {new Date(order.estimatedDeliveryTime).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       )}
                     </CardContent>
@@ -379,12 +381,12 @@ export default function ManagerDelivery() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-[#2D9B6E]" />
-                رابط الـ Webhook
+                {tc("رابط الـ Webhook", "Webhook URL")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                استخدم الروابط أدناه لاستقبال الطلبات تلقائياً من تطبيقات التوصيل. أدخل الرابط المناسب في إعدادات كل تطبيق.
+                {tc("استخدم الروابط أدناه لاستقبال الطلبات تلقائياً من تطبيقات التوصيل. أدخل الرابط المناسب في إعدادات كل تطبيق.", "Use the URLs below to receive orders automatically from delivery apps. Enter the relevant URL in each app's settings.")}
               </p>
               {['hungerstation', 'jahez', 'toyou', 'mrsool', 'noon_food', 'keeta', 'careem'].map(provider => (
                 <div key={provider} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
@@ -397,10 +399,10 @@ export default function ManagerDelivery() {
                     size="sm"
                     onClick={() => {
                       navigator.clipboard.writeText(`${window.location.origin}/api/webhooks/delivery/${provider}`);
-                      toast({ title: "تم النسخ", className: "bg-green-600 text-white" });
+                      toast({ title: tc("تم النسخ", "Copied!"), className: "bg-green-600 text-white" });
                     }}
                   >
-                    نسخ
+                    {tc("نسخ", "Copy")}
                   </Button>
                 </div>
               ))}
@@ -409,13 +411,13 @@ export default function ManagerDelivery() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">ملاحظات الربط</CardTitle>
+              <CardTitle className="text-sm">{tc("ملاحظات الربط", "Integration Notes")}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-2">
-              <p>• يجب تفعيل الربط مع كل تطبيق من تبويب "الإعدادات" أولاً</p>
-              <p>• عند تفعيل "القبول التلقائي"، سيتم تعيين أقرب سائق متاح تلقائياً</p>
-              <p>• الطلبات الواردة ستظهر في تبويب "الطلبات النشطة" فوراً</p>
-              <p>• تأكد من إدخال مفتاح الـ API الصحيح لكل تطبيق</p>
+              <p>• {tc('يجب تفعيل الربط مع كل تطبيق من تبويب "الإعدادات" أولاً', 'Integration must be activated for each app from the "Settings" tab first')}</p>
+              <p>• {tc('عند تفعيل "القبول التلقائي"، سيتم تعيين أقرب سائق متاح تلقائياً', 'When "Auto Accept" is enabled, the nearest available driver will be assigned automatically')}</p>
+              <p>• {tc('الطلبات الواردة ستظهر في تبويب "الطلبات النشطة" فوراً', 'Incoming orders will appear in the "Active Orders" tab immediately')}</p>
+              <p>• {tc('تأكد من إدخال مفتاح الـ API الصحيح لكل تطبيق', 'Make sure to enter the correct API key for each app')}</p>
             </CardContent>
           </Card>
         </TabsContent>

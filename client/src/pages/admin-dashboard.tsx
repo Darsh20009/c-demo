@@ -236,7 +236,7 @@ export default function AdminDashboard() {
           ) : (
             <div className="text-center py-8">
               <Users className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-              <p className="text-muted-foreground">لا توجد موظفون</p>
+              <p className="text-muted-foreground">{tc("لا توجد موظفون", "No employees")}</p>
             </div>
           )}
         </CardContent>

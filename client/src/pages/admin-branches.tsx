@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useTranslate } from "@/lib/useTranslate";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ interface Branch {
 }
 
 export default function AdminBranches() {
+  const tc = useTranslate();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -75,19 +77,12 @@ export default function AdminBranches() {
     mutationFn: (data: any) => apiRequest('POST', '/api/branches', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/branches'] });
-      toast({
-        title: "تم إنشاء الفرع بنجاح",
-        description: "تم إنشاء الفرع وتعيين المدير.",
-      });
+      toast({ title: tc("تم إنشاء الفرع بنجاح", "Branch created successfully") });
       setIsAddDialogOpen(false);
       resetFormData();
     },
     onError: (error: any) => {
-      toast({
-        title: "خطأ في إنشاء الفرع",
-        description: error?.message || "حدث خطأ عند إنشاء الفرع",
-        variant: "destructive"
-      });
+      toast({ title: tc("خطأ في إنشاء الفرع", "Error creating branch"), description: error?.message, variant: "destructive" });
     }
   });
 
@@ -96,19 +91,13 @@ export default function AdminBranches() {
       apiRequest('PUT', `/api/branches/${data.id}`, data.updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/branches'] });
-      toast({
-        title: "تم تحديث الفرع بنجاح",
-      });
+      toast({ title: tc("تم تحديث الفرع بنجاح", "Branch updated successfully") });
       setIsEditDialogOpen(false);
       setSelectedBranch(null);
       resetFormData();
     },
     onError: (error: any) => {
-      toast({
-        title: "خطأ في تحديث الفرع",
-        description: error?.message || "حدث خطأ عند تحديث الفرع",
-        variant: "destructive"
-      });
+      toast({ title: tc("خطأ في تحديث الفرع", "Error updating branch"), description: error?.message, variant: "destructive" });
     }
   });
 
@@ -116,18 +105,12 @@ export default function AdminBranches() {
     mutationFn: (id: string) => apiRequest('DELETE', `/api/branches/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/branches'] });
-      toast({
-        title: "تم حذف الفرع بنجاح",
-      });
+      toast({ title: tc("تم حذف الفرع بنجاح", "Branch deleted successfully") });
       setDeleteDialogOpen(false);
       setSelectedBranch(null);
     },
     onError: (error: any) => {
-      toast({
-        title: "خطأ في حذف الفرع",
-        description: error?.message || "حدث خطأ عند حذف الفرع",
-        variant: "destructive"
-      });
+      toast({ title: tc("خطأ في حذف الفرع", "Error deleting branch"), description: error?.message, variant: "destructive" });
     }
   });
 
@@ -208,11 +191,7 @@ export default function AdminBranches() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nameAr.trim()) {
-      toast({
-        title: "خطأ",
-        description: "يجب إدخال اسم الفرع بالعربية",
-        variant: "destructive"
-      });
+      toast({ title: tc("خطأ", "Error"), description: tc("يجب إدخال اسم الفرع بالعربية", "Branch name in Arabic is required"), variant: "destructive" });
       return;
     }
     createMutation.mutate(prepareSubmitData());
@@ -228,8 +207,8 @@ export default function AdminBranches() {
             <ArrowRight className="w-5 h-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">إدارة الفروع</h1>
-            <p className="text-muted-foreground mt-1">إضافة وتعديل فروع المقهى</p>
+            <h1 className="text-3xl font-bold">{tc("إدارة الفروع", "Branch Management")}</h1>
+            <p className="text-muted-foreground mt-1">{tc("إضافة وتعديل فروع المقهى", "Add and edit cafe branches")}</p>
           </div>
         </div>
         <Button 
@@ -237,7 +216,7 @@ export default function AdminBranches() {
           className="bg-accent hover:bg-accent"
         >
           <Plus className="w-4 h-4 ml-2" />
-          إضافة فرع جديد
+          {tc("إضافة فرع جديد", "Add New Branch")}
         </Button>
       </div>
 
@@ -245,16 +224,16 @@ export default function AdminBranches() {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-2xl" dir="rtl">
           <DialogHeader>
-            <DialogTitle>إضافة فرع جديد</DialogTitle>
+            <DialogTitle>{tc("إضافة فرع جديد", "Add New Branch")}</DialogTitle>
             <DialogDescription>
-              سيتم إنشاء حساب مدير للفرع تلقائياً عند الحفظ
+              {tc("سيتم إنشاء حساب مدير للفرع تلقائياً عند الحفظ", "A manager account will be created automatically upon saving")}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nameAr">اسم الفرع (بالعربية) *</Label>
+                <Label htmlFor="nameAr">{tc("اسم الفرع (بالعربية) *", "Branch Name (Arabic) *")}</Label>
                 <Input 
                   id="nameAr"
                   required
@@ -264,7 +243,7 @@ export default function AdminBranches() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="nameEn">اسم الفرع (بالإنجليزي)</Label>
+                <Label htmlFor="nameEn">{tc("اسم الفرع (بالإنجليزي)", "Branch Name (English)")}</Label>
                 <Input 
                   id="nameEn"
                   value={formData.nameEn}
@@ -273,16 +252,16 @@ export default function AdminBranches() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="address">العنوان</Label>
+                <Label htmlFor="address">{tc("العنوان", "Address")}</Label>
                 <Input 
                   id="address"
                   value={formData.address}
                   onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  placeholder="الرياض، طريق الملك فهد"
+                  placeholder={tc("الرياض، طريق الملك فهد", "Riyadh, King Fahd Road")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">رقم الهاتف</Label>
+                <Label htmlFor="phone">{tc("رقم الهاتف", "Phone Number")}</Label>
                 <Input 
                   id="phone"
                   value={formData.phone}
@@ -296,7 +275,7 @@ export default function AdminBranches() {
             <div className="border-t pt-4 mt-4">
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                إعدادات الموقع والحدود الجغرافية
+                {tc("إعدادات الموقع والحدود الجغرافية", "Location & Geofence Settings")}
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -322,7 +301,7 @@ export default function AdminBranches() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="geofenceRadius">نطاق حدود الفرع الدائري (بالمتر) - اختياري</Label>
+                  <Label htmlFor="geofenceRadius">{tc("نطاق حدود الفرع الدائري (بالمتر) - اختياري", "Circular Geofence Radius (meters) - Optional")}</Label>
                   <Input 
                     id="geofenceRadius"
                     type="number"
@@ -330,10 +309,10 @@ export default function AdminBranches() {
                     onChange={(e) => setFormData({...formData, geofenceRadius: e.target.value})}
                     placeholder="200"
                   />
-                  <p className="text-xs text-muted-foreground">يُستخدم فقط إذا لم ترسم حدود متعددة النقاط</p>
+                  <p className="text-xs text-muted-foreground">{tc("يُستخدم فقط إذا لم ترسم حدود متعددة النقاط", "Used only if no polygon boundary is drawn")}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lateThresholdMinutes">عتبة التأخير (بالدقائق)</Label>
+                  <Label htmlFor="lateThresholdMinutes">{tc("عتبة التأخير (بالدقائق)", "Late Threshold (minutes)")}</Label>
                   <Input 
                     id="lateThresholdMinutes"
                     type="number"
@@ -341,10 +320,10 @@ export default function AdminBranches() {
                     onChange={(e) => setFormData({...formData, lateThresholdMinutes: e.target.value})}
                     placeholder="15"
                   />
-                  <p className="text-xs text-muted-foreground">بعد كم دقيقة يُعتبر الموظف متأخراً</p>
+                  <p className="text-xs text-muted-foreground">{tc("بعد كم دقيقة يُعتبر الموظف متأخراً", "After how many minutes an employee is considered late")}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="workingHoursOpen">وقت الافتتاح</Label>
+                  <Label htmlFor="workingHoursOpen">{tc("وقت الافتتاح", "Opening Time")}</Label>
                   <Input 
                     id="workingHoursOpen"
                     type="time"
@@ -353,7 +332,7 @@ export default function AdminBranches() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="workingHoursClose">وقت الإغلاق</Label>
+                  <Label htmlFor="workingHoursClose">{tc("وقت الإغلاق", "Closing Time")}</Label>
                   <Input 
                     id="workingHoursClose"
                     type="time"
@@ -368,7 +347,7 @@ export default function AdminBranches() {
             <div className="border-t pt-4 mt-4">
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Pentagon className="w-4 h-4" />
-                رسم حدود الفرع (اختياري - أدق من الدائرة)
+                {tc("رسم حدود الفرع (اختياري - أدق من الدائرة)", "Draw Branch Boundary (Optional - More Precise)")}
               </h4>
               <BranchPolygonPicker
                 initialPoints={geofenceBoundary}
@@ -379,28 +358,14 @@ export default function AdminBranches() {
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsAddDialogOpen(false)}
-              >
-                إلغاء
+              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                {tc("إلغاء", "Cancel")}
               </Button>
-              <Button 
-                type="submit" 
-                className="bg-accent hover:bg-accent"
-                disabled={createMutation.isPending}
-              >
+              <Button type="submit" className="bg-accent hover:bg-accent" disabled={createMutation.isPending}>
                 {createMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                    جاري الحفظ...
-                  </>
+                  <><Loader2 className="w-4 h-4 animate-spin ml-2" />{tc("جاري الحفظ...", "Saving...")}</>
                 ) : (
-                  <>
-                    <Plus className="w-4 h-4 ml-2" />
-                    حفظ الفرع
-                  </>
+                  <><Plus className="w-4 h-4 ml-2" />{tc("حفظ الفرع", "Save Branch")}</>
                 )}
               </Button>
             </DialogFooter>
@@ -413,7 +378,7 @@ export default function AdminBranches() {
         {isLoading ? (
           <div className="col-span-full text-center py-12">
             <Loader2 className="w-8 h-8 animate-spin mx-auto text-accent" />
-            <p className="mt-2 text-muted-foreground">جاري تحميل الفروع...</p>
+            <p className="mt-2 text-muted-foreground">{tc("جاري تحميل الفروع...", "Loading branches...")}</p>
           </div>
         ) : branches && branches.length > 0 ? (
           branches.map((branch) => {
@@ -443,7 +408,7 @@ export default function AdminBranches() {
                   {branch.managerName && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <User className="w-4 h-4" />
-                      المدير: {branch.managerName}
+                      {tc("المدير:", "Manager:")} {branch.managerName}
                     </div>
                   )}
                   <div className="flex gap-2 pt-2 border-t">
@@ -455,7 +420,7 @@ export default function AdminBranches() {
                       data-testid={`button-edit-branch-${branchId}`}
                     >
                       <Edit2 className="w-4 h-4 ml-1" />
-                      تعديل
+                      {tc("تعديل", "Edit")}
                     </Button>
                     <Button 
                       variant="outline" 
@@ -465,7 +430,7 @@ export default function AdminBranches() {
                       data-testid={`button-delete-branch-${branchId}`}
                     >
                       <Trash2 className="w-4 h-4 ml-1" />
-                      حذف
+                      {tc("حذف", "Delete")}
                     </Button>
                   </div>
                 </CardContent>
@@ -475,8 +440,8 @@ export default function AdminBranches() {
         ) : (
           <div className="col-span-full text-center py-12 bg-gray-50 dark:bg-card rounded-xl border-2 border-dashed border-gray-200 dark:border-slate-800">
             <Store className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <h3 className="text-lg font-semibold">لا توجد فروع مضافة</h3>
-            <p className="text-muted-foreground">ابدأ بإضافة أول فرع للمقهى الخاص بك</p>
+            <h3 className="text-lg font-semibold">{tc("لا توجد فروع مضافة", "No branches added")}</h3>
+            <p className="text-muted-foreground">{tc("ابدأ بإضافة أول فرع للمقهى الخاص بك", "Start by adding your first branch")}</p>
           </div>
         )}
       </div>
@@ -491,16 +456,14 @@ export default function AdminBranches() {
       }}>
         <DialogContent className="max-w-2xl" dir="rtl">
           <DialogHeader>
-            <DialogTitle>تعديل الفرع</DialogTitle>
-            <DialogDescription>
-              تعديل بيانات الفرع
-            </DialogDescription>
+            <DialogTitle>{tc("تعديل الفرع", "Edit Branch")}</DialogTitle>
+            <DialogDescription>{tc("تعديل بيانات الفرع", "Update branch details")}</DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-nameAr">اسم الفرع (بالعربية) *</Label>
+                <Label htmlFor="edit-nameAr">{tc("اسم الفرع (بالعربية) *", "Branch Name (Arabic) *")}</Label>
                 <Input 
                   id="edit-nameAr"
                   required
@@ -510,7 +473,7 @@ export default function AdminBranches() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-nameEn">اسم الفرع (بالإنجليزي)</Label>
+                <Label htmlFor="edit-nameEn">{tc("اسم الفرع (بالإنجليزي)", "Branch Name (English)")}</Label>
                 <Input 
                   id="edit-nameEn"
                   value={formData.nameEn}
@@ -519,7 +482,7 @@ export default function AdminBranches() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-address">العنوان</Label>
+                <Label htmlFor="edit-address">{tc("العنوان", "Address")}</Label>
                 <Input 
                   id="edit-address"
                   value={formData.address}
@@ -528,7 +491,7 @@ export default function AdminBranches() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-phone">رقم الهاتف</Label>
+                <Label htmlFor="edit-phone">{tc("رقم الهاتف", "Phone Number")}</Label>
                 <Input 
                   id="edit-phone"
                   value={formData.phone}
@@ -542,7 +505,7 @@ export default function AdminBranches() {
             <div className="border-t pt-4 mt-4">
               <h4 className="font-semibold mb-3 flex items-center gap-2">
                 <Pentagon className="w-4 h-4" />
-                تعديل حدود الفرع
+                {tc("تعديل حدود الفرع", "Edit Branch Boundary")}
               </h4>
               <BranchPolygonPicker
                 initialPoints={geofenceBoundary}
@@ -553,28 +516,14 @@ export default function AdminBranches() {
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsEditDialogOpen(false)}
-              >
-                إلغاء
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                {tc("إلغاء", "Cancel")}
               </Button>
-              <Button 
-                type="submit" 
-                className="bg-accent hover:bg-accent"
-                disabled={updateMutation.isPending}
-              >
+              <Button type="submit" className="bg-accent hover:bg-accent" disabled={updateMutation.isPending}>
                 {updateMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                    جاري الحفظ...
-                  </>
+                  <><Loader2 className="w-4 h-4 animate-spin ml-2" />{tc("جاري الحفظ...", "Saving...")}</>
                 ) : (
-                  <>
-                    <Edit2 className="w-4 h-4 ml-2" />
-                    حفظ التعديلات
-                  </>
+                  <><Edit2 className="w-4 h-4 ml-2" />{tc("حفظ التعديلات", "Save Changes")}</>
                 )}
               </Button>
             </DialogFooter>
@@ -586,30 +535,18 @@ export default function AdminBranches() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
-            <AlertDialogTitle>تأكيد حذف الفرع</AlertDialogTitle>
+            <AlertDialogTitle>{tc("تأكيد حذف الفرع", "Confirm Delete Branch")}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف الفرع "{selectedBranch?.nameAr}"؟ 
-              هذا الإجراء لا يمكن التراجع عنه.
+              {tc(`هل أنت متأكد من حذف الفرع "${selectedBranch?.nameAr}"؟ هذا الإجراء لا يمكن التراجع عنه.`, `Are you sure you want to delete "${selectedBranch?.nameAr}"? This action cannot be undone.`)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSelectedBranch(null)}>
-              إلغاء
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            <AlertDialogCancel onClick={() => setSelectedBranch(null)}>{tc("إلغاء", "Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {deleteMutation.isPending ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                  جاري الحذف...
-                </>
+                <><Loader2 className="w-4 h-4 animate-spin ml-2" />{tc("جاري الحذف...", "Deleting...")}</>
               ) : (
-                <>
-                  <Trash2 className="w-4 h-4 ml-2" />
-                  تأكيد الحذف
-                </>
+                <><Trash2 className="w-4 h-4 ml-2" />{tc("تأكيد الحذف", "Confirm Delete")}</>
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
