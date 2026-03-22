@@ -105,6 +105,7 @@ const NAV_GROUPS: { label: string; labelEn: string; color: string; items: NavIte
     items: [
       { label: "برنامج الولاء", labelEn: "Loyalty", icon: CreditCard, path: "/manager/loyalty", color: "#f43f5e" },
       { label: "العروض الترويجية", labelEn: "Promotions", icon: Tag, path: "/manager/promotions", color: "#fda4af" },
+      { label: "إرسال إشعارات Push", labelEn: "Push Notifications", icon: Bell, path: "/admin/notifications", color: "#fb7185" },
       { label: "الموردون", labelEn: "Suppliers", icon: Handshake, path: "/manager/suppliers", color: "#fecdd3" },
     ]
   },

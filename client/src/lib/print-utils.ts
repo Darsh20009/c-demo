@@ -511,7 +511,7 @@ function formatDate(dateStr: string): { date: string; time: string } {
   }
 }
 
-export async function printTaxInvoice(data: TaxInvoiceData): Promise<void> {
+export async function printTaxInvoice(data: TaxInvoiceData, config: PrintConfig = {}): Promise<void> {
   const totalAmount = parseNumber(data.total);
   
   const codeDiscountAmount = data.discount ? parseNumber(data.discount.amount) : 0;
@@ -725,7 +725,7 @@ export async function printTaxInvoice(data: TaxInvoiceData): Promise<void> {
 
   openPrintWindow(invoiceHtml, `فاتورة ضريبية - ${displayInvoiceNumber}`, { 
     paperWidth: '80mm', 
-    autoPrint: true, 
+    autoPrint: config.autoPrint !== undefined ? config.autoPrint : true,
     showPrintButton: true 
   });
 }

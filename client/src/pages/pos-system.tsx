@@ -103,6 +103,7 @@ export default function PosSystem() {
   const [showOrdersPanel, setShowOrdersPanel] = useState(false);
   const [ordersFilter, setOrdersFilter] = useState<'all' | 'online' | 'pos'>('all');
   const [showReceiptDialog, setShowReceiptDialog] = useState(false);
+  const [receiptCountdown, setReceiptCountdown] = useState(0);
   const [lastOrder, setLastOrder] = useState<any>(null);
   const [posTerminalConnected, setPosTerminalConnected] = useState(() => {
     return localStorage.getItem("pos-terminal-connected") === "true";
@@ -192,6 +193,20 @@ export default function PosSystem() {
   useEffect(() => { localStorage.setItem("pos-show-vat-label", String(showVatLabel)); }, [showVatLabel]);
   useEffect(() => { localStorage.setItem("pos-zoom", String(posZoom)); }, [posZoom]);
   useEffect(() => { if (orderItems.length === 0 && showOrderReview) setShowOrderReview(false); }, [orderItems.length, showOrderReview]);
+
+  // Auto-close receipt dialog after 12 seconds with countdown
+  useEffect(() => {
+    if (!showReceiptDialog) { setReceiptCountdown(0); return; }
+    setReceiptCountdown(12);
+    const interval = setInterval(() => {
+      setReceiptCountdown(prev => {
+        if (prev <= 0) { clearInterval(interval); return 0; }       // manually paused
+        if (prev <= 1) { clearInterval(interval); setShowReceiptDialog(false); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [showReceiptDialog]);
 
   useEffect(() => {
     const is9Digit = customerPhone.length === 9 && customerPhone.startsWith('5');
@@ -672,7 +687,7 @@ export default function PosSystem() {
       date: lastOrder.date,
       crNumber: businessConfig?.commercialRegistration,
       vatNumber: businessConfig?.vatNumber,
-    });
+    }, { autoPrint: false });
   };
 
   const handlePrintLiveOrder = (order: any) => {
@@ -1700,11 +1715,18 @@ export default function PosSystem() {
       </Dialog>
 
       <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" dir={dir}>
+        <DialogContent className="max-w-sm max-h-[92vh] overflow-y-auto" dir={dir}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-center justify-center">
-              <Receipt className="w-5 h-5 text-primary" />
-              {t('pos.receipt_title')}
+            <DialogTitle className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Receipt className="w-5 h-5 text-primary" />
+                {t('pos.receipt_title')}
+              </div>
+              {receiptCountdown > 0 && (
+                <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full tabular-nums">
+                  {receiptCountdown}s
+                </span>
+              )}
             </DialogTitle>
           </DialogHeader>
           {lastOrder && (
@@ -1778,23 +1800,26 @@ export default function PosSystem() {
                 )}
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex flex-col gap-2 pt-2 sticky bottom-0 bg-background pb-1">
                 <Button
-                  className="flex-1 gap-2"
-                  onClick={handlePrintReceipt}
+                  className="w-full gap-2 h-11 text-base font-bold"
+                  onClick={() => { setShowReceiptDialog(false); }}
+                  data-testid="button-new-order"
+                >
+                  <Plus className="w-5 h-5" />
+                  {t('pos.new_order_btn')}
+                  {receiptCountdown > 0 && (
+                    <span className="mr-1 text-xs opacity-70">({receiptCountdown})</span>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full gap-2"
+                  onClick={() => { setReceiptCountdown(0); handlePrintReceipt(); }}
                   data-testid="button-print-receipt"
                 >
                   <Printer className="w-4 h-4" />
                   {t('pos.print_invoice')}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 gap-2"
-                  onClick={() => setShowReceiptDialog(false)}
-                  data-testid="button-new-order"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t('pos.new_order_btn')}
                 </Button>
               </div>
             </div>
