@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useOrderWebSocket } from "@/lib/websocket";
 import { getSoundEnabled, setSoundEnabled as saveSoundEnabled, testSound, playNotificationSound } from "@/lib/notification-sounds";
@@ -63,6 +64,7 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 };
 
 export default function PosSystem() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { t, i18n } = useTranslation();
   const dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
@@ -1227,7 +1229,7 @@ export default function PosSystem() {
                       setOfflineQueueCount(c);
                       if (synced > 0) queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
                     }}
-                  >مزامنة</button>
+                  >{tc("مزامنة","Sync")}</button>
                 )}
               </div>
             )}
@@ -2051,7 +2053,7 @@ export default function PosSystem() {
                     data-testid="button-test-sound-settings"
                   >
                     <PlayCircle className="w-4 h-4" />
-                    <span>اختبار</span>
+                    <span>{tc("اختبار","Test")}</span>
                   </button>
                 )}
                 <Switch id="sound-notif" checked={soundEnabled} onCheckedChange={(val) => { setSoundEnabled(val); saveSoundEnabled('pos', val); }} />
@@ -2064,7 +2066,7 @@ export default function PosSystem() {
             <Separator />
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-bold">حجم الشاشة (Zoom)</Label>
+                <Label className="text-sm font-bold">{tc("حجم الشاشة (Zoom)","Screen Size (Zoom)")}</Label>
                 <span className="text-sm font-mono font-bold text-primary">{posZoom}%</span>
               </div>
               <div className="flex items-center gap-2">

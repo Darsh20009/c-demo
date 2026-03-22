@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslate } from "@/lib/useTranslate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,7 @@ interface MenuCategory {
 }
 
 export default function AdminSettings() {
+  const tc = useTranslate();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const { data: config, isLoading } = useQuery<any>({
@@ -516,8 +518,8 @@ export default function AdminSettings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold font-ibm-arabic">إدارة الموقع والنظام</h1>
-          <p className="text-muted-foreground mt-1 font-ibm-arabic text-sm">تخصيص كامل للهوية، نوع النشاط، وحالة النظام</p>
+          <h1 className="text-3xl font-bold font-ibm-arabic">{tc("إدارة الموقع والنظام","Site & System Management")}</h1>
+          <p className="text-muted-foreground mt-1 font-ibm-arabic text-sm">{tc("تخصيص كامل للهوية، نوع النشاط، وحالة النظام","Full customization of identity, business type, and system status")}</p>
         </div>
         <div className="bg-accent/10 p-3 rounded-full">
           <Layout className="w-6 h-6 text-accent" />
@@ -534,13 +536,13 @@ export default function AdminSettings() {
                   <Store className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-bold">إدارة تشغيل المتجر</CardTitle>
-                  <CardDescription>التحكم في ساعات العمل والروابط الاجتماعية</CardDescription>
+                  <CardTitle className="text-xl font-bold">{tc("إدارة تشغيل المتجر","Store Operations")}</CardTitle>
+                  <CardDescription>{tc("التحكم في ساعات العمل والروابط الاجتماعية","Control working hours and social links")}</CardDescription>
                 </div>
               </div>
               <div className="flex items-center gap-3 bg-white dark:bg-gray-800 p-2 rounded-lg border shadow-sm">
                 <div className="flex items-center gap-2 px-2 border-l ml-2">
-                  <Label htmlFor="emergency-close" className="text-sm font-bold text-red-600 cursor-pointer">إغلاق طارئ</Label>
+                  <Label htmlFor="emergency-close" className="text-sm font-bold text-red-600 cursor-pointer">{tc("إغلاق طارئ","Emergency Close")}</Label>
                   <Switch
                     id="emergency-close"
                     checked={isEmergencyClosed}
@@ -550,7 +552,7 @@ export default function AdminSettings() {
                 </div>
                 <Button onClick={handleSaveStoreManagement} disabled={mutation.isPending} size="sm">
                   {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
-                  حفظ كافة التغييرات
+                  {tc("حفظ كافة التغييرات","Save All Changes")}
                 </Button>
               </div>
             </div>
@@ -561,7 +563,7 @@ export default function AdminSettings() {
               <div className="lg:col-span-3 space-y-4">
                 <h3 className="font-bold text-lg flex items-center gap-2 text-primary border-b pb-2">
                   <Wifi className="w-5 h-5" />
-                  ساعات العمل الأسبوعية
+                  {tc("ساعات العمل الأسبوعية","Weekly Working Hours")}
                 </h3>
                 <div className="space-y-3">
                   {storeHours && Object.keys(daysAr).map((day) => (
@@ -586,7 +588,7 @@ export default function AdminSettings() {
                                 }}
                               />
                               <Label htmlFor={`open-${day}`} className={`text-xs cursor-pointer font-bold ${storeHours[day]?.isOpen ? 'text-green-600' : 'text-red-600'}`}>
-                                {storeHours[day]?.isOpen ? 'مفتوح للعمل' : 'مغلق حالياً'}
+                                {storeHours[day]?.isOpen ? tc("مفتوح للعمل","Open") : tc("مغلق حالياً","Closed")}
                               </Label>
                             </div>
                           </div>
@@ -608,7 +610,7 @@ export default function AdminSettings() {
                                   }
                                 })}
                               />
-                              <Label htmlFor={`always-open-${day}`} className="text-xs cursor-pointer font-bold">24 ساعة</Label>
+                              <Label htmlFor={`always-open-${day}`} className="text-xs cursor-pointer font-bold">{tc("24 ساعة","24 Hours")}</Label>
                             </div>
 
                             {!storeHours[day]?.isAlwaysOpen && (
@@ -652,7 +654,7 @@ export default function AdminSettings() {
               <div className="lg:col-span-2 space-y-4">
                 <h3 className="font-bold text-lg flex items-center gap-2 text-primary border-b pb-2">
                   <Smartphone className="w-5 h-5" />
-                  حسابات التواصل الاجتماعي
+                  {tc("حسابات التواصل الاجتماعي","Social Media Accounts")}
                 </h3>
                 <div className="grid gap-5 bg-primary/5 p-4 rounded-xl border border-primary/10">
                   {Object.keys(socialLinks).map((platform) => (
@@ -680,7 +682,7 @@ export default function AdminSettings() {
                 </div>
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex items-start gap-2">
                   <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
-                  <p>تأكد من وضع الروابط كاملة (مثال: https://instagram.com/qirox) لتظهر بشكل صحيح في أسفل الموقع للعملاء.</p>
+                  <p>{tc("تأكد من وضع الروابط كاملة (مثال: https://instagram.com/qirox) لتظهر بشكل صحيح في أسفل الموقع للعملاء.","Make sure to enter full URLs (e.g. https://instagram.com/qirox) so they display correctly at the bottom of the customer site.")}</p>
                 </div>
               </div>
             </div>
@@ -696,8 +698,8 @@ export default function AdminSettings() {
                   <MonitorSmartphone className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-bold">تخطيط الواجهة</CardTitle>
-                  <CardDescription>اختر شكل عرض المنيو للعملاء وواجهة الكاشير</CardDescription>
+                  <CardTitle className="text-xl font-bold">{tc("تخطيط الواجهة","Interface Layout")}</CardTitle>
+                  <CardDescription>{tc("اختر شكل عرض المنيو للعملاء وواجهة الكاشير","Choose the display style for the customer menu and cashier interface")}</CardDescription>
                 </div>
               </div>
               <Button
@@ -707,7 +709,7 @@ export default function AdminSettings() {
                 data-testid="button-save-layout"
               >
                 {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
-                حفظ التخطيط
+                {tc("حفظ التخطيط","Save Layout")}
               </Button>
             </div>
           </CardHeader>
@@ -716,13 +718,13 @@ export default function AdminSettings() {
             <div>
               <h3 className="font-bold text-lg flex items-center gap-2 text-primary border-b pb-2 mb-4">
                 <Layout className="w-5 h-5" />
-                تخطيط منيو العملاء
+                {tc("تخطيط منيو العملاء","Customer Menu Layout")}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {([
-                  { value: 'classic', label: 'كلاسيك', desc: 'بطاقات أفقية — صورة يسار + تفاصيل يمين', icon: '▤' },
-                  { value: 'cards', label: 'بطاقات', desc: 'شبكة عمودية — صورة فوق + تفاصيل أسفل', icon: '⊞' },
-                  { value: 'list', label: 'قائمة', desc: 'صفوف مضغوطة — صورة صغيرة + تفاصيل', icon: '☰' },
+                  { value: 'classic', label: tc('كلاسيك','Classic'), desc: tc('بطاقات أفقية — صورة يسار + تفاصيل يمين','Horizontal cards — image left + details right'), icon: '▤' },
+                  { value: 'cards', label: tc('بطاقات','Cards'), desc: tc('شبكة عمودية — صورة فوق + تفاصيل أسفل','Vertical grid — image top + details bottom'), icon: '⊞' },
+                  { value: 'list', label: tc('قائمة','List'), desc: tc('صفوف مضغوطة — صورة صغيرة + تفاصيل','Compact rows — small image + details'), icon: '☰' },
                 ] as const).map((opt) => (
                   <button
                     key={opt.value}
@@ -751,13 +753,13 @@ export default function AdminSettings() {
             <div>
               <h3 className="font-bold text-lg flex items-center gap-2 text-primary border-b pb-2 mb-4">
                 <MonitorSmartphone className="w-5 h-5" />
-                تخطيط واجهة الكاشير
+                {tc("تخطيط واجهة الكاشير","Cashier Interface Layout")}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {([
-                  { value: 'classic', label: 'كلاسيك', desc: 'شبكة 2 عمود — بطاقة مع اسم وسعر وزر إضافة', icon: '▤' },
-                  { value: 'pos', label: 'POS', desc: 'أزرار كبيرة 3-4 أعمدة — تصميم نقطة البيع', icon: '⊞' },
-                  { value: 'split', label: 'مقسّم', desc: 'شريط فئات + عناصر + سلة — 3 أقسام', icon: '⋮⊞' },
+                  { value: 'classic', label: tc('كلاسيك','Classic'), desc: tc('شبكة 2 عمود — بطاقة مع اسم وسعر وزر إضافة','2-col grid — card with name, price & add button'), icon: '▤' },
+                  { value: 'pos', label: 'POS', desc: tc('أزرار كبيرة 3-4 أعمدة — تصميم نقطة البيع','Large buttons 3-4 cols — POS design'), icon: '⊞' },
+                  { value: 'split', label: tc('مقسّم','Split'), desc: tc('شريط فئات + عناصر + سلة — 3 أقسام','Category bar + items + cart — 3 sections'), icon: '⋮⊞' },
                 ] as const).map((opt) => (
                   <button
                     key={opt.value}
@@ -793,8 +795,8 @@ export default function AdminSettings() {
                   <ShieldAlert className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">حالة النظام</CardTitle>
-                  <CardDescription>تفعيل وضع الصيانة أو التحديث</CardDescription>
+                  <CardTitle className="text-lg font-bold">{tc("حالة النظام","System Status")}</CardTitle>
+                  <CardDescription>{tc("تفعيل وضع الصيانة أو التحديث","Enable maintenance or update mode")}</CardDescription>
                 </div>
               </div>
               <Switch
@@ -807,22 +809,22 @@ export default function AdminSettings() {
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
             <div className="p-3 bg-orange-50 dark:bg-orange-900/10 rounded-lg text-xs text-orange-800 dark:text-orange-300">
-              عند التفعيل، سيتم تحويل جميع العملاء تلقائياً لصفحة التوقف المؤقت.
+              {tc("عند التفعيل، سيتم تحويل جميع العملاء تلقائياً لصفحة التوقف المؤقت.","When enabled, all customers will be redirected to the maintenance page.")}
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium">رسالة الحالة للعملاء</Label>
+              <Label className="text-sm font-medium">{tc("رسالة الحالة للعملاء","Customer Status Message")}</Label>
               <Select
                 value={config?.maintenanceReason || "maintenance"}
                 onValueChange={(value) => mutation.mutate({ maintenanceReason: value })}
                 disabled={mutation.isPending}
               >
                 <SelectTrigger className="font-ibm-arabic">
-                  <SelectValue placeholder="اختر السبب" />
+                  <SelectValue placeholder={tc("اختر السبب","Select reason")} />
                 </SelectTrigger>
                 <SelectContent className="font-ibm-arabic">
-                  <SelectItem value="maintenance">الموقع خارج الخدمة حالياً (صيانة)</SelectItem>
-                  <SelectItem value="development">الموقع تحت التطوير حالياً</SelectItem>
-                  <SelectItem value="update">جاري تحديث الموقع حالياً</SelectItem>
+                  <SelectItem value="maintenance">{tc("الموقع خارج الخدمة حالياً (صيانة)","Site is currently out of service (maintenance)")}</SelectItem>
+                  <SelectItem value="development">{tc("الموقع تحت التطوير حالياً","Site is currently under development")}</SelectItem>
+                  <SelectItem value="update">{tc("جاري تحديث الموقع حالياً","Site is currently being updated")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -837,40 +839,40 @@ export default function AdminSettings() {
                 <Store className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <CardTitle className="text-lg font-bold">تخصيص النشاط</CardTitle>
-                <CardDescription>تحديد نوع النظام والتحكم في الأقسام</CardDescription>
+                <CardTitle className="text-lg font-bold">{tc("تخصيص النشاط","Business Customization")}</CardTitle>
+                <CardDescription>{tc("تحديد نوع النظام والتحكم في الأقسام","Define the system type and manage sections")}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">نوع النشاط التجاري</Label>
+              <Label className="text-sm font-medium">{tc("نوع النشاط التجاري","Business Type")}</Label>
               <Select
                 value={config?.activityType || "cafe"}
                 onValueChange={(value) => mutation.mutate({ activityType: value })}
                 disabled={mutation.isPending}
               >
                 <SelectTrigger className="font-ibm-arabic">
-                  <SelectValue placeholder="اختر نوع النشاط" />
+                  <SelectValue placeholder={tc("اختر نوع النشاط","Select business type")} />
                 </SelectTrigger>
                 <SelectContent className="font-ibm-arabic">
-                  <SelectItem value="cafe">نظام كافيه فقط</SelectItem>
-                  <SelectItem value="restaurant">نظام مطعم فقط</SelectItem>
-                  <SelectItem value="both">نظام مطعم وكافيه معاً</SelectItem>
+                  <SelectItem value="cafe">{tc("نظام كافيه فقط","Café System Only")}</SelectItem>
+                  <SelectItem value="restaurant">{tc("نظام مطعم فقط","Restaurant System Only")}</SelectItem>
+                  <SelectItem value="both">{tc("نظام مطعم وكافيه معاً","Restaurant & Café System")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-bold text-blue-800 dark:text-blue-300">أقسام النظام المتاحة</Label>
+                <Label className="text-sm font-bold text-blue-800 dark:text-blue-300">{tc("أقسام النظام المتاحة","Available System Sections")}</Label>
                 <div className="flex gap-2">
                   {isAddingSection ? (
                     <div className="flex items-center gap-1 animate-in slide-in-from-left-2">
                       <Input 
                         size={1} 
                         className="h-7 text-xs w-24" 
-                        placeholder="اسم القسم..."
+                        placeholder={tc("اسم القسم...","Section name...")}
                         value={newSectionName}
                         onChange={(e) => setNewSectionName(e.target.value)}
                       />
@@ -884,8 +886,8 @@ export default function AdminSettings() {
                             setIsAddingSection(false);
                           }
                         }}
-                      >حفظ</Button>
-                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setIsAddingSection(false)}>إلغاء</Button>
+                      >{tc("حفظ","Save")}</Button>
+                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setIsAddingSection(false)}>{tc("إلغاء","Cancel")}</Button>
                     </div>
                   ) : (
                     <Button 
@@ -895,7 +897,7 @@ export default function AdminSettings() {
                       onClick={() => setIsAddingSection(true)}
                     >
                       <Plus className="w-3 h-3 ml-1" />
-                      إضافة قسم
+                      {tc("إضافة قسم","Add Section")}
                     </Button>
                   )}
                 </div>
@@ -905,7 +907,7 @@ export default function AdminSettings() {
                 <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border">
                   <div className="flex items-center gap-2">
                     <Utensils className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs">إدارة المأكولات</span>
+                    <span className="text-xs">{tc("إدارة المأكولات","Food Management")}</span>
                   </div>
                   <Switch
                     checked={config?.isFoodEnabled}
@@ -916,7 +918,7 @@ export default function AdminSettings() {
                 <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border">
                   <div className="flex items-center gap-2">
                     <Coffee className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-xs">إدارة المشروبات</span>
+                    <span className="text-xs">{tc("إدارة المشروبات","Drinks Management")}</span>
                   </div>
                   <Switch
                     checked={config?.isDrinksEnabled}
@@ -937,18 +939,18 @@ export default function AdminSettings() {
                 <ShoppingBag className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <CardTitle className="text-lg font-bold">طرق الاستلام</CardTitle>
-                <CardDescription>تحكم في أنواع الطلبات المتاحة للعملاء</CardDescription>
+                <CardTitle className="text-lg font-bold">{tc("طرق الاستلام","Order Methods")}</CardTitle>
+                <CardDescription>{tc("تحكم في أنواع الطلبات المتاحة للعملاء","Control the order types available to customers")}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {[
-              { key: 'enableTakeaway', icon: Store, label: 'استلام من الفرع', desc: 'الاستلام المباشر من الفرع', color: 'text-blue-600' },
-              { key: 'enableDineIn', icon: Utensils, label: 'داخل المطعم (طاولة)', desc: 'الجلوس والطلب من الطاولة', color: 'text-orange-600' },
-              { key: 'enableCarPickup', icon: Car, label: 'استلام من السيارة', desc: 'توصيل الطلب للسيارة أمام الفرع', color: 'text-purple-600' },
-              { key: 'enableScheduledPickup', icon: Timer, label: 'طلب مجدول', desc: 'تحديد وقت استلام مسبق', color: 'text-teal-600' },
-              { key: 'enableDelivery', icon: Truck, label: 'توصيل للمنزل', desc: 'توصيل الطلب لعنوان العميل', color: 'text-red-600' },
+              { key: 'enableTakeaway', icon: Store, label: tc('استلام من الفرع','Branch Pickup'), desc: tc('الاستلام المباشر من الفرع','Direct pickup from branch'), color: 'text-blue-600' },
+              { key: 'enableDineIn', icon: Utensils, label: tc('داخل المطعم (طاولة)','Dine-in (Table)'), desc: tc('الجلوس والطلب من الطاولة','Sit and order at the table'), color: 'text-orange-600' },
+              { key: 'enableCarPickup', icon: Car, label: tc('استلام من السيارة','Car Pickup'), desc: tc('توصيل الطلب للسيارة أمام الفرع','Deliver order to car in front of branch'), color: 'text-purple-600' },
+              { key: 'enableScheduledPickup', icon: Timer, label: tc('طلب مجدول','Scheduled Order'), desc: tc('تحديد وقت استلام مسبق','Set a pre-arranged pickup time'), color: 'text-teal-600' },
+              { key: 'enableDelivery', icon: Truck, label: tc('توصيل للمنزل','Home Delivery'), desc: tc('توصيل الطلب لعنوان العميل','Deliver order to customer address'), color: 'text-red-600' },
             ].map(({ key, icon: Icon, label, desc, color }) => (
               <div key={key} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border">
                 <div className="flex items-center gap-3">

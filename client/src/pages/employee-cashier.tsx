@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -78,6 +79,7 @@ QIROX Cafe
 }
 
 export default function EmployeeCashier() {
+ const tc = useTranslate();
  const [, setLocation] = useLocation();
  const [employee, setEmployee] = useState<Employee | null>(null);
  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
@@ -848,8 +850,8 @@ export default function EmployeeCashier() {
  <Coffee className="w-6 h-6 text-white" />
  </div>
  <div>
- <h1 className="text-2xl font-bold text-accent">نظام الكاشير</h1>
- <p className="text-gray-400 text-sm">الموظف: {employee.fullName}</p>
+ <h1 className="text-2xl font-bold text-accent">{tc("نظام الكاشير","Cashier System")}</h1>
+ <p className="text-gray-400 text-sm">{tc("الموظف:","Employee:")} {employee.fullName}</p>
  </div>
  </div>
  <div className="flex items-center gap-3 flex-wrap">
@@ -860,27 +862,27 @@ export default function EmployeeCashier() {
  data-testid="button-phone-lookup"
  >
  <Search className="w-4 h-4 ml-2" />
- بحث برقم الهاتف
+ {tc("بحث برقم الهاتف","Search by Phone")}
  </Button>
  <Dialog open={isPosSettingsOpen} onOpenChange={setIsPosSettingsOpen}>
  <DialogTrigger asChild>
  <div className="bg-[#2d1f1a] border border-primary/20 rounded-lg px-4 py-2 hover-elevate cursor-pointer" data-testid="pos-settings-trigger">
  <div className="flex items-center gap-2">
  <MonitorSmartphone className={`w-4 h-4 ${posConnected ? 'text-green-400' : 'text-gray-400'}`} />
- <span className="text-xs text-gray-400">جهاز POS:</span>
+ <span className="text-xs text-gray-400">{tc("جهاز POS:","POS Device:")}</span>
  <Badge variant="outline" className={posConnected ? "border-green-500/30 text-green-400" : "border-yellow-500/30 text-yellow-400"}>
- {posConnected ? "متصل" : "غير متصل"}
+ {posConnected ? tc("متصل","Connected") : tc("غير متصل","Disconnected")}
  </Badge>
  <Settings className="w-3 h-3 text-gray-500" />
  </div>
- <p className="text-xs text-gray-500 mt-1">{posConnected ? "جاهز للدفع الإلكتروني" : "انقر للإعدادات"}</p>
+ <p className="text-xs text-gray-500 mt-1">{posConnected ? tc("جاهز للدفع الإلكتروني","Ready for payment") : tc("انقر للإعدادات","Click for settings")}</p>
  </div>
  </DialogTrigger>
  <DialogContent className="bg-[#2d1f1a] border-primary/20 text-white">
  <DialogHeader>
  <DialogTitle className="text-accent flex items-center gap-2">
  <MonitorSmartphone className="w-5 h-5" />
- إعدادات جهاز نقاط البيع (POS)
+ {tc("إعدادات جهاز نقاط البيع (POS)","POS Device Settings")}
  </DialogTitle>
  </DialogHeader>
  <div className="space-y-6">
@@ -892,9 +894,9 @@ export default function EmployeeCashier() {
  <WifiOff className="w-6 h-6 text-gray-400" />
  )}
  <div>
- <p className="text-gray-200 font-medium">حالة الاتصال</p>
+ <p className="text-gray-200 font-medium">{tc("حالة الاتصال","Connection Status")}</p>
  <p className={`text-sm ${posConnected ? 'text-green-400' : 'text-gray-500'}`}>
- {posConnected ? 'متصل وجاهز للاستخدام' : 'غير متصل'}
+ {posConnected ? tc("متصل وجاهز للاستخدام","Connected and ready") : tc("غير متصل","Disconnected")}
  </p>
  </div>
  </div>
@@ -909,25 +911,25 @@ export default function EmployeeCashier() {
  <div className="space-y-3 p-4 bg-[#1a1410]/50 rounded-lg">
  <h4 className="text-accent font-medium flex items-center gap-2">
  <Settings className="w-4 h-4" />
- معلومات الجهاز
+ {tc("معلومات الجهاز","Device Info")}
  </h4>
  <div className="grid grid-cols-2 gap-3 text-sm">
  <div>
- <p className="text-gray-500">نوع الاتصال</p>
- <p className="text-gray-300">USB / شبكة محلية</p>
+ <p className="text-gray-500">{tc("نوع الاتصال","Connection Type")}</p>
+ <p className="text-gray-300">USB / {tc("شبكة محلية","Local Network")}</p>
  </div>
  <div>
- <p className="text-gray-500">حالة الجهاز</p>
+ <p className="text-gray-500">{tc("حالة الجهاز","Device Status")}</p>
  <p className={posConnected ? 'text-green-400' : 'text-yellow-400'}>
- {posConnected ? 'نشط' : 'في وضع الاستعداد'}
+ {posConnected ? tc("نشط","Active") : tc("في وضع الاستعداد","Standby")}
  </p>
  </div>
  </div>
  </div>
 
  <div className="text-xs text-gray-500 p-3 bg-primary/10 rounded-lg border border-primary/20">
- <p className="font-medium text-accent mb-1">ملاحظة:</p>
- <p>عند تفعيل جهاز POS، سيتم معالجة الدفعات الإلكترونية تلقائياً عبر الجهاز. تأكد من توصيل الجهاز بشكل صحيح قبل التفعيل.</p>
+ <p className="font-medium text-accent mb-1">{tc("ملاحظة:","Note:")}</p>
+ <p>{tc("عند تفعيل جهاز POS، سيتم معالجة الدفعات الإلكترونية تلقائياً عبر الجهاز. تأكد من توصيل الجهاز بشكل صحيح قبل التفعيل.","When POS is enabled, electronic payments will be processed automatically. Ensure the device is connected correctly before activation.")}</p>
  </div>
  </div>
  </DialogContent>
@@ -940,7 +942,7 @@ export default function EmployeeCashier() {
  data-testid="button-print-receipt"
  >
  <Printer className="w-4 h-4 ml-2" />
- طباعة الإيصال
+ {tc("طباعة الإيصال","Print Receipt")}
  </Button>
  <Button
  onClick={handlePrintTaxInvoice}
@@ -948,7 +950,7 @@ export default function EmployeeCashier() {
  data-testid="button-print-tax-invoice"
  >
  <FileText className="w-4 h-4 ml-2" />
- فاتورة ضريبية
+ {tc("فاتورة ضريبية","Tax Invoice")}
  </Button>
  <Button
  onClick={handlePrintAllReceipts}
@@ -956,7 +958,7 @@ export default function EmployeeCashier() {
  data-testid="button-print-all-receipts"
  >
  <Printer className="w-4 h-4 ml-2" />
- طباعة 3 إيصالات
+ {tc("طباعة 3 إيصالات","Print 3 Receipts")}
  </Button>
  </>
  )}
@@ -988,7 +990,7 @@ export default function EmployeeCashier() {
  <div className="lg:col-span-2">
  <Card className="bg-[#2d1f1a] border-primary/20">
  <CardHeader>
- <CardTitle className="text-accent text-right">القائمة</CardTitle>
+ <CardTitle className="text-accent text-right">{tc("القائمة","Menu")}</CardTitle>
  </CardHeader>
  <CardContent>
  {businessConfig?.cashierLayout === 'pos' ? (
@@ -1024,7 +1026,7 @@ export default function EmployeeCashier() {
  <CardTitle className="text-accent text-right flex items-center justify-between gap-2">
  <div className="flex items-center gap-2">
  <ShoppingBag className="w-5 h-5" />
- الطلب الحالي
+ {tc("الطلب الحالي","Current Order")}
  </div>
  <Badge 
    data-testid="badge-order-type"
@@ -1037,11 +1039,11 @@ export default function EmployeeCashier() {
    }
  >
    {orderType === 'dine-in' ? (
-     <><Store className="w-3 h-3 ml-1" />محلي</>
+     <><Store className="w-3 h-3 ml-1" />{tc("محلي","Dine-in")}</>
    ) : orderType === 'pickup' ? (
-     <><MapPin className="w-3 h-3 ml-1" />استلام</>
+     <><MapPin className="w-3 h-3 ml-1" />{tc("استلام","Pickup")}</>
    ) : (
-     <><Truck className="w-3 h-3 ml-1" />توصيل</>
+     <><Truck className="w-3 h-3 ml-1" />{tc("توصيل","Delivery")}</>
    )}
  </Badge>
  </CardTitle>
@@ -1049,7 +1051,7 @@ export default function EmployeeCashier() {
  <CardContent className="space-y-4">
  {orderItems.length === 0 ? (
  <div className="text-center text-gray-400 py-8">
- لا توجد عناصر في الطلب
+ {tc("لا توجد عناصر في الطلب","No items in order")}
  </div>
  ) : (
  <>
@@ -1123,12 +1125,12 @@ export default function EmployeeCashier() {
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block">
  <User className="w-4 h-4 inline ml-2" />
- اسم العميل
+ {tc("اسم العميل","Customer Name")}
  </Label>
  <Input
  value={customerName}
  onChange={(e) => setCustomerName(e.target.value)}
- placeholder="أدخل اسم العميل"
+ placeholder={tc("أدخل اسم العميل","Enter customer name")}
  className="bg-[#1a1410] border-primary/30 text-white text-right"
  data-testid="input-customer-name"
  />
@@ -1137,7 +1139,7 @@ export default function EmployeeCashier() {
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block">
  <Phone className="w-4 h-4 inline ml-2" />
- رقم الجوال (9 أرقام تبدأ بـ 5)
+ {tc("رقم الجوال (9 أرقام تبدأ بـ 5)","Mobile (9 digits starting with 5)")}
  </Label>
  <div className="flex gap-2">
  <Input
@@ -1160,7 +1162,7 @@ export default function EmployeeCashier() {
  </DialogTrigger>
  <DialogContent className="bg-[#1a1410] border-primary/30 text-white max-w-md">
  <DialogHeader>
- <DialogTitle className="text-right text-accent">مسح بطاقة الولاء</DialogTitle>
+ <DialogTitle className="text-right text-accent">{tc("مسح بطاقة الولاء","Scan Loyalty Card")}</DialogTitle>
  </DialogHeader>
  <BarcodeScanner
  showManualInput={true}
@@ -1186,13 +1188,13 @@ export default function EmployeeCashier() {
  </Dialog>
  </div>
  {isCheckingCustomer && (
- <p className="text-xs text-accent text-right animate-pulse">جاري التحقق من العميل...</p>
+ <p className="text-xs text-accent text-right animate-pulse">{tc("جاري التحقق من العميل...","Checking customer...")}</p>
  )}
  </div>
 
  {showRegisterDialog && customerPhone.length === 9 && (
  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 space-y-3">
- <p className="text-blue-300 text-sm text-right">عميل غير مسجل - يمكنك تسجيله الآن</p>
+ <p className="text-blue-300 text-sm text-right">{tc("عميل غير مسجل - يمكنك تسجيله الآن","Unregistered customer — you can register them now")}</p>
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block text-xs">
  البريد الإلكتروني (اختياري)
@@ -1292,10 +1294,10 @@ export default function EmployeeCashier() {
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
  <Gift className="w-5 h-5 text-accent" />
- <span className="text-accent font-semibold">بطاقة كوبي</span>
+ <span className="text-accent font-semibold">{tc("بطاقة كوبي","Loyalty Card")}</span>
  </div>
  <Badge className="bg-primary text-black">
- {(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)} أختام
+ {(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)} {tc("أختام","stamps")}
  </Badge>
  </div>
  <div className="flex items-center gap-1 justify-end">
@@ -1320,14 +1322,14 @@ export default function EmployeeCashier() {
  </div>
  <p className="text-xs text-gray-400 text-right flex items-center gap-1 justify-end">
  <Gift className="w-3 h-3 text-accent" />
- المشروبات المجانية متاحة: {Math.floor(((loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)) / 10)}
+ {tc("المشروبات المجانية متاحة:","Free drinks available:")} {Math.floor(((loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)) / 10)}
  </p>
  </div>
  )}
 
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block text-sm font-medium">
- نوع الطلب
+ {tc("نوع الطلب","Order Type")}
  </Label>
  <div className="grid grid-cols-3 gap-2">
  <Button
@@ -1342,7 +1344,7 @@ export default function EmployeeCashier() {
  data-testid="button-order-type-dinein"
  >
  <Store className="w-5 h-5" />
- <span className="text-xs">في الكافيه</span>
+ <span className="text-xs">{tc("في الكافيه","Dine-in")}</span>
  </Button>
  <Button
  type="button"
@@ -1356,7 +1358,7 @@ export default function EmployeeCashier() {
  data-testid="button-order-type-pickup"
  >
  <MapPin className="w-5 h-5" />
- <span className="text-xs">استلام</span>
+ <span className="text-xs">{tc("استلام","Pickup")}</span>
  </Button>
  <Button
  type="button"
@@ -1370,7 +1372,7 @@ export default function EmployeeCashier() {
  data-testid="button-order-type-delivery"
  >
  <Truck className="w-5 h-5" />
- <span className="text-xs">توصيل</span>
+ <span className="text-xs">{tc("توصيل","Delivery")}</span>
  </Button>
  </div>
  </div>
@@ -1378,12 +1380,12 @@ export default function EmployeeCashier() {
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block">
  <Coffee className="w-4 h-4 inline ml-2" />
- رقم الطاولة (اختياري)
+ {tc("رقم الطاولة (اختياري)","Table Number (optional)")}
  </Label>
  <Input
  value={tableNumber}
  onChange={(e) => setTableNumber(e.target.value)}
- placeholder="مثال: 5 أو A3"
+ placeholder={tc("مثال: 5 أو A3","e.g. 5 or A3")}
  className="bg-[#1a1410] border-primary/30 text-white text-right"
  data-testid="input-table-number"
  />
@@ -1391,22 +1393,22 @@ export default function EmployeeCashier() {
 
  <div className="space-y-2">
  <Label className="text-gray-300 text-right block">
- طريقة الدفع
+ {tc("طريقة الدفع","Payment Method")}
  </Label>
  <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
  <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-payment-method">
  <SelectValue />
  </SelectTrigger>
     <SelectContent className="bg-[#1a1410] border-primary/30 text-white">
-      <SelectItem value="cash">نقدي</SelectItem>
-      <SelectItem value="pos-network">شبكة</SelectItem>
-      <SelectItem value="qahwa-card">بطاقة كيروكس (ولاء)</SelectItem>
+      <SelectItem value="cash">{tc("نقدي","Cash")}</SelectItem>
+      <SelectItem value="pos-network">{tc("شبكة","Network")}</SelectItem>
+      <SelectItem value="qahwa-card">{tc("بطاقة كيروكس (ولاء)","QIROX Card (Loyalty)")}</SelectItem>
     </SelectContent>
  </Select>
  {paymentMethod === 'qahwa-card' && loyaltyCard && (
  <div className="bg-primary/30 border border-primary/50 rounded-lg p-4 space-y-3 mt-2">
  <div className="space-y-2">
- <Label className="text-accent text-sm">عدد الأختام المراد استخدامها</Label>
+ <Label className="text-accent text-sm">{tc("عدد الأختام المراد استخدامها","Number of stamps to use")}</Label>
  <div className="flex gap-2 items-center">
  <Input
  type="number"
@@ -1417,13 +1419,13 @@ export default function EmployeeCashier() {
  className="bg-[#1a1410] border-primary/30 text-white text-center w-20"
  data-testid="input-stamps-to-use"
  />
- <span className="text-accent text-sm">من {(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)}</span>
+ <span className="text-accent text-sm">{tc("من","of")} {(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)}</span>
  </div>
  </div>
  <div className="bg-[#1a1410] rounded p-2 space-y-1">
- <p className="text-xs text-gray-400">تفاصيل الحسم:</p>
+ <p className="text-xs text-gray-400">{tc("تفاصيل الحسم:","Discount details:")}</p>
  <p className="text-accent text-sm">
- الأختام المستخدمة: {stampsToUse} ختم
+ {tc("الأختام المستخدمة:","Stamps used:")} {stampsToUse} {tc("ختم","stamp")}
  </p>
  <p className="text-accent text-sm">
  {(() => {
@@ -1437,7 +1439,7 @@ export default function EmployeeCashier() {
  discount += itemPrices[i];
  freeItems.push(itemPrices[i]);
  }
- return `قيمة الخصم: ${discount.toFixed(2)} ريال (${stampsToUse} ختم = ${freeItems.length} عنصر مجاني)`;
+ return `${tc("قيمة الخصم:","Discount value:")} ${discount.toFixed(2)} SAR (${stampsToUse} ${tc("ختم","stamp")} = ${freeItems.length} ${tc("عنصر مجاني","free item")})`;
  })()}
  </p>
  <p className="text-accent text-sm">
@@ -1451,7 +1453,7 @@ export default function EmployeeCashier() {
  discount += itemPrices[i];
  }
  const finalPrice = Math.max(0, parseFloat(calculateTotal()) - discount);
- return `السعر النهائي: ${finalPrice.toFixed(2)} ريال`;
+ return `${tc("السعر النهائي:","Final price:")} ${finalPrice.toFixed(2)} SAR`;
  })()}
  </p>
  </div>
@@ -1461,11 +1463,11 @@ export default function EmployeeCashier() {
 
  <div className="space-y-2 bg-gradient-to-br from-green-900/20 to-emerald-900/20 p-4 rounded-lg border border-green-500/20">
  <Label className="text-gray-300 text-right block flex items-center justify-end gap-2">
- <span className="text-green-400">كود الخصم (اختياري)</span>
+ <span className="text-green-400">{tc("كود الخصم (اختياري)","Discount Code (optional)")}</span>
  <Gift className="w-5 h-5 text-green-400" />
  </Label>
  <p className="text-xs text-gray-400 text-right mb-2">
- هل لديك كود خصم؟ أدخله هنا للحصول على تخفيض فوري
+ {tc("هل لديك كود خصم؟ أدخله هنا للحصول على تخفيض فوري","Have a discount code? Enter it here for an instant discount")}
  </p>
  {!appliedDiscount ? (
  <div className="flex gap-2">
@@ -1485,12 +1487,12 @@ export default function EmployeeCashier() {
  {isValidatingDiscount ? (
  <>
  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white ml-2"></div>
- جاري التحقق
+ {tc("جاري التحقق","Checking")}
  </>
  ) : (
  <>
  <Check className="w-4 h-4 ml-2" />
- تطبيق
+ {tc("تطبيق","Apply")}
  </>
  )}
  </Button>
@@ -1527,7 +1529,7 @@ export default function EmployeeCashier() {
 
  <div className="space-y-2">
  <div className="flex justify-between items-center text-sm">
- <span className="text-gray-400">المجموع الفرعي:</span>
+ <span className="text-gray-400">{tc("المجموع الفرعي:","Subtotal:")}</span>
  <span className="text-gray-300" data-testid="text-subtotal">
  {calculateSubtotal().toFixed(2)} ريال
  </span>
@@ -1535,7 +1537,7 @@ export default function EmployeeCashier() {
  
  {appliedDiscount && (
  <div className="flex justify-between items-center text-sm">
- <span className="text-green-400">الخصم ({appliedDiscount.percentage}%):</span>
+ <span className="text-green-400">{tc("الخصم","Discount")} ({appliedDiscount.percentage}%):</span>
  <span className="text-green-400" data-testid="text-discount-amount">
  -{calculateDiscount().toFixed(2)} ريال
  </span>
@@ -1544,7 +1546,7 @@ export default function EmployeeCashier() {
 
  {usePointsDiscount && pointsToRedeem > 0 && (
  <div className="flex justify-between items-center text-sm">
- <span className="text-purple-400">خصم النقاط ({pointsToRedeem} نقطة):</span>
+ <span className="text-purple-400">{tc("خصم النقاط","Points Discount")} ({pointsToRedeem} {tc("نقطة","pts")}):</span>
  <span className="text-purple-400" data-testid="text-points-discount-amount">
  -{pointsToSar(pointsToRedeem).toFixed(2)} ريال
  </span>
@@ -1554,7 +1556,7 @@ export default function EmployeeCashier() {
  <Separator className="bg-primary/10" />
  
  <div className="flex justify-between items-center text-lg font-bold">
- <span className="text-accent">الإجمالي:</span>
+ <span className="text-accent">{tc("الإجمالي:","Total:")}</span>
  <span className="text-accent" data-testid="text-total">
  {calculateTotal()} ريال
  </span>
@@ -1568,7 +1570,7 @@ export default function EmployeeCashier() {
  data-testid="button-submit-order"
  >
  <Check className="w-5 h-5 ml-2" />
- {createOrderMutation.isPending ? "جاري الإنشاء..." : "إنشاء الطلب وإرسال واتساب"}
+ {createOrderMutation.isPending ? tc("جاري الإنشاء...","Creating...") : tc("إنشاء الطلب وإرسال واتساب","Create Order & Send WhatsApp")}
  </Button>
  </>
  )}
