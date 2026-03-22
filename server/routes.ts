@@ -14255,6 +14255,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         { id: req.params.id, tenantId },
         { $set: { isActive: 0, updatedAt: new Date() } }
       );
+      // Clear server-side cache so next GET reflects the deletion
+      cache.invalidate('menu-cats:' + tenantId);
       res.json({ success: true, message: "تم حذف القسم بنجاح" });
     } catch (error) {
       res.status(500).json({ error: "فشل في حذف القسم" });

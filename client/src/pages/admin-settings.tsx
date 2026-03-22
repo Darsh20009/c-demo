@@ -488,14 +488,16 @@ export default function AdminSettings() {
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (categoryId: string) => {
-      return apiRequest("DELETE", `/api/menu-categories/${categoryId}`);
+      const res = await apiRequest("DELETE", `/api/menu-categories/${categoryId}`);
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-categories"] });
-      toast({ title: "تم حذف القسم بنجاح" });
+      toast({ title: "تم حذف القسم بنجاح", className: "bg-green-600 text-white" });
     },
-    onError: () => {
-      toast({ title: "فشل في حذف القسم", variant: "destructive" });
+    onError: (error: any) => {
+      const msg = error?.message || "فشل في حذف القسم";
+      toast({ title: msg, variant: "destructive" });
     }
   });
 
