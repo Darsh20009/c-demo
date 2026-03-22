@@ -66,7 +66,6 @@ const EmployeeAttendance = lazy(() => import("@/pages/employee-attendance"));
 const LeaveRequestPage = lazy(() => import("@/pages/leave-request"));
 const ManagerAttendance = lazy(() => import("@/pages/manager-attendance"));
 const OwnerDashboard = lazy(() => import("@/pages/owner-dashboard"));
-const InventoryDashboard = lazy(() => import("@/pages/inventory-dashboard"));
 const InventoryRawItems = lazy(() => import("@/pages/inventory-raw-items"));
 const InventorySuppliers = lazy(() => import("@/pages/inventory-suppliers"));
 const InventoryPurchases = lazy(() => import("@/pages/inventory-purchases"));
@@ -79,11 +78,9 @@ const POSSystem = lazy(() => import("@/pages/pos-system"));
 const ShiftManagement = lazy(() => import("@/pages/shift-management"));
 const KitchenDisplay = lazy(() => import("@/pages/kitchen-display"));
 const AccountingDashboard = lazy(() => import("@/pages/accounting-dashboard"));
-const IngredientsRecipesInventory = lazy(() => import("@/pages/ingredients-recipes-inventory"));
 const OrderStatusDisplay = lazy(() => import("@/pages/order-status-display"));
 const CustomerDisplay = lazy(() => import("@/pages/customer-display"));
 const InventorySmartPage = lazy(() => import("@/pages/inventory-smart"));
-const AccountingSmartPage = lazy(() => import("@/pages/accounting-smart"));
 const EmployeeAvailability = lazy(() => import("@/pages/employee-availability"));
 const UnauthorizedPage = lazy(() => import("@/pages/unauthorized"));
 const ProductReviews = lazy(() => import("@/pages/product-reviews"));
@@ -98,20 +95,8 @@ const AdminSettings = lazy(() => import("@/pages/admin-settings"));
 const AdminBranches = lazy(() => import("@/pages/admin-branches"));
 const AdminEmail = lazy(() => import("@/pages/admin-email"));
 const TenantSignup = lazy(() => import("@/pages/tenant-signup"));
-const RecipesManagement = lazy(() => import("@/pages/recipes-management"));
-const InventorySmartDashboard = lazy(() => import("@/pages/inventory-smart-dashboard"));
-const AccountingSmartDashboard = lazy(() => import("@/pages/accounting-smart-dashboard"));
-const ReportsPage = lazy(() => import("@/pages/reports"));
-const StockMovementsPage = lazy(() => import("@/pages/stock-movements"));
-
-const OSInventoryManagement = lazy(() => import("@/pages/os-inventory-management"));
-const OSRecipeManagement = lazy(() => import("@/pages/os-recipe-management"));
-const OSAccountingDashboard = lazy(() => import("@/pages/os-accounting-dashboard"));
-const OSStockManagement = lazy(() => import("@/pages/os-stock-management"));
 const NotFound = lazy(() => import("@/pages/not-found"));
-const OSRolesManagement = lazy(() => import("@/pages/os-roles-management"));
 const ExecutiveDashboard = lazy(() => import("@/pages/executive-dashboard"));
-const UnifiedInventoryRecipes = lazy(() => import("@/pages/unified-inventory-recipes"));
 const ZATCAInvoices = lazy(() => import("@/pages/zatca-invoices"));
 const MenuView = lazy(() => import("@/pages/menu-view"));
 const ErpAccountingPage = lazy(() => import("@/pages/erp-accounting"));
@@ -308,11 +293,6 @@ function AppRouter() {
       <Route path="/manager/inventory/transfers"><AuthGuard userType="manager"><InventoryTransfers /></AuthGuard></Route>
       <Route path="/manager/accounting"><AuthGuard userType="manager"><AccountingDashboard /></AuthGuard></Route>
       <Route path="/manager/shifts"><AuthGuard userType="manager"><ShiftManagement /></AuthGuard></Route>
-      <Route path="/manager/inventory/smart"><AuthGuard userType="manager"><InventorySmartPage /></AuthGuard></Route>
-      <Route path="/manager/accounting/smart"><AuthGuard userType="manager"><AccountingSmartPage /></AuthGuard></Route>
-      <Route path="/manager/ingredients-recipes"><AuthGuard userType="manager"><IngredientsRecipesInventory /></AuthGuard></Route>
-      <Route path="/manager/os-inventory"><AuthGuard userType="manager"><OSInventoryManagement /></AuthGuard></Route>
-      <Route path="/manager/unified-inventory"><AuthGuard userType="manager"><UnifiedInventoryRecipes /></AuthGuard></Route>
       <Route path="/manager/zatca"><AuthGuard userType="manager"><ZATCAInvoices /></AuthGuard></Route>
       <Route path="/manager/guide"><AuthGuard userType="manager"><UserGuide /></AuthGuard></Route>
       <Route path="/guide"><UserGuide /></Route>
@@ -333,11 +313,6 @@ function AppRouter() {
       <Route path="/manager/delivery"><AuthGuard userType="manager"><ManagerDelivery /></AuthGuard></Route>
       <Route path="/manager/unified-reports"><AuthGuard userType="manager"><UnifiedReports /></AuthGuard></Route>
       <Route path="/manager/bi-analytics"><AuthGuard userType="manager"><BIAnalytics /></AuthGuard></Route>
-      <Route path="/manager/os-recipes"><AuthGuard userType="manager"><OSRecipeManagement /></AuthGuard></Route>
-      <Route path="/manager/os-accounting"><AuthGuard userType="manager"><OSAccountingDashboard /></AuthGuard></Route>
-      <Route path="/manager/os-stock"><AuthGuard userType="manager"><OSStockManagement /></AuthGuard></Route>
-      <Route path="/manager/os-roles"><AuthGuard userType="manager" allowedRoles={["owner", "admin"]}><OSRolesManagement /></AuthGuard></Route>
-
       {/* Owner protected routes */}
       <Route path="/owner/dashboard"><AuthGuard userType="manager" allowedRoles={["owner", "admin"]}><OwnerDashboard /></AuthGuard></Route>
       <Route path="/executive"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><ExecutiveDashboard /></AuthGuard></Route>
@@ -349,13 +324,6 @@ function AppRouter() {
       <Route path="/admin/settings"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminSettings /></AdminLayout></AuthGuard></Route>
       <Route path="/admin/branches"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminBranches /></AdminLayout></AuthGuard></Route>
       <Route path="/admin/email"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><AdminEmail /></AdminLayout></AuthGuard></Route>
-
-      {/* Phase 5 - New Dashboard Pages */}
-      <Route path="/recipes/management"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><RecipesManagement /></AuthGuard></Route>
-      <Route path="/inventory/dashboard"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><InventorySmartDashboard /></AuthGuard></Route>
-      <Route path="/accounting/dashboard"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AccountingSmartDashboard /></AuthGuard></Route>
-      <Route path="/reports"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><ReportsPage /></AuthGuard></Route>
-      <Route path="/stock-movements"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><StockMovementsPage /></AuthGuard></Route>
 
       {/* ERP Accounting System */}
       <Route path="/erp/accounting"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><ErpAccountingPage /></AuthGuard></Route>
