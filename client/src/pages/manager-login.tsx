@@ -17,6 +17,22 @@ export default function ManagerLogin() {
   const [error, setError] = useState("");
   const tc = useTranslate();
 
+  // Auto-redirect if already logged in
+  useState(() => {
+    const stored = localStorage.getItem("currentEmployee");
+    if (stored) {
+      try {
+        const emp = JSON.parse(stored);
+        const managerRoles = ["admin", "owner", "manager", "branch_manager"];
+        if (managerRoles.includes(emp.role)) {
+          if (emp.role === "admin") setLocation("/admin/dashboard");
+          else if (emp.role === "owner") setLocation("/owner/dashboard");
+          else setLocation("/manager/dashboard");
+        }
+      } catch {}
+    }
+  });
+
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
       const response = await fetch("/api/employees/login", {

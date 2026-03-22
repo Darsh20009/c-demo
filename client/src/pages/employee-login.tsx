@@ -12,7 +12,26 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import { useTranslate } from "@/lib/useTranslate";
 
+function useAutoRedirectIfLoggedIn() {
+  const [, setLocation] = useLocation();
+  useState(() => {
+    const stored = localStorage.getItem("currentEmployee");
+    if (stored) {
+      try {
+        const emp = JSON.parse(stored);
+        if (emp?.role) {
+          if (emp.role === "admin") setLocation("/admin/dashboard");
+          else if (emp.role === "owner") setLocation("/owner/dashboard");
+          else if (emp.role === "manager" || emp.role === "branch_manager") setLocation("/manager/dashboard");
+          else setLocation("/employee/dashboard");
+        }
+      } catch {}
+    }
+  });
+}
+
 export default function EmployeeLogin() {
+  useAutoRedirectIfLoggedIn();
   const [location, setLocation] = useLocation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
