@@ -219,6 +219,7 @@ export default function ManagerEmployees() {
  shiftEndTime: shiftEndTime || undefined,
  workDays: workDaysData.length > 0 ? workDaysData : undefined,
  deviceBalance: parseInt(formData.get("deviceBalance") as string) || 0,
+ salary: parseFloat(formData.get("salary") as string) || 0,
  commissionPercentage: parseFloat(formData.get("commissionPercentage") as string) || 0,
  imageUrl: uploadedImageUrl || undefined,
  };
@@ -244,6 +245,7 @@ export default function ManagerEmployees() {
  shiftEndTime: formData.get("shiftEndTime") as string || undefined,
  workDays: workDaysData.length > 0 ? workDaysData : undefined,
  deviceBalance: parseInt(formData.get("deviceBalance") as string) || 0,
+ salary: parseFloat(formData.get("salary") as string) || 0,
  commissionPercentage: parseFloat(formData.get("commissionPercentage") as string) || 0,
  imageUrl: editUploadedImageUrl || editingEmployee.imageUrl || undefined,
  };
@@ -582,7 +584,7 @@ export default function ManagerEmployees() {
  />
  </div>
  <div>
- <Label htmlFor="commissionPercentage" className="text-gray-300">نسبةالعمولة(%)</Label>
+ <Label htmlFor="commissionPercentage" className="text-gray-300">نسبة العمولة (%)</Label>
  <Input
  id="commissionPercentage"
  name="commissionPercentage"
@@ -593,6 +595,20 @@ export default function ManagerEmployees() {
  defaultValue="0"
  className="bg-[#1a1410] border-primary/30 text-white"
  data-testid="input-commission"
+ />
+ </div>
+ <div>
+ <Label htmlFor="salary" className="text-gray-300">الراتب الأساسي (ريال)</Label>
+ <Input
+ id="salary"
+ name="salary"
+ type="number"
+ step="1"
+ min="0"
+ defaultValue="0"
+ className="bg-[#1a1410] border-primary/30 text-white"
+ data-testid="input-salary"
+ placeholder="0"
  />
  </div>
  </div>
@@ -740,6 +756,13 @@ export default function ManagerEmployees() {
  <div className="flex items-center gap-2 text-gray-300">
  <Clock className="w-4 h-4 text-accent" />
  <span className="text-sm">{employee.shiftTime}</span>
+ </div>
+ )}
+
+ {(employee as any).salary !== undefined && (employee as any).salary > 0 && (
+ <div className="flex items-center gap-2 text-gray-300">
+ <span className="text-accent text-xs font-bold">ر.س</span>
+ <span className="text-sm">الراتب: {(employee as any).salary.toLocaleString()} ريال</span>
  </div>
  )}
 
@@ -919,7 +942,7 @@ export default function ManagerEmployees() {
  />
  </div>
  <div>
- <Label htmlFor="edit-commissionPercentage" className="text-gray-300">نسبةالعمولة(%)</Label>
+ <Label htmlFor="edit-commissionPercentage" className="text-gray-300">نسبة العمولة (%)</Label>
  <Input
  id="edit-commissionPercentage"
  name="commissionPercentage"
@@ -930,6 +953,20 @@ export default function ManagerEmployees() {
  defaultValue={editingEmployee.commissionPercentage || 0}
  className="bg-[#1a1410] border-primary/30 text-white"
  data-testid="input-edit-commission"
+ />
+ </div>
+ <div>
+ <Label htmlFor="edit-salary" className="text-gray-300">الراتب الأساسي (ريال)</Label>
+ <Input
+ id="edit-salary"
+ name="salary"
+ type="number"
+ step="1"
+ min="0"
+ defaultValue={(editingEmployee as any).salary || 0}
+ className="bg-[#1a1410] border-primary/30 text-white"
+ data-testid="input-edit-salary"
+ placeholder="0"
  />
  </div>
  </div>

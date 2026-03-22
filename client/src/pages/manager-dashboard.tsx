@@ -133,7 +133,8 @@ export default function ManagerDashboard() {
  const storedEmployee = localStorage.getItem("currentEmployee");
  if (storedEmployee) {
  const emp = JSON.parse(storedEmployee);
- if (emp.role !== "manager" && emp.role !== "admin") {
+ const managerRoles = ["manager", "admin", "owner", "branch_manager"];
+ if (!managerRoles.includes(emp.role)) {
  localStorage.removeItem("currentEmployee");
  setLocation("/employee/dashboard");
  return;
@@ -160,7 +161,7 @@ export default function ManagerDashboard() {
  checkSession();
  }, [setLocation]);
 
- const isAdmin = manager?.role === "admin";
+ const isAdmin = manager?.role === "admin" || manager?.role === "owner";
  const managerBranchId = manager?.branchId;
 
  const searchBranchLocations = async (query: string) => {
@@ -745,7 +746,17 @@ export default function ManagerDashboard() {
            <Menu className="w-5 h-5" />
          </button>
          <div className="hidden sm:block">
-           <div className="text-white font-bold text-sm">{greeting}، <span className="text-[#2D9B6E]">{manager.fullName}</span></div>
+           <div className="flex items-center gap-2">
+             <div className="text-white font-bold text-sm">{greeting}، <span className="text-[#2D9B6E]">{manager.fullName}</span></div>
+             <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium border ${
+               manager.role === 'admin' ? 'bg-purple-500/15 text-purple-400 border-purple-500/30' :
+               manager.role === 'owner' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' :
+               manager.role === 'branch_manager' ? 'bg-blue-500/15 text-blue-400 border-blue-500/30' :
+               'bg-[#2D9B6E]/15 text-[#2D9B6E] border-[#2D9B6E]/30'
+             }`}>
+               {manager.role === 'admin' ? 'مدير عام' : manager.role === 'owner' ? 'مالك' : manager.role === 'branch_manager' ? 'مدير فرع' : 'مدير'}
+             </span>
+           </div>
            <div className="text-[#555] text-xs">{today}</div>
          </div>
        </div>

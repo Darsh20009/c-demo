@@ -153,8 +153,8 @@ const SOUND_CONFIGS: Record<NotificationSoundType, BeepConfig[]> = {
     { freqs: [1046, 1318], duration: 0.4, type: 'sine', volume: 1.0 },
   ],
   cashierOrder: [
-    { freqs: [660], duration: 0.15, type: 'sine', volume: 0.85 },
-    { freqs: [880], duration: 0.25, type: 'sine', volume: 0.85 },
+    { freqs: [1318], duration: 0.55, type: 'sine', volume: 0.9 },
+    { freqs: [1318], duration: 0.55, type: 'sine', volume: 0.9 },
   ],
   statusChange: [
     { freqs: [440], duration: 0.3, type: 'sine', volume: 0.7 },
@@ -205,7 +205,13 @@ async function playBeepFallback(type: NotificationSoundType, volume: number): Pr
 
 // ─── Core play function ───────────────────────────────────────────────────────
 
-async function playSound(volume: number): Promise<void> {
+async function playSound(type: NotificationSoundType, volume: number): Promise<void> {
+  // POS cashier orders always use the ting-ting Web Audio bell sound
+  if (type === 'cashierOrder') {
+    await playBeepFallback('cashierOrder', volume);
+    return;
+  }
+
   const audio = getNotificationAudio();
 
   if (audio && !audioLoadFailed) {
@@ -220,7 +226,7 @@ async function playSound(volume: number): Promise<void> {
   }
 
   // Web Audio API fallback
-  await playBeepFallback('newOrder', volume);
+  await playBeepFallback(type, volume);
 }
 
 // ─── Test sound (bypasses dedup, forces unlock) ───────────────────────────────
@@ -228,7 +234,7 @@ async function playSound(volume: number): Promise<void> {
 export async function testSound(type: NotificationSoundType = 'success', volume = 0.8): Promise<boolean> {
   try {
     await unlockAudio();
-    await playSound(volume);
+    await playSound(type, volume);
     return true;
   } catch {
     return false;
@@ -243,7 +249,7 @@ export async function playNotificationSound(
 ): Promise<void> {
   if (isDuplicate(type)) return;
   markPlayed(type);
-  await playSound(volume);
+  await playSound(type, volume);
 }
 
 export async function playNotificationSequence(
