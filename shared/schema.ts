@@ -1259,6 +1259,11 @@ OrderSchema.index({ tenantId: 1, branchId: 1, status: 1 });
 OrderSchema.index({ tenantId: 1, createdAt: -1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
 OrderSchema.index({ orderNumber: 1, tenantId: 1 });
+OrderSchema.index({ customerId: 1, createdAt: -1 });
+OrderSchema.index({ customerPhone: 1, tenantId: 1 });
+OrderSchema.index({ tenantId: 1, branchId: 1, createdAt: -1 });
+OrderSchema.index({ tenantId: 1, paymentStatus: 1, createdAt: -1 });
+OrderSchema.index({ tableId: 1, status: 1 });
 
 export const OrderModel = mongoose.model<IOrder>("Order", OrderSchema);
 
@@ -2401,6 +2406,10 @@ const EmployeeSchema = new Schema<IEmployee>({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
+
+EmployeeSchema.index({ tenantId: 1, role: 1 });
+EmployeeSchema.index({ tenantId: 1, branchId: 1, isActive: 1 });
+EmployeeSchema.index({ tenantId: 1, isActive: 1 });
 
 export const EmployeeModel = mongoose.model<IEmployee>("Employee", EmployeeSchema);
 

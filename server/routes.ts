@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { cache, cacheKey, CACHE_TTL } from "./cache";
 import { 
   insertOrderSchema, 
   insertCartItemSchema, 
@@ -1002,7 +1003,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/business-config", async (req, res) => {
     try {
       const tenantId = getTenantIdFromRequest(req) || "demo-tenant";
-      let config = await BusinessConfigModel.findOne({ tenantId });
+      const ck = cacheKey('biz-config', tenantId);
+      let config = cache.get<any>(ck);
+      if (!config) {
+        config = await BusinessConfigModel.findOne({ tenantId });
+        if (config) cache.set(ck, config, CACHE_TTL.BUSINESS_CONFIG);
+      }
       
       if (!config) {
         config = await BusinessConfigModel.create({
@@ -1148,8 +1154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       config.updatedAt = new Date();
       await config.save();
-      
-      // console.log(`[CONFIG] Successfully updated business config for tenant: ${tenantId}`);
+      cache.invalidateKey(cacheKey('biz-config', tenantId));
       res.json(serializeDoc(config));
     } catch (error) {
       console.error("[CONFIG] Error updating business config:", error);
@@ -8962,24 +8967,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userRole = (req as any).employee?.role;
       const userBranchId = (req as any).employee?.branchId;
 
+      const ck = cacheKey('branches', tenantId, userRole, userBranchId);
+      const cached = cache.get<any[]>(ck);
+      if (cached) return res.json(cached);
+
       let query: any = {};
-      
-      // For admin/owner, show all; for managers, show only their branch
       if (userRole === "manager" && userBranchId) {
         query = { $or: [{ id: userBranchId }, { _id: userBranchId }] };
       } else {
-        // Show all branches (admin can see all)
         query = { isActive: { $in: [1, true] } };
       }
 
       const branches = await BranchModel.find(query).lean();
-      
       const serialized = branches.map((b: any) => ({
         ...b,
         id: b.id || b._id?.toString(),
         _id: b._id?.toString()
       }));
-      
+      cache.set(ck, serialized, CACHE_TTL.BRANCHES);
       res.json(serialized);
     } catch (error) {
       console.error("Error fetching branches:", error);
@@ -14100,8 +14105,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { MenuCategoryModel } = await import("@shared/schema");
       const tenantId = getTenantIdFromRequest(req) || "demo-tenant";
-      const branchId = req.query.branchId as string;
-      
+      const branchId = (req.query.branchId as string) || 'all';
+      const ck = cacheKey('menu-cats', tenantId, branchId);
+      const cached = cache.get<any[]>(ck);
+      if (cached) return res.json(cached);
+
       const query: any = { 
         isActive: 1,
         tenantId 
@@ -14115,8 +14123,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ];
       }
       
-      const categories = await MenuCategoryModel.find(query).sort({ orderIndex: 1, createdAt: 1 });
-      res.json(categories.map(c => ({ ...c.toObject(), id: c.id })));
+      const categories = await MenuCategoryModel.find(query).sort({ orderIndex: 1, createdAt: 1 }).lean();
+      const result = categories.map((c: any) => ({ ...c, id: c.id || c._id?.toString() }));
+      cache.set(ck, result, CACHE_TTL.CATEGORIES);
+      res.json(result);
     } catch (error) {
       res.status(500).json({ error: "فشل في جلب الأقسام" });
     }
@@ -14162,7 +14172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const category = new MenuCategoryModel(categoryData);
       await category.save();
-      
+      cache.invalidate('menu-cats:' + tenantId);
       res.status(201).json({ ...category.toObject(), id: category.id });
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -14200,7 +14210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!category) {
         return res.status(404).json({ error: "القسم غير موجود" });
       }
-      
+      cache.invalidate('menu-cats:' + tenantId);
       res.json({ ...category.toObject(), id: category.id });
     } catch (error: any) {
       if (error.name === 'ZodError') {

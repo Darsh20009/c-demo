@@ -3,6 +3,7 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import compression from "compression";
 import path from "path";
+import { cache } from "./cache";
 import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import { registerRoutes } from "./routes";
@@ -40,6 +41,11 @@ async function connectDatabase() {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
     heartbeatFrequencyMS: 10000,
+    maxPoolSize: 50,
+    minPoolSize: 10,
+    connectTimeoutMS: 10000,
+    maxIdleTimeMS: 30000,
+    compressors: ['zlib'] as any,
   };
 
   try {
@@ -323,7 +329,11 @@ app.get('/health', (_req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     database: isDbConnected ? 'connected' : 'disconnected',
-    readyState: mongoose.connection.readyState
+    readyState: mongoose.connection.readyState,
+    pool: { max: 50, min: 10 },
+    cache: cache.stats(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
   });
 });
 
