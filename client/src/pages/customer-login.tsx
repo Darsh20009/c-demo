@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, User, Phone, Zap, Star, ChevronRight } from "lucide-react";
+import { User, Phone, Zap, Star, ChevronRight } from "lucide-react";
+import qiroxLogoCustomer from "@assets/qirox-logo-customer.png";
 import { customerStorage } from "@/lib/customer-storage";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslate } from "@/lib/useTranslate";
@@ -50,9 +51,9 @@ export default function CustomerLogin() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background flex flex-col items-center justify-center p-4" dir="rtl">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Coffee className="w-12 h-12 text-accent" />
-            <h1 className="text-4xl font-bold font-playfair text-foreground">QIROX Cafe</h1>
+          <div className="flex flex-col items-center gap-2 mb-2">
+            <img src={qiroxLogoCustomer} alt="QIROX Cafe" className="h-16 object-contain" />
+            <h1 className="text-3xl font-bold font-playfair text-foreground">QIROX Cafe</h1>
           </div>
           <p className="text-muted-foreground text-lg font-cairo">{tc("لكل لحظة قهوة ، لحظة نجاح", "For every coffee moment, a moment of success")}</p>
         </div>

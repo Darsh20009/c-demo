@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/phone-input";
 import { useToast } from "@/hooks/use-toast";
-import { Coffee, UserPlus, Eye, EyeOff } from "lucide-react";
+import { UserPlus, Eye, EyeOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslate } from "@/lib/useTranslate";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 
 export default function EmployeeActivation() {
   const [, setLocation] = useLocation();
@@ -70,17 +71,15 @@ export default function EmployeeActivation() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-gradient-to-br from-background to-background border-primary/20">
-        <CardHeader className="space-y-4">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-              <Coffee className="w-8 h-8 text-white" />
-            </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
+      <Card className="w-full max-w-md border border-border bg-card shadow-xl">
+        <CardHeader className="space-y-3 text-center pb-4">
+          <div className="flex justify-center mb-1">
+            <img src={qiroxLogoStaff} alt="QIROX" className="h-12 object-contain" />
           </div>
           <div className="text-center">
-            <CardTitle className="text-2xl font-bold text-accent">{tc("تفعيل حساب موظف جديد", "Activate New Employee Account")}</CardTitle>
-            <CardDescription className="text-gray-400 mt-2">
+            <CardTitle className="text-2xl font-bold text-foreground">{tc("تفعيل حساب موظف جديد", "Activate New Employee Account")}</CardTitle>
+            <CardDescription className="text-muted-foreground mt-2">
               {tc("أدخل بياناتك التي سجلها المدير لإنشاء كلمة المرور الخاصة بك", "Enter your details registered by the manager to create your password")}
             </CardDescription>
           </div>
@@ -88,7 +87,7 @@ export default function EmployeeActivation() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="fullName" className="text-gray-300">
+              <Label htmlFor="fullName" className="text-foreground">
                 {tc("الاسم الكامل", "Full Name")}
               </Label>
               <Input
@@ -97,14 +96,14 @@ export default function EmployeeActivation() {
                 onChange={(e) => setFullName(e.target.value)}
                 required
                 placeholder={tc("أدخل اسمك الكامل كما سجله المدير", "Enter your full name as registered by the manager")}
-                className="bg-[#1a1410] border-primary/30 text-white placeholder:text-gray-500"
+                className="bg-secondary border-border focus:border-primary focus:ring-primary/30"
                 data-testid="input-fullname"
               />
-              <p className="text-xs text-gray-400 mt-1">{tc("يجب أن يطابق الاسم المسجل لدى المدير", "Must match the name registered by the manager")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{tc("يجب أن يطابق الاسم المسجل لدى المدير", "Must match the name registered by the manager")}</p>
             </div>
 
             <div>
-              <Label htmlFor="phone" className="text-gray-300">
+              <Label htmlFor="phone" className="text-foreground">
                 {tc("رقم الهاتف", "Phone Number")}
               </Label>
               <PhoneInput
@@ -115,12 +114,12 @@ export default function EmployeeActivation() {
                 data-testid="input-phone"
                 required
               />
-              <p className="text-xs text-gray-400 mt-1">{tc("رقم الهاتف المسجل لدى المدير", "Phone number registered by the manager")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{tc("رقم الهاتف المسجل لدى المدير", "Phone number registered by the manager")}</p>
             </div>
 
-            <div className="border-t border-primary/20 pt-4">
+            <div className="border-t border-border pt-4">
               <div className="mb-4">
-                <Label htmlFor="password" className="text-gray-300">
+                <Label htmlFor="password" className="text-foreground">
                   {tc("كلمة المرور الجديدة", "New Password")}
                 </Label>
                 <div className="relative">
@@ -132,13 +131,13 @@ export default function EmployeeActivation() {
                     required
                     minLength={4}
                     placeholder={tc("أدخل كلمة مرور قوية", "Enter a strong password")}
-                    className="bg-[#1a1410] border-primary/30 text-white placeholder:text-gray-500 pl-10"
+                    className="bg-secondary border-border focus:border-primary focus:ring-primary/30 pl-10"
                     data-testid="input-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute left-3 top-3 text-accent hover:text-accent"
+                    className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -146,7 +145,7 @@ export default function EmployeeActivation() {
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword" className="text-gray-300">
+                <Label htmlFor="confirmPassword" className="text-foreground">
                   {tc("تأكيد كلمة المرور", "Confirm Password")}
                 </Label>
                 <div className="relative">
@@ -158,13 +157,13 @@ export default function EmployeeActivation() {
                     required
                     minLength={4}
                     placeholder={tc("أعد إدخال كلمة المرور", "Re-enter password")}
-                    className="bg-[#1a1410] border-primary/30 text-white placeholder:text-gray-500 pl-10"
+                    className="bg-secondary border-border focus:border-primary focus:ring-primary/30 pl-10"
                     data-testid="input-confirm-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute left-3 top-3 text-accent hover:text-accent"
+                    className="absolute left-3 top-3 text-muted-foreground hover:text-foreground"
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -172,12 +171,12 @@ export default function EmployeeActivation() {
               </div>
             </div>
 
-            <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
+            <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
               <div className="flex items-start gap-2">
-                <UserPlus className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-accent/90">
+                <UserPlus className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-foreground">
                   <p className="font-semibold mb-1">{tc("تعليمات مهمة:", "Important Instructions:")}</p>
-                  <ul className="list-disc list-inside space-y-1">
+                  <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                     <li>{tc("تأكد من إدخال رقم الهاتف والاسم المسجلين لدى المدير بدقة", "Enter the phone number and name registered by the manager accurately")}</li>
                     <li>{tc("اختر كلمة مرور قوية لا تقل عن 4 أحرف", "Choose a strong password of at least 4 characters")}</li>
                     <li>{tc("احفظ كلمة المرور في مكان آمن", "Keep your password in a safe place")}</li>
@@ -189,7 +188,7 @@ export default function EmployeeActivation() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-full"
               data-testid="button-activate"
             >
               {isLoading ? tc("جاري التفعيل...", "Activating...") : tc("تفعيل الحساب", "Activate Account")}
@@ -200,7 +199,7 @@ export default function EmployeeActivation() {
                 type="button"
                 variant="ghost"
                 onClick={() => setLocation("/employee/login")}
-                className="text-accent hover:text-accent"
+                className="text-muted-foreground hover:text-foreground"
                 data-testid="button-back-to-login"
               >
                 {tc("العودة إلى تسجيل الدخول", "Back to Login")}
