@@ -25,7 +25,6 @@ import { useLocation } from "wouter";
 const COLORS = ['#2D9B6E', '#f97316', '#3b82f6', '#a855f7', '#ec4899', '#eab308', '#14b8a6', '#ef4444'];
 
 function formatCurrency(amount: number) {
-  const tc = useTranslate();
   return `${amount.toFixed(2)} ر.س`;
 }
 
