@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Coffee, ArrowRight, ArrowLeft, CheckCircle, XCircle, Plus, Edit2, Trash2, Sparkles, Upload, ImageIcon, X, FlaskConical, AlertTriangle, Library } from "lucide-react";
 import { ImageLibraryModal } from "@/components/ImageLibraryModal";
+import { AIMenuAssistant } from "@/components/AIMenuAssistant";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getCoffeeImage } from "@/lib/coffee-data-clean";
@@ -102,6 +103,14 @@ export default function EmployeeMenuManagement() {
  const [addonImages, setAddonImages] = useState<{[key: string]: string}>({});
  const [addonFileInputs, setAddonFileInputs] = useState<{[key: string]: HTMLInputElement | null}>({});
  const [addonFreeStatus, setAddonFreeStatus] = useState<{[key: string]: boolean}>({});
+
+// AI Assistant controlled state for add form
+const [aiAddNameAr, setAiAddNameAr] = useState("");
+const [aiAddNameEn, setAiAddNameEn] = useState("");
+const [aiAddDescription, setAiAddDescription] = useState("");
+// AI Assistant controlled state for edit form
+const [aiEditNameEn, setAiEditNameEn] = useState("");
+const [aiEditDescription, setAiEditDescription] = useState("");
 
  useEffect(() => {
  const storedEmployee = localStorage.getItem("currentEmployee");
@@ -668,6 +677,8 @@ export default function EmployeeMenuManagement() {
  setEditableSizes(item.availableSizes || []);
  setEditableAddons(item.addons || []);
 setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : []));
+ setAiEditNameEn(item.nameEn || "");
+ setAiEditDescription(item.description || "");
  setIsEditDialogOpen(true);
  };
 
@@ -802,16 +813,32 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  name="nameAr"
  required
  defaultValue={step1Data?.nameAr || ""}
+ onChange={(e) => setAiAddNameAr(e.target.value)}
  className="bg-[#1a1410] border-primary/30 text-white"
  data-testid="input-name-ar"
  />
  </div>
  <div>
- <Label htmlFor="nameEn" className="text-gray-300">الاسم بالإنجليزية</Label>
+ <Label htmlFor="nameEn" className="text-gray-300">
+   <span className="flex items-center justify-between">
+     <span>الاسم بالإنجليزية</span>
+     <AIMenuAssistant
+       nameAr={aiAddNameAr || step1Data?.nameAr || ""}
+       nameEn={aiAddNameEn}
+       category={selectedCategory}
+       existingDescription={aiAddDescription}
+       onInsertNameEn={(name) => setAiAddNameEn(name)}
+       onInsertDescription={(desc) => setAiAddDescription(desc)}
+       onInsertAddons={(addons) => setAddEditableAddons(prev => [...prev, ...addons.map(a => ({ ...a, imageUrl: '', category: 'other', section: '' }))])}
+       compact
+     />
+   </span>
+ </Label>
  <Input
  id="nameEn"
  name="nameEn"
- defaultValue={step1Data?.nameEn || ""}
+ value={aiAddNameEn}
+ onChange={(e) => setAiAddNameEn(e.target.value)}
  className="bg-[#1a1410] border-primary/30 text-white"
  data-testid="input-name-en"
  />
@@ -819,13 +846,28 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  </div>
 
  <div>
- <Label htmlFor="description" className="text-gray-300">الوصف *</Label>
+ <Label htmlFor="description" className="text-gray-300">
+   <span className="flex items-center justify-between mb-1">
+     <span>الوصف *</span>
+     <AIMenuAssistant
+       nameAr={aiAddNameAr || step1Data?.nameAr || ""}
+       nameEn={aiAddNameEn}
+       category={selectedCategory}
+       existingDescription={aiAddDescription}
+       onInsertDescription={(desc) => setAiAddDescription(desc)}
+       onInsertNameEn={(name) => setAiAddNameEn(name)}
+       onInsertAddons={(addons) => setAddEditableAddons(prev => [...prev, ...addons.map(a => ({ ...a, imageUrl: '', category: 'other', section: '' }))])}
+       compact
+     />
+   </span>
+ </Label>
  <Textarea
  id="description"
  name="description"
  required
- defaultValue={step1Data?.description || ""}
- className="bg-[#1a1410] border-primary/30 text-white"
+ value={aiAddDescription}
+ onChange={(e) => setAiAddDescription(e.target.value)}
+ className="bg-[#1a1410] border-primary/30 text-white min-h-[80px]"
  data-testid="input-description"
  />
  </div>
@@ -1022,7 +1064,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  type="button"
  variant="outline"
- onClick={() => { setIsAddDialogOpen(false); setAddImageUrls([]); setAddEditableAddons([]); setSelectedIngredients([]); setRecipeItems([]); setSelectedBranches([]); setAddStep(1); setStep1Data(null); setSelectedCategory("hot"); setSelectedCoffeeStrength("classic"); }}
+ onClick={() => { setIsAddDialogOpen(false); setAddImageUrls([]); setAddEditableAddons([]); setSelectedIngredients([]); setRecipeItems([]); setSelectedBranches([]); setAddStep(1); setStep1Data(null); setSelectedCategory("hot"); setSelectedCoffeeStrength("classic"); setAiAddNameAr(""); setAiAddNameEn(""); setAiAddDescription(""); }}
  className="border-gray-600 text-gray-300"
  data-testid="button-cancel"
  >
@@ -1465,11 +1507,26 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  />
  </div>
  <div>
- <Label htmlFor="edit-nameEn" className="text-gray-300">الاسم بالإنجليزية</Label>
+ <Label htmlFor="edit-nameEn" className="text-gray-300">
+   <span className="flex items-center justify-between">
+     <span>الاسم بالإنجليزية</span>
+     <AIMenuAssistant
+       nameAr={editingItem.nameAr}
+       nameEn={aiEditNameEn}
+       category={editingItem.category}
+       existingDescription={aiEditDescription}
+       onInsertNameEn={(name) => setAiEditNameEn(name)}
+       onInsertDescription={(desc) => setAiEditDescription(desc)}
+       onInsertAddons={(addons) => setEditableAddons(prev => [...prev, ...addons.map(a => ({ ...a, imageUrl: '', category: 'other', section: '' }))])}
+       compact
+     />
+   </span>
+ </Label>
  <Input
  id="edit-nameEn"
  name="nameEn"
- defaultValue={editingItem.nameEn}
+ value={aiEditNameEn}
+ onChange={(e) => setAiEditNameEn(e.target.value)}
  className="bg-[#1a1410] border-primary/30 text-white"
  data-testid="input-edit-name-en"
  />
@@ -1477,13 +1534,28 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  </div>
 
  <div>
- <Label htmlFor="edit-description" className="text-gray-300">الوصف *</Label>
+ <Label htmlFor="edit-description" className="text-gray-300">
+   <span className="flex items-center justify-between mb-1">
+     <span>الوصف *</span>
+     <AIMenuAssistant
+       nameAr={editingItem.nameAr}
+       nameEn={aiEditNameEn}
+       category={editingItem.category}
+       existingDescription={aiEditDescription}
+       onInsertDescription={(desc) => setAiEditDescription(desc)}
+       onInsertNameEn={(name) => setAiEditNameEn(name)}
+       onInsertAddons={(addons) => setEditableAddons(prev => [...prev, ...addons.map(a => ({ ...a, imageUrl: '', category: 'other', section: '' }))])}
+       compact
+     />
+   </span>
+ </Label>
  <Textarea
  id="edit-description"
  name="description"
- defaultValue={editingItem.description}
+ value={aiEditDescription}
+ onChange={(e) => setAiEditDescription(e.target.value)}
  required
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-[#1a1410] border-primary/30 text-white min-h-[80px]"
  data-testid="input-edit-description"
  />
  </div>

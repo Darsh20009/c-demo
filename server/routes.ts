@@ -16431,6 +16431,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // AI MENU ASSISTANT  (OpenRouter / OpenAI-compatible)
+  // ─────────────────────────────────────────────────────────────────────────
+  app.post("/api/ai/menu-assist", async (req, res) => {
+    try {
+      const { nameAr, nameEn, category, task, existingDescription, existingIngredients } = req.body;
+
+      if (!nameAr && !nameEn) {
+        return res.status(400).json({ error: "يرجى إدخال اسم المنتج أولاً" });
+      }
+
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ error: "مفتاح الذكاء الاصطناعي غير مضبوط" });
+      }
+
+      const categoryLabels: Record<string, string> = {
+        hot: "مشروب ساخن / hot beverage",
+        cold: "مشروب بارد / cold beverage",
+        desserts: "حلويات وكيك / desserts & cakes",
+        bakery: "مخبوزات / bakery",
+        sandwiches: "ساندوتشات / sandwiches",
+        specialty: "مشروب متخصص / specialty drink",
+      };
+      const catLabel = categoryLabels[category] || category || "منتج كافيه";
+
+      const systemPrompt = `أنت خبير تسويق إبداعي متخصص في صناعة القهوة والمقاهي العالمية من مستوى Starbucks وBlue Bottle وPeet's Coffee.
+مهمتك توليد محتوى تسويقي إبداعي، شهي، وجذاب لمنيو المقاهي.
+يجب أن يكون المحتوى:
+- شاعرياً وجذاباً يستفز حواس القارئ
+- يستخدم مصطلحات قهوة عالمية دقيقة
+- مثالي للعرض في قائمة طعام راقية
+- يذكر النكهات، الأحاسيس، الرائحة عند الاقتضاء
+- باللغتين العربية والإنجليزية حسب المطلوب`;
+
+      const tasks: Record<string, string> = {
+        description_ar: `اكتب وصفاً إبداعياً وشهياً باللغة العربية الفصيحة للمنتج التالي:
+الاسم: ${nameAr}${nameEn ? ` / ${nameEn}` : ""}
+النوع: ${catLabel}
+${existingDescription ? `الوصف الحالي: ${existingDescription}` : ""}
+
+الوصف يجب أن يكون من 2-3 جمل، يصف النكهة والمكونات الرئيسية والإحساس عند تناوله. استخدم لغة راقية وشاعرية.
+أعطني الوصف مباشرة بدون مقدمات أو شرح.`,
+
+        description_en: `Write a creative, appetizing description in English for:
+Name: ${nameEn || nameAr}
+Type: ${catLabel}
+${existingDescription ? `Current description: ${existingDescription}` : ""}
+
+Write 2-3 poetic, sensory sentences describing the flavor, texture, aroma, and experience. Use premium café language like Starbucks/Blue Bottle.
+Return only the description, no intro or explanation.`,
+
+        description_both: `اكتب وصفاً مزدوجاً إبداعياً (عربي وإنجليزي) للمنتج التالي:
+الاسم: ${nameAr}${nameEn ? ` / ${nameEn}` : ""}
+النوع: ${catLabel}
+
+أعطني:
+🇸🇦 الوصف العربي: [وصف شاعري راقي 2-3 جمل]
+🇬🇧 English: [creative 2-3 sentences poetic description]
+
+لا تضف مقدمات أو شرح إضافي.`,
+
+        name_en: `Suggest 3 creative English names for this Arabic café item:
+Arabic name: ${nameAr}
+Type: ${catLabel}
+
+Requirements: Premium café naming style, memorable, brandable, can include poetic adjectives.
+Format: numbered list 1, 2, 3 — names only, no explanation.`,
+
+        ingredients: `أنت طاهٍ متخصص في صناعة القهوة والمشروبات. اقترح قائمة المكونات المفصلة لتحضير هذا المنتج:
+المنتج: ${nameAr}${nameEn ? ` / ${nameEn}` : ""}
+النوع: ${catLabel}
+${existingIngredients ? `المكونات الحالية: ${existingIngredients}` : ""}
+
+قدم القائمة بهذا الشكل:
+• [اسم المكون] — [الكمية المقترحة] [الوحدة]
+
+اذكر كل المكونات الأساسية مع الكميات النموذجية لكوب واحد. كن دقيقاً ومفصلاً.`,
+
+        addons: `اقترح إضافات وخيارات تخصيص احترافية لهذا المنتج في مقهى راقٍ:
+المنتج: ${nameAr}${nameEn ? ` / ${nameEn}` : ""}
+النوع: ${catLabel}
+
+قدم 5-8 إضافات متنوعة بهذا الشكل:
+• [اسم الإضافة] — [السعر المقترح بالريال]
+
+تشمل: الأحجام المختلفة، نوع الحليب، النكهات الإضافية، الإضافات الخاصة.`,
+
+        flavor_profile: `صِف ملف النكهة والحواس الكامل لهذا المنتج بأسلوب التقييم المهني:
+المنتج: ${nameAr}${nameEn ? ` / ${nameEn}` : ""}
+النوع: ${catLabel}
+
+اكتب بهذا الشكل:
+☕ النكهة الرئيسية: ...
+🌸 الرائحة: ...  
+🎨 اللون والمظهر: ...
+✨ الإحساس في الفم: ...
+💡 مقترح التقديم: ...
+
+استخدم لغة تذوق احترافية.`,
+      };
+
+      const userPrompt = tasks[task] || tasks.description_ar;
+
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://qirox.cafe",
+          "X-Title": "QIROX Café AI Assistant",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-flash-1.5",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          max_tokens: 600,
+          temperature: 0.85,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("OpenRouter error:", errText);
+        return res.status(500).json({ error: "فشل في الاتصال بالذكاء الاصطناعي" });
+      }
+
+      const data = await response.json() as any;
+      const content = data.choices?.[0]?.message?.content || "";
+      res.json({ result: content, task, model: data.model });
+    } catch (error: any) {
+      console.error("AI Menu Assist error:", error);
+      res.status(500).json({ error: error.message || "حدث خطأ في الذكاء الاصطناعي" });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // Setup WebSocket for real-time order updates
