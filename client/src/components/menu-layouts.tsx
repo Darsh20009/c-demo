@@ -35,6 +35,16 @@ const itemMotion = {
   exit: { opacity: 0, scale: 0.95 },
 };
 
+const DEFAULT_IMG = "/images/default-coffee.png";
+function imgClass(hasImage: boolean, extra = "") {
+  return hasImage
+    ? `w-full h-full object-cover ${extra}`
+    : `w-full h-full object-contain p-2 ${extra}`;
+}
+function imgWrapClass(hasImage: boolean, extra = "") {
+  return hasImage ? extra : `${extra} bg-[#1a1a1a]`;
+}
+
 export function ClassicMenuLayout({ items, onAddItem, lang, currency, favoriteIds, onToggleFavorite }: MenuLayoutProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -52,12 +62,12 @@ export function ClassicMenuLayout({ items, onAddItem, lang, currency, favoriteId
               onClick={() => onAddItem(item)}
               data-testid={`card-menu-${item.id}`}
             >
-              <div className="w-20 h-20 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
+              <div className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 ${imgWrapClass(!!item.imageUrl, "bg-secondary")}`}>
                 <img
-                  src={item.imageUrl || "/images/default-coffee.png"}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  src={item.imageUrl || DEFAULT_IMG}
+                  className={imgClass(!!item.imageUrl, "group-hover:scale-110 transition-transform duration-500")}
                   alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
                 />
               </div>
               <div className="flex-1 min-w-0 py-1">
@@ -110,12 +120,12 @@ export function CardsMenuLayout({ items, onAddItem, lang, currency, favoriteIds,
               onClick={() => onAddItem(item)}
               data-testid={`card-menu-${item.id}`}
             >
-              <div className="relative aspect-square overflow-hidden bg-secondary">
+              <div className={`relative aspect-square overflow-hidden ${imgWrapClass(!!item.imageUrl, "bg-secondary")}`}>
                 <img
-                  src={item.imageUrl || "/images/default-coffee.png"}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  src={item.imageUrl || DEFAULT_IMG}
+                  className={imgClass(!!item.imageUrl, "group-hover:scale-110 transition-transform duration-500")}
                   alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
                 />
                 {item.isBestSeller && (
                   <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
@@ -173,12 +183,12 @@ export function ListMenuLayout({ items, onAddItem, lang, currency, favoriteIds, 
               onClick={() => onAddItem(item)}
               data-testid={`card-menu-${item.id}`}
             >
-              <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
+              <div className={`w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 ${imgWrapClass(!!item.imageUrl, "bg-secondary")}`}>
                 <img
-                  src={item.imageUrl || "/images/default-coffee.png"}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  src={item.imageUrl || DEFAULT_IMG}
+                  className={imgClass(!!item.imageUrl, "group-hover:scale-105 transition-transform duration-300")}
                   alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-coffee.png"; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
                 />
               </div>
               <div className="flex-1 min-w-0">

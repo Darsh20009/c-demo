@@ -241,7 +241,7 @@ export default function MenuView() {
  className="w-full h-96 object-cover transition-all duration-700 group-hover:scale-105"
  data-testid="img-current-drink"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent"></div>
@@ -311,7 +311,7 @@ export default function MenuView() {
  className="w-80 h-80 object-cover rounded-full mx-auto group-hover:scale-105 transition-all duration-700"
  data-testid="img-showcase-drink"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  </div>
@@ -342,7 +342,7 @@ export default function MenuView() {
  alt={currentItem.nameAr}
  className="w-full h-96 object-cover transition-all duration-500 group-hover:scale-110"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent"></div>
@@ -385,7 +385,7 @@ export default function MenuView() {
  alt={currentItem.nameAr}
  className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
@@ -435,7 +435,7 @@ export default function MenuView() {
  alt={currentItem.nameAr}
  className="w-full h-80 object-cover transition-all duration-500 group-hover:scale-105"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent"></div>
@@ -510,7 +510,7 @@ export default function MenuView() {
  alt={currentItem.nameAr}
  className="w-full h-96 object-cover rounded-2xl transition-all duration-700 group-hover:scale-105"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  </div>
@@ -634,7 +634,7 @@ export default function MenuView() {
  alt={currentItem.nameAr}
  className="w-full h-32 md:h-64 object-cover"
  onError={(e) => {
- e.currentTarget.src = "/images/default-coffee.png";
+ e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a";
  }}
  />
  <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent"></div>
@@ -680,14 +680,14 @@ export default function MenuView() {
             {/* Spotlight Hero */}
             <div className="relative flex-1 flex items-center justify-center overflow-hidden bg-black/80">
               <div className="absolute inset-0 overflow-hidden">
-                <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt="" className="w-full h-full object-cover blur-xl scale-110 opacity-25" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt="" className="w-full h-full object-cover blur-xl scale-110 opacity-25" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
               </div>
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_70%_at_50%_40%,_transparent_30%,_black_100%)]" />
               <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12 px-6 py-14 max-w-5xl w-full">
                 <div className="relative shrink-0">
                   <div className="absolute inset-0 rounded-full bg-primary/40 blur-3xl scale-110 animate-pulse" />
                   <div className="relative w-60 h-60 rounded-full overflow-hidden border-4 border-primary/70 shadow-2xl shadow-primary/40 ring-8 ring-white/5">
-                    <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt={currentItem.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                    <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt={currentItem.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
                   </div>
                   <div className="absolute -top-3 -left-3 w-12 h-12 bg-primary rotate-45 shadow-lg shadow-primary/50 flex items-center justify-center">
                     <Star className="w-5 h-5 text-white -rotate-45 fill-white" />
@@ -717,7 +717,7 @@ export default function MenuView() {
                 </div>
                 {coffeeItems.map((item, idx) => (
                   <div key={item.id} onClick={() => setCurrentIndex(idx)} className={`relative shrink-0 w-24 h-24 rounded-lg overflow-hidden cursor-pointer border-2 transition-all duration-300 ${idx === currentIndex ? 'border-primary scale-110 shadow-lg shadow-primary/40' : 'border-white/10 opacity-50 hover:opacity-90'}`}>
-                    <img src={item.imageUrl || getCoffeeImage(item.id)} alt={item.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                    <img src={item.imageUrl || getCoffeeImage(item.id)} alt={item.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
                     <div className="absolute bottom-0 inset-x-0 bg-black/70 text-white text-center text-[9px] py-1 truncate px-1">{item.nameAr}</div>
                   </div>
                 ))}
@@ -734,7 +734,7 @@ export default function MenuView() {
           <div className="min-h-[85vh] px-4 md:px-6 flex flex-col gap-8">
             <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-primary/20 min-h-[480px] flex flex-col lg:flex-row">
               <div className="relative lg:w-[55%] min-h-[280px] overflow-hidden">
-                <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt={currentItem.nameAr} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt={currentItem.nameAr} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background lg:hidden" />
               </div>
               <div className="relative lg:w-[45%] flex flex-col justify-center p-8 bg-background/95 backdrop-blur-lg">
@@ -767,7 +767,7 @@ export default function MenuView() {
                 {coffeeItems.filter((_, i) => i !== currentIndex).slice(0, 8).map((item, idx) => (
                   <div key={item.id} onClick={() => setCurrentIndex(coffeeItems.indexOf(item))} className="group cursor-pointer">
                     <div className={`relative overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl ${idx % 3 === 0 ? 'rounded-3xl' : idx % 3 === 1 ? 'rounded-tr-3xl rounded-bl-3xl' : 'rounded-tl-3xl rounded-br-3xl'}`}>
-                      <img src={item.imageUrl || getCoffeeImage(item.id)} alt={item.nameAr} className="w-full h-36 object-cover group-hover:scale-105 transition-all duration-500" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                      <img src={item.imageUrl || getCoffeeImage(item.id)} alt={item.nameAr} className="w-full h-36 object-cover group-hover:scale-105 transition-all duration-500" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                       <div className="absolute bottom-0 inset-x-0 p-3">
                         <p className="text-white font-bold text-sm">{item.nameAr}</p>
@@ -802,13 +802,13 @@ export default function MenuView() {
                 <div className="relative">
                   <div className="absolute inset-0 blur-2xl bg-primary/30 scale-105" style={{clipPath: 'polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%)'}} />
                   <div className="relative w-64 h-72 overflow-hidden" style={{clipPath: 'polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%)'}}>
-                    <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt={currentItem.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                    <img src={currentItem.imageUrl || getCoffeeImage(currentItem.id)} alt={currentItem.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
                   </div>
                 </div>
                 <div className="flex gap-3 flex-wrap justify-center max-w-xs">
                   {coffeeItems.slice(0, 6).map((item, idx) => (
                     <div key={item.id} onClick={() => setCurrentIndex(idx)} className={`w-12 h-12 rounded-lg overflow-hidden cursor-pointer border transition-all duration-300 ${idx === currentIndex ? 'border-primary shadow-md shadow-primary/60 scale-110' : 'border-white/10 opacity-40 hover:opacity-80'}`}>
-                      <img src={item.imageUrl || getCoffeeImage(item.id)} alt={item.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; }} />
+                      <img src={item.imageUrl || getCoffeeImage(item.id)} alt={item.nameAr} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.src = "/images/default-coffee.png"; e.currentTarget.style.objectFit = "contain"; e.currentTarget.style.padding = "8px"; if (e.currentTarget.parentElement) e.currentTarget.parentElement.style.background = "#1a1a1a"; }} />
                     </div>
                   ))}
                 </div>

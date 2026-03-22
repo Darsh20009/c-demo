@@ -762,7 +762,7 @@ export default function TableMenuNew() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       alt={i18n.language === 'ar' ? item.nameAr : item.nameEn || item.nameAr}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/default-coffee.png";
+                        const img = e.target as HTMLImageElement; img.src = "/images/default-coffee.png"; img.style.objectFit = "contain"; img.style.padding = "8px"; if (img.parentElement) img.parentElement.style.background = "#1a1a1a";
                       }}
                     />
                   </div>
@@ -808,7 +808,7 @@ export default function TableMenuNew() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         alt={i18n.language === 'ar' ? item.nameAr : item.nameEn || item.nameAr}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = "/images/default-coffee.png";
+                          const img = e.target as HTMLImageElement; img.src = "/images/default-coffee.png"; img.style.objectFit = "contain"; img.style.padding = "8px"; if (img.parentElement) img.parentElement.style.background = "#1a1a1a";
                         }}
                       />
                     </div>
