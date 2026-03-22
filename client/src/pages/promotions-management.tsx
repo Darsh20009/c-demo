@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -28,13 +29,14 @@ interface PromoOffer {
 }
 
 function SarIcon() {
+  const tc = useTranslate();
   return <span className="font-arabic text-xs font-bold">ر.س</span>;
 }
 
 const offerTypeLabels: Record<string, { label: string; color: string; icon: any }> = {
-  bundle: { label: "باقة", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Package },
-  discount: { label: "خصم", color: "bg-primary/10 text-primary border-primary/20", icon: Percent },
-  bogo: { label: "اشتر واحد واحصل على واحد", color: "bg-purple-100 text-purple-700 border-purple-200", icon: ShoppingBag },
+  bundle: { label: tc("باقة", "Bundle"), color: "bg-blue-100 text-blue-700 border-blue-200", icon: Package },
+  discount: { label: tc("خصم", "Discount"), color: "bg-primary/10 text-primary border-primary/20", icon: Percent },
+  bogo: { label: tc("اشتر واحد واحصل على واحد", "Buy One Get One"), color: "bg-purple-100 text-purple-700 border-purple-200", icon: ShoppingBag },
 };
 
 const defaultForm = {
@@ -64,11 +66,11 @@ export default function PromotionsManagement() {
     mutationFn: async (data: any) => {
       if (editingId) {
         const res = await apiRequest("PUT", `/api/promo-offers/${editingId}`, data);
-        if (!res.ok) throw new Error("فشل تحديث العرض");
+        if (!res.ok) throw new Error(tc("فشل تحديث العرض", "Failed to update offer"));
         return res.json();
       } else {
         const res = await apiRequest("POST", `/api/promo-offers`, data);
-        if (!res.ok) throw new Error("فشل إنشاء العرض");
+        if (!res.ok) throw new Error(tc("فشل إنشاء العرض", "Failed to create offer"));
         return res.json();
       }
     },
@@ -78,29 +80,29 @@ export default function PromotionsManagement() {
       setShowDialog(false);
       setEditingId(null);
       setForm({ ...defaultForm });
-      toast({ title: editingId ? "تم التحديث" : "تم الإنشاء" });
+      toast({ title: editingId ? tc("تم التحديث", "Updated") : tc("تم الإنشاء", "Created") });
     },
-    onError: (err: any) => toast({ variant: "destructive", title: "خطأ", description: err.message }),
+    onError: (err: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: err.message }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await apiRequest("DELETE", `/api/promo-offers/${id}`);
-      if (!res.ok) throw new Error("فشل الحذف");
+      if (!res.ok) throw new Error(tc("فشل الحذف", "Failed to delete"));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/promo-offers"] });
       queryClient.invalidateQueries({ queryKey: ["/api/promo-offers"] });
       setDeleteId(null);
-      toast({ title: "تم الحذف" });
+      toast({ title: tc("تم الحذف", "Deleted") });
     },
-    onError: (err: any) => toast({ variant: "destructive", title: "خطأ", description: err.message }),
+    onError: (err: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: err.message }),
   });
 
   const toggleActive = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: number }) => {
       const res = await apiRequest("PUT", `/api/promo-offers/${id}`, { isActive });
-      if (!res.ok) throw new Error("فشل التحديث");
+      if (!res.ok) throw new Error(tc("فشل التحديث", "Failed to update"));
       return res.json();
     },
     onSuccess: () => {
@@ -132,8 +134,8 @@ export default function PromotionsManagement() {
   };
 
   const handleSubmit = () => {
-    if (!form.nameAr.trim()) return toast({ variant: "destructive", title: "يرجى إدخال اسم العرض" });
-    if (!form.originalPrice || !form.offerPrice) return toast({ variant: "destructive", title: "يرجى إدخال الأسعار" });
+    if (!form.nameAr.trim()) return toast({ variant: "destructive", title: tc("يرجى إدخال اسم العرض", "Please enter offer name") });
+    if (!form.originalPrice || !form.offerPrice) return toast({ variant: "destructive", title: tc("يرجى إدخال الأسعار", "Please enter prices") });
     saveMutation.mutate({
       nameAr: form.nameAr,
       nameEn: form.nameEn,
@@ -156,8 +158,8 @@ export default function PromotionsManagement() {
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-foreground">إدارة العروض الترويجية</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">باقات، خصومات، اشتر واحد واحصل على واحد</p>
+          <h1 className="text-2xl font-black text-foreground">{tc("إدارة العروض الترويجية", "Promotions Management")}</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">{tc("باقات، خصومات، اشتر واحد واحصل على واحد", "Bundles, discounts, buy one get one")}</p>
         </div>
         <Button onClick={openCreate} data-testid="button-create-offer">
           <Plus className="w-4 h-4 ml-2" /> عرض جديد
@@ -172,9 +174,9 @@ export default function PromotionsManagement() {
         <Card className="text-center py-16">
           <CardContent>
             <Tag className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-            <p className="text-lg font-semibold text-muted-foreground">لا توجد عروض بعد</p>
-            <p className="text-sm text-muted-foreground mt-1">أنشئ عرضك الأول الآن</p>
-            <Button className="mt-4" onClick={openCreate}>إضافة عرض</Button>
+            <p className="text-lg font-semibold text-muted-foreground">{tc("لا توجد عروض بعد", "No offers yet")}</p>
+            <p className="text-sm text-muted-foreground mt-1">{tc("أنشئ عرضك الأول الآن", "Create your first offer now")}</p>
+            <Button className="mt-4" onClick={openCreate}>{tc("إضافة عرض", "Add Offer")}</Button>
           </CardContent>
         </Card>
       ) : (
@@ -245,25 +247,25 @@ export default function PromotionsManagement() {
       <Dialog open={showDialog} onOpenChange={v => { setShowDialog(v); if (!v) { setEditingId(null); setForm({ ...defaultForm }); } }}>
         <DialogContent className="max-w-lg" dir="rtl">
           <DialogHeader>
-            <DialogTitle>{editingId ? "تعديل العرض" : "إنشاء عرض جديد"}</DialogTitle>
+            <DialogTitle>{editingId ? tc("تعديل العرض", "Edit Offer") : tc("إنشاء عرض جديد", "Create New Offer")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>اسم العرض (عربي) *</Label>
+                <Label>{tc("اسم العرض (عربي) *", "Offer Name (Arabic) *")}</Label>
                 <Input value={form.nameAr} onChange={e => setForm(f => ({ ...f, nameAr: e.target.value }))} placeholder="مثال: باقة الصباح" data-testid="input-offer-nameAr" />
               </div>
               <div>
-                <Label>الاسم (إنجليزي)</Label>
+                <Label>{tc("الاسم (إنجليزي)", "English Name")}</Label>
                 <Input value={form.nameEn} onChange={e => setForm(f => ({ ...f, nameEn: e.target.value }))} placeholder="Morning Bundle" data-testid="input-offer-nameEn" />
               </div>
             </div>
             <div>
-              <Label>الوصف</Label>
+              <Label>{tc("الوصف", "Description")}</Label>
               <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="وصف مختصر للعرض..." rows={2} data-testid="input-offer-description" />
             </div>
             <div>
-              <Label>نوع العرض</Label>
+              <Label>{tc("نوع العرض", "Offer Type")}</Label>
               <Select value={form.offerType} onValueChange={v => setForm(f => ({ ...f, offerType: v as any }))}>
                 <SelectTrigger data-testid="select-offer-type">
                   <SelectValue />

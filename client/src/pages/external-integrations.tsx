@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslate } from "@/lib/useTranslate";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { Package, Truck, Globe, Settings2, Link2, ArrowLeft, Activity, RefreshCw
 import { useLocation } from "wouter";
 
 export default function ExternalIntegrationsPage() {
+  const tc = useTranslate();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [apiKey, setApiKey] = useState("");
@@ -31,7 +33,7 @@ export default function ExternalIntegrationsPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/integrations/delivery"] });
-      toast({ title: "تم التفعيل بنجاح", className: "bg-green-600 text-white" });
+      toast({ title: tc("تم التفعيل بنجاح", "Activated Successfully"), className: "bg-green-600 text-white" });
     },
   });
 
@@ -53,8 +55,8 @@ export default function ExternalIntegrationsPage() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-primary">الربط مع تطبيقات التوصيل</h1>
-          <p className="text-muted-foreground">قم بربط متجرك مع تطبيقات التوصيل العالمية لزيادة مبيعاتك</p>
+          <h1 className="text-3xl font-bold text-primary">{tc("الربط مع تطبيقات التوصيل", "Integrate Delivery Apps")}</h1>
+          <p className="text-muted-foreground">{tc("قم بربط متجرك مع تطبيقات التوصيل العالمية لزيادة مبيعاتك", "Connect your store with global delivery apps to increase sales")}</p>
         </div>
         <Globe className="h-10 w-10 text-primary mr-auto" />
       </div>
@@ -98,7 +100,7 @@ export default function ExternalIntegrationsPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor={`${provider.id}-active`}>حالة الربط</Label>
+                    <Label htmlFor={`${provider.id}-active`}>{tc("حالة الربط", "Connection Status")}</Label>
                     <Switch id={`${provider.id}-active`} checked={!!isEnabled} />
                   </div>
                   {!isEnabled && (
@@ -106,7 +108,7 @@ export default function ExternalIntegrationsPage() {
                       <Label>مفتاح API الخاص بـ {provider.nameAr}</Label>
                       <Input 
                         type="password" 
-                        placeholder="أدخل المفتاح هنا..." 
+                        placeholder={tc("أدخل المفتاح هنا...", "Enter key here...")} 
                         onChange={(e) => setApiKey(e.target.value)}
                       />
                       <Button 
@@ -140,10 +142,10 @@ export default function ExternalIntegrationsPage() {
             <CardTitle className="flex items-center">
               <Package className="ml-2 h-6 w-6 text-primary" /> مستودعات الإمداد
             </CardTitle>
-            <CardDescription>هذه الميزة تمكنك من إدارة المخزون المركزي وتوزيعه على الفروع</CardDescription>
+            <CardDescription>{tc("هذه الميزة تمكنك من إدارة المخزون المركزي وتوزيعه على الفروع", "This feature enables managing central inventory and distributing it to branches")}</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">تم تفعيل واجهة المستودعات المركزية لتمكين التحويل بين المخازن.</p>
+            <p className="text-sm text-muted-foreground">{tc("تم تفعيل واجهة المستودعات المركزية لتمكين التحويل بين المخازن.", "Central warehouse interface activated to enable inter-warehouse transfers.")}</p>
             <Button onClick={() => setLocation("/manager/warehouse")}>
               إدارة المستودعات <Warehouse className="mr-2 h-4 w-4" />
             </Button>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { useLocation } from "wouter";
 const COLORS = ['#2D9B6E', '#f97316', '#3b82f6', '#a855f7', '#ec4899', '#eab308', '#14b8a6', '#ef4444'];
 
 function formatCurrency(amount: number) {
+  const tc = useTranslate();
   return `${amount.toFixed(2)} ر.س`;
 }
 
@@ -88,10 +90,10 @@ export default function BIAnalytics() {
   const dayPartData = useMemo(() => {
     if (!data?.hourlyData) return [];
     const parts = [
-      { name: 'صباحاً (6-12)', hours: [6,7,8,9,10,11], icon: Sun },
-      { name: 'ظهراً (12-17)', hours: [12,13,14,15,16], icon: Sun },
-      { name: 'مساءً (17-22)', hours: [17,18,19,20,21], icon: Moon },
-      { name: 'ليلاً (22-6)', hours: [22,23,0,1,2,3,4,5], icon: Moon },
+      { name: tc('صباحاً (6-12)', 'Morning (6-12)'), hours: [6,7,8,9,10,11], icon: Sun },
+      { name: tc('ظهراً (12-17)', 'Afternoon (12-17)'), hours: [12,13,14,15,16], icon: Sun },
+      { name: tc('مساءً (17-22)', 'Evening (17-22)'), hours: [17,18,19,20,21], icon: Moon },
+      { name: tc('ليلاً (22-6)', 'Night (22-6)'), hours: [22,23,0,1,2,3,4,5], icon: Moon },
     ];
     return parts.map(p => ({
       name: p.name,
@@ -123,7 +125,7 @@ export default function BIAnalytics() {
               <Brain className="w-7 h-7 text-[#2D9B6E]" />
               تحليلات BI المتقدمة
             </h1>
-            <p className="text-sm text-muted-foreground">ذكاء الأعمال والرؤى التحليلية</p>
+            <p className="text-sm text-muted-foreground">{tc("ذكاء الأعمال والرؤى التحليلية", "Business intelligence and analytical insights")}</p>
           </div>
         </div>
         <Select value={period} onValueChange={setPeriod}>
@@ -131,10 +133,10 @@ export default function BIAnalytics() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="today">اليوم</SelectItem>
-            <SelectItem value="week">الأسبوع</SelectItem>
-            <SelectItem value="month">الشهر</SelectItem>
-            <SelectItem value="year">السنة</SelectItem>
+            <SelectItem value="today">{tc("اليوم", "Today")}</SelectItem>
+            <SelectItem value="week">{tc("الأسبوع", "Week")}</SelectItem>
+            <SelectItem value="month">{tc("الشهر", "Month")}</SelectItem>
+            <SelectItem value="year">{tc("السنة", "Year")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -146,8 +148,8 @@ export default function BIAnalytics() {
       ) : (
         <Tabs defaultValue="insights">
           <TabsList className="grid grid-cols-4 w-full max-w-xl">
-            <TabsTrigger value="insights">الرؤى</TabsTrigger>
-            <TabsTrigger value="performance">الأداء</TabsTrigger>
+            <TabsTrigger value="insights">{tc("الرؤى", "Insights")}</TabsTrigger>
+            <TabsTrigger value="performance">{tc("الأداء", "Performance")}</TabsTrigger>
             <TabsTrigger value="products">المنتجات</TabsTrigger>
             <TabsTrigger value="patterns">الأنماط</TabsTrigger>
           </TabsList>

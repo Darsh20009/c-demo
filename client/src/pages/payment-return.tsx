@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { CheckCircle, XCircle, Loader2, Coffee } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 type PaymentStatus = "loading" | "success" | "failed" | "pending";
 
 export default function PaymentReturnPage() {
+  const tc = useTranslate();
   const [, navigate] = useLocation();
   const [status, setStatus] = useState<PaymentStatus>("loading");
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export default function PaymentReturnPage() {
 
         if (data.verified) {
           setStatus("success");
-          setMessage("تمت عملية الدفع بنجاح! شكراً لك.");
+          setMessage(tc("تمت عملية الدفع بنجاح! شكراً لك.", "Payment successful! Thank you."));
         } else {
           // Check responseCode directly as fallback
           const isPaidByCode = geideaResponseCode === "000" ||
@@ -64,13 +66,13 @@ export default function PaymentReturnPage() {
 
           if (isPaidByCode) {
             setStatus("success");
-            setMessage("تمت عملية الدفع بنجاح! شكراً لك.");
+            setMessage(tc("تمت عملية الدفع بنجاح! شكراً لك.", "Payment successful! Thank you."));
           } else if (geideaResponseCode !== null) {
             setStatus("failed");
-            setMessage("لم تتم عملية الدفع. يرجى المحاولة مرة أخرى.");
+            setMessage(tc("لم تتم عملية الدفع. يرجى المحاولة مرة أخرى.", "Payment was not completed. Please try again."));
           } else {
             setStatus("pending");
-            setMessage("جاري التحقق من حالة الدفع...");
+            setMessage(tc("جاري التحقق من حالة الدفع...", "Checking payment status..."));
           }
         }
       } catch (err) {
@@ -78,10 +80,10 @@ export default function PaymentReturnPage() {
         // If we have a response code, use it directly
         if (geideaResponseCode === "000" || geideaStatus === "Success") {
           setStatus("success");
-          setMessage("تمت عملية الدفع بنجاح! شكراً لك.");
+          setMessage(tc("تمت عملية الدفع بنجاح! شكراً لك.", "Payment successful! Thank you."));
         } else {
           setStatus("failed");
-          setMessage("حدث خطأ أثناء التحقق من الدفع.");
+          setMessage(tc("حدث خطأ أثناء التحقق من الدفع.", "An error occurred while verifying payment."));
         }
       }
     };
@@ -114,8 +116,8 @@ export default function PaymentReturnPage() {
           {status === "loading" && (
             <>
               <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto" />
-              <h1 className="text-2xl font-bold">جاري التحقق من الدفع...</h1>
-              <p className="text-muted-foreground">يرجى الانتظار، لا تغلق هذه الصفحة</p>
+              <h1 className="text-2xl font-bold">{tc("جاري التحقق من الدفع...", "Verifying Payment...")}</h1>
+              <p className="text-muted-foreground">{tc("يرجى الانتظار، لا تغلق هذه الصفحة", "Please wait, do not close this page")}</p>
             </>
           )}
 
@@ -124,11 +126,11 @@ export default function PaymentReturnPage() {
               <div className="flex justify-center">
                 <CheckCircle className="w-20 h-20 text-green-500 animate-in zoom-in duration-500" />
               </div>
-              <h1 className="text-3xl font-bold text-green-600">تم الدفع بنجاح!</h1>
+              <h1 className="text-3xl font-bold text-green-600">{tc("تم الدفع بنجاح!", "Payment Successful!")}</h1>
               <p className="text-muted-foreground text-lg">{message}</p>
               {orderNumber && (
                 <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl p-4">
-                  <p className="text-sm text-muted-foreground">رقم الطلب</p>
+                  <p className="text-sm text-muted-foreground">{tc("رقم الطلب", "Order Number")}</p>
                   <p className="text-xl font-bold font-mono text-green-700 dark:text-green-400">#{orderNumber}</p>
                 </div>
               )}
@@ -148,7 +150,7 @@ export default function PaymentReturnPage() {
               <div className="flex justify-center">
                 <XCircle className="w-20 h-20 text-red-500 animate-in zoom-in duration-500" />
               </div>
-              <h1 className="text-3xl font-bold text-red-600">فشل الدفع</h1>
+              <h1 className="text-3xl font-bold text-red-600">{tc("فشل الدفع", "Payment Failed")}</h1>
               <p className="text-muted-foreground text-lg">{message}</p>
               <div className="flex flex-col gap-3">
                 <Button
@@ -168,7 +170,7 @@ export default function PaymentReturnPage() {
               <div className="flex justify-center">
                 <Loader2 className="w-20 h-20 text-yellow-500 animate-spin" />
               </div>
-              <h1 className="text-3xl font-bold text-yellow-600">جاري المعالجة</h1>
+              <h1 className="text-3xl font-bold text-yellow-600">{tc("جاري المعالجة", "Processing")}</h1>
               <p className="text-muted-foreground text-lg">{message}</p>
               <Button
                 size="lg"

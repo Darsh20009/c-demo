@@ -5,36 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { 
-  History,
-  Search,
-  ArrowUp,
-  ArrowDown,
-  ArrowRightLeft,
-  Package,
-  Loader2,
-  RefreshCw,
-  Calendar,
-  Trash2,
-  ShoppingCart
-} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { History, Search, ArrowUp, ArrowDown, ArrowRightLeft, Loader2, RefreshCw, Trash2, ShoppingCart } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { useTranslate } from "@/lib/useTranslate";
 
 interface StockMovement {
   id: string;
@@ -49,14 +25,8 @@ interface StockMovement {
   notes?: string;
   createdBy: string;
   createdAt: string;
-  rawItem?: {
-    nameAr: string;
-    code: string;
-    unit: string;
-  };
-  branch?: {
-    nameAr: string;
-  };
+  rawItem?: { nameAr: string; code: string; unit: string; };
+  branch?: { nameAr: string; };
 }
 
 interface Branch {
@@ -64,30 +34,31 @@ interface Branch {
   nameAr: string;
 }
 
-const movementTypeConfig: Record<string, { label: string; icon: typeof ArrowUp; color: string; direction: "in" | "out" | "neutral" }> = {
-  purchase: { label: "شراء", icon: ArrowUp, color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", direction: "in" },
-  sale: { label: "بيع", icon: ArrowDown, color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200", direction: "out" },
-  transfer_in: { label: "تحويل وارد", icon: ArrowUp, color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", direction: "in" },
-  transfer_out: { label: "تحويل صادر", icon: ArrowDown, color: "bg-accent text-accent dark:bg-accent dark:text-accent", direction: "out" },
-  adjustment: { label: "تعديل", icon: ArrowRightLeft, color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200", direction: "neutral" },
-  waste: { label: "تالف", icon: ArrowDown, color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", direction: "out" },
-  return: { label: "إرجاع", icon: ArrowUp, color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200", direction: "in" },
-};
-
-const unitLabels: Record<string, string> = {
-  kg: "كيلوجرام",
-  g: "جرام",
-  liter: "لتر",
-  ml: "ملليلتر",
-  piece: "قطعة",
-  box: "صندوق",
-  bag: "كيس",
-};
-
 export default function InventoryMovementsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const tc = useTranslate();
+
+  const movementTypeConfig: Record<string, { labelAr: string; labelEn: string; icon: typeof ArrowUp; color: string; direction: "in" | "out" | "neutral" }> = {
+    purchase: { labelAr: "شراء", labelEn: "Purchase", icon: ArrowUp, color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", direction: "in" },
+    sale: { labelAr: "بيع", labelEn: "Sale", icon: ArrowDown, color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200", direction: "out" },
+    transfer_in: { labelAr: "تحويل وارد", labelEn: "Transfer In", icon: ArrowUp, color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", direction: "in" },
+    transfer_out: { labelAr: "تحويل صادر", labelEn: "Transfer Out", icon: ArrowDown, color: "bg-accent text-accent dark:bg-accent dark:text-accent", direction: "out" },
+    adjustment: { labelAr: "تعديل", labelEn: "Adjustment", icon: ArrowRightLeft, color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200", direction: "neutral" },
+    waste: { labelAr: "تالف", labelEn: "Waste", icon: ArrowDown, color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", direction: "out" },
+    return: { labelAr: "إرجاع", labelEn: "Return", icon: ArrowUp, color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200", direction: "in" },
+  };
+
+  const unitLabels: Record<string, { ar: string; en: string }> = {
+    kg: { ar: "كيلوجرام", en: "kg" },
+    g: { ar: "جرام", en: "g" },
+    liter: { ar: "لتر", en: "L" },
+    ml: { ar: "ملليلتر", en: "ml" },
+    piece: { ar: "قطعة", en: "pcs" },
+    box: { ar: "صندوق", en: "box" },
+    bag: { ar: "كيس", en: "bag" },
+  };
 
   const { data: movements = [], isLoading } = useQuery<StockMovement[]>({
     queryKey: ["/api/inventory/movements"],
@@ -100,27 +71,20 @@ export default function InventoryMovementsPage() {
   const getBranchName = (id: string) => branches.find(b => b.id === id)?.nameAr || id;
 
   const filteredMovements = movements.filter((movement) => {
-    const matchesSearch = 
+    const matchesSearch =
       (movement.rawItem?.nameAr?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
       (movement.rawItem?.code?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
-    
     const matchesBranch = branchFilter === "all" || movement.branchId === branchFilter;
     const matchesType = typeFilter === "all" || movement.movementType === typeFilter;
-    
     return matchesSearch && matchesBranch && matchesType;
   });
 
   const inMovements = movements.filter(m => movementTypeConfig[m.movementType]?.direction === "in").length;
-  const outMovements = movements.filter(m => movementTypeConfig[m.movementType]?.direction === "out").length;
   const saleMovements = movements.filter(m => m.movementType === 'sale').length;
   const wasteMovements = movements.filter(m => m.movementType === 'waste').length;
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   }
 
   return (
@@ -129,62 +93,58 @@ export default function InventoryMovementsPage() {
         <div className="flex items-center gap-3">
           <History className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">حركات المخزون</h1>
-            <p className="text-muted-foreground text-sm">سجل جميع حركات المخزون (شراء، بيع، تحويل، تعديل)</p>
+            <h1 className="text-2xl font-bold">{tc("حركات المخزون", "Inventory Movements")}</h1>
+            <p className="text-muted-foreground text-sm">{tc("سجل جميع حركات المخزون (شراء، بيع، تحويل، تعديل)", "Record of all stock movements (purchase, sale, transfer, adjustment)")}</p>
           </div>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/inventory/movements"] })}
-          data-testid="button-refresh"
-        >
+        <Button variant="outline" onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/inventory/movements"] })} data-testid="button-refresh">
           <RefreshCw className="h-4 w-4 ml-2" />
-          تحديث
+          {tc("تحديث", "Refresh")}
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الحركات</CardTitle>
+            <CardTitle className="text-sm font-medium">{tc("إجمالي الحركات", "Total Movements")}</CardTitle>
             <History className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{movements.length}</div>
-            <p className="text-xs text-muted-foreground">حركة مخزون</p>
+            <p className="text-xs text-muted-foreground">{tc("حركة مخزون", "stock movements")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">حركات واردة</CardTitle>
+            <CardTitle className="text-sm font-medium">{tc("حركات واردة", "Incoming")}</CardTitle>
             <ArrowUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{inMovements}</div>
-            <p className="text-xs text-muted-foreground">شراء وتحويل وارد</p>
+            <p className="text-xs text-muted-foreground">{tc("شراء وتحويل وارد", "purchase & transfer in")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">مبيعات</CardTitle>
+            <CardTitle className="text-sm font-medium">{tc("مبيعات", "Sales")}</CardTitle>
             <ShoppingCart className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{saleMovements}</div>
-            <p className="text-xs text-muted-foreground">خصم من الطلبات</p>
+            <p className="text-xs text-muted-foreground">{tc("خصم من الطلبات", "deducted from orders")}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">هدر/تالف</CardTitle>
+            <CardTitle className="text-sm font-medium">{tc("هدر/تالف", "Waste/Damaged")}</CardTitle>
             <Trash2 className="h-4 w-4 text-red-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{wasteMovements}</div>
-            <p className="text-xs text-muted-foreground">مواد تالفة</p>
+            <p className="text-xs text-muted-foreground">{tc("مواد تالفة", "damaged materials")}</p>
           </CardContent>
         </Card>
       </div>
@@ -195,7 +155,7 @@ export default function InventoryMovementsPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="بحث بالمادة..."
+                placeholder={tc("بحث بالمادة...", "Search by material...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pr-10"
@@ -204,26 +164,24 @@ export default function InventoryMovementsPage() {
             </div>
             <Select value={branchFilter} onValueChange={setBranchFilter}>
               <SelectTrigger className="w-[180px]" data-testid="select-branch-filter">
-                <SelectValue placeholder="الفرع" />
+                <SelectValue placeholder={tc("الفرع", "Branch")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الفروع</SelectItem>
+                <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
                 {branches.map((branch) => (
-                  <SelectItem key={branch.id} value={branch.id as string}>
-                    {branch.nameAr}
-                  </SelectItem>
+                  <SelectItem key={branch.id} value={branch.id as string}>{branch.nameAr}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[180px]" data-testid="select-type-filter">
-                <SelectValue placeholder="نوع الحركة" />
+                <SelectValue placeholder={tc("نوع الحركة", "Movement Type")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الأنواع</SelectItem>
-                {Object.entries(movementTypeConfig).map(([key, { label }]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                <SelectItem value="all">{tc("جميع الأنواع", "All Types")}</SelectItem>
+                {Object.entries(movementTypeConfig).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{tc(cfg.labelAr, cfg.labelEn)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -234,14 +192,14 @@ export default function InventoryMovementsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="text-right">التاريخ</TableHead>
-                  <TableHead className="text-right">النوع</TableHead>
-                  <TableHead className="text-right">المادة</TableHead>
-                  <TableHead className="text-right">الفرع</TableHead>
-                  <TableHead className="text-right">الكمية</TableHead>
-                  <TableHead className="text-right">قبل</TableHead>
-                  <TableHead className="text-right">بعد</TableHead>
-                  <TableHead className="text-right">ملاحظات</TableHead>
+                  <TableHead className="text-right">{tc("التاريخ", "Date")}</TableHead>
+                  <TableHead className="text-right">{tc("النوع", "Type")}</TableHead>
+                  <TableHead className="text-right">{tc("المادة", "Material")}</TableHead>
+                  <TableHead className="text-right">{tc("الفرع", "Branch")}</TableHead>
+                  <TableHead className="text-right">{tc("الكمية", "Qty")}</TableHead>
+                  <TableHead className="text-right">{tc("قبل", "Before")}</TableHead>
+                  <TableHead className="text-right">{tc("بعد", "After")}</TableHead>
+                  <TableHead className="text-right">{tc("ملاحظات", "Notes")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -249,13 +207,14 @@ export default function InventoryMovementsPage() {
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       <History className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>لا توجد حركات مخزون</p>
+                      <p>{tc("لا توجد حركات مخزون", "No inventory movements found")}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredMovements.map((movement) => {
                     const config = movementTypeConfig[movement.movementType] || movementTypeConfig.adjustment;
                     const MovementIcon = config.icon;
+                    const unitLabel = unitLabels[movement.rawItem?.unit || ""];
                     
                     return (
                       <TableRow key={movement.id} data-testid={`row-movement-${movement.id}`}>
@@ -265,7 +224,7 @@ export default function InventoryMovementsPage() {
                         <TableCell>
                           <Badge className={`${config.color} flex items-center gap-1 w-fit`}>
                             <MovementIcon className="h-3 w-3" />
-                            {config.label}
+                            {tc(config.labelAr, config.labelEn)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -276,15 +235,12 @@ export default function InventoryMovementsPage() {
                         </TableCell>
                         <TableCell>{movement.branch?.nameAr || getBranchName(movement.branchId)}</TableCell>
                         <TableCell>
-                          <span className={`font-medium ${
-                            config.direction === "in" ? "text-green-600" : 
-                            config.direction === "out" ? "text-red-600" : ""
-                          }`}>
+                          <span className={`font-medium ${config.direction === "in" ? "text-green-600" : config.direction === "out" ? "text-red-600" : ""}`}>
                             {config.direction === "in" ? "+" : config.direction === "out" ? "-" : ""}
                             {movement.quantity}
                           </span>
                           <span className="text-muted-foreground mr-1">
-                            {unitLabels[movement.rawItem?.unit || ""] || movement.rawItem?.unit}
+                            {unitLabel ? tc(unitLabel.ar, unitLabel.en) : movement.rawItem?.unit}
                           </span>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{movement.previousQuantity}</TableCell>

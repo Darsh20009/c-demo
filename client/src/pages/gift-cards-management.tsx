@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -25,13 +26,14 @@ interface GiftCard {
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  active:   { label: "نشطة",    color: "bg-green-500/20 text-green-400 border-green-800" },
-  used:     { label: "مستخدمة", color: "bg-slate-500/20 text-muted-foreground border-border" },
-  expired:  { label: "منتهية",  color: "bg-red-500/20 text-red-400 border-red-800" },
-  cancelled:{ label: "ملغاة",   color: "bg-yellow-500/20 text-yellow-400 border-yellow-800" },
+  active:   { label: tc("نشطة", "Active"),    color: "bg-green-500/20 text-green-400 border-green-800" },
+  used:     { label: tc("مستخدمة", "Used"), color: "bg-slate-500/20 text-muted-foreground border-border" },
+  expired:  { label: tc("منتهية", "Expired"),  color: "bg-red-500/20 text-red-400 border-red-800" },
+  cancelled:{ label: tc("ملغاة", "Cancelled"),   color: "bg-yellow-500/20 text-yellow-400 border-yellow-800" },
 };
 
 export default function GiftCardsManagementPage() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -50,16 +52,16 @@ export default function GiftCardsManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/gift-cards"] });
       setOpen(false);
       setForm({ value: "", recipientName: "", recipientPhone: "", note: "" });
-      toast({ title: "تم إنشاء بطاقة الهدية بنجاح" });
+      toast({ title: tc("تم إنشاء بطاقة الهدية بنجاح", "Gift card created successfully") });
     },
-    onError: () => toast({ title: "فشل إنشاء البطاقة", variant: "destructive" }),
+    onError: () => toast({ title: tc("فشل إنشاء البطاقة", "Failed to create card"), variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiRequest("DELETE", `/api/gift-cards/${id}`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/gift-cards"] });
-      toast({ title: "تم حذف البطاقة" });
+      toast({ title: tc("تم حذف البطاقة", "Card deleted") });
     },
   });
 
@@ -100,11 +102,11 @@ export default function GiftCardsManagementPage() {
             </DialogTrigger>
             <DialogContent className="bg-card border-border" dir="rtl">
               <DialogHeader>
-                <DialogTitle className="text-foreground">إنشاء بطاقة هدية جديدة</DialogTitle>
+                <DialogTitle className="text-foreground">{tc("إنشاء بطاقة هدية جديدة", "Create New Gift Card")}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label className="text-muted-foreground">قيمة البطاقة (<SarIcon />) *</Label>
+                  <Label className="text-muted-foreground">{tc("قيمة البطاقة", "Card Value")} (<SarIcon />) *</Label>
                   <Input
                     type="number" min="1"
                     value={form.value}
@@ -115,15 +117,15 @@ export default function GiftCardsManagementPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">اسم المستفيد</Label>
-                  <Input value={form.recipientName} onChange={e => setForm(f => ({ ...f, recipientName: e.target.value }))} className="bg-background border-border mt-1" placeholder="اختياري" data-testid="input-recipient-name" />
+                  <Label className="text-muted-foreground">{tc("اسم المستفيد", "Recipient Name")}</Label>
+                  <Input value={form.recipientName} onChange={e => setForm(f => ({ ...f, recipientName: e.target.value }))} className="bg-background border-border mt-1" placeholder={tc("اختياري", "Optional")} data-testid="input-recipient-name" />
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">جوال المستفيد</Label>
-                  <Input value={form.recipientPhone} onChange={e => setForm(f => ({ ...f, recipientPhone: e.target.value }))} className="bg-background border-border mt-1" placeholder="اختياري" data-testid="input-recipient-phone" />
+                  <Label className="text-muted-foreground">{tc("جوال المستفيد", "Recipient Phone")}</Label>
+                  <Input value={form.recipientPhone} onChange={e => setForm(f => ({ ...f, recipientPhone: e.target.value }))} className="bg-background border-border mt-1" placeholder={tc("اختياري", "Optional")} data-testid="input-recipient-phone" />
                 </div>
                 <div>
-                  <Label className="text-muted-foreground">ملاحظة / مناسبة</Label>
+                  <Label className="text-muted-foreground">{tc("ملاحظة / مناسبة", "Note / Occasion")}</Label>
                   <Input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} className="bg-background border-border mt-1" placeholder="مثال: عيد ميلاد سعيد" data-testid="input-gift-note" />
                 </div>
                 <Button
@@ -143,10 +145,10 @@ export default function GiftCardsManagementPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
-            { label: "إجمالي البطاقات", value: stats.total, color: "text-foreground" },
-            { label: "البطاقات النشطة", value: stats.active, color: "text-green-400" },
-            { label: "إجمالي القيمة", value: `${stats.totalValue.toLocaleString()} ر.س`, color: "text-primary" },
-            { label: "الرصيد المتبقي", value: `${stats.remaining.toLocaleString()} ر.س`, color: "text-cyan-400" },
+            { label: tc("إجمالي البطاقات", "Total Cards"), value: stats.total, color: "text-foreground" },
+            { label: tc("البطاقات النشطة", "Active Cards"), value: stats.active, color: "text-green-400" },
+            { label: tc("إجمالي القيمة", "Total Value"), value: `${stats.totalValue.toLocaleString()} ر.س`, color: "text-primary" },
+            { label: tc("الرصيد المتبقي", "Remaining Balance"), value: `${stats.remaining.toLocaleString()} ر.س`, color: "text-cyan-400" },
           ].map((s, i) => (
             <Card key={i} className="bg-card border-border">
               <CardContent className="p-4 text-center">
@@ -163,7 +165,7 @@ export default function GiftCardsManagementPage() {
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="بحث بالكود أو الاسم أو الجوال..."
+            placeholder={tc("بحث بالكود أو الاسم أو الجوال...", "Search by code, name or phone...")}
             className="bg-background border-border pr-10"
             data-testid="input-search-cards"
           />

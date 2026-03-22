@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -101,33 +102,34 @@ interface Branch {
 const CHART_COLORS = ["#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444", "#ec4899"];
 
 const periodOptions = [
-  { value: "today", label: "اليوم" },
-  { value: "week", label: "هذا الأسبوع" },
-  { value: "month", label: "هذا الشهر" },
-  { value: "last30", label: "آخر 30 يوم" },
+  { value: "today", labelAr: "اليوم", label: "Today" },
+  { value: "week", labelAr: "هذا الأسبوع", label: "This Week" },
+  { value: "month", labelAr: "هذا الشهر", label: "This Month" },
+  { value: "last30", labelAr: "آخر 30 يوم", label: "Last 30 Days" },
 ];
 
 const expenseCategories = [
-  { value: "inventory", label: "المخزون والمواد الخام" },
-  { value: "salaries", label: "الرواتب والأجور" },
-  { value: "rent", label: "الإيجار" },
-  { value: "utilities", label: "المرافق" },
-  { value: "marketing", label: "التسويق" },
-  { value: "maintenance", label: "الصيانة" },
-  { value: "other", label: "أخرى" },
+  { value: "inventory", labelAr: "المخزون والمواد الخام", label: "Inventory & Raw Materials" },
+  { value: "salaries", labelAr: "الرواتب والأجور", label: "Salaries & Wages" },
+  { value: "rent", labelAr: "الإيجار", label: "Rent" },
+  { value: "utilities", labelAr: "المرافق", label: "Utilities" },
+  { value: "marketing", labelAr: "التسويق", label: "Marketing" },
+  { value: "maintenance", labelAr: "الصيانة", label: "Maintenance" },
+  { value: "other", labelAr: "أخرى", label: "Other" },
 ];
 
 const paymentMethodLabels: Record<string, string> = {
-  cash: "نقدي",
-  pos: "شبكة",
-  online: "أونلاين",
-  wallet: "محفظة",
+  cash: tc("نقدي", "Cash"),
+  pos: tc("شبكة", "POS"),
+  online: tc("أونلاين", "Online"),
+  wallet: tc("محفظة", "Wallet"),
 };
 
 type DrilldownType = "revenue" | "expenses" | "orders" | null;
 
 export default function AccountingSmartPage() {
   const { toast } = useToast();
+  const tc = useTranslate();
   const [period, setPeriod] = useState("today");
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -169,17 +171,17 @@ export default function AccountingSmartPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting/dashboard"] });
       setIsAddExpenseOpen(false);
       setNewExpense({ category: "", description: "", amount: "", notes: "" });
-      toast({ title: "تم إضافة المصروف بنجاح" });
+      toast({ title: tc("تم إضافة المصروف بنجاح", "Expense added successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في إضافة المصروف", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في إضافة المصروف", "Failed to add expense"), variant: "destructive" });
     },
   });
 
   const handleAddExpense = () => {
     const amount = parseFloat(newExpense.amount);
     if (!newExpense.category || !newExpense.description || isNaN(amount) || amount <= 0) {
-      toast({ title: "يرجى ملء جميع الحقول", variant: "destructive" });
+      toast({ title: tc("يرجى ملء جميع الحقول", "Please fill all required fields"), variant: "destructive" });
       return;
     }
     createExpenseMutation.mutate({
@@ -247,9 +249,9 @@ export default function AccountingSmartPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-l from-emerald-600 to-emerald-800 bg-clip-text text-transparent">
-              المحاسبة الذكية
+              {tc("المحاسبة الذكية", "Smart Accounting")}
             </h1>
-            <p className="text-muted-foreground">تحليل مالي شامل ومتكامل</p>
+            <p className="text-muted-foreground">{tc("تحليل مالي شامل ومتكامل", "Comprehensive integrated financial analysis")}</p>
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -266,10 +268,10 @@ export default function AccountingSmartPage() {
           </Select>
           <Select value={selectedBranch} onValueChange={setSelectedBranch}>
             <SelectTrigger className="w-[150px]" data-testid="select-branch">
-              <SelectValue placeholder="الفرع" />
+              <SelectValue placeholder={tc("الفرع", "Branch")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الفروع</SelectItem>
+              <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
               {branches.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id}>
                   {branch.nameAr}
@@ -335,7 +337,7 @@ export default function AccountingSmartPage() {
                 </p>
                 <div className="flex items-center gap-1 mt-2 text-sm text-accent">
                   <Package className="h-4 w-4" />
-                  <span>خصم تلقائي من المخزون</span>
+                  <span>{tc("خصم تلقائي من المخزون", "Auto-deducted from inventory")}</span>
                 </div>
               </div>
               <div className="p-3 rounded-full bg-primary/50 dark:bg-primary/30">
@@ -363,7 +365,7 @@ export default function AccountingSmartPage() {
                 </p>
                 <div className="flex items-center gap-1 mt-2 text-sm text-red-600">
                   <ArrowDownRight className="h-4 w-4" />
-                  <span>مصروفات تشغيلية</span>
+                  <span>{tc("مصروفات تشغيلية", "Operating expenses")}</span>
                 </div>
               </div>
               <div className="p-3 rounded-full bg-red-200/50 dark:bg-red-700/30">
@@ -377,7 +379,7 @@ export default function AccountingSmartPage() {
           <CardContent className="p-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">صافي الربح</p>
+                <p className="text-sm font-medium text-muted-foreground mb-1">{tc("صافي الربح", "Net Profit")}</p>
                 <p className={`text-3xl font-bold ${data.netProfit >= 0 ? 'text-blue-700 dark:text-blue-300' : 'text-red-700 dark:text-red-300'}`} data-testid="text-net-profit">
                   {data.netProfit.toFixed(0)}
                   <span className="text-lg mr-1"><SarIcon /></span>
@@ -400,7 +402,7 @@ export default function AccountingSmartPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">الربح الإجمالي</p>
+                <p className="text-sm text-muted-foreground">{tc("الربح الإجمالي", "Gross Profit")}</p>
                 <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
                   {data.grossProfit.toFixed(0)} <SarIcon />
                 </p>
@@ -416,7 +418,7 @@ export default function AccountingSmartPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">ضريبة القيمة المضافة</p>
+                <p className="text-sm text-muted-foreground">{tc("ضريبة القيمة المضافة", "VAT")}</p>
                 <p className="text-2xl font-bold text-cyan-700 dark:text-cyan-300">
                   {data.totalVat.toFixed(0)} <SarIcon />
                 </p>
@@ -432,7 +434,7 @@ export default function AccountingSmartPage() {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">عدد الفواتير</p>
+                <p className="text-sm text-muted-foreground">{tc("عدد الفواتير", "Invoice Count")}</p>
                 <p className="text-2xl font-bold text-pink-700 dark:text-pink-300">
                   {data.invoiceCount}
                 </p>
@@ -448,9 +450,9 @@ export default function AccountingSmartPage() {
 
       <Tabs defaultValue="daily" className="space-y-4">
         <TabsList className="bg-muted/50 p-1 rounded-xl">
-          <TabsTrigger value="daily" className="rounded-lg px-6">يومي</TabsTrigger>
-          <TabsTrigger value="weekly" className="rounded-lg px-6">أسبوعي</TabsTrigger>
-          <TabsTrigger value="monthly" className="rounded-lg px-6">شهري</TabsTrigger>
+          <TabsTrigger value="daily" className="rounded-lg px-6">{tc("يومي", "Daily")}</TabsTrigger>
+          <TabsTrigger value="weekly" className="rounded-lg px-6">{tc("أسبوعي", "Weekly")}</TabsTrigger>
+          <TabsTrigger value="monthly" className="rounded-lg px-6">{tc("شهري", "Monthly")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="daily">
@@ -494,7 +496,7 @@ export default function AccountingSmartPage() {
                         dataKey="revenue" 
                         stroke="#10b981" 
                         fill="url(#colorRevenue)"
-                        name="الإيرادات"
+                        name={tc("الإيرادات", "Revenue")}
                         strokeWidth={2}
                       />
                       <Area 
@@ -502,7 +504,7 @@ export default function AccountingSmartPage() {
                         dataKey="netProfit" 
                         stroke="#3b82f6" 
                         fill="url(#colorProfit)"
-                        name="صافي الربح"
+                        name={tc("صافي الربح", "Net Profit")}
                         strokeWidth={2}
                       />
                     </AreaChart>
@@ -512,7 +514,7 @@ export default function AccountingSmartPage() {
                 <div className="h-[350px] flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
                     <BarChart3 className="h-16 w-16 mx-auto mb-4 opacity-20" />
-                    <p>لا توجد بيانات كافية لعرض الرسم البياني</p>
+                    <p>{tc("لا توجد بيانات كافية لعرض الرسم البياني", "No data available for chart")}</p>
                   </div>
                 </div>
               )}
@@ -541,10 +543,10 @@ export default function AccountingSmartPage() {
                         contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                       />
                       <Legend />
-                      <Bar dataKey="revenue" fill="#10b981" name="الإيرادات" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="cogs" fill="#f59e0b" name="تكلفة المكونات" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="expenses" fill="#ef4444" name="المصروفات" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="netProfit" fill="#3b82f6" name="صافي الربح" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="revenue" fill="#10b981" name={tc("الإيرادات", "Revenue")} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="cogs" fill="#f59e0b" name={tc("تكلفة المكونات", "Ingredients Cost")} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="expenses" fill="#ef4444" name={tc("المصروفات", "Expenses")} radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="netProfit" fill="#3b82f6" name={tc("صافي الربح", "Net Profit")} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -578,8 +580,8 @@ export default function AccountingSmartPage() {
                         contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                       />
                       <Legend />
-                      <Line type="monotone" dataKey="revenue" stroke="#10b981" name="الإيرادات" strokeWidth={3} dot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="netProfit" stroke="#3b82f6" name="صافي الربح" strokeWidth={3} dot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="revenue" stroke="#10b981" name={tc("الإيرادات", "Revenue")} strokeWidth={3} dot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="netProfit" stroke="#3b82f6" name={tc("صافي الربح", "Net Profit")} strokeWidth={3} dot={{ r: 6 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

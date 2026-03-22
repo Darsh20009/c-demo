@@ -18,16 +18,17 @@ import { customerStorage } from "@/lib/customer-storage";
 import { useCustomer } from "@/contexts/CustomerContext";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { useTranslate } from "@/lib/useTranslate";
 import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { PaymentMethodInfo, PaymentMethod } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
 
 const TIER_STYLES: Record<string, { gradient: string; badge: string; name: string; icon: string; nextTier?: string; threshold: number }> = {
-  bronze:   { gradient: 'from-amber-600 via-amber-700 to-amber-800',   badge: 'bg-amber-600',  name: 'برونزي',  icon: '🥉', nextTier: 'silver',   threshold: 500 },
-  silver:   { gradient: 'from-slate-400 via-slate-500 to-slate-600',   badge: 'bg-slate-500',  name: 'فضي',     icon: '🥈', nextTier: 'gold',     threshold: 1500 },
-  gold:     { gradient: 'from-yellow-500 via-amber-500 to-yellow-600', badge: 'bg-yellow-500', name: 'ذهبي',    icon: '🥇', nextTier: 'platinum', threshold: 3000 },
-  platinum: { gradient: 'from-violet-500 via-purple-600 to-indigo-700',badge: 'bg-violet-500', name: 'بلاتيني', icon: '💎', threshold: 3000 },
+  bronze:   { gradient: 'from-amber-600 via-amber-700 to-amber-800',   badge: 'bg-amber-600',  name: tc('برونزي', 'Bronze'),  icon: '🥉', nextTier: 'silver',   threshold: 500 },
+  silver:   { gradient: 'from-slate-400 via-slate-500 to-slate-600',   badge: 'bg-slate-500',  name: tc('فضي', 'Silver'),     icon: '🥈', nextTier: 'gold',     threshold: 1500 },
+  gold:     { gradient: 'from-yellow-500 via-amber-500 to-yellow-600', badge: 'bg-yellow-500', name: tc('ذهبي', 'Gold'),    icon: '🥇', nextTier: 'platinum', threshold: 3000 },
+  platinum: { gradient: 'from-violet-500 via-purple-600 to-indigo-700',badge: 'bg-violet-500', name: tc('بلاتيني', 'Platinum'), icon: '💎', threshold: 3000 },
 };
 
 function LoyaltyCheckoutCard({
@@ -75,7 +76,7 @@ function LoyaltyCheckoutCard({
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-bold text-base tracking-wide">بطاقة كوبي</span>
+                <span className="font-bold text-base tracking-wide">{tc("بطاقة كوبي", "COPY Card")}</span>
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 flex items-center gap-1">
                   {tierStyle.icon} {tierStyle.name}
                 </span>
@@ -84,7 +85,7 @@ function LoyaltyCheckoutCard({
             </div>
             <div className="text-right flex-shrink-0">
               <p className="text-4xl font-black leading-none" data-testid="text-loyalty-points">{loyaltyPoints.toLocaleString()}</p>
-              <p className="text-[11px] opacity-70 mt-0.5">نقطة</p>
+              <p className="text-[11px] opacity-70 mt-0.5">{tc("نقطة", "pts")}</p>
             </div>
           </div>
 
@@ -92,7 +93,7 @@ function LoyaltyCheckoutCard({
           <div className="mt-3 pt-3 border-t border-white/20 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-xs opacity-80">
               <Coins className="w-3.5 h-3.5" />
-              <span>قيمة نقاطك</span>
+              <span>{tc("قيمة نقاطك", "Your Points Value")}</span>
             </div>
             <span className="text-lg font-black">{totalPointsValue.toFixed(2)} ريال</span>
           </div>
@@ -118,7 +119,7 @@ function LoyaltyCheckoutCard({
           <div className="flex items-center gap-2 text-green-700 dark:text-green-400 flex-1 min-w-0">
             <CheckCircle className="w-5 h-5 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm font-bold">تم تطبيق خصم النقاط ✓</p>
+              <p className="text-sm font-bold">{tc("تم تطبيق خصم النقاط ✓", "Points Discount Applied ✓")}</p>
               <p className="text-xs opacity-80">
                 {pointsToRedeem.toLocaleString()} نقطة = <span className="font-black">{appliedDiscount.toFixed(2)} ريال</span> خصم
                 {appliedDiscount >= baseTotal && <span className="text-green-600 font-bold mr-1">· يغطي المبلغ كاملاً!</span>}
@@ -143,7 +144,7 @@ function LoyaltyCheckoutCard({
         <div className="border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-xl p-4 space-y-3 bg-amber-50/50 dark:bg-amber-900/10" data-testid="points-redeem-section">
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 text-amber-500" />
-            <p className="text-sm font-bold text-amber-800 dark:text-amber-300">استخدم نقاطك كخصم</p>
+            <p className="text-sm font-bold text-amber-800 dark:text-amber-300">{tc("استخدم نقاطك كخصم", "Use Your Points as Discount")}</p>
           </div>
 
           <div className="space-y-2">
@@ -160,7 +161,7 @@ function LoyaltyCheckoutCard({
               />
               <div className="text-right min-w-[80px]">
                 <p className="text-sm font-black text-amber-700 dark:text-amber-400">{inputVal.toLocaleString()}</p>
-                <p className="text-[10px] text-amber-600/70">نقطة</p>
+                <p className="text-[10px] text-amber-600/70">{tc("نقطة", "pts")}</p>
               </div>
             </div>
             <div className="flex items-center justify-between text-xs px-1">
@@ -204,6 +205,7 @@ function LoyaltyCheckoutCard({
 }
 
 export default function CheckoutPage() {
+  const tc = useTranslate();
   const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const { cartItems, clearCart, getFinalTotal, deliveryInfo } = useCartStore();
@@ -274,13 +276,13 @@ export default function CheckoutPage() {
     try {
       const res = await fetch(`/api/gift-cards/check/${codeToUse.toUpperCase()}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "بطاقة غير صالحة");
+      if (!res.ok) throw new Error(data.error || tc("بطاقة غير صالحة", "Invalid gift card"));
       const currentTotal = getFinalTotalWithPoints();
       const applied = Math.min(Number(data.balance), currentTotal);
       setAppliedGiftCard({ code: data.code, balance: Number(data.balance), applied });
-      toast({ title: "✅ بطاقة هدية مقبولة", description: `سيتم خصم ${applied.toFixed(2)} ريال (الرصيد الكامل: ${data.balance} ريال)` });
+      toast({ title: tc("✅ بطاقة هدية مقبولة", "✅ Gift Card Accepted"), description: `سيتم خصم ${applied.toFixed(2)} ريال (الرصيد الكامل: ${data.balance} ريال)` });
     } catch (err: any) {
-      toast({ variant: "destructive", title: "❌ خطأ", description: err.message });
+      toast({ variant: "destructive", title: tc("❌ خطأ", "❌ Error"), description: err.message });
     } finally {
       setIsCheckingGiftCard(false);
     }
@@ -453,7 +455,7 @@ export default function CheckoutPage() {
       return;
     }
     if (!navigator.geolocation) {
-      setCashDistanceError('متصفحك لا يدعم تحديد الموقع، لا يمكن التحقق من المسافة للدفع نقداً');
+      setCashDistanceError(tc('متصفحك لا يدعم تحديد الموقع، لا يمكن التحقق من المسافة للدفع نقداً', 'Your browser does not support location detection. Cash payment distance check unavailable.'));
       return;
     }
     setCashDistanceChecking(true);
@@ -469,7 +471,7 @@ export default function CheckoutPage() {
       },
       () => {
         setCashDistanceChecking(false);
-        setCashDistanceError('تعذّر تحديد موقعك. الرجاء السماح بالوصول للموقع للدفع نقداً.');
+        setCashDistanceError(tc('تعذّر تحديد موقعك. الرجاء السماح بالوصول للموقع للدفع نقداً.', 'Could not determine your location. Please allow location access for cash payment.'));
       },
       { timeout: 8000, maximumAge: 60000 }
     );
@@ -812,7 +814,7 @@ export default function CheckoutPage() {
                       </button>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-                      <p className="text-xs text-amber-800 dark:text-amber-300">سجّل الآن واحصل على نقاط ولاء وتتبع طلباتك</p>
+                      <p className="text-xs text-amber-800 dark:text-amber-300">{tc("سجّل الآن واحصل على نقاط ولاء وتتبع طلباتك", "Register now to earn loyalty points and track your orders")}</p>
                       <button
                         type="button"
                         onClick={() => setLocation("/auth")}
@@ -844,7 +846,7 @@ export default function CheckoutPage() {
                 {selectedPaymentMethod === 'cash' && cashDistanceChecking && (
                   <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg text-blue-700 dark:text-blue-300 text-sm" data-testid="status-cash-distance-checking">
                     <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                    <span>جاري التحقق من موقعك للدفع نقداً...</span>
+                    <span>{tc("جاري التحقق من موقعك للدفع نقداً...", "Checking your location for cash payment...")}</span>
                   </div>
                 )}
 
@@ -975,7 +977,7 @@ export default function CheckoutPage() {
                 <div className="border rounded-lg p-4 bg-card space-y-3">
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-primary" />
-                    <Label className="font-semibold">بطاقة الهدية</Label>
+                    <Label className="font-semibold">{tc("بطاقة الهدية", "Gift Card")}</Label>
                   </div>
                   {appliedGiftCard ? (
                     <div className="flex items-center justify-between bg-primary/5 rounded-lg px-3 py-2">
@@ -996,7 +998,7 @@ export default function CheckoutPage() {
                   ) : (
                     <div className="flex gap-2">
                       <Input
-                        placeholder="أدخل رمز بطاقة الهدية"
+                        placeholder={tc("أدخل رمز بطاقة الهدية", "Enter gift card code")}
                         value={giftCardCode}
                         onChange={e => setGiftCardCode(e.target.value.toUpperCase())}
                         onKeyDown={e => e.key === "Enter" && handleCheckGiftCard()}
@@ -1009,7 +1011,7 @@ export default function CheckoutPage() {
                         data-testid="button-apply-gift-card"
                         className="shrink-0"
                       >
-                        {isCheckingGiftCard ? "جاري التحقق..." : "تطبيق"}
+                        {isCheckingGiftCard ? tc("جاري التحقق...", "Checking...") : tc("تطبيق", "Apply")}
                       </Button>
                     </div>
                   )}
@@ -1056,7 +1058,7 @@ export default function CheckoutPage() {
                 {!showSimulatedCard && showInlineGeidea ? (
                   <div className="space-y-3" data-testid="section-geidea-inline">
                     <div className="bg-primary rounded-xl px-4 py-3 text-white text-center">
-                      <p className="text-xs opacity-75">إجمالي الطلب</p>
+                      <p className="text-xs opacity-75">{tc("إجمالي الطلب", "Order Total")}</p>
                       <p className="text-2xl font-black" data-testid="text-geidea-amount">
                         {pendingGeideaOrderData.current?.totalAmount?.toFixed(2)} ريال
                       </p>

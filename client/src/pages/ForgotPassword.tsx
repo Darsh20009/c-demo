@@ -8,6 +8,7 @@ import { PhoneInput } from "@/components/phone-input";
 import { Coffee, Mail, Phone, User, ArrowRight, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslate } from "@/lib/useTranslate";
 
 type Step =
   | "choice"
@@ -17,39 +18,36 @@ type Step =
 export default function ForgotPassword() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
 
   const [step, setStep] = useState<Step>("choice");
 
-  // ── Email path state ─────────────────────────────────────────────
   const [email, setEmail] = useState("");
   const [emailPhone, setEmailPhone] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
   const [verifiedEmail, setVerifiedEmail] = useState("");
 
-  // ── Phone+Name path state ────────────────────────────────────────
   const [phoneOnly, setPhoneOnly] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [phonePassword, setPhonePassword] = useState("");
   const [phoneConfirm, setPhoneConfirm] = useState("");
   const [verifiedPhone, setVerifiedPhone] = useState("");
 
-  // ── UI ───────────────────────────────────────────────────────────
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "نسيت كلمة المرور - QIROX Cafe | إعادة تعيين";
-  }, []);
+    document.title = tc("نسيت كلمة المرور - QIROX Cafe | إعادة تعيين", "Forgot Password - QIROX Cafe | Reset");
+  }, [tc]);
 
-  // ════════════════════════════════════════════════════════════════
-  // EMAIL PATH handlers
-  // ════════════════════════════════════════════════════════════════
+  const err = (msg: string) => toast({ title: tc("خطأ", "Error"), description: msg, variant: "destructive" });
+
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return toast({ title: "خطأ", description: "البريد الإلكتروني غير صحيح", variant: "destructive" });
+      return err(tc("البريد الإلكتروني غير صحيح", "Invalid email address"));
     }
     setLoading(true);
     try {
@@ -59,10 +57,10 @@ export default function ForgotPassword() {
         setVerifiedEmail(email);
         setStep("phone");
       } else {
-        toast({ title: "خطأ", description: "البريد غير مسجل لدينا", variant: "destructive" });
+        err(tc("البريد غير مسجل لدينا", "Email not registered"));
       }
-    } catch (err: any) {
-      toast({ title: "خطأ", description: err.message || "حدث خطأ", variant: "destructive" });
+    } catch (e: any) {
+      err(e.message || tc("حدث خطأ", "An error occurred"));
     } finally { setLoading(false); }
   };
 
@@ -70,7 +68,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     const clean = emailPhone.trim().replace(/\s/g, "");
     if (!/^5\d{8}$/.test(clean)) {
-      return toast({ title: "خطأ", description: "رقم الجوال يجب أن يبدأ بـ 5 (9 أرقام)", variant: "destructive" });
+      return err(tc("رقم الجوال يجب أن يبدأ بـ 5 (9 أرقام)", "Phone must start with 5 (9 digits)"));
     }
     setLoading(true);
     try {
@@ -79,38 +77,35 @@ export default function ForgotPassword() {
       if (data.valid) {
         setStep("password");
       } else {
-        toast({ title: "خطأ", description: "رقم الجوال غير مطابق للبريد", variant: "destructive" });
+        err(tc("رقم الجوال غير مطابق للبريد", "Phone does not match the email"));
       }
-    } catch (err: any) {
-      toast({ title: "خطأ", description: err.message || "حدث خطأ", variant: "destructive" });
+    } catch (e: any) {
+      err(e.message || tc("حدث خطأ", "An error occurred"));
     } finally { setLoading(false); }
   };
 
   const handleEmailPasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (emailPassword.length < 4) return toast({ title: "خطأ", description: "كلمة المرور 4 أحرف على الأقل", variant: "destructive" });
-    if (emailPassword !== emailConfirm) return toast({ title: "خطأ", description: "كلمتا المرور غير متطابقتان", variant: "destructive" });
+    if (emailPassword.length < 4) return err(tc("كلمة المرور 4 أحرف على الأقل", "Password must be at least 4 characters"));
+    if (emailPassword !== emailConfirm) return err(tc("كلمتا المرور غير متطابقتان", "Passwords do not match"));
     setLoading(true);
     const clean = emailPhone.trim().replace(/\s/g, "");
     try {
       await apiRequest("POST", "/api/customers/reset-password-direct", {
         email: verifiedEmail, phone: clean, newPassword: emailPassword,
       });
-      toast({ title: "تم بنجاح!", description: "تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن" });
+      toast({ title: tc("تم بنجاح!", "Success!"), description: tc("تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن", "Password changed. You can now log in") });
       setTimeout(() => navigate("/auth"), 1500);
-    } catch (err: any) {
-      toast({ title: "خطأ", description: err.message || "حدث خطأ", variant: "destructive" });
+    } catch (e: any) {
+      err(e.message || tc("حدث خطأ", "An error occurred"));
     } finally { setLoading(false); }
   };
 
-  // ════════════════════════════════════════════════════════════════
-  // PHONE+NAME PATH handlers
-  // ════════════════════════════════════════════════════════════════
   const handlePhoneOnlySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const clean = phoneOnly.trim().replace(/\s/g, "");
     if (!/^5\d{8}$/.test(clean)) {
-      return toast({ title: "خطأ", description: "رقم الجوال يجب أن يبدأ بـ 5 (9 أرقام)", variant: "destructive" });
+      return err(tc("رقم الجوال يجب أن يبدأ بـ 5 (9 أرقام)", "Phone must start with 5 (9 digits)"));
     }
     setVerifiedPhone(clean);
     setStep("name");
@@ -119,7 +114,7 @@ export default function ForgotPassword() {
   const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim()) {
-      return toast({ title: "خطأ", description: "يرجى إدخال الاسم", variant: "destructive" });
+      return err(tc("يرجى إدخال الاسم", "Please enter your name"));
     }
     setLoading(true);
     try {
@@ -129,52 +124,49 @@ export default function ForgotPassword() {
       const data = await res.json();
       if (data.valid) {
         setStep("phone-password");
-        toast({ title: "تم التحقق", description: "الآن أدخل كلمة المرور الجديدة" });
+        toast({ title: tc("تم التحقق", "Verified"), description: tc("الآن أدخل كلمة المرور الجديدة", "Now enter your new password") });
       } else {
-        toast({ title: "خطأ", description: "رقم الجوال أو الاسم غير صحيح", variant: "destructive" });
+        err(tc("رقم الجوال أو الاسم غير صحيح", "Phone number or name is incorrect"));
       }
-    } catch (err: any) {
-      toast({ title: "خطأ", description: err.message || "حدث خطأ", variant: "destructive" });
+    } catch (e: any) {
+      err(e.message || tc("حدث خطأ", "An error occurred"));
     } finally { setLoading(false); }
   };
 
   const handlePhonePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phonePassword.length < 4) return toast({ title: "خطأ", description: "كلمة المرور 4 أحرف على الأقل", variant: "destructive" });
-    if (phonePassword !== phoneConfirm) return toast({ title: "خطأ", description: "كلمتا المرور غير متطابقتان", variant: "destructive" });
+    if (phonePassword.length < 4) return err(tc("كلمة المرور 4 أحرف على الأقل", "Password must be at least 4 characters"));
+    if (phonePassword !== phoneConfirm) return err(tc("كلمتا المرور غير متطابقتان", "Passwords do not match"));
     setLoading(true);
     try {
       await apiRequest("POST", "/api/customers/reset-password-by-phone-name", {
         phone: verifiedPhone, name: customerName.trim(), newPassword: phonePassword,
       });
-      toast({ title: "تم بنجاح!", description: "تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن" });
+      toast({ title: tc("تم بنجاح!", "Success!"), description: tc("تم تغيير كلمة المرور. يمكنك تسجيل الدخول الآن", "Password changed. You can now log in") });
       setTimeout(() => navigate("/auth"), 1500);
-    } catch (err: any) {
-      toast({ title: "خطأ", description: err.message || "حدث خطأ", variant: "destructive" });
+    } catch (e: any) {
+      err(e.message || tc("حدث خطأ", "An error occurred"));
     } finally { setLoading(false); }
   };
 
-  // ════════════════════════════════════════════════════════════════
-  // UI helpers
-  // ════════════════════════════════════════════════════════════════
   const titles: Record<Step, string> = {
-    choice: "نسيت كلمة المرور؟",
-    email: "استرداد بالبريد الإلكتروني",
-    phone: "تحقق من رقم الجوال",
-    password: "كلمة المرور الجديدة",
-    "phone-only": "استرداد برقم الجوال والاسم",
-    name: "تحقق من هويتك",
-    "phone-password": "كلمة المرور الجديدة",
+    choice: tc("نسيت كلمة المرور؟", "Forgot Password?"),
+    email: tc("استرداد بالبريد الإلكتروني", "Recover via Email"),
+    phone: tc("تحقق من رقم الجوال", "Verify Phone Number"),
+    password: tc("كلمة المرور الجديدة", "New Password"),
+    "phone-only": tc("استرداد برقم الجوال والاسم", "Recover via Phone & Name"),
+    name: tc("تحقق من هويتك", "Verify Your Identity"),
+    "phone-password": tc("كلمة المرور الجديدة", "New Password"),
   };
 
   const descs: Record<Step, string> = {
-    choice: "اختر طريقة الاسترداد",
-    email: "أدخل بريدك الإلكتروني المسجل",
-    phone: "أدخل رقم الجوال المرتبط بالبريد",
-    password: "أدخل كلمة المرور الجديدة وتأكيدها",
-    "phone-only": "أدخل رقم جوالك المسجل",
-    name: "أدخل الاسم المسجل في حسابك",
-    "phone-password": "أدخل كلمة المرور الجديدة وتأكيدها",
+    choice: tc("اختر طريقة الاسترداد", "Choose a recovery method"),
+    email: tc("أدخل بريدك الإلكتروني المسجل", "Enter your registered email"),
+    phone: tc("أدخل رقم الجوال المرتبط بالبريد", "Enter the phone linked to the email"),
+    password: tc("أدخل كلمة المرور الجديدة وتأكيدها", "Enter and confirm your new password"),
+    "phone-only": tc("أدخل رقم جوالك المسجل", "Enter your registered phone number"),
+    name: tc("أدخل الاسم المسجل في حسابك", "Enter the name registered in your account"),
+    "phone-password": tc("أدخل كلمة المرور الجديدة وتأكيدها", "Enter and confirm your new password"),
   };
 
   const canGoBack = step !== "choice";
@@ -196,7 +188,7 @@ export default function ForgotPassword() {
       {loading ? (
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-          <span>جارٍ التحقق...</span>
+          <span>{tc("جارٍ التحقق...", "Verifying...")}</span>
         </div>
       ) : (
         <div className="flex items-center gap-2">
@@ -226,7 +218,6 @@ export default function ForgotPassword() {
 
         <CardContent className="space-y-5">
 
-          {/* ── CHOICE ─────────────────────────────────────────── */}
           {step === "choice" && (
             <div className="space-y-3">
               <button
@@ -238,8 +229,8 @@ export default function ForgotPassword() {
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-foreground">لدي بريد إلكتروني</p>
-                  <p className="text-sm text-muted-foreground">استرداد عبر البريد الإلكتروني ورقم الجوال</p>
+                  <p className="font-semibold text-foreground">{tc("لدي بريد إلكتروني", "I have an email")}</p>
+                  <p className="text-sm text-muted-foreground">{tc("استرداد عبر البريد الإلكتروني ورقم الجوال", "Recover via email and phone number")}</p>
                 </div>
                 <ArrowLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </button>
@@ -253,20 +244,19 @@ export default function ForgotPassword() {
                   <Phone className="w-5 h-5 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-foreground">ليس لدي بريد إلكتروني</p>
-                  <p className="text-sm text-muted-foreground">استرداد عبر رقم الجوال واسم الحساب</p>
+                  <p className="font-semibold text-foreground">{tc("ليس لدي بريد إلكتروني", "I don't have an email")}</p>
+                  <p className="text-sm text-muted-foreground">{tc("استرداد عبر رقم الجوال واسم الحساب", "Recover via phone number and account name")}</p>
                 </div>
                 <ArrowLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </button>
             </div>
           )}
 
-          {/* ── EMAIL PATH ─────────────────────────────────────── */}
           {step === "email" && (
             <form onSubmit={handleEmailSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2 text-foreground">
-                  <Mail className="w-4 h-4" /> البريد الإلكتروني
+                  <Mail className="w-4 h-4" /> {tc("البريد الإلكتروني", "Email")}
                 </Label>
                 <Input
                   id="email" type="email" dir="ltr"
@@ -276,7 +266,7 @@ export default function ForgotPassword() {
                   data-testid="input-email" required
                 />
               </div>
-              <SubmitButton label="التالي" testId="button-submit-email" />
+              <SubmitButton label={tc("التالي", "Next")} testId="button-submit-email" />
             </form>
           )}
 
@@ -284,25 +274,25 @@ export default function ForgotPassword() {
             <form onSubmit={handleEmailPhoneSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="emailPhone" className="flex items-center gap-2 text-foreground">
-                  <Phone className="w-4 h-4" /> رقم الجوال
+                  <Phone className="w-4 h-4" /> {tc("رقم الجوال", "Phone Number")}
                 </Label>
                 <PhoneInput
                   id="emailPhone" value={emailPhone} onChange={(v) => setEmailPhone(v)}
                   placeholder="5xxxxxxxx" data-testid="input-phone" required
                 />
-                <p className="text-xs text-muted-foreground">رقم الجوال المرتبط بالبريد المدخل</p>
+                <p className="text-xs text-muted-foreground">{tc("رقم الجوال المرتبط بالبريد المدخل", "The phone linked to the entered email")}</p>
               </div>
-              <SubmitButton label="تحقق" testId="button-submit-phone" />
+              <SubmitButton label={tc("تحقق", "Verify")} testId="button-submit-phone" />
             </form>
           )}
 
           {step === "password" && (
             <form onSubmit={handleEmailPasswordSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-foreground">كلمة المرور الجديدة</Label>
+                <Label className="text-foreground">{tc("كلمة المرور الجديدة", "New Password")}</Label>
                 <div className="relative">
                   <Input
-                    type={showPass ? "text" : "password"} placeholder="أدخل كلمة المرور الجديدة"
+                    type={showPass ? "text" : "password"} placeholder={tc("أدخل كلمة المرور الجديدة", "Enter new password")}
                     value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)}
                     className="bg-secondary border-border focus:border-primary pl-10"
                     data-testid="input-new-password" required
@@ -314,10 +304,10 @@ export default function ForgotPassword() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-foreground">تأكيد كلمة المرور</Label>
+                <Label className="text-foreground">{tc("تأكيد كلمة المرور", "Confirm Password")}</Label>
                 <div className="relative">
                   <Input
-                    type={showConfirm ? "text" : "password"} placeholder="أعد إدخال كلمة المرور"
+                    type={showConfirm ? "text" : "password"} placeholder={tc("أعد إدخال كلمة المرور", "Re-enter password")}
                     value={emailConfirm} onChange={(e) => setEmailConfirm(e.target.value)}
                     className="bg-secondary border-border focus:border-primary pl-10"
                     data-testid="input-confirm-password" required
@@ -327,26 +317,25 @@ export default function ForgotPassword() {
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground">كلمة المرور يجب أن تكون 4 أحرف على الأقل</p>
+                <p className="text-xs text-muted-foreground">{tc("كلمة المرور يجب أن تكون 4 أحرف على الأقل", "Password must be at least 4 characters")}</p>
               </div>
-              <SubmitButton label="تغيير كلمة المرور" testId="button-reset-password" />
+              <SubmitButton label={tc("تغيير كلمة المرور", "Change Password")} testId="button-reset-password" />
             </form>
           )}
 
-          {/* ── PHONE+NAME PATH ────────────────────────────────── */}
           {step === "phone-only" && (
             <form onSubmit={handlePhoneOnlySubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="phoneOnly" className="flex items-center gap-2 text-foreground">
-                  <Phone className="w-4 h-4" /> رقم الجوال
+                  <Phone className="w-4 h-4" /> {tc("رقم الجوال", "Phone Number")}
                 </Label>
                 <PhoneInput
                   id="phoneOnly" value={phoneOnly} onChange={(v) => setPhoneOnly(v)}
                   placeholder="5xxxxxxxx" data-testid="input-phone-only" required
                 />
-                <p className="text-xs text-muted-foreground">رقم الجوال المسجل في حسابك</p>
+                <p className="text-xs text-muted-foreground">{tc("رقم الجوال المسجل في حسابك", "Phone number registered in your account")}</p>
               </div>
-              <SubmitButton label="التالي" testId="button-submit-phone-only" />
+              <SubmitButton label={tc("التالي", "Next")} testId="button-submit-phone-only" />
             </form>
           )}
 
@@ -354,30 +343,30 @@ export default function ForgotPassword() {
             <form onSubmit={handleNameSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="customerName" className="flex items-center gap-2 text-foreground">
-                  <User className="w-4 h-4" /> اسم الحساب
+                  <User className="w-4 h-4" /> {tc("اسم الحساب", "Account Name")}
                 </Label>
                 <Input
                   id="customerName"
-                  placeholder="أدخل اسمك كما هو مسجل في الحساب"
+                  placeholder={tc("أدخل اسمك كما هو مسجل في الحساب", "Enter your name as registered")}
                   value={customerName} onChange={(e) => setCustomerName(e.target.value)}
                   className="bg-secondary border-border focus:border-primary focus:ring-primary/30"
                   data-testid="input-name" required
                 />
                 <p className="text-xs text-muted-foreground">
-                  الاسم الذي أدخلته عند إنشاء حسابك
+                  {tc("الاسم الذي أدخلته عند إنشاء حسابك", "The name you entered when creating your account")}
                 </p>
               </div>
-              <SubmitButton label="تحقق من الهوية" testId="button-submit-name" />
+              <SubmitButton label={tc("تحقق من الهوية", "Verify Identity")} testId="button-submit-name" />
             </form>
           )}
 
           {step === "phone-password" && (
             <form onSubmit={handlePhonePasswordSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-foreground">كلمة المرور الجديدة</Label>
+                <Label className="text-foreground">{tc("كلمة المرور الجديدة", "New Password")}</Label>
                 <div className="relative">
                   <Input
-                    type={showPass ? "text" : "password"} placeholder="أدخل كلمة المرور الجديدة"
+                    type={showPass ? "text" : "password"} placeholder={tc("أدخل كلمة المرور الجديدة", "Enter new password")}
                     value={phonePassword} onChange={(e) => setPhonePassword(e.target.value)}
                     className="bg-secondary border-border focus:border-primary pl-10"
                     data-testid="input-phone-new-password" required
@@ -389,10 +378,10 @@ export default function ForgotPassword() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-foreground">تأكيد كلمة المرور</Label>
+                <Label className="text-foreground">{tc("تأكيد كلمة المرور", "Confirm Password")}</Label>
                 <div className="relative">
                   <Input
-                    type={showConfirm ? "text" : "password"} placeholder="أعد إدخال كلمة المرور"
+                    type={showConfirm ? "text" : "password"} placeholder={tc("أعد إدخال كلمة المرور", "Re-enter password")}
                     value={phoneConfirm} onChange={(e) => setPhoneConfirm(e.target.value)}
                     className="bg-secondary border-border focus:border-primary pl-10"
                     data-testid="input-phone-confirm-password" required
@@ -402,13 +391,12 @@ export default function ForgotPassword() {
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-muted-foreground">كلمة المرور يجب أن تكون 4 أحرف على الأقل</p>
+                <p className="text-xs text-muted-foreground">{tc("كلمة المرور يجب أن تكون 4 أحرف على الأقل", "Password must be at least 4 characters")}</p>
               </div>
-              <SubmitButton label="تغيير كلمة المرور" testId="button-phone-reset-password" />
+              <SubmitButton label={tc("تغيير كلمة المرور", "Change Password")} testId="button-phone-reset-password" />
             </form>
           )}
 
-          {/* ── Bottom links ────────────────────────────────────── */}
           <div className="pt-2 flex items-center justify-between">
             {canGoBack ? (
               <button
@@ -417,7 +405,7 @@ export default function ForgotPassword() {
                 data-testid="button-back"
               >
                 <ArrowRight className="w-4 h-4" />
-                رجوع
+                {tc("رجوع", "Back")}
               </button>
             ) : (
               <span />
@@ -427,7 +415,7 @@ export default function ForgotPassword() {
               className="text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
               data-testid="link-back-to-login"
             >
-              تسجيل الدخول
+              {tc("تسجيل الدخول", "Login")}
             </button>
           </div>
         </CardContent>

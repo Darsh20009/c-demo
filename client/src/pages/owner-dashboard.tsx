@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -56,6 +57,7 @@ const collectionIcons: Record<string, any> = {
 };
 
 export default function OwnerDashboard() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [employee, setEmployee] = useState<Employee | null>(null);
@@ -127,7 +129,7 @@ export default function OwnerDashboard() {
   const handleDeleteCollection = async (collection: string) => {
     if (deleteConfirm !== 'حذف') {
       toast({
-        title: "خطأ",
+        title: tc("خطأ", "Error"),
         description: "يرجى كتابة 'حذف' للتأكيد",
         variant: "destructive"
       });
@@ -140,7 +142,7 @@ export default function OwnerDashboard() {
       const data = await response.json();
 
       toast({
-        title: "تم الحذف",
+        title: tc("تم الحذف", "Deleted"),
         description: data.message
       });
 
@@ -150,8 +152,8 @@ export default function OwnerDashboard() {
       setDeleteConfirm('');
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "فشل الحذف",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل الحذف", "Delete failed"),
         variant: "destructive"
       });
     } finally {
@@ -164,16 +166,16 @@ export default function OwnerDashboard() {
       await apiRequest('DELETE', `/api/owner/record/${collection}/${id}`);
 
       toast({
-        title: "تم الحذف",
-        description: "تم حذف السجل بنجاح"
+        title: tc("تم الحذف", "Deleted"),
+        description: tc("تم حذف السجل بنجاح", "Record deleted successfully")
       });
 
       fetchCollectionData(collection, currentPage);
       fetchStats();
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "فشل الحذف",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل الحذف", "Delete failed"),
         variant: "destructive"
       });
     }
@@ -182,7 +184,7 @@ export default function OwnerDashboard() {
   const handleResetDatabase = async () => {
     if (resetConfirm !== 'احذف جميع البيانات') {
       toast({
-        title: "خطأ",
+        title: tc("خطأ", "Error"),
         description: "يرجى كتابة العبارة الصحيحة للتأكيد",
         variant: "destructive"
       });
@@ -196,7 +198,7 @@ export default function OwnerDashboard() {
       const data = await response.json();
 
       toast({
-        title: "تم إعادة التعيين",
+        title: tc("تم إعادة التعيين", "Reset Done"),
         description: data.message
       });
 
@@ -205,8 +207,8 @@ export default function OwnerDashboard() {
       setResetConfirm('');
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message || "فشل إعادة التعيين",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("فشل إعادة التعيين", "Reset failed"),
         variant: "destructive"
       });
     }
@@ -265,7 +267,7 @@ export default function OwnerDashboard() {
                     <BarChart3 className="w-5 h-5 text-blue-400" />
                     <div>
                       <p className="text-blue-400 text-2xl font-bold">{stats?.summary.todayOrders || 0}</p>
-                      <p className="text-gray-400 text-xs">طلبات اليوم</p>
+                      <p className="text-gray-400 text-xs">{tc("طلبات اليوم", "Today's Orders")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -279,7 +281,7 @@ export default function OwnerDashboard() {
                       <p className="text-green-400 text-2xl font-bold">
                         {(stats?.summary.totalRevenue || 0).toLocaleString()} <SarIcon />
                       </p>
-                      <p className="text-gray-400 text-xs">إجمالي الإيرادات</p>
+                      <p className="text-gray-400 text-xs">{tc("إجمالي الإيرادات", "Total Revenue")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -293,7 +295,7 @@ export default function OwnerDashboard() {
                       <p className="text-purple-400 text-2xl font-bold">
                         {stats?.collections.customers?.count || 0}
                       </p>
-                      <p className="text-gray-400 text-xs">العملاء</p>
+                      <p className="text-gray-400 text-xs">{tc("العملاء", "Customers")}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -307,7 +309,7 @@ export default function OwnerDashboard() {
                       <p className="text-accent text-2xl font-bold">
                         {stats?.collections.orders?.count || 0}
                       </p>
-                      <p className="text-gray-400 text-xs">الطلبات</p>
+                      <p className="text-gray-400 text-xs">{tc("الطلبات", "Orders")}</p>
                     </div>
                   </div>
                 </CardContent>

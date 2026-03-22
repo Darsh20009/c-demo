@@ -16,6 +16,7 @@ import {
   CheckCircle, XCircle, Navigation, ArrowRight,
   Coffee, RefreshCw, Bike, Car, LogOut
 } from "lucide-react";
+import { useTranslate } from "@/lib/useTranslate";
 
 interface DeliveryOrder {
   id: string;
@@ -47,16 +48,6 @@ interface Driver {
   currentLocation?: { lat: number; lng: number };
 }
 
-const ORDER_STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "في الانتظار", color: "bg-yellow-500" },
-  assigned: { label: "تم التعيين", color: "bg-blue-500" },
-  accepted: { label: "تم القبول", color: "bg-indigo-500" },
-  picked_up: { label: "تم الاستلام", color: "bg-purple-500" },
-  on_the_way: { label: "في الطريق", color: "bg-orange-500" },
-  delivered: { label: "تم التوصيل", color: "bg-green-500" },
-  cancelled: { label: "ملغي", color: "bg-red-500" },
-};
-
 const VEHICLE_ICONS: Record<string, any> = {
   motorcycle: Bike,
   car: Car,
@@ -69,16 +60,27 @@ export default function DriverPortal() {
   const [isOnline, setIsOnline] = useState(false);
   const [activeTab, setActiveTab] = useState("active");
   const { toast } = useToast();
+  const tc = useTranslate();
+
+  const ORDER_STATUS_LABELS: Record<string, { label: string; color: string }> = {
+    pending:    { label: tc("في الانتظار", "Pending"),      color: "bg-yellow-500" },
+    assigned:   { label: tc("تم التعيين", "Assigned"),      color: "bg-blue-500" },
+    accepted:   { label: tc("تم القبول", "Accepted"),       color: "bg-indigo-500" },
+    picked_up:  { label: tc("تم الاستلام", "Picked Up"),    color: "bg-purple-500" },
+    on_the_way: { label: tc("في الطريق", "On the Way"),     color: "bg-orange-500" },
+    delivered:  { label: tc("تم التوصيل", "Delivered"),     color: "bg-green-500" },
+    cancelled:  { label: tc("ملغي", "Cancelled"),           color: "bg-red-500" },
+  };
 
   useEffect(() => {
-    document.title = "بوابة المندوب - QIROX Systems";
+    document.title = tc("بوابة المندوب - QIROX Systems", "Driver Portal - QIROX Systems");
     const storedDriver = localStorage.getItem("currentDriver");
     if (storedDriver) {
       const driverData = JSON.parse(storedDriver);
       setDriver(driverData);
       setIsOnline(driverData.status === "available");
     }
-  }, []);
+  }, [tc]);
 
   const { data: ordersData, isLoading: loadingOrders, refetch: refetchOrders } = useQuery({
     queryKey: ['/api/delivery/orders/driver', driver?.id],
@@ -92,10 +94,10 @@ export default function DriverPortal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/delivery/orders/driver'] });
       refetchOrders();
-      toast({ title: "تم التحديث", description: "تم تحديث حالة الطلب" });
+      toast({ title: tc("تم التحديث", "Updated"), description: tc("تم تحديث حالة الطلب", "Order status updated") });
     },
     onError: () => {
-      toast({ title: "خطأ", description: "فشل في تحديث الحالة", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: tc("فشل في تحديث الحالة", "Failed to update status"), variant: "destructive" });
     },
   });
 
@@ -112,8 +114,8 @@ export default function DriverPortal() {
         localStorage.setItem("currentDriver", JSON.stringify(updatedDriver));
       }
       toast({ 
-        title: status === "available" ? "أنت متصل الآن" : "أنت غير متصل",
-        description: status === "available" ? "يمكنك استلام طلبات جديدة" : "لن تستلم طلبات جديدة"
+        title: status === "available" ? tc("أنت متصل الآن", "You are now online") : tc("أنت غير متصل", "You are now offline"),
+        description: status === "available" ? tc("يمكنك استلام طلبات جديدة", "You can receive new orders") : tc("لن تستلم طلبات جديدة", "You will not receive new orders")
       });
     },
   });
@@ -147,12 +149,12 @@ export default function DriverPortal() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Truck className="w-16 h-16 mx-auto text-primary mb-4" />
-            <CardTitle>بوابة المندوب</CardTitle>
-            <CardDescription>يرجى تسجيل الدخول للمتابعة</CardDescription>
+            <CardTitle>{tc("بوابة المندوب", "Driver Portal")}</CardTitle>
+            <CardDescription>{tc("يرجى تسجيل الدخول للمتابعة", "Please sign in to continue")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={() => setLocation("/driver/login")} data-testid="button-driver-login">
-              تسجيل الدخول
+              {tc("تسجيل الدخول", "Sign In")}
             </Button>
           </CardContent>
         </Card>
@@ -184,9 +186,9 @@ export default function DriverPortal() {
                 />
                 <Label htmlFor="online-status" className="text-sm">
                   {isOnline ? (
-                    <span className="text-green-600 font-medium">متصل</span>
+                    <span className="text-green-600 font-medium">{tc("متصل", "Online")}</span>
                   ) : (
-                    <span className="text-muted-foreground">غير متصل</span>
+                    <span className="text-muted-foreground">{tc("غير متصل", "Offline")}</span>
                   )}
                 </Label>
               </div>
@@ -204,7 +206,7 @@ export default function DriverPortal() {
             <CardContent className="p-4 text-center">
               <Package className="w-8 h-8 mx-auto text-blue-600 mb-2" />
               <p className="text-2xl font-bold text-blue-600">{activeOrders.length}</p>
-              <p className="text-xs text-muted-foreground">طلبات نشطة</p>
+              <p className="text-xs text-muted-foreground">{tc("طلبات نشطة", "Active Orders")}</p>
             </CardContent>
           </Card>
           <Card className="bg-green-50 dark:bg-green-950/20">
@@ -213,7 +215,7 @@ export default function DriverPortal() {
               <p className="text-2xl font-bold text-green-600">
                 {completedOrders.filter((o: DeliveryOrder) => o.status === "delivered").length}
               </p>
-              <p className="text-xs text-muted-foreground">تم التوصيل</p>
+              <p className="text-xs text-muted-foreground">{tc("تم التوصيل", "Delivered")}</p>
             </CardContent>
           </Card>
           <Card className="bg-orange-50 dark:bg-orange-950/20">
@@ -222,26 +224,26 @@ export default function DriverPortal() {
               <p className="text-2xl font-bold text-orange-600">
                 {orders.filter((o: DeliveryOrder) => o.status === "on_the_way").length}
               </p>
-              <p className="text-xs text-muted-foreground">في الطريق</p>
+              <p className="text-xs text-muted-foreground">{tc("في الطريق", "On the Way")}</p>
             </CardContent>
           </Card>
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">الطلبات</h2>
+          <h2 className="text-xl font-bold">{tc("الطلبات", "Orders")}</h2>
           <Button variant="outline" size="sm" onClick={() => refetchOrders()} data-testid="button-refresh">
             <RefreshCw className="w-4 h-4 ml-2" />
-            تحديث
+            {tc("تحديث", "Refresh")}
           </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="active">
-              نشطة ({activeOrders.length})
+              {tc("نشطة", "Active")} ({activeOrders.length})
             </TabsTrigger>
             <TabsTrigger value="completed">
-              مكتملة ({completedOrders.length})
+              {tc("مكتملة", "Completed")} ({completedOrders.length})
             </TabsTrigger>
           </TabsList>
 
@@ -250,8 +252,8 @@ export default function DriverPortal() {
               <LoadingState />
             ) : activeOrders.length === 0 ? (
               <EmptyState 
-                title="لا توجد طلبات نشطة" 
-                description={isOnline ? "انتظر طلبات جديدة" : "قم بتفعيل حالة الاتصال لاستلام الطلبات"}
+                title={tc("لا توجد طلبات نشطة", "No Active Orders")}
+                description={isOnline ? tc("انتظر طلبات جديدة", "Wait for new orders") : tc("قم بتفعيل حالة الاتصال لاستلام الطلبات", "Go online to receive orders")}
               />
             ) : (
               activeOrders.map((order: DeliveryOrder) => (
@@ -260,6 +262,8 @@ export default function DriverPortal() {
                   order={order} 
                   onStatusChange={handleStatusChange}
                   isPending={updateStatusMutation.isPending}
+                  statusLabels={ORDER_STATUS_LABELS}
+                  tc={tc}
                 />
               ))
             )}
@@ -267,7 +271,7 @@ export default function DriverPortal() {
 
           <TabsContent value="completed" className="space-y-4">
             {completedOrders.length === 0 ? (
-              <EmptyState title="لا توجد طلبات مكتملة" description="ستظهر هنا الطلبات المكتملة" />
+              <EmptyState title={tc("لا توجد طلبات مكتملة", "No Completed Orders")} description={tc("ستظهر هنا الطلبات المكتملة", "Completed orders will appear here")} />
             ) : (
               completedOrders.slice(0, 20).map((order: DeliveryOrder) => (
                 <OrderCard 
@@ -276,6 +280,8 @@ export default function DriverPortal() {
                   onStatusChange={handleStatusChange}
                   isPending={updateStatusMutation.isPending}
                   isCompleted
+                  statusLabels={ORDER_STATUS_LABELS}
+                  tc={tc}
                 />
               ))
             )}
@@ -290,15 +296,19 @@ function OrderCard({
   order, 
   onStatusChange, 
   isPending,
-  isCompleted = false 
+  isCompleted = false,
+  statusLabels,
+  tc,
 }: { 
   order: DeliveryOrder; 
   onStatusChange: (orderId: string, status: string) => void;
   isPending: boolean;
   isCompleted?: boolean;
+  statusLabels: Record<string, { label: string; color: string }>;
+  tc: (ar: string, en: string) => string;
 }) {
   const orderId = order.id || "";
-  const statusInfo = ORDER_STATUS_LABELS[order.status] || { label: order.status, color: "bg-gray-500" };
+  const statusInfo = statusLabels[order.status] || { label: order.status, color: "bg-gray-500" };
 
   const getNextStatus = (currentStatus: string): string | null => {
     const flow: Record<string, string> = {
@@ -312,10 +322,10 @@ function OrderCard({
 
   const getNextStatusLabel = (status: string): string => {
     const labels: Record<string, string> = {
-      accepted: "قبول الطلب",
-      picked_up: "تم الاستلام",
-      on_the_way: "بدء التوصيل",
-      delivered: "تم التوصيل",
+      accepted:  tc("قبول الطلب", "Accept Order"),
+      picked_up: tc("تم الاستلام", "Picked Up"),
+      on_the_way: tc("بدء التوصيل", "Start Delivery"),
+      delivered: tc("تم التوصيل", "Delivered"),
     };
     return labels[status] || status;
   };
@@ -329,7 +339,7 @@ function OrderCard({
         <div className="flex items-start justify-between mb-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-bold text-lg">طلب {order.orderNumber || orderId.slice(-6)}</span>
+              <span className="font-bold text-lg">{tc("طلب", "Order")} {order.orderNumber || orderId.slice(-6)}</span>
               <Badge className={`${statusInfo.color} text-white`}>
                 {statusInfo.label}
               </Badge>
@@ -343,7 +353,7 @@ function OrderCard({
             {order.estimatedMinutes && (
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {order.estimatedMinutes} دقيقة
+                {order.estimatedMinutes} {tc("دقيقة", "min")}
               </p>
             )}
           </div>
@@ -370,7 +380,7 @@ function OrderCard({
           <div className="bg-muted/50 rounded-lg p-3 mb-4">
             <p className="text-sm font-medium mb-2 flex items-center gap-2">
               <Coffee className="w-4 h-4" />
-              المنتجات
+              {tc("المنتجات", "Products")}
             </p>
             <div className="space-y-1">
               {order.items.map((item, idx) => (
@@ -396,7 +406,7 @@ function OrderCard({
                 data-testid={`button-navigate-${orderId}`}
               >
                 <Navigation className="w-4 h-4 ml-2" />
-                الملاحة
+                {tc("الملاحة", "Navigate")}
               </Button>
             )}
             {nextStatus && (

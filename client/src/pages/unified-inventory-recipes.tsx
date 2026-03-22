@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -109,25 +110,26 @@ interface Branch {
 }
 
 const unitLabels: Record<string, string> = {
-  g: "جرام",
-  kg: "كيلو",
-  ml: "مل",
-  l: "لتر",
-  pcs: "قطعة",
-  piece: "قطعة",
-  box: "صندوق",
-  bag: "كيس",
+  g: tc("جرام", "g"),
+  kg: tc("كيلو", "kg"),
+  ml: tc("مل", "ml"),
+  l: tc("لتر", "L"),
+  pcs: tc("قطعة", "pcs"),
+  piece: tc("قطعة", "pcs"),
+  box: tc("صندوق", "box"),
+  bag: tc("كيس", "bag"),
 };
 
 const categoryLabels: Record<string, { label: string; icon: any; color: string }> = {
-  coffee: { label: "قهوة", icon: Coffee, color: "text-accent" },
-  dairy: { label: "ألبان", icon: Droplet, color: "text-blue-500" },
-  packaging: { label: "تغليف", icon: Box, color: "text-muted-foreground" },
-  sweetener: { label: "محليات", icon: Droplet, color: "text-yellow-500" },
-  other: { label: "أخرى", icon: Package, color: "text-muted-foreground" },
+  coffee: { label: tc("قهوة", "Coffee"), icon: Coffee, color: "text-accent" },
+  dairy: { label: tc("ألبان", "Dairy"), icon: Droplet, color: "text-blue-500" },
+  packaging: { label: tc("تغليف", "Packaging"), icon: Box, color: "text-muted-foreground" },
+  sweetener: { label: tc("محليات", "Sweeteners"), icon: Droplet, color: "text-yellow-500" },
+  other: { label: tc("أخرى", "Other"), icon: Package, color: "text-muted-foreground" },
 };
 
 export default function UnifiedInventoryRecipesPage() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
@@ -177,10 +179,10 @@ export default function UnifiedInventoryRecipesPage() {
         nameAr: "", nameEn: "", sku: "", unit: "g",
         unitCost: "", currentStock: "", minStockThreshold: "", category: "other"
       });
-      toast({ title: "تمت إضافة المادة بنجاح" });
+      toast({ title: tc("تمت إضافة المادة بنجاح", "Ingredient added successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في إضافة المادة", variant: "destructive" });
+      toast({ title: tc("فشل في إضافة المادة", "Failed to add ingredient"), variant: "destructive" });
     },
   });
 
@@ -219,11 +221,11 @@ export default function UnifiedInventoryRecipesPage() {
       ? (item.currentStock / (item.minStockThreshold * 2)) * 100 
       : 100;
     if (item.currentStock <= item.minStockThreshold) {
-      return { status: "critical", color: "bg-red-500", text: "منخفض جداً", percentage: Math.min(percentage, 100) };
+      return { status: "critical", color: "bg-red-500", text: tc("منخفض جداً", "Very Low"), percentage: Math.min(percentage, 100) };
     } else if (item.currentStock <= item.minStockThreshold * 1.5) {
-      return { status: "warning", color: "bg-primary", text: "منخفض", percentage: Math.min(percentage, 100) };
+      return { status: "warning", color: "bg-primary", text: tc("منخفض", "Low"), percentage: Math.min(percentage, 100) };
     }
-    return { status: "good", color: "bg-green-500", text: "جيد", percentage: Math.min(percentage, 100) };
+    return { status: "good", color: "bg-green-500", text: tc("جيد", "Good"), percentage: Math.min(percentage, 100) };
   };
 
   return (
@@ -257,7 +259,7 @@ export default function UnifiedInventoryRecipesPage() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
-              placeholder="بحث في المواد..."
+              placeholder={tc("بحث في المواد...", "Search ingredients...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pr-10"
@@ -265,23 +267,23 @@ export default function UnifiedInventoryRecipesPage() {
           </div>
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
             <SelectTrigger className="w-40">
-              <SelectValue placeholder="الفئة" />
+              <SelectValue placeholder={tc("الفئة", "Category")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الفئات</SelectItem>
-              <SelectItem value="coffee">قهوة</SelectItem>
-              <SelectItem value="dairy">ألبان</SelectItem>
-              <SelectItem value="packaging">تغليف</SelectItem>
-              <SelectItem value="sweetener">محليات</SelectItem>
-              <SelectItem value="other">أخرى</SelectItem>
+              <SelectItem value="all">{tc("جميع الفئات", "All Categories")}</SelectItem>
+              <SelectItem value="coffee">{tc("قهوة", "Coffee")}</SelectItem>
+              <SelectItem value="dairy">{tc("ألبان", "Dairy")}</SelectItem>
+              <SelectItem value="packaging">{tc("تغليف", "Packaging")}</SelectItem>
+              <SelectItem value="sweetener">{tc("محليات", "Sweeteners")}</SelectItem>
+              <SelectItem value="other">{tc("أخرى", "Other")}</SelectItem>
             </SelectContent>
           </Select>
           <Select value={selectedBranch} onValueChange={setSelectedBranch}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="الفرع" />
+              <SelectValue placeholder={tc("الفرع", "Branch")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الفروع</SelectItem>
+              <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
               {branches.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id || ""}>
                   {branch.nameAr}
@@ -757,11 +759,11 @@ export default function UnifiedInventoryRecipesPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="coffee">قهوة</SelectItem>
-                      <SelectItem value="dairy">ألبان</SelectItem>
-                      <SelectItem value="sweetener">محليات</SelectItem>
-                      <SelectItem value="packaging">تغليف</SelectItem>
-                      <SelectItem value="other">أخرى</SelectItem>
+                      <SelectItem value="coffee">{tc("قهوة", "Coffee")}</SelectItem>
+                      <SelectItem value="dairy">{tc("ألبان", "Dairy")}</SelectItem>
+                      <SelectItem value="sweetener">{tc("محليات", "Sweeteners")}</SelectItem>
+                      <SelectItem value="packaging">{tc("تغليف", "Packaging")}</SelectItem>
+                      <SelectItem value="other">{tc("أخرى", "Other")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

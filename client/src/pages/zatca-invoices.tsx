@@ -113,25 +113,25 @@ interface ZATCASettings {
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  pending: { label: "قيد الانتظار", color: "bg-primary", icon: Clock },
-  submitted: { label: "تم الإرسال", color: "bg-blue-500", icon: Send },
-  accepted: { label: "مقبولة", color: "bg-green-500", icon: CheckCircle },
-  rejected: { label: "مرفوضة", color: "bg-red-500", icon: XCircle },
-  cancelled: { label: "ملغاة", color: "bg-gray-500", icon: XCircle },
+  pending: { label: tc("قيد الانتظار", "Pending"), color: "bg-primary", icon: Clock },
+  submitted: { label: tc("تم الإرسال", "Submitted"), color: "bg-blue-500", icon: Send },
+  accepted: { label: tc("مقبولة", "Accepted"), color: "bg-green-500", icon: CheckCircle },
+  rejected: { label: tc("مرفوضة", "Rejected"), color: "bg-red-500", icon: XCircle },
+  cancelled: { label: tc("ملغاة", "Cancelled"), color: "bg-gray-500", icon: XCircle },
 };
 
 const invoiceTypeLabels: Record<string, string> = {
-  standard: "فاتورة ضريبية",
-  simplified: "فاتورة مبسطة",
-  debit_note: "إشعار مدين",
-  credit_note: "إشعار دائن",
+  standard: tc("فاتورة ضريبية", "Tax Invoice"),
+  simplified: tc("فاتورة مبسطة", "Simplified Invoice"),
+  debit_note: tc("إشعار مدين", "Debit Note"),
+  credit_note: tc("إشعار دائن", "Credit Note"),
 };
 
 const paymentMethodLabels: Record<string, string> = {
-  cash: "نقدي",
-  pos: "بطاقة",
-  bank_transfer: "تحويل بنكي",
-  mada: "مدى",
+  cash: tc("نقدي", "Cash"),
+  pos: tc("بطاقة", "Card"),
+  bank_transfer: tc("تحويل بنكي", "Bank Transfer"),
+  mada: tc("مدى", "Mada"),
   stc_pay: "STC Pay",
   apple_pay: "Apple Pay",
 };
@@ -184,10 +184,10 @@ export default function ZATCAInvoicesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/zatca/invoices"] });
-      toast({ title: "تم إرسال الفاتورة بنجاح" });
+      toast({ title: tc("تم إرسال الفاتورة بنجاح", "Invoice sent successfully") });
     },
     onError: () => {
-      toast({ title: "فشل إرسال الفاتورة", variant: "destructive" });
+      toast({ title: tc("فشل إرسال الفاتورة", "Invoice send failed"), variant: "destructive" });
     },
   });
 
@@ -198,10 +198,10 @@ export default function ZATCAInvoicesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/zatca/settings"] });
       setIsSettingsOpen(false);
-      toast({ title: "✓ تم حفظ إعدادات ZATCA" });
+      toast({ title: tc("✓ تم حفظ إعدادات ZATCA", "✓ ZATCA settings saved") });
     },
     onError: (e: any) => {
-      toast({ title: "فشل في حفظ الإعدادات", description: e.message, variant: "destructive" });
+      toast({ title: tc("فشل في حفظ الإعدادات", "Failed to save settings"), description: e.message, variant: "destructive" });
     },
   });
 
@@ -276,7 +276,7 @@ export default function ZATCAInvoicesPage() {
             <CardContent className="flex items-center gap-4 p-4">
               <AlertTriangle className="w-8 h-8 text-accent" />
               <div>
-                <p className="font-medium text-accent dark:text-accent">لم يتم تكوين إعدادات ZATCA</p>
+                <p className="font-medium text-accent dark:text-accent">{tc("لم يتم تكوين إعدادات ZATCA", "ZATCA settings not configured")}</p>
                 <p className="text-sm text-accent">يرجى إعداد بيانات المنشأة والرقم الضريبي قبل إرسال الفواتير</p>
               </div>
               <Button onClick={() => setIsSettingsOpen(true)} className="mr-auto bg-primary hover:bg-primary">

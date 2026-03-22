@@ -4,16 +4,18 @@ import { motion } from "framer-motion";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function EmployeeSplash() {
   const [, setLocation] = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const tc = useTranslate();
 
   useEffect(() => {
-    document.title = "نظام الموظفين - QIROX Systems | نظام إدارة متكامل";
+    document.title = tc("نظام الموظفين - QIROX Systems | نظام إدارة متكامل", "Employee System - QIROX Systems | Integrated Management");
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'نظام إدارة الموظفين والعمليات في QIROX Systems');
+    if (metaDesc) metaDesc.setAttribute('content', tc('نظام إدارة الموظفين والعمليات في QIROX Systems', 'Employee and operations management system for QIROX Systems'));
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -26,12 +28,11 @@ export default function EmployeeSplash() {
       clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [tc]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#1a2e2b] via-[#1e3530] to-[#12201e] flex items-center justify-center p-6 overflow-hidden relative">
 
-      {/* Background glow blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/20 blur-[100px]"
@@ -45,7 +46,6 @@ export default function EmployeeSplash() {
         />
       </div>
 
-      {/* Unified Card */}
       <motion.div
         className="relative z-10 w-full max-w-sm"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -53,13 +53,9 @@ export default function EmployeeSplash() {
         transition={{ duration: 0.7, ease: "easeOut" }}
       >
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-
-          {/* Top colored band */}
           <div className="h-1.5 w-full bg-gradient-to-r from-primary via-[#4eca9c] to-primary" />
 
           <div className="p-8 flex flex-col items-center gap-6" dir="rtl">
-
-            {/* Logo */}
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
@@ -73,20 +69,17 @@ export default function EmployeeSplash() {
               </div>
             </motion.div>
 
-            {/* Title & subtitle */}
             <div className="text-center">
               <h1 className="text-white font-bold text-2xl tracking-wide mb-1">
                 QIROX Systems
               </h1>
               <p className="text-white/50 text-sm font-cairo">
-                نظام إدارة الموظفين
+                {tc("نظام إدارة الموظفين", "Employee Management System")}
               </p>
             </div>
 
-            {/* Divider */}
             <div className="w-full h-px bg-white/10" />
 
-            {/* Buttons or Loading */}
             {isLoading ? (
               <div className="flex gap-2 py-2">
                 {[0, 1, 2].map((i) => (
@@ -110,7 +103,7 @@ export default function EmployeeSplash() {
                   onClick={() => setLocation("/employee/gateway")}
                   className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/25"
                 >
-                  الدخول للنظام
+                  {tc("الدخول للنظام", "Enter System")}
                 </Button>
 
                 <Button
@@ -130,29 +123,26 @@ export default function EmployeeSplash() {
                     } else {
                       const ua = navigator.userAgent.toLowerCase();
                       if (/iphone|ipad|ipod/.test(ua)) {
-                        alert("لتثبيت النظام على iPhone: اضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'");
+                        alert(tc("لتثبيت النظام على iPhone: اضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'", "To install on iPhone: tap 'Share' then 'Add to Home Screen'"));
                       } else {
-                        alert("لتثبيت النظام: اضغط على القائمة (⋮) ثم 'تثبيت التطبيق'");
+                        alert(tc("لتثبيت النظام: اضغط على القائمة (⋮) ثم 'تثبيت التطبيق'", "To install: tap the menu (⋮) then 'Install App'"));
                       }
                     }
                   }}
                   className="w-full text-white/60 hover:text-white hover:bg-white/5 h-10 rounded-xl font-cairo text-sm"
                 >
                   <Download className="ml-2 h-4 w-4" />
-                  تحميل كتطبيق
+                  {tc("تحميل كتطبيق", "Install as App")}
                 </Button>
               </motion.div>
             )}
-
           </div>
 
-          {/* Footer strip */}
           <div className="px-8 pb-5 text-center">
             <p className="text-white/25 text-xs font-cairo">
-              أهلاً وسهلاً بك في نظام الموظفين
+              {tc("أهلاً وسهلاً بك في نظام الموظفين", "Welcome to the Employee System")}
             </p>
           </div>
-
         </div>
       </motion.div>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -185,27 +186,27 @@ interface DashboardData {
 }
 
 const expenseCategories = [
-  { value: "inventory", label: "المخزون والمواد الخام" },
-  { value: "salaries", label: "الرواتب والأجور" },
-  { value: "rent", label: "الإيجار" },
-  { value: "utilities", label: "المرافق (كهرباء/ماء)" },
-  { value: "marketing", label: "التسويق والإعلان" },
-  { value: "maintenance", label: "الصيانة" },
-  { value: "supplies", label: "المستلزمات" },
-  { value: "other", label: "أخرى" },
+  { value: "inventory", label: tc("المخزون والمواد الخام", "Inventory & Raw Materials") },
+  { value: "salaries", label: tc("الرواتب والأجور", "Salaries & Wages") },
+  { value: "rent", label: tc("الإيجار", "Rent") },
+  { value: "utilities", label: tc("المرافق (كهرباء/ماء)", "Utilities (electricity/water)") },
+  { value: "marketing", label: tc("التسويق والإعلان", "Marketing & Advertising") },
+  { value: "maintenance", label: tc("الصيانة", "Maintenance") },
+  { value: "supplies", label: tc("المستلزمات", "Supplies") },
+  { value: "other", label: tc("أخرى", "Other") },
 ];
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
-  pending: { label: "قيد الانتظار", variant: "secondary" },
-  approved: { label: "معتمد", variant: "default" },
-  rejected: { label: "مرفوض", variant: "destructive" },
-  paid: { label: "مدفوع", variant: "default" },
+  pending: { labelAr: "قيد الانتظار", labelEn: "Pending", label: "Pending", variant: "secondary" },
+  approved: { labelAr: "معتمد", labelEn: "Approved", label: "Approved", variant: "default" },
+  rejected: { labelAr: "مرفوض", labelEn: "Rejected", label: "Rejected", variant: "destructive" },
+  paid: { labelAr: "مدفوع", labelEn: "Paid", label: "Paid", variant: "default" },
 };
 
 const paymentMethodLabels: Record<string, string> = {
-  cash: "نقدي",
-  pos: "شبكة",
-  bank_transfer: "تحويل بنكي",
+  cash: tc("نقدي", "Cash"),
+  pos: tc("شبكة", "POS"),
+  bank_transfer: tc("تحويل بنكي", "Bank Transfer"),
   stc: "STC Pay",
   alinma: "Alinma Pay",
 };
@@ -213,15 +214,16 @@ const paymentMethodLabels: Record<string, string> = {
 const CHART_COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#ec4899'];
 
 const periodLabels: Record<string, string> = {
-  today: 'اليوم',
-  week: 'هذا الأسبوع',
-  month: 'هذا الشهر',
-  year: 'هذه السنة'
+  today: tc('اليوم', 'Today'),
+  week: tc('هذا الأسبوع', 'This Week'),
+  month: tc('هذا الشهر', 'This Month'),
+  year: tc('هذه السنة', 'This Year')
 };
 
 export default function AccountingDashboardPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [activeTab, setActiveTab] = useState("overview");
   const [period, setPeriod] = useState("today");
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
@@ -346,10 +348,10 @@ export default function AccountingDashboardPage() {
         paymentMethod: "cash",
         notes: "",
       });
-      toast({ title: "تم إضافة المصروف بنجاح" });
+      toast({ title: tc("تم إضافة المصروف بنجاح", "Expense added successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في إضافة المصروف", variant: "destructive" });
+      toast({ title: tc("فشل في إضافة المصروف", "Failed to add expense"), variant: "destructive" });
     },
   });
 
@@ -360,10 +362,10 @@ export default function AccountingDashboardPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/accounting/dashboard"] });
-      toast({ title: "تم اعتماد المصروف بنجاح" });
+      toast({ title: tc("تم اعتماد المصروف بنجاح", "Expense approved successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في اعتماد المصروف", variant: "destructive" });
+      toast({ title: tc("فشل في اعتماد المصروف", "Failed to approve expense"), variant: "destructive" });
     },
   });
 
@@ -387,7 +389,7 @@ export default function AccountingDashboardPage() {
 
   const getBranchName = (branchId: string) => {
     const branch = branches.find(b => b.id === branchId);
-    return branch?.nameAr || "غير محدد";
+    return branch?.nameAr || tc("غير محدد", "Unknown");
   };
 
   const sanitizeForExport = (items: any[]) => {
@@ -409,9 +411,9 @@ export default function AccountingDashboardPage() {
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'تقرير');
       XLSX.writeFile(wb, `${filename}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
-      toast({ title: 'تم تصدير التقرير بنجاح', description: 'تم حفظ الملف بصيغة Excel' });
+      toast({ title: tc('تم تصدير التقرير بنجاح', 'Report exported successfully'), description: 'تم حفظ الملف بصيغة Excel' });
     }).catch(() => {
-      toast({ title: 'فشل التصدير', variant: 'destructive' });
+      toast({ title: tc('فشل التصدير', 'Export failed'), variant: 'destructive' });
     });
   };
 
@@ -443,9 +445,9 @@ export default function AccountingDashboardPage() {
       }
       
       doc.save(`${title}_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
-      toast({ title: 'تم تصدير التقرير بنجاح', description: 'تم حفظ الملف بصيغة PDF' });
+      toast({ title: tc('تم تصدير التقرير بنجاح', 'Report exported successfully'), description: 'تم حفظ الملف بصيغة PDF' });
     }).catch(() => {
-      toast({ title: 'فشل التصدير', variant: 'destructive' });
+      toast({ title: tc('فشل التصدير', 'Export failed'), variant: 'destructive' });
     });
   };
 
@@ -557,7 +559,7 @@ export default function AccountingDashboardPage() {
               <SelectValue placeholder="الفرع" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الفروع</SelectItem>
+              <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
               {branches.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id}>
                   {branch.nameAr}
@@ -686,7 +688,7 @@ export default function AccountingDashboardPage() {
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                        <p className="text-muted-foreground text-sm">إجمالي الربح</p>
+                        <p className="text-muted-foreground text-sm">{tc("إجمالي الربح", "Gross Profit")}</p>
                         <p className="text-2xl font-bold text-green-600" data-testid="text-gross-profit">{dashboardData.grossProfit.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground"><SarIcon /></p>
                       </div>
@@ -700,7 +702,7 @@ export default function AccountingDashboardPage() {
                         <p className="text-xs text-muted-foreground">من الإيرادات</p>
                       </div>
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
-                        <p className="text-muted-foreground text-sm">صافي الربح</p>
+                        <p className="text-muted-foreground text-sm">{tc("صافي الربح", "Net Profit")}</p>
                         <p className={`text-2xl font-bold ${dashboardData.netProfit >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
                           {dashboardData.netProfit.toFixed(2)}
                         </p>
@@ -718,15 +720,15 @@ export default function AccountingDashboardPage() {
                     <div className="p-4 bg-muted/50 rounded-lg">
                       <div className="flex flex-col gap-2 text-sm">
                         <div className="flex justify-between">
-                          <span>إجمالي الإيرادات</span>
+                          <span>{tc("إجمالي الإيرادات", "Total Revenue")}</span>
                           <span className="font-medium text-green-600">+{dashboardData.totalRevenue.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between">
-                          <span>ضريبة القيمة المضافة</span>
+                          <span>{tc("ضريبة القيمة المضافة", "VAT")}</span>
                           <span className="font-medium text-accent">-{dashboardData.totalVat.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between">
-                          <span>تكلفة المكونات (COGS)</span>
+                          <span>{tc("تكلفة المكونات (COGS)", "Ingredients Cost (COGS)")}</span>
                           <span className="font-medium text-red-600">-{dashboardData.totalCogs.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between border-t pt-2">
@@ -734,7 +736,7 @@ export default function AccountingDashboardPage() {
                           <span className="font-bold text-green-600">{dashboardData.grossProfit.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between">
-                          <span>المصروفات التشغيلية</span>
+                          <span>{tc("المصروفات التشغيلية", "Operating Expenses")}</span>
                           <span className="font-medium text-red-600">-{dashboardData.totalExpenses.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between border-t pt-2 border-primary">
@@ -913,7 +915,7 @@ export default function AccountingDashboardPage() {
                           <ShoppingCart className="w-6 h-6 text-accent" />
                         </div>
                         <div>
-                          <p className="text-muted-foreground text-sm">عدد الطلبات</p>
+                          <p className="text-muted-foreground text-sm">{tc("عدد الطلبات", "Order Count")}</p>
                           <p className="text-2xl font-bold" data-testid="text-order-count">{dashboardData.orderCount}</p>
                         </div>
                       </div>
@@ -959,7 +961,7 @@ export default function AccountingDashboardPage() {
                           <DollarSign className="w-6 h-6 text-purple-600" />
                         </div>
                         <div>
-                          <p className="text-muted-foreground text-sm">ضريبة القيمة المضافة</p>
+                          <p className="text-muted-foreground text-sm">{tc("ضريبة القيمة المضافة", "VAT")}</p>
                           <p className="text-2xl font-bold">{dashboardData.totalVat.toFixed(2)}</p>
                         </div>
                       </div>
@@ -1224,7 +1226,7 @@ export default function AccountingDashboardPage() {
                       <div className={`p-4 rounded-xl border ${dashboardData.netProfit >= 0 ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800' : 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/20 border-red-200 dark:border-red-800'}`}>
                         <div className="flex items-center gap-2 mb-2">
                           <PiggyBank className={`w-5 h-5 ${dashboardData.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`} />
-                          <span className={`text-sm font-medium ${dashboardData.netProfit >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'}`}>صافي الربح</span>
+                          <span className={`text-sm font-medium ${dashboardData.netProfit >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'}`}>{tc("صافي الربح", "Net Profit")}</span>
                         </div>
                         <p className={`text-2xl font-bold ${dashboardData.netProfit >= 0 ? 'text-blue-800 dark:text-blue-300' : 'text-red-800 dark:text-red-300'}`}>{dashboardData.netProfit.toFixed(2)}</p>
                         <p className={`text-xs ${dashboardData.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}><SarIcon /></p>
@@ -1247,7 +1249,7 @@ export default function AccountingDashboardPage() {
                         </TableHeader>
                         <TableBody>
                           <TableRow>
-                            <TableCell className="font-medium">إجمالي الإيرادات</TableCell>
+                            <TableCell className="font-medium">{tc("إجمالي الإيرادات", "Total Revenue")}</TableCell>
                             <TableCell className="text-green-600 font-bold">{dashboardData.totalRevenue.toFixed(2)} <SarIcon /></TableCell>
                             <TableCell>100%</TableCell>
                           </TableRow>
@@ -1257,7 +1259,7 @@ export default function AccountingDashboardPage() {
                             <TableCell>{dashboardData.totalRevenue > 0 ? ((dashboardData.totalVat / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell className="font-medium">تكلفة المكونات (COGS)</TableCell>
+                            <TableCell className="font-medium">{tc("تكلفة المكونات (COGS)", "Ingredients Cost (COGS)")}</TableCell>
                             <TableCell className="text-accent">{dashboardData.totalCogs.toFixed(2)} <SarIcon /></TableCell>
                             <TableCell>{dashboardData.totalRevenue > 0 ? ((dashboardData.totalCogs / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
@@ -1267,7 +1269,7 @@ export default function AccountingDashboardPage() {
                             <TableCell className="font-medium">{dashboardData.totalRevenue > 0 ? ((dashboardData.grossProfit / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell className="font-medium">المصروفات التشغيلية</TableCell>
+                            <TableCell className="font-medium">{tc("المصروفات التشغيلية", "Operating Expenses")}</TableCell>
                             <TableCell className="text-red-600">{dashboardData.totalExpenses.toFixed(2)} <SarIcon /></TableCell>
                             <TableCell>{dashboardData.totalRevenue > 0 ? ((dashboardData.totalExpenses / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
@@ -1493,7 +1495,7 @@ export default function AccountingDashboardPage() {
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
                         <ShoppingCart className="w-8 h-8 mx-auto mb-2 text-accent" />
                         <p className="text-2xl font-bold">{dashboardData.orderCount}</p>
-                        <p className="text-sm text-muted-foreground">عدد الطلبات</p>
+                        <p className="text-sm text-muted-foreground">{tc("عدد الطلبات", "Order Count")}</p>
                       </div>
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
                         <Receipt className="w-8 h-8 mx-auto mb-2 text-blue-600" />
@@ -1616,7 +1618,7 @@ export default function AccountingDashboardPage() {
                             <TableHead className="text-right">رقم الطلب</TableHead>
                             <TableHead className="text-right">الإجمالي</TableHead>
                             <TableHead className="text-right">تكلفة المكونات</TableHead>
-                            <TableHead className="text-right">هامش الربح</TableHead>
+                            <TableHead className="text-right">{tc("هامش الربح", "Profit Margin")}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>

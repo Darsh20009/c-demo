@@ -69,9 +69,9 @@ export default function ManagerReviewsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews/all"] });
       setReplyDialog(null);
       setReplyText("");
-      toast({ title: "تم إرسال الرد بنجاح" });
+      toast({ title: tc("تم إرسال الرد بنجاح", "Reply sent successfully") });
     },
-    onError: () => toast({ title: "فشل إرسال الرد", variant: "destructive" }),
+    onError: () => toast({ title: tc("فشل إرسال الرد", "Failed to send reply"), variant: "destructive" }),
   });
 
   const reviews = data?.reviews || [];
@@ -87,13 +87,13 @@ export default function ManagerReviewsPage() {
       <div className="container mx-auto p-4 md:p-6 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => setLocation("/manager/dashboard")} className="text-muted-foreground hover:text-foreground" data-testid="btn-back">
-            <ArrowLeft className="w-4 h-4 ml-2" />العودة
+            <ArrowLeft className="w-4 h-4 ml-2" />{tc("العودة", "Back")}
           </Button>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Star className="w-7 h-7 text-amber-400" />{tc("تقييمات العملاء", "Customer Reviews")}
           </h1>
           <Button variant="outline" size="sm" onClick={() => refetch()} className="border-border text-muted-foreground">
-            تحديث
+            {tc("تحديث", "Refresh")}
           </Button>
         </div>
 
@@ -104,7 +104,7 @@ export default function ManagerReviewsPage() {
               <div className="text-center">
                 <p className="text-5xl font-bold text-foreground">{avgRating.toFixed(1)}</p>
                 <StarRating rating={Math.round(avgRating)} />
-                <p className="text-muted-foreground text-xs mt-1">{data?.total || 0} تقييم</p>
+                <p className="text-muted-foreground text-xs mt-1">{data?.total || 0} {tc("تقييم", "reviews")}</p>
               </div>
               <div className="flex-1 space-y-1 min-w-[180px]">
                 {ratingCounts.map(({ rating, count }) => {
@@ -130,15 +130,15 @@ export default function ManagerReviewsPage() {
           <Filter className="w-4 h-4 text-muted-foreground" />
           <Select value={ratingFilter} onValueChange={setRatingFilter}>
             <SelectTrigger className="w-40 bg-background border-border" data-testid="select-rating-filter">
-              <SelectValue placeholder="فلتر التقييم" />
+              <SelectValue placeholder={tc("فلتر التقييم", "Filter by rating")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">الكل</SelectItem>
-              <SelectItem value="5">5 نجوم ⭐⭐⭐⭐⭐</SelectItem>
-              <SelectItem value="4">4 نجوم ⭐⭐⭐⭐</SelectItem>
-              <SelectItem value="3">3 نجوم ⭐⭐⭐</SelectItem>
-              <SelectItem value="2">2 نجوم ⭐⭐</SelectItem>
-              <SelectItem value="1">نجمة واحدة ⭐</SelectItem>
+              <SelectItem value="all">{tc("الكل", "All")}</SelectItem>
+              <SelectItem value="5">5 {tc("نجوم", "stars")} ⭐⭐⭐⭐⭐</SelectItem>
+              <SelectItem value="4">4 {tc("نجوم", "stars")} ⭐⭐⭐⭐</SelectItem>
+              <SelectItem value="3">3 {tc("نجوم", "stars")} ⭐⭐⭐</SelectItem>
+              <SelectItem value="2">2 {tc("نجوم", "stars")} ⭐⭐</SelectItem>
+              <SelectItem value="1">{tc("نجمة واحدة", "1 star")} ⭐</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -148,7 +148,7 @@ export default function ManagerReviewsPage() {
         ) : reviews.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <Star className="w-16 h-16 mx-auto mb-4 opacity-30" />
-            <p>لا توجد تقييمات بعد</p>
+            <p>{tc("لا توجد تقييمات بعد", "No reviews yet")}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -157,10 +157,10 @@ export default function ManagerReviewsPage() {
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
-                      <p className="text-white font-medium">{review.customerName || 'عميل'}</p>
+                      <p className="text-white font-medium">{review.customerName || tc('عميل', 'Customer')}</p>
                       {review.customerPhone && <p className="text-muted-foreground text-xs">{review.customerPhone}</p>}
                       <p className="text-muted-foreground text-xs mt-0.5">
-                        {review.orderNumber ? `طلب #${review.orderNumber}` : ''} · {new Date(review.createdAt).toLocaleDateString('ar-SA')}
+                        {review.orderNumber ? `${tc('طلب', 'Order')} #${review.orderNumber}` : ''} · {new Date(review.createdAt).toLocaleDateString('ar-SA')}
                       </p>
                     </div>
                     <StarRating rating={review.rating} />
@@ -172,7 +172,7 @@ export default function ManagerReviewsPage() {
                     <div className="bg-green-900/30 border border-green-800 rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-1">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-green-400 text-xs font-medium">رد المدير</span>
+                        <span className="text-green-400 text-xs font-medium">{tc("رد المدير", "Manager Reply")}</span>
                       </div>
                       <p className="text-muted-foreground text-sm">{review.managerReply}</p>
                     </div>
@@ -183,7 +183,7 @@ export default function ManagerReviewsPage() {
                       className="border-border text-muted-foreground hover:text-foreground hover:border-primary/50"
                       data-testid={`btn-reply-${review._id}`}
                     >
-                      <MessageSquare className="w-3 h-3 ml-2" />رد على التقييم
+                      <MessageSquare className="w-3 h-3 ml-2" />{tc("رد على التقييم", "Reply to Review")}
                     </Button>
                   )}
                 </CardContent>
@@ -196,12 +196,12 @@ export default function ManagerReviewsPage() {
         <Dialog open={!!replyDialog} onOpenChange={o => !o && setReplyDialog(null)}>
           <DialogContent className="bg-card border-border" dir="rtl">
             <DialogHeader>
-              <DialogTitle className="text-white">الرد على تقييم {replyDialog?.customerName}</DialogTitle>
+              <DialogTitle className="text-white">{tc("الرد على تقييم", "Reply to review by")} {replyDialog?.customerName}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               {replyDialog?.comment && (
                 <div className="bg-card/50 rounded-lg p-3">
-                  <p className="text-muted-foreground text-xs mb-1">تقييم العميل:</p>
+                  <p className="text-muted-foreground text-xs mb-1">{tc("تقييم العميل:", "Customer review:")}</p>
                   <StarRating rating={replyDialog.rating} />
                   <p className="text-muted-foreground text-sm mt-1">"{replyDialog.comment}"</p>
                 </div>
@@ -209,7 +209,7 @@ export default function ManagerReviewsPage() {
               <Textarea
                 value={replyText}
                 onChange={e => setReplyText(e.target.value)}
-                placeholder="اكتب ردك هنا..."
+                placeholder={tc("اكتب ردك هنا...", "Write your reply here...")}
                 className="bg-background border-border resize-none"
                 rows={4}
                 data-testid="textarea-reply"
@@ -221,7 +221,7 @@ export default function ManagerReviewsPage() {
                 data-testid="btn-submit-reply"
               >
                 {replyMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : null}
-                إرسال الرد
+                {tc("إرسال الرد", "Send Reply")}
               </Button>
             </div>
           </DialogContent>

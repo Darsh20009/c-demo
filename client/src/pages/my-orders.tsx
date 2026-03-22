@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -23,6 +24,7 @@ interface OrderDisplay extends OrderType {
 }
 
 function StarRatingInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const tc = useTranslate();
   const [hover, setHover] = useState(0);
   return (
     <div className="flex gap-1 justify-center my-2">
@@ -50,7 +52,7 @@ export default function MyOrders() {
      apiRequest('POST', '/api/reviews/order/' + orderId, {
        rating,
        comment,
-       customerName: (customer as any)?.name || 'عميل',
+       customerName: (customer as any)?.name || tc('عميل', 'Customer'),
        customerId: (customer as any)?.id,
        customerPhone: (customer as any)?.phone,
      }),
@@ -59,14 +61,14 @@ export default function MyOrders() {
      setActiveReview(null);
      setReviewRating(5);
      setReviewComment('');
-     toast({ title: 'شكراً على تقييمك! 🌟' });
+     toast({ title: tc('شكراً على تقييمك! 🌟', 'Thank you for your rating! 🌟') });
    },
    onError: (err: any) => {
-     if (String(err?.message || '').includes('مسبقاً')) {
-       toast({ title: 'لقد قيّمت هذا الطلب مسبقاً' });
+     if (String(err?.message || '').includes(tc('مسبقاً', 'already'))) {
+       toast({ title: tc('لقد قيّمت هذا الطلب مسبقاً', 'You have already rated this order') });
        setActiveReview(null);
      } else {
-       toast({ title: 'فشل إرسال التقييم', variant: 'destructive' });
+       toast({ title: tc('فشل إرسال التقييم', 'Failed to submit rating'), variant: 'destructive' });
      }
    }
  });
@@ -282,18 +284,18 @@ export default function MyOrders() {
                     {order.status === 'completed' && reviewedOrders.has(order.id) && (
                       <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 rounded-lg p-2">
                         <CheckCircle className="w-4 h-4" />
-                        <span className="text-sm font-cairo">شكراً على تقييمك!</span>
+                        <span className="text-sm font-cairo">{tc("شكراً على تقييمك!", "Thank you for your rating!")}</span>
                       </div>
                     )}
 
                     {activeReview === order.id && (
                       <Card className="p-4 bg-card border-border">
-                        <p className="text-center text-accent font-cairo font-semibold mb-2">كيف كانت تجربتك؟</p>
+                        <p className="text-center text-accent font-cairo font-semibold mb-2">{tc("كيف كانت تجربتك؟", "How was your experience?")}</p>
                         <StarRatingInput value={reviewRating} onChange={setReviewRating} />
                         <textarea
                           value={reviewComment}
                           onChange={e => setReviewComment(e.target.value)}
-                          placeholder="أضف تعليقك (اختياري)..."
+                          placeholder={tc("أضف تعليقك (اختياري)...", "Add your comment (optional)...")}
                           className="w-full mt-2 p-2 rounded-lg border border-border bg-background text-sm font-cairo resize-none focus:outline-none focus:border-primary"
                           rows={3}
                           data-testid={'textarea-review-' + order.id}
@@ -305,7 +307,7 @@ export default function MyOrders() {
                             className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-cairo"
                             data-testid={'btn-submit-review-' + order.id}
                           >
-                            {reviewMutation.isPending ? '...' : 'إرسال التقييم'}
+                            {reviewMutation.isPending ? '...' : tc('إرسال التقييم', 'Submit Rating')}
                           </Button>
                           <Button variant="outline" onClick={() => setActiveReview(null)} className="border-border text-muted-foreground font-cairo">
                             إلغاء

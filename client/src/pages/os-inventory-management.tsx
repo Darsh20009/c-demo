@@ -18,7 +18,8 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
-import { Loader2, Plus, Package, Ruler, DollarSign, AlertTriangle } from "lucide-react";
+import { Loader2, Plus, Package, AlertTriangle } from "lucide-react";
+import { useTranslate } from "@/lib/useTranslate";
 
 const ingredientSchema = z.object({
   nameAr: z.string().min(1, "الاسم العربي مطلوب"),
@@ -32,6 +33,7 @@ const ingredientSchema = z.object({
 
 export default function OSInventoryManagement() {
   const { toast } = useToast();
+  const tc = useTranslate();
   const { data: ingredients, isLoading } = useQuery<any[]>({
     queryKey: ["/api/ingredients"],
   });
@@ -56,7 +58,7 @@ export default function OSInventoryManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ingredients"] });
-      toast({ title: "تم الإضافة بنجاح", description: "تم إضافة المادة الخام للمخزون" });
+      toast({ title: tc("تم الإضافة بنجاح", "Added Successfully"), description: tc("تم إضافة المادة الخام للمخزون", "Raw material added to inventory") });
       form.reset();
     },
   });
@@ -64,15 +66,15 @@ export default function OSInventoryManagement() {
   return (
     <div className="p-6 space-y-6 bg-background min-h-screen text-right" dir="rtl">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">إدارة المواد الخام (المخزون الذكي)</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{tc("إدارة المواد الخام (المخزون الذكي)", "Raw Materials Management (Smart Inventory)")}</h1>
         <Package className="w-8 h-8 text-primary" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>إضافة مادة جديدة</CardTitle>
-            <CardDescription>أدخل بيانات المادة الخام لحساب التكاليف والوصفات</CardDescription>
+            <CardTitle>{tc("إضافة مادة جديدة", "Add New Material")}</CardTitle>
+            <CardDescription>{tc("أدخل بيانات المادة الخام لحساب التكاليف والوصفات", "Enter raw material data to calculate costs and recipes")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -82,7 +84,7 @@ export default function OSInventoryManagement() {
                   name="nameAr"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الاسم بالعربي</FormLabel>
+                      <FormLabel>{tc("الاسم بالعربي", "Arabic Name")}</FormLabel>
                       <FormControl><Input {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
@@ -93,17 +95,17 @@ export default function OSInventoryManagement() {
                   name="unit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>وحدة القياس</FormLabel>
+                      <FormLabel>{tc("وحدة القياس", "Unit of Measure")}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger><SelectValue placeholder="اختر الوحدة" /></SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder={tc("اختر الوحدة", "Select unit")} /></SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="g">جرام (g)</SelectItem>
-                          <SelectItem value="ml">مللتر (ml)</SelectItem>
-                          <SelectItem value="pcs">حبة (pcs)</SelectItem>
-                          <SelectItem value="kg">كيلوجرام (kg)</SelectItem>
-                          <SelectItem value="l">لتر (l)</SelectItem>
+                          <SelectItem value="g">{tc("جرام", "Gram")} (g)</SelectItem>
+                          <SelectItem value="ml">{tc("مللتر", "Milliliter")} (ml)</SelectItem>
+                          <SelectItem value="pcs">{tc("حبة", "Piece")} (pcs)</SelectItem>
+                          <SelectItem value="kg">{tc("كيلوجرام", "Kilogram")} (kg)</SelectItem>
+                          <SelectItem value="l">{tc("لتر", "Liter")} (l)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -116,7 +118,7 @@ export default function OSInventoryManagement() {
                     name="unitCost"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>تكلفة الوحدة</FormLabel>
+                        <FormLabel>{tc("تكلفة الوحدة", "Unit Cost")}</FormLabel>
                         <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -127,7 +129,7 @@ export default function OSInventoryManagement() {
                     name="currentStock"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>الكمية الحالية</FormLabel>
+                        <FormLabel>{tc("الكمية الحالية", "Current Stock")}</FormLabel>
                         <FormControl><Input type="number" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
@@ -136,7 +138,7 @@ export default function OSInventoryManagement() {
                 </div>
                 <Button type="submit" className="w-full" disabled={createMutation.isPending}>
                   {createMutation.isPending ? <Loader2 className="animate-spin" /> : <Plus className="ml-2" />}
-                  إضافة للمخزون
+                  {tc("إضافة للمخزون", "Add to Inventory")}
                 </Button>
               </form>
             </Form>
@@ -145,7 +147,7 @@ export default function OSInventoryManagement() {
 
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle>قائمة المواد الخام</CardTitle>
+            <CardTitle>{tc("قائمة المواد الخام", "Raw Materials List")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -154,11 +156,11 @@ export default function OSInventoryManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-right">المادة</TableHead>
-                    <TableHead className="text-right">الوحدة</TableHead>
-                    <TableHead className="text-right">التكلفة</TableHead>
-                    <TableHead className="text-right">المخزون</TableHead>
-                    <TableHead className="text-right">الحالة</TableHead>
+                    <TableHead className="text-right">{tc("المادة", "Material")}</TableHead>
+                    <TableHead className="text-right">{tc("الوحدة", "Unit")}</TableHead>
+                    <TableHead className="text-right">{tc("التكلفة", "Cost")}</TableHead>
+                    <TableHead className="text-right">{tc("المخزون", "Stock")}</TableHead>
+                    <TableHead className="text-right">{tc("الحالة", "Status")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -166,13 +168,13 @@ export default function OSInventoryManagement() {
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.nameAr}</TableCell>
                       <TableCell>{item.unit}</TableCell>
-                      <TableCell>{item.unitCost} ريال</TableCell>
+                      <TableCell>{item.unitCost} {tc("ريال", "SAR")}</TableCell>
                       <TableCell>{item.currentStock}</TableCell>
                       <TableCell>
                         {item.currentStock <= item.minStockThreshold ? (
-                          <span className="text-destructive flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> منخفض</span>
+                          <span className="text-destructive flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> {tc("منخفض", "Low")}</span>
                         ) : (
-                          <span className="text-green-600">جيد</span>
+                          <span className="text-green-600">{tc("جيد", "Good")}</span>
                         )}
                       </TableCell>
                     </TableRow>

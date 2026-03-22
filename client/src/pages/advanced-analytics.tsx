@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -57,11 +58,12 @@ interface AnalyticsResponse {
 }
 
 const PAYMENT_LABELS: Record<string, string> = {
-  cash: "نقدي", card: "بطاقة", pos: "نقطة البيع",
-  loyalty: "نقاط ولاء", wallet: "محفظة", online: "أونلاين", other: "أخرى"
+  cash: tc("نقدي", "Cash"), card: tc("بطاقة", "Card"), pos: tc("نقطة البيع", "POS"),
+  loyalty: tc("نقاط ولاء", "Loyalty"), wallet: tc("محفظة", "Wallet"), online: tc("أونلاين", "Online"), other: tc("أخرى", "Other")
 };
 
 export default function AdvancedAnalyticsPage() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const [period, setPeriod] = useState("today");
   const [activeTab, setActiveTab] = useState("overview");
@@ -123,10 +125,10 @@ export default function AdvancedAnalyticsPage() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">اليوم</SelectItem>
-                <SelectItem value="week">آخر 7 أيام</SelectItem>
-                <SelectItem value="month">هذا الشهر</SelectItem>
-                <SelectItem value="year">هذه السنة</SelectItem>
+                <SelectItem value="today">{tc("اليوم", "Today")}</SelectItem>
+                <SelectItem value="week">{tc("آخر 7 أيام", "Last 7 Days")}</SelectItem>
+                <SelectItem value="month">{tc("هذا الشهر", "This Month")}</SelectItem>
+                <SelectItem value="year">{tc("هذه السنة", "This Year")}</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" size="icon" className="border-border text-muted-foreground" onClick={() => refetch()} data-testid="btn-refresh">
@@ -142,10 +144,10 @@ export default function AdvancedAnalyticsPage() {
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <KPICard title="إجمالي الإيرادات" value={`${(summary?.totalRevenue || 0).toLocaleString()} ر.س`} change={summary?.revenueChange || 0} changeLabel={summary?.changeLabel || ""} icon={DollarSign} gradient="from-green-500 to-emerald-600" />
-              <KPICard title="إجمالي الطلبات" value={(summary?.totalOrders || 0).toLocaleString()} change={summary?.ordersChange || 0} changeLabel={summary?.changeLabel || ""} icon={ShoppingCart} gradient="from-blue-500 to-indigo-600" />
-              <KPICard title="متوسط قيمة الطلب" value={`${(summary?.avgOrderValue || 0).toFixed(1)} ر.س`} change={summary?.avgOrderChange || 0} changeLabel={summary?.changeLabel || ""} icon={Target} gradient="from-purple-500 to-violet-600" />
-              <KPICard title="العملاء الفريدون" value={(summary?.uniqueCustomers || 0).toLocaleString()} change={summary?.customersChange || 0} changeLabel={summary?.changeLabel || ""} icon={Users} gradient="from-primary to-primary/80" />
+              <KPICard title={tc("إجمالي الإيرادات", "Total Revenue")} value={`${(summary?.totalRevenue || 0).toLocaleString()} ر.س`} change={summary?.revenueChange || 0} changeLabel={summary?.changeLabel || ""} icon={DollarSign} gradient="from-green-500 to-emerald-600" />
+              <KPICard title={tc("إجمالي الطلبات", "Total Orders")} value={(summary?.totalOrders || 0).toLocaleString()} change={summary?.ordersChange || 0} changeLabel={summary?.changeLabel || ""} icon={ShoppingCart} gradient="from-blue-500 to-indigo-600" />
+              <KPICard title={tc("متوسط قيمة الطلب", "Avg Order Value")} value={`${(summary?.avgOrderValue || 0).toFixed(1)} ر.س`} change={summary?.avgOrderChange || 0} changeLabel={summary?.changeLabel || ""} icon={Target} gradient="from-purple-500 to-violet-600" />
+              <KPICard title={tc("العملاء الفريدون", "Unique Customers")} value={(summary?.uniqueCustomers || 0).toLocaleString()} change={summary?.customersChange || 0} changeLabel={summary?.changeLabel || ""} icon={Users} gradient="from-primary to-primary/80" />
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -169,7 +171,7 @@ export default function AdvancedAnalyticsPage() {
                   <Card className="bg-gradient-to-br from-blue-900/50 to-indigo-900/50 border-blue-800">
                     <CardContent className="p-6 flex items-center justify-between">
                       <div>
-                        <p className="text-blue-300 text-sm">ساعة الذروة</p>
+                        <p className="text-blue-300 text-sm">{tc("ساعة الذروة", "Peak Hour")}</p>
                         <p className="text-3xl font-bold text-foreground mt-1">{peakHour.hour}:00</p>
                         <p className="text-blue-400 text-sm mt-1">{peakHour.orders} طلب</p>
                       </div>
@@ -179,7 +181,7 @@ export default function AdvancedAnalyticsPage() {
                   <Card className="bg-gradient-to-br from-purple-900/50 to-violet-900/50 border-purple-800">
                     <CardContent className="p-6 flex items-center justify-between">
                       <div>
-                        <p className="text-purple-300 text-sm">الأكثر مبيعاً</p>
+                        <p className="text-purple-300 text-sm">{tc("الأكثر مبيعاً", "Best Seller")}</p>
                         <p className="text-xl font-bold text-foreground mt-1">{topProducts[0]?.nameAr || '—'}</p>
                         <p className="text-purple-400 text-sm mt-1">{topProducts[0]?.qty || 0} حبة</p>
                       </div>

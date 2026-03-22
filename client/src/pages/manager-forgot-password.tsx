@@ -7,10 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function ManagerForgotPassword() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [username, setUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,7 +24,7 @@ export default function ManagerForgotPassword() {
   const handleUsernameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || username.trim().length < 2) {
-      toast({ title: "خطأ", description: "يرجى إدخال اسم المستخدم", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: tc("يرجى إدخال اسم المستخدم", "Please enter your username"), variant: "destructive" });
       return;
     }
     setStep('password');
@@ -31,11 +33,11 @@ export default function ManagerForgotPassword() {
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPassword || newPassword.length < 4) {
-      toast({ title: "خطأ", description: "كلمة المرور يجب أن تكون على الأقل 4 أحرف", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: tc("كلمة المرور يجب أن تكون على الأقل 4 أحرف", "Password must be at least 4 characters"), variant: "destructive" });
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: "خطأ", description: "كلمة المرور غير متطابقة", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: tc("كلمة المرور غير متطابقة", "Passwords do not match"), variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -45,11 +47,11 @@ export default function ManagerForgotPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, newPassword })
       });
-      if (!response.ok) throw new Error("فشل تغيير كلمة المرور");
-      toast({ title: "نجح!", description: "تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن" });
+      if (!response.ok) throw new Error(tc("فشل تغيير كلمة المرور", "Failed to change password"));
+      toast({ title: tc("نجح!", "Success!"), description: tc("تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن", "Password changed successfully. You can sign in now") });
       setTimeout(() => navigate("/manager/login"), 2000);
     } catch (error: any) {
-      toast({ title: "خطأ", description: error.message || "حدث خطأ أثناء تغيير كلمة المرور", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: error.message || tc("حدث خطأ أثناء تغيير كلمة المرور", "An error occurred while changing the password"), variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -62,10 +64,10 @@ export default function ManagerForgotPassword() {
           <div className="flex justify-center">
             <img src={qiroxLogoStaff} alt="QIROX Systems" className="w-16 h-16 object-contain rounded-xl" />
           </div>
-          <CardTitle className="text-2xl font-bold">نسيت كلمة المرور؟</CardTitle>
+          <CardTitle className="text-2xl font-bold">{tc("نسيت كلمة المرور؟", "Forgot Password?")}</CardTitle>
           <CardDescription>
-            {step === 'username' && 'أدخل اسم المستخدم لتغيير كلمة المرور'}
-            {step === 'password' && 'أدخل كلمة المرور الجديدة'}
+            {step === 'username' && tc('أدخل اسم المستخدم لتغيير كلمة المرور', 'Enter your username to change your password')}
+            {step === 'password' && tc('أدخل كلمة المرور الجديدة', 'Enter your new password')}
           </CardDescription>
         </CardHeader>
 
@@ -73,11 +75,11 @@ export default function ManagerForgotPassword() {
           {step === 'username' && (
             <form onSubmit={handleUsernameSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="username">اسم المستخدم</Label>
+                <Label htmlFor="username">{tc("اسم المستخدم", "Username")}</Label>
                 <Input
                   id="username"
                   type="text"
-                  placeholder="أدخل اسم المستخدم الخاص بك"
+                  placeholder={tc("أدخل اسم المستخدم الخاص بك", "Enter your username")}
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   data-testid="input-username"
@@ -86,7 +88,7 @@ export default function ManagerForgotPassword() {
               </div>
               <Button type="submit" className="w-full" data-testid="button-submit-username">
                 <Shield className="w-4 h-4 ml-2" />
-                التحقق من الحساب
+                {tc("التحقق من الحساب", "Verify Account")}
               </Button>
               <Button
                 type="button"
@@ -96,7 +98,7 @@ export default function ManagerForgotPassword() {
                 data-testid="button-back-login"
               >
                 <ArrowRight className="w-4 h-4 ml-2" />
-                العودة لتسجيل الدخول
+                {tc("العودة لتسجيل الدخول", "Back to Login")}
               </Button>
             </form>
           )}
@@ -104,12 +106,12 @@ export default function ManagerForgotPassword() {
           {step === 'password' && (
             <form onSubmit={handlePasswordSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="newPassword">كلمة المرور الجديدة</Label>
+                <Label htmlFor="newPassword">{tc("كلمة المرور الجديدة", "New Password")}</Label>
                 <div className="relative">
                   <Input
                     id="newPassword"
                     type={showNewPassword ? "text" : "password"}
-                    placeholder="أدخل كلمة مرور جديدة"
+                    placeholder={tc("أدخل كلمة مرور جديدة", "Enter new password")}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     data-testid="input-new-password"
@@ -126,12 +128,12 @@ export default function ManagerForgotPassword() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+                <Label htmlFor="confirmPassword">{tc("تأكيد كلمة المرور", "Confirm Password")}</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="أعد إدخال كلمة المرور"
+                    placeholder={tc("أعد إدخال كلمة المرور", "Re-enter password")}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     data-testid="input-confirm-password"
@@ -149,7 +151,7 @@ export default function ManagerForgotPassword() {
 
               <Button type="submit" className="w-full" disabled={loading} data-testid="button-submit-password">
                 <Lock className="w-4 h-4 ml-2" />
-                {loading ? "جارٍ التغيير..." : "تغيير كلمة المرور"}
+                {loading ? tc("جارٍ التغيير...", "Changing...") : tc("تغيير كلمة المرور", "Change Password")}
               </Button>
               <Button
                 type="button"
@@ -159,7 +161,7 @@ export default function ManagerForgotPassword() {
                 data-testid="button-back-step"
               >
                 <ArrowRight className="w-4 h-4 ml-2" />
-                العودة
+                {tc("العودة", "Back")}
               </Button>
             </form>
           )}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useCustomer } from "@/contexts/CustomerContext";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +26,7 @@ import { customerStorage, type CardDesignPreference } from "@/lib/customer-stora
 import SarIcon from "@/components/sar-icon";
 
 export default function CopyCard() {
+  const tc = useTranslate();
   const [, navigate] = useLocation();
   const { customer, logout, isAuthenticated } = useCustomer();
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -171,11 +173,11 @@ export default function CopyCard() {
         setShowPasswordDialog(false);
         setTimeLeft(60);
       } else {
-        alert("كلمة المرور غير صحيحة");
+        alert(tc("كلمة المرور غير صحيحة", "Incorrect password"));
       }
     } catch (error) {
       console.error("Verification error:", error);
-      alert("حدث خطأ أثناء التحقق");
+      alert(tc("حدث خطأ أثناء التحقق", "An error occurred during verification"));
     } finally {
       setIsVerifying(false);
       setPassword("");
@@ -207,10 +209,10 @@ export default function CopyCard() {
   const points = loyaltyCard?.points || customer.points || 0;
 
   const tierNames: Record<string, string> = {
-    bronze: 'برونزي',
-    silver: 'فضي',
-    gold: 'ذهبي',
-    platinum: 'بلاتيني'
+    bronze: tc('برونزي', 'Bronze'),
+    silver: tc('فضي', 'Silver'),
+    gold: tc('ذهبي', 'Gold'),
+    platinum: tc('بلاتيني', 'Platinum')
   };
 
   // Calculate actual average price per drink from completed orders (including all non-cancelled orders)
@@ -363,10 +365,10 @@ export default function CopyCard() {
           data-testid="button-back"
         >
           <ArrowLeft className="w-4 h-4 ml-1.5" />
-          <span className="text-sm">القائمة</span>
+          <span className="text-sm">{tc("القائمة", "Menu")}</span>
         </Button>
 
-        <h1 className="text-xl md:text-2xl font-bold text-accent text-center flex-1">حسابك</h1>
+        <h1 className="text-xl md:text-2xl font-bold text-accent text-center flex-1">{tc("حسابك", "My Account")}</h1>
 
         <div className="flex gap-1 md:gap-2">
           <Button
@@ -377,7 +379,7 @@ export default function CopyCard() {
             data-testid="button-customize-card"
           >
             <Palette className="w-4 h-4 ml-1.5" />
-            <span className="hidden sm:inline text-sm">تخصيص</span>
+            <span className="hidden sm:inline text-sm">{tc("تخصيص", "Customize")}</span>
           </Button>
           <Button
             variant="ghost"
@@ -387,7 +389,7 @@ export default function CopyCard() {
             data-testid="button-logout"
           >
             <LogOut className="w-4 h-4 ml-1.5" />
-            <span className="hidden sm:inline text-sm">خروج</span>
+            <span className="hidden sm:inline text-sm">{tc("خروج", "Sign Out")}</span>
           </Button>
         </div>
       </div>
@@ -530,7 +532,7 @@ export default function CopyCard() {
             data-testid="button-show-card-info"
           >
             <User className="w-4 h-4 md:w-5 md:h-5 text-accent" />
-            <span className="text-[10px] md:text-xs font-bold">معلومات البطاقة</span>
+            <span className="text-[10px] md:text-xs font-bold">{tc("معلومات البطاقة", "Card Info")}</span>
           </Button>
 
           <Button
@@ -540,7 +542,7 @@ export default function CopyCard() {
             data-testid="button-change-password"
           >
             <Smartphone className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
-            <span className="text-[10px] md:text-xs font-bold">تغيير كلمة المرور</span>
+            <span className="text-[10px] md:text-xs font-bold">{tc("تغيير كلمة المرور", "Change Password")}</span>
           </Button>
 
           <Button
@@ -549,7 +551,7 @@ export default function CopyCard() {
             disabled={!loyaltyCard}
             onClick={() => {
               if (loyaltyCard && loyaltyCard.reissuanceCount < 2) {
-                alert("لا يمكنك إلغاء البطاقة إلا إذا كان لديك فرصة لإنشاء بطاقة جديدة");
+                alert(tc("لا يمكنك إلغاء البطاقة إلا إذا كان لديك فرصة لإنشاء بطاقة جديدة", "You cannot cancel the card unless you have a chance to create a new one"));
               } else {
                 setShowCancelDialog(true);
                 setCancelPhone(customer?.phone || "");
@@ -558,7 +560,7 @@ export default function CopyCard() {
             data-testid="button-cancel-card"
           >
             <LogOut className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
-            <span className="text-[10px] md:text-xs font-bold text-red-400">إلغاء البطاقة</span>
+            <span className="text-[10px] md:text-xs font-bold text-red-400">{tc("إلغاء البطاقة", "Cancel Card")}</span>
           </Button>
 
           <Button
@@ -566,7 +568,7 @@ export default function CopyCard() {
             className="h-14 md:h-16 flex flex-col items-center justify-center gap-1 border-green-600/20 bg-green-950/10 text-green-200 hover:bg-green-900/20 active:scale-95 transition-transform"
             onClick={() => {
               if (loyaltyCard && loyaltyCard.reissuanceCount >= 2) {
-                alert("لقد وصلت إلى الحد الأقصى لإصدار بطاقة جديدة (مرتين فقط)");
+                alert(tc("لقد وصلت إلى الحد الأقصى لإصدار بطاقة جديدة (مرتين فقط)", "You have reached the maximum card issuance limit (twice only)"));
               } else {
                 setShowReissueDialog(true);
               }
@@ -574,7 +576,7 @@ export default function CopyCard() {
             data-testid="button-issue-new-card"
           >
             <Award className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
-            <span className="text-[10px] md:text-xs font-bold text-green-400">إصدار بطاقة جديدة</span>
+            <span className="text-[10px] md:text-xs font-bold text-green-400">{tc("إصدار بطاقة جديدة", "Issue New Card")}</span>
           </Button>
         </div>
 
@@ -582,26 +584,26 @@ export default function CopyCard() {
         <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
           <DialogContent className="w-[90%] max-w-[425px] bg-stone-950 border-red-500/30 text-white rounded-2xl">
             <DialogHeader>
-              <DialogTitle className="text-lg md:text-xl font-black text-red-400">إلغاء البطاقة</DialogTitle>
+              <DialogTitle className="text-lg md:text-xl font-black text-red-400">{tc("إلغاء البطاقة", "Cancel Card")}</DialogTitle>
               <DialogDescription className="text-white/60 text-sm">
                 أدخل بيانات حسابك للتحقق من الهوية قبل إلغاء البطاقة
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-3">
               <div className="grid gap-2">
-                <Label htmlFor="cancel-phone" className="text-white/70 text-sm">رقم الهاتف</Label>
+                <Label htmlFor="cancel-phone" className="text-white/70 text-sm">{tc("رقم الهاتف", "Phone Number")}</Label>
                 <Input
                   id="cancel-phone"
                   type="tel"
                   value={cancelPhone}
                   onChange={(e) => setCancelPhone(e.target.value)}
                   className="bg-white/5 border-white/10 text-white focus-visible:ring-red-500 h-11"
-                  placeholder="رقم الهاتف"
+                  placeholder={tc("رقم الهاتف", "Phone Number")}
                   data-testid="input-cancel-phone"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="cancel-email" className="text-white/70 text-sm">البريد الإلكتروني</Label>
+                <Label htmlFor="cancel-email" className="text-white/70 text-sm">{tc("البريد الإلكتروني", "Email")}</Label>
                 <Input
                   id="cancel-email"
                   type="email"
@@ -680,7 +682,7 @@ export default function CopyCard() {
         <Dialog open={showReissueDialog} onOpenChange={setShowReissueDialog}>
           <DialogContent className="w-[90%] max-w-[425px] bg-stone-950 border-primary/30 text-white rounded-2xl">
             <DialogHeader>
-              <DialogTitle className="text-lg md:text-xl font-black text-accent">إصدار بطاقة جديدة</DialogTitle>
+              <DialogTitle className="text-lg md:text-xl font-black text-accent">{tc("إصدار بطاقة جديدة", "Issue New Card")}</DialogTitle>
               <DialogDescription className="text-white/60 text-sm">
                 اختر تصميماً جديداً وحدد رمز PIN للبطاقة الجديدة (متبقي: {loyaltyCard?.reissuanceCount ? 2 - loyaltyCard.reissuanceCount : 2}/2)
               </DialogDescription>

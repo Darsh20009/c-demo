@@ -6,223 +6,225 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Coffee, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslate } from "@/lib/useTranslate";
 
 export default function EmployeeForgotPassword() {
- const [, navigate] = useLocation();
- const { toast } = useToast();
- const [username, setUsername] = useState("");
- const [newPassword, setNewPassword] = useState("");
- const [confirmPassword, setConfirmPassword] = useState("");
- const [showNewPassword, setShowNewPassword] = useState(false);
- const [showConfirmPassword, setShowConfirmPassword] = useState(false);
- const [loading, setLoading] = useState(false);
- const [step, setStep] = useState<'username' | 'password'>('username');
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const tc = useTranslate();
+  const [username, setUsername] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'username' | 'password'>('username');
 
- const handleUsernameSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
- 
- if (!username || username.trim().length < 2) {
- toast({
- title: "خطأ",
- description: "يرجى إدخال اسم المستخدم",
- variant: "destructive"
- });
- return;
- }
+  const handleUsernameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
- setStep('password');
- };
+    if (!username || username.trim().length < 2) {
+      toast({
+        title: tc("خطأ", "Error"),
+        description: tc("يرجى إدخال اسم المستخدم", "Please enter your username"),
+        variant: "destructive"
+      });
+      return;
+    }
 
- const handlePasswordSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
- 
- if (!newPassword || newPassword.length < 4) {
- toast({
- title: "خطأ",
- description: "كلمة المرور يجب أن تكون على الأقل 4 أحرف",
- variant: "destructive"
- });
- return;
- }
+    setStep('password');
+  };
 
- if (newPassword !== confirmPassword) {
- toast({
- title: "خطأ",
- description: "كلمة المرور غير متطابقة",
- variant: "destructive"
- });
- return;
- }
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
- setLoading(true);
+    if (!newPassword || newPassword.length < 4) {
+      toast({
+        title: tc("خطأ", "Error"),
+        description: tc("كلمة المرور يجب أن تكون على الأقل 4 أحرف", "Password must be at least 4 characters"),
+        variant: "destructive"
+      });
+      return;
+    }
 
- try {
- const response = await fetch("/api/employees/reset-password-by-username", {
- method: "POST",
- headers: { "Content-Type": "application/json" },
- body: JSON.stringify({ username, newPassword })
- });
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: tc("خطأ", "Error"),
+        description: tc("كلمة المرور غير متطابقة", "Passwords do not match"),
+        variant: "destructive"
+      });
+      return;
+    }
 
- if (!response.ok) {
- throw new Error("فشل تغيير كلمة المرور");
- }
+    setLoading(true);
 
- toast({
- title: "نجح!",
- description: "تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن",
- });
+    try {
+      const response = await fetch("/api/employees/reset-password-by-username", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, newPassword })
+      });
 
- setTimeout(() => navigate("/employee/login"), 2000);
- } catch (error: any) {
- console.error("Reset password error:", error);
- toast({
- title: "خطأ",
- description: error.message || "حدث خطأ أثناء تغيير كلمة المرور",
- variant: "destructive"
- });
- } finally {
- setLoading(false);
- }
- };
+      if (!response.ok) {
+        throw new Error(tc("فشل تغيير كلمة المرور", "Failed to change password"));
+      }
 
- return (
- <div 
- className="min-h-screen flex items-center justify-center p-4"
- style={{
- background: "linear-gradient(135deg, #1a1410 0%, #2d1810 50%, #1a1410 100%)",
- }}
- dir="rtl"
- >
- <Card className="w-full max-w-md border-primary/30 bg-gradient-to-br from-stone-900/95 to-stone-950/95 backdrop-blur shadow-2xl">
- <CardHeader className="space-y-3 text-center pb-6">
- <div className="flex justify-center">
- <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
- <Coffee className="w-10 h-10 text-white" />
- </div>
- </div>
- <CardTitle className="text-3xl font-bold text-accent">
- نسيت كلمة المرور؟
- </CardTitle>
- <CardDescription className="text-accent/70 text-lg">
- {step === 'username' && 'أدخل اسم المستخدم لتغيير كلمة المرور'}
- {step === 'password' && 'أدخل كلمة المرور الجديدة'}
- </CardDescription>
- </CardHeader>
+      toast({
+        title: tc("نجح!", "Success!"),
+        description: tc("تم تغيير كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن", "Password changed successfully. You can sign in now"),
+      });
 
- <CardContent className="space-y-6">
- {step === 'username' && (
- <form onSubmit={handleUsernameSubmit} className="space-y-5">
- <div className="space-y-2">
- <Label htmlFor="username" className="text-accent">اسم المستخدم</Label>
- <Input
- id="username"
- type="text"
- placeholder="أدخل اسم المستخدم الخاص بك"
- value={username}
- onChange={(e) => setUsername(e.target.value)}
- className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30"
- data-testid="input-username"
- required
- />
- </div>
+      setTimeout(() => navigate("/employee/login"), 2000);
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      toast({
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("حدث خطأ أثناء تغيير كلمة المرور", "An error occurred while changing the password"),
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
- <Button
- type="submit"
- className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
- data-testid="button-submit"
- >
- <div className="flex items-center gap-2">
- <span>التالي</span>
- <ArrowRight className="w-5 h-5" />
- </div>
- </Button>
- </form>
- )}
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: "linear-gradient(135deg, #1a1410 0%, #2d1810 50%, #1a1410 100%)",
+      }}
+      dir="rtl"
+    >
+      <Card className="w-full max-w-md border-primary/30 bg-gradient-to-br from-stone-900/95 to-stone-950/95 backdrop-blur shadow-2xl">
+        <CardHeader className="space-y-3 text-center pb-6">
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
+              <Coffee className="w-10 h-10 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-3xl font-bold text-accent">
+            {tc("نسيت كلمة المرور؟", "Forgot Password?")}
+          </CardTitle>
+          <CardDescription className="text-accent/70 text-lg">
+            {step === 'username' && tc('أدخل اسم المستخدم لتغيير كلمة المرور', 'Enter your username to change your password')}
+            {step === 'password' && tc('أدخل كلمة المرور الجديدة', 'Enter your new password')}
+          </CardDescription>
+        </CardHeader>
 
- {step === 'password' && (
- <form onSubmit={handlePasswordSubmit} className="space-y-5">
- <div className="space-y-2">
- <Label htmlFor="newPassword" className="text-accent">كلمة المرور الجديدة</Label>
- <div className="relative">
- <Input
- id="newPassword"
- type={showNewPassword ? "text" : "password"}
- placeholder="أدخل كلمة المرور الجديدة"
- value={newPassword}
- onChange={(e) => setNewPassword(e.target.value)}
- className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30 pl-10"
- data-testid="input-new-password"
- required
- />
- <button
- type="button"
- onClick={() => setShowNewPassword(!showNewPassword)}
- className="absolute left-3 top-2.5 text-accent hover:text-accent"
- data-testid="button-toggle-new-password"
- >
- {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
- </button>
- </div>
- </div>
+        <CardContent className="space-y-6">
+          {step === 'username' && (
+            <form onSubmit={handleUsernameSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-accent">{tc("اسم المستخدم", "Username")}</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder={tc("أدخل اسم المستخدم الخاص بك", "Enter your username")}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30"
+                  data-testid="input-username"
+                  required
+                />
+              </div>
 
- <div className="space-y-2">
- <Label htmlFor="confirmPassword" className="text-accent">تأكيد كلمة المرور</Label>
- <div className="relative">
- <Input
- id="confirmPassword"
- type={showConfirmPassword ? "text" : "password"}
- placeholder="أعد إدخال كلمة المرور"
- value={confirmPassword}
- onChange={(e) => setConfirmPassword(e.target.value)}
- className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30 pl-10"
- data-testid="input-confirm-password"
- required
- />
- <button
- type="button"
- onClick={() => setShowConfirmPassword(!showConfirmPassword)}
- className="absolute left-3 top-2.5 text-accent hover:text-accent"
- data-testid="button-toggle-confirm-password"
- >
- {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
- </button>
- </div>
- <p className="text-xs text-accent/50 mt-1">
- كلمة المرور يجب أن تكون على الأقل 4 أحرف
- </p>
- </div>
+              <Button
+                type="submit"
+                className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
+                data-testid="button-submit"
+              >
+                <div className="flex items-center gap-2">
+                  <span>{tc("التالي", "Next")}</span>
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+              </Button>
+            </form>
+          )}
 
- <Button
- type="submit"
- disabled={loading}
- className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
- data-testid="button-reset-password"
- >
- {loading ? "جارٍ التغيير..." : "تغيير كلمة المرور"}
- </Button>
- </form>
- )}
+          {step === 'password' && (
+            <form onSubmit={handlePasswordSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword" className="text-accent">{tc("كلمة المرور الجديدة", "New Password")}</Label>
+                <div className="relative">
+                  <Input
+                    id="newPassword"
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder={tc("أدخل كلمة المرور الجديدة", "Enter new password")}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30 pl-10"
+                    data-testid="input-new-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute left-3 top-2.5 text-accent hover:text-accent"
+                    data-testid="button-toggle-new-password"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
 
- <div className="pt-4 text-center">
- <button
- type="button"
- onClick={() => {
- if (step === 'password') {
- setStep('username');
- setNewPassword("");
- setConfirmPassword("");
- } else {
- navigate("/employee/login");
- }
- }}
- className="text-accent hover:text-accent text-sm"
- data-testid="button-back"
- >
- {step === 'password' ? "رجوع" : "العودة لتسجيل الدخول"}
- </button>
- </div>
- </CardContent>
- </Card>
- </div>
- );
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-accent">{tc("تأكيد كلمة المرور", "Confirm Password")}</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder={tc("أعد إدخال كلمة المرور", "Re-enter password")}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="bg-stone-800/50 border-primary/50 text-accent placeholder:text-accent/40 focus:border-primary focus:ring-amber-600/30 pl-10"
+                    data-testid="input-confirm-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute left-3 top-2.5 text-accent hover:text-accent"
+                    data-testid="button-toggle-confirm-password"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-xs text-accent/50 mt-1">
+                  {tc("كلمة المرور يجب أن تكون على الأقل 4 أحرف", "Password must be at least 4 characters")}
+                </p>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
+                data-testid="button-reset-password"
+              >
+                {loading ? tc("جارٍ التغيير...", "Changing...") : tc("تغيير كلمة المرور", "Change Password")}
+              </Button>
+            </form>
+          )}
+
+          <div className="pt-4 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                if (step === 'password') {
+                  setStep('username');
+                  setNewPassword("");
+                  setConfirmPassword("");
+                } else {
+                  navigate("/employee/login");
+                }
+              }}
+              className="text-accent hover:text-accent text-sm"
+              data-testid="button-back"
+            >
+              {step === 'password' ? tc("رجوع", "Back") : tc("العودة لتسجيل الدخول", "Back to Login")}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

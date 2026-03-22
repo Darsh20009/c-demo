@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -95,31 +96,31 @@ interface Branch {
 }
 
 const unitLabels: Record<string, string> = {
-  kg: "كجم",
-  g: "جرام",
-  liter: "لتر",
-  ml: "مل",
-  piece: "قطعة",
-  box: "صندوق",
-  bag: "كيس",
+  kg: tc("كجم", "kg"),
+  g: tc("جرام", "g"),
+  liter: tc("لتر", "L"),
+  ml: tc("مل", "ml"),
+  piece: tc("قطعة", "pcs"),
+  box: tc("صندوق", "box"),
+  bag: tc("كيس", "bag"),
 };
 
 const unitLabelsFull: Record<string, string> = {
-  kg: "كيلوجرام",
-  g: "جرام",
-  liter: "لتر",
-  ml: "ملليلتر",
-  piece: "قطعة",
-  box: "صندوق",
-  bag: "كيس",
+  kg: tc("كيلوجرام", "kilogram"),
+  g: tc("جرام", "g"),
+  liter: tc("لتر", "L"),
+  ml: tc("ملليلتر", "milliliter"),
+  piece: tc("قطعة", "pcs"),
+  box: tc("صندوق", "box"),
+  bag: tc("كيس", "bag"),
 };
 
 const formatQuantity = (quantity: number, unit: string): string => {
   if (unit === "kg") {
-    return quantity >= 1 ? `${quantity.toFixed(1)} كجم` : `${(quantity * 1000).toFixed(0)} جرام`;
+    return quantity >= 1 ? `${quantity.toFixed(1)} kg` : `${(quantity * 1000).toFixed(0)} g`;
   }
   if (unit === "liter") {
-    return quantity >= 1 ? `${quantity.toFixed(1)} لتر` : `${(quantity * 1000).toFixed(0)} مل`;
+    return quantity >= 1 ? `${quantity.toFixed(1)} L` : `${(quantity * 1000).toFixed(0)} ml`;
   }
   if (unit === "g" || unit === "ml") {
     return `${quantity.toFixed(0)} ${unitLabels[unit]}`;
@@ -128,17 +129,18 @@ const formatQuantity = (quantity: number, unit: string): string => {
 };
 
 const categoryLabels: Record<string, string> = {
-  coffee: "قهوة",
-  dairy: "ألبان",
-  syrups: "شراب",
-  cups: "أكواب",
-  chocolate: "شوكولاتة",
-  tea: "شاي",
-  other: "أخرى",
+  coffee: tc("قهوة", "Coffee"),
+  dairy: tc("ألبان", "Dairy"),
+  syrups: tc("شراب", "Syrups"),
+  cups: tc("أكواب", "Cups"),
+  chocolate: tc("شوكولاتة", "Chocolate"),
+  tea: tc("شاي", "Tea"),
+  other: tc("أخرى", "Other"),
 };
 
 export default function IngredientsRecipesInventoryPage() {
   const { toast } = useToast();
+  const tc = useTranslate();
   const [activeTab, setActiveTab] = useState("stock");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
@@ -196,10 +198,10 @@ export default function IngredientsRecipesInventoryPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/raw-items"] });
       setIsAddItemOpen(false);
       setNewItem({ nameAr: "", unit: "kg", unitCost: "", category: "ingredient", minimumStock: "10" });
-      toast({ title: "تم إضافة المكون بنجاح" });
+      toast({ title: tc("تم إضافة المكون بنجاح", "Ingredient added successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في إضافة المكون", variant: "destructive" });
+      toast({ title: tc("فشل في إضافة المكون", "Failed to add ingredient"), variant: "destructive" });
     },
   });
 
@@ -210,10 +212,10 @@ export default function IngredientsRecipesInventoryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/raw-items"] });
       setEditingItem(null);
-      toast({ title: "تم تحديث المكون بنجاح" });
+      toast({ title: tc("تم تحديث المكون بنجاح", "Ingredient updated successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في تحديث المكون", variant: "destructive" });
+      toast({ title: tc("فشل في تحديث المكون", "Failed to update ingredient"), variant: "destructive" });
     },
   });
 
@@ -224,34 +226,34 @@ export default function IngredientsRecipesInventoryPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/raw-items"] });
       setDeletingItemId(null);
-      toast({ title: "تم حذف المكون بنجاح" });
+      toast({ title: tc("تم حذف المكون بنجاح", "Ingredient deleted successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في حذف المكون", variant: "destructive" });
+      toast({ title: tc("فشل في حذف المكون", "Failed to delete ingredient"), variant: "destructive" });
     },
   });
 
   const addStockMutation = useMutation({
     mutationFn: async (data: { rawItemId: string; quantity: number }) => {
       if (selectedBranch === "all") {
-        throw new Error("اختر فرع محدد أولاً");
+        throw new Error(tc("اختر فرع محدد أولاً", "Please select a specific branch first"));
       }
       return apiRequest("POST", "/api/stock-movements", {
         branchId: selectedBranch,
         rawItemId: data.rawItemId,
         movementType: "purchase",
         quantity: data.quantity,
-        notes: "إضافة مخزون",
+        notes: tc("إضافة مخزون", "Add Stock"),
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/branch-stock"] });
       setAddStockItem(null);
       setAddStockQuantity("");
-      toast({ title: "تم إضافة المخزون بنجاح" });
+      toast({ title: tc("تم إضافة المخزون بنجاح", "Stock added successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في إضافة المخزون", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في إضافة المخزون", "Failed to add stock"), variant: "destructive" });
     },
   });
 
@@ -292,10 +294,10 @@ export default function IngredientsRecipesInventoryPage() {
       setIsEditRecipeOpen(false);
       setEditingRecipeDrink(null);
       setRecipeIngredients([]);
-      toast({ title: "تم حفظ الوصفة بنجاح" });
+      toast({ title: tc("تم حفظ الوصفة بنجاح", "Recipe saved successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في حفظ الوصفة", variant: "destructive" });
+      toast({ title: tc("فشل في حفظ الوصفة", "Failed to save recipe"), variant: "destructive" });
     },
   });
 
@@ -369,7 +371,7 @@ export default function IngredientsRecipesInventoryPage() {
     if (!addStockItem || !addStockQuantity) return;
     const qty = parseFloat(addStockQuantity);
     if (qty <= 0) {
-      toast({ title: "أدخل كمية صحيحة", variant: "destructive" });
+      toast({ title: tc("أدخل كمية صحيحة", "Enter a valid quantity"), variant: "destructive" });
       return;
     }
     addStockMutation.mutate({ rawItemId: addStockItem.id, quantity: qty });
@@ -396,7 +398,7 @@ export default function IngredientsRecipesInventoryPage() {
       ing => ing.rawItemId && ing.quantity && parseFloat(ing.quantity) > 0
     );
     if (validIngredients.length === 0) {
-      toast({ title: "أضف مكون واحد على الأقل", variant: "destructive" });
+      toast({ title: tc("أضف مكون واحد على الأقل", "Add at least one ingredient"), variant: "destructive" });
       return;
     }
     saveRecipeMutation.mutate({
@@ -441,16 +443,16 @@ export default function IngredientsRecipesInventoryPage() {
             <Button variant="ghost" size="icon" onClick={() => window.history.back()} data-testid="button-back">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-bold">المخزون والوصفات</h1>
+            <h1 className="text-xl font-bold">{tc("المخزون والوصفات", "Inventory & Recipes")}</h1>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
             <Select value={selectedBranch} onValueChange={setSelectedBranch}>
               <SelectTrigger className="w-40" data-testid="select-branch">
-                <SelectValue placeholder="الفرع" />
+                <SelectValue placeholder={tc("الفرع", "Branch")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الفروع</SelectItem>
+                <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
                 {branches.map(branch => (
                   <SelectItem key={branch.id} value={branch.id}>{branch.nameAr}</SelectItem>
                 ))}
@@ -473,7 +475,7 @@ export default function IngredientsRecipesInventoryPage() {
                 <Package className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">المكونات</p>
+                <p className="text-xs text-muted-foreground">{tc("المكونات", "Ingredients")}</p>
                 <p className="text-xl font-bold">{rawItems.length}</p>
               </div>
             </CardContent>
@@ -485,7 +487,7 @@ export default function IngredientsRecipesInventoryPage() {
                 <AlertTriangle className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">مخزون منخفض</p>
+                <p className="text-xs text-muted-foreground">{tc("مخزون منخفض", "Low Stock")}</p>
                 <p className="text-xl font-bold text-accent">{lowStockCount}</p>
               </div>
             </CardContent>
@@ -497,7 +499,7 @@ export default function IngredientsRecipesInventoryPage() {
                 <CheckCircle className="h-5 w-5 text-green-500" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">بوصفات</p>
+                <p className="text-xs text-muted-foreground">{tc("بوصفات", "With Recipes")}</p>
                 <p className="text-xl font-bold text-green-600">{drinksWithRecipeCount}/{coffeeItems.length}</p>
               </div>
             </CardContent>
@@ -509,7 +511,7 @@ export default function IngredientsRecipesInventoryPage() {
                 <Calculator className="h-5 w-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">متوسط الربح</p>
+                <p className="text-xs text-muted-foreground">{tc("متوسط الربح", "Avg. Profit")}</p>
                 <p className="text-xl font-bold">
                   {drinksWithRecipes.length > 0 
                     ? `${(drinksWithRecipes.reduce((sum, d) => sum + (d.hasRecipe ? d.profitMargin : 0), 0) / Math.max(drinksWithRecipeCount, 1)).toFixed(0)}%`
@@ -554,7 +556,7 @@ export default function IngredientsRecipesInventoryPage() {
         <div className="relative">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="بحث..."
+            placeholder={tc("بحث...", "Search...")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-10"
@@ -578,7 +580,7 @@ export default function IngredientsRecipesInventoryPage() {
             {selectedBranch === "all" && (
               <div className="mb-4 p-4 bg-amber-500/10 rounded-lg border border-amber-500/30 flex items-center gap-3">
                 <AlertTriangle className="h-5 w-5 text-accent shrink-0" />
-                <p className="text-sm">اختر فرع محدد لإضافة أو تعديل المخزون</p>
+                <p className="text-sm">{tc("اختر فرع محدد لإضافة أو تعديل المخزون", "Select a specific branch to add or edit inventory")}</p>
               </div>
             )}
 
@@ -640,7 +642,7 @@ export default function IngredientsRecipesInventoryPage() {
                       variant={item.status === "critical" ? "default" : "outline"}
                       onClick={() => {
                         if (selectedBranch === "all") {
-                          toast({ title: "اختر فرع محدد أولاً", variant: "destructive" });
+                          toast({ title: tc("اختر فرع محدد أولاً", "Please select a specific branch first"), variant: "destructive" });
                           return;
                         }
                         setAddStockItem(item);
@@ -658,7 +660,7 @@ export default function IngredientsRecipesInventoryPage() {
               {stockItems.length === 0 && (
                 <div className="col-span-full text-center py-12 text-muted-foreground">
                   <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>لا توجد مكونات بعد</p>
+                  <p>{tc("لا توجد مكونات بعد", "No ingredients yet")}</p>
                   <Button 
                     variant="outline" 
                     className="mt-4"
@@ -700,7 +702,7 @@ export default function IngredientsRecipesInventoryPage() {
                         </p>
                       </div>
                       <Badge variant={drink.hasRecipe ? "default" : "secondary"}>
-                        {drink.hasRecipe ? "مكتملة" : "بدون وصفة"}
+                        {drink.hasRecipe ? tc("مكتملة", "Complete") : tc("بدون وصفة", "No Recipe")}
                       </Badge>
                     </div>
 

@@ -14,12 +14,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import SarIcon from "@/components/sar-icon";
+import { useTranslate } from "@/lib/useTranslate";
 
-const TIER_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
-  bronze:   { label: "برونزي",  color: "text-amber-600 bg-amber-100",   icon: Medal  },
-  silver:   { label: "فضي",     color: "text-slate-600 bg-slate-100",   icon: Star   },
-  gold:     { label: "ذهبي",    color: "text-yellow-600 bg-yellow-100", icon: Crown  },
-  platinum: { label: "بلاتيني", color: "text-gray-600 bg-gray-100",     icon: Award  },
+const TIER_CONFIG: Record<string, { labelAr: string; labelEn: string; color: string; icon: any }> = {
+  bronze:   { labelAr: "برونزي",  labelEn: "Bronze",   color: "text-amber-600 bg-amber-100",   icon: Medal  },
+  silver:   { labelAr: "فضي",     labelEn: "Silver",   color: "text-slate-600 bg-slate-100",   icon: Star   },
+  gold:     { labelAr: "ذهبي",    labelEn: "Gold",     color: "text-yellow-600 bg-yellow-100", icon: Crown  },
+  platinum: { labelAr: "بلاتيني", labelEn: "Platinum", color: "text-gray-600 bg-gray-100",     icon: Award  },
 };
 
 function getTier(tier: string) {
@@ -29,6 +30,7 @@ function getTier(tier: string) {
 export default function EmployeeLoyalty() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const tc = useTranslate();
   const [phone, setPhone] = useState("");
   const [searchedPhone, setSearchedPhone] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -38,7 +40,6 @@ export default function EmployeeLoyalty() {
   const [pointsToAdd, setPointsToAdd] = useState("");
   const [pointsNote, setPointsNote] = useState("");
 
-  // Card lookup by phone
   const { data: card, isLoading: lookupLoading, error: lookupError, refetch } = useQuery<any>({
     queryKey: ["/api/loyalty/lookup/phone", searchedPhone],
     queryFn: async () => {
@@ -46,14 +47,13 @@ export default function EmployeeLoyalty() {
       const cleanPhone = searchedPhone.replace(/\D/g, '').slice(-9);
       const res = await fetch(`/api/loyalty/lookup/phone/${cleanPhone}`);
       if (res.status === 404) return null;
-      if (!res.ok) throw new Error("فشل في البحث");
+      if (!res.ok) throw new Error(tc("فشل في البحث", "Search failed"));
       return res.json();
     },
     enabled: !!searchedPhone && searchedPhone.replace(/\D/g, '').length >= 9,
     retry: false,
   });
 
-  // Loyalty settings
   const { data: settings } = useQuery<any>({
     queryKey: ["/api/public/loyalty-settings"],
   });
@@ -62,7 +62,7 @@ export default function EmployeeLoyalty() {
   const handleSearch = () => {
     const clean = phone.replace(/\D/g, '');
     if (clean.length < 9) {
-      toast({ variant: "destructive", title: "رقم الهاتف يجب أن يكون 9 أرقام على الأقل" });
+      toast({ variant: "destructive", title: tc("رقم الهاتف يجب أن يكون 9 أرقام على الأقل", "Phone number must be at least 9 digits") });
       return;
     }
     setSearchedPhone(phone);
@@ -73,7 +73,6 @@ export default function EmployeeLoyalty() {
     refetch();
   };
 
-  // Add stamp
   const addStampMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/loyalty/employee/add-stamp", { phone: searchedPhone });
@@ -82,15 +81,14 @@ export default function EmployeeLoyalty() {
     onSuccess: (data) => {
       invalidateCard();
       if (data.earnedFreeCup) {
-        toast({ title: "🎉 تهانينا!", description: "حصل العميل على مشروب مجاني!" });
+        toast({ title: tc("🎉 تهانينا!", "🎉 Congratulations!"), description: tc("حصل العميل على مشروب مجاني!", "Customer earned a free drink!") });
       } else {
-        toast({ title: "✓ تم إضافة الطابع", description: `الطوابع: ${data.card?.stamps ?? "-"} / 6` });
+        toast({ title: tc("✓ تم إضافة الطابع", "✓ Stamp Added"), description: `${tc("الطوابع:", "Stamps:")} ${data.card?.stamps ?? "-"} / 6` });
       }
     },
-    onError: (e: any) => toast({ variant: "destructive", title: "خطأ", description: e.message }),
+    onError: (e: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: e.message }),
   });
 
-  // Redeem free cup
   const redeemCupMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/loyalty/employee/redeem-cup", { phone: searchedPhone });
@@ -98,12 +96,11 @@ export default function EmployeeLoyalty() {
     },
     onSuccess: () => {
       invalidateCard();
-      toast({ title: "✓ تم استرداد المشروب المجاني", description: "يمكن للعميل الآن استلام مشروبه" });
+      toast({ title: tc("✓ تم استرداد المشروب المجاني", "✓ Free Drink Redeemed"), description: tc("يمكن للعميل الآن استلام مشروبه", "Customer can now collect their drink") });
     },
-    onError: (e: any) => toast({ variant: "destructive", title: "خطأ", description: e.message }),
+    onError: (e: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: e.message }),
   });
 
-  // Add points
   const addPointsMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/loyalty/employee/add-points", {
@@ -116,12 +113,11 @@ export default function EmployeeLoyalty() {
       setShowAddPointsDialog(false);
       setPointsToAdd("");
       setPointsNote("");
-      toast({ title: `✓ تمت إضافة ${pointsToAdd} نقطة`, description: `الرصيد الجديد: ${data.card?.points ?? "-"} نقطة` });
+      toast({ title: `✓ ${tc("تمت إضافة", "Added")} ${pointsToAdd} ${tc("نقطة", "points")}`, description: `${tc("الرصيد الجديد:", "New balance:")} ${data.card?.points ?? "-"} ${tc("نقطة", "points")}` });
     },
-    onError: (e: any) => toast({ variant: "destructive", title: "خطأ", description: e.message }),
+    onError: (e: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: e.message }),
   });
 
-  // Create new card
   const createCardMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/loyalty/employee/create-card", {
@@ -133,9 +129,9 @@ export default function EmployeeLoyalty() {
       setShowCreateDialog(false);
       setNewCardName("");
       setNewCardPhone("");
-      toast({ title: "✓ تم إنشاء البطاقة بنجاح", description: "يمكن البحث عن العميل الآن" });
+      toast({ title: tc("✓ تم إنشاء البطاقة بنجاح", "✓ Card Created"), description: tc("يمكن البحث عن العميل الآن", "You can now search for the customer") });
     },
-    onError: (e: any) => toast({ variant: "destructive", title: "خطأ", description: e.message }),
+    onError: (e: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: e.message }),
   });
 
   const availableCups = card ? Math.max(0, (card.freeCupsEarned || 0) - (card.freeCupsRedeemed || 0)) : 0;
@@ -144,7 +140,6 @@ export default function EmployeeLoyalty() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-background">
-      {/* Header */}
       <div className="sticky top-0 z-10 bg-background border-b">
         <div className="max-w-2xl mx-auto flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
@@ -153,21 +148,19 @@ export default function EmployeeLoyalty() {
             </Button>
             <div className="flex items-center gap-2">
               <Gift className="w-5 h-5 text-primary" />
-              <h1 className="font-black text-lg">بطاقة الولاء</h1>
+              <h1 className="font-black text-lg">{tc("بطاقة الولاء", "Loyalty Card")}</h1>
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={() => setShowCreateDialog(true)} className="gap-1.5" data-testid="button-new-card">
             <UserPlus className="w-4 h-4" />
-            بطاقة جديدة
+            {tc("بطاقة جديدة", "New Card")}
           </Button>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 pb-24 space-y-5">
-
-        {/* Phone Search */}
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground font-medium">ابحث عن العميل برقم الجوال</p>
+          <p className="text-sm text-muted-foreground font-medium">{tc("ابحث عن العميل برقم الجوال", "Search customer by phone number")}</p>
           <div className="flex gap-2">
             <Input
               value={phone}
@@ -181,47 +174,40 @@ export default function EmployeeLoyalty() {
             />
             <Button onClick={handleSearch} className="h-12 px-5 gap-2" disabled={lookupLoading} data-testid="button-search">
               {lookupLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              بحث
+              {tc("بحث", "Search")}
             </Button>
           </div>
         </div>
 
-        {/* Result */}
         {searchedPhone && !lookupLoading && (
           <>
             {lookupError || card === null ? (
-              /* Not Found */
               <div className="bg-card border rounded-2xl p-8 text-center space-y-3">
                 <Search className="w-12 h-12 mx-auto text-muted-foreground opacity-30" />
-                <p className="font-bold text-muted-foreground">لا توجد بطاقة بهذا الرقم</p>
+                <p className="font-bold text-muted-foreground">{tc("لا توجد بطاقة بهذا الرقم", "No card found for this number")}</p>
                 <p className="text-sm text-muted-foreground">{searchedPhone}</p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setNewCardPhone(searchedPhone);
-                    setShowCreateDialog(true);
-                  }}
+                  onClick={() => { setNewCardPhone(searchedPhone); setShowCreateDialog(true); }}
                   className="gap-2"
                   data-testid="button-create-for-phone"
                 >
                   <UserPlus className="w-4 h-4" />
-                  إنشاء بطاقة لهذا الرقم
+                  {tc("إنشاء بطاقة لهذا الرقم", "Create card for this number")}
                 </Button>
               </div>
             ) : card ? (
-              /* Card Found */
               <div className="space-y-4">
-                {/* Card Info */}
                 <div className="bg-card border rounded-2xl overflow-hidden" data-testid="card-found">
                   <div className="bg-primary/5 border-b px-5 py-4 flex items-center justify-between">
                     <div>
-                      <p className="font-black text-lg">{card.customerName || "عميل"}</p>
+                      <p className="font-black text-lg">{card.customerName || tc("عميل", "Customer")}</p>
                       <p className="text-sm text-muted-foreground font-mono">{card.phoneNumber}</p>
                     </div>
                     {tierCfg && TierIcon && (
                       <Badge className={`gap-1.5 ${tierCfg.color} border-none`} data-testid="badge-tier">
                         <TierIcon className="w-3.5 h-3.5" />
-                        {tierCfg.label}
+                        {tc(tierCfg.labelAr, tierCfg.labelEn)}
                       </Badge>
                     )}
                   </div>
@@ -229,25 +215,24 @@ export default function EmployeeLoyalty() {
                   <div className="grid grid-cols-3 divide-x divide-x-reverse">
                     <div className="p-4 text-center">
                       <p className="text-2xl font-black text-primary" data-testid="text-points">{(card.points || 0).toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">نقطة</p>
-                      <p className="text-[10px] text-muted-foreground">{((card.points || 0) * pointsValueInSar).toFixed(2)} ر.س</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{tc("نقطة", "Points")}</p>
+                      <p className="text-[10px] text-muted-foreground">{((card.points || 0) * pointsValueInSar).toFixed(2)} {tc("ر.س", "SAR")}</p>
                     </div>
                     <div className="p-4 text-center">
                       <p className="text-2xl font-black text-amber-600" data-testid="text-stamps">{card.stamps || 0} / 6</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">طوابع</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{tc("طوابع", "Stamps")}</p>
                     </div>
                     <div className="p-4 text-center">
                       <p className={`text-2xl font-black ${availableCups > 0 ? "text-green-600" : "text-muted-foreground"}`} data-testid="text-free-cups">
                         {availableCups}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-0.5">مجاني متاح</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{tc("مجاني متاح", "Free available")}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Stamps row */}
                 <div className="bg-card border rounded-2xl p-4">
-                  <p className="text-xs font-semibold text-muted-foreground mb-3">طوابع المشروبات (6 طوابع = مشروب مجاني)</p>
+                  <p className="text-xs font-semibold text-muted-foreground mb-3">{tc("طوابع المشروبات (6 طوابع = مشروب مجاني)", "Drink stamps (6 stamps = free drink)")}</p>
                   <div className="flex gap-2 justify-center">
                     {Array.from({ length: 6 }).map((_, i) => (
                       <div
@@ -264,7 +249,6 @@ export default function EmployeeLoyalty() {
                   </div>
                 </div>
 
-                {/* Action buttons */}
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     onClick={() => addStampMutation.mutate()}
@@ -273,7 +257,7 @@ export default function EmployeeLoyalty() {
                     data-testid="button-add-stamp"
                   >
                     {addStampMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Coffee className="w-5 h-5" />}
-                    إضافة طابع
+                    {tc("إضافة طابع", "Add Stamp")}
                   </Button>
 
                   <Button
@@ -283,7 +267,7 @@ export default function EmployeeLoyalty() {
                     data-testid="button-add-points"
                   >
                     <Coins className="w-5 h-5 text-primary" />
-                    إضافة نقاط
+                    {tc("إضافة نقاط", "Add Points")}
                   </Button>
 
                   <Button
@@ -294,11 +278,12 @@ export default function EmployeeLoyalty() {
                     data-testid="button-redeem-cup"
                   >
                     {redeemCupMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Gift className="w-5 h-5" />}
-                    {availableCups > 0 ? `استرداد مشروب مجاني (${availableCups} متاح)` : "لا يوجد مشروب مجاني"}
+                    {availableCups > 0
+                      ? `${tc("استرداد مشروب مجاني", "Redeem Free Drink")} (${availableCups} ${tc("متاح", "available")})`
+                      : tc("لا يوجد مشروب مجاني", "No Free Drink Available")}
                   </Button>
                 </div>
 
-                {/* Card number */}
                 <p className="text-center text-xs text-muted-foreground font-mono" data-testid="text-card-number">
                   {card.cardNumber}
                 </p>
@@ -307,36 +292,34 @@ export default function EmployeeLoyalty() {
           </>
         )}
 
-        {/* Empty state */}
         {!searchedPhone && (
           <div className="text-center py-16 space-y-3">
             <Search className="w-16 h-16 mx-auto text-muted-foreground opacity-20" />
-            <p className="text-muted-foreground">ابحث عن رقم جوال العميل للبدء</p>
+            <p className="text-muted-foreground">{tc("ابحث عن رقم جوال العميل للبدء", "Search customer's phone number to begin")}</p>
           </div>
         )}
       </div>
 
-      {/* Create Card Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-sm" dir="rtl" data-testid="dialog-create-card">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <UserPlus className="w-5 h-5" />
-              إنشاء بطاقة ولاء جديدة
+              {tc("إنشاء بطاقة ولاء جديدة", "Create New Loyalty Card")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>اسم العميل</Label>
+              <Label>{tc("اسم العميل", "Customer Name")}</Label>
               <Input
                 value={newCardName}
                 onChange={(e) => setNewCardName(e.target.value)}
-                placeholder="محمد أحمد"
+                placeholder={tc("محمد أحمد", "Mohammed Ahmed")}
                 data-testid="input-new-name"
               />
             </div>
             <div className="space-y-2">
-              <Label>رقم الجوال (9 أرقام)</Label>
+              <Label>{tc("رقم الجوال (9 أرقام)", "Phone Number (9 digits)")}</Label>
               <Input
                 value={newCardPhone}
                 onChange={(e) => setNewCardPhone(e.target.value)}
@@ -348,31 +331,30 @@ export default function EmployeeLoyalty() {
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)} data-testid="button-cancel-create">إلغاء</Button>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)} data-testid="button-cancel-create">{tc("إلغاء", "Cancel")}</Button>
             <Button
               onClick={() => createCardMutation.mutate()}
               disabled={createCardMutation.isPending || !newCardPhone}
               data-testid="button-confirm-create"
             >
               {createCardMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : null}
-              إنشاء البطاقة
+              {tc("إنشاء البطاقة", "Create Card")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Add Points Dialog */}
       <Dialog open={showAddPointsDialog} onOpenChange={setShowAddPointsDialog}>
         <DialogContent className="max-w-sm" dir="rtl" data-testid="dialog-add-points">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Coins className="w-5 h-5" />
-              إضافة نقاط يدوياً
+              {tc("إضافة نقاط يدوياً", "Add Points Manually")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>عدد النقاط</Label>
+              <Label>{tc("عدد النقاط", "Number of Points")}</Label>
               <Input
                 value={pointsToAdd}
                 onChange={(e) => setPointsToAdd(e.target.value)}
@@ -383,29 +365,29 @@ export default function EmployeeLoyalty() {
               />
               {pointsToAdd && Number(pointsToAdd) > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  = {(Number(pointsToAdd) * pointsValueInSar).toFixed(2)} ريال قيمة خصم
+                  = {(Number(pointsToAdd) * pointsValueInSar).toFixed(2)} {tc("ريال قيمة خصم", "SAR discount value")}
                 </p>
               )}
             </div>
             <div className="space-y-2">
-              <Label>ملاحظة (اختياري)</Label>
+              <Label>{tc("ملاحظة (اختياري)", "Note (optional)")}</Label>
               <Input
                 value={pointsNote}
                 onChange={(e) => setPointsNote(e.target.value)}
-                placeholder="سبب الإضافة..."
+                placeholder={tc("سبب الإضافة...", "Reason for adding...")}
                 data-testid="input-points-note"
               />
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowAddPointsDialog(false)} data-testid="button-cancel-points">إلغاء</Button>
+            <Button variant="outline" onClick={() => setShowAddPointsDialog(false)} data-testid="button-cancel-points">{tc("إلغاء", "Cancel")}</Button>
             <Button
               onClick={() => addPointsMutation.mutate()}
               disabled={addPointsMutation.isPending || !pointsToAdd || Number(pointsToAdd) <= 0}
               data-testid="button-confirm-points"
             >
               {addPointsMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : null}
-              إضافة النقاط
+              {tc("إضافة النقاط", "Add Points")}
             </Button>
           </DialogFooter>
         </DialogContent>

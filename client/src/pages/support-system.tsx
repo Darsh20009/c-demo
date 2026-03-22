@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -239,28 +240,29 @@ const mockArticles: Article[] = [
 ];
 
 const categoryConfig: Record<string, { label: string; icon: any; color: string }> = {
-  technical: { label: "تقني", icon: Settings, color: "bg-blue-500" },
-  billing: { label: "فوترة", icon: CreditCard, color: "bg-green-500" },
-  feature: { label: "ميزة جديدة", icon: Lightbulb, color: "bg-purple-500" },
-  general: { label: "عام", icon: HelpCircle, color: "bg-gray-500" },
+  technical: { label: tc("تقني", "Technical"), icon: Settings, color: "bg-blue-500" },
+  billing: { label: tc("فوترة", "Billing"), icon: CreditCard, color: "bg-green-500" },
+  feature: { label: tc("ميزة جديدة", "New Feature"), icon: Lightbulb, color: "bg-purple-500" },
+  general: { label: tc("عام", "General"), icon: HelpCircle, color: "bg-gray-500" },
 };
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
-  low: { label: "منخفض", color: "bg-gray-500" },
-  medium: { label: "متوسط", color: "bg-primary" },
-  high: { label: "عالي", color: "bg-primary" },
-  urgent: { label: "عاجل", color: "bg-red-500" },
+  low: { label: tc("منخفض", "Low"), color: "bg-gray-500" },
+  medium: { label: tc("متوسط", "Medium"), color: "bg-primary" },
+  high: { label: tc("عالي", "High"), color: "bg-primary" },
+  urgent: { label: tc("عاجل", "Urgent"), color: "bg-red-500" },
 };
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  open: { label: "مفتوح", color: "bg-blue-500", icon: AlertCircle },
-  in_progress: { label: "قيد المعالجة", color: "bg-primary", icon: Clock },
-  waiting: { label: "بانتظار الرد", color: "bg-purple-500", icon: Clock },
-  resolved: { label: "تم الحل", color: "bg-green-500", icon: CheckCircle },
-  closed: { label: "مغلق", color: "bg-gray-500", icon: XCircle },
+  open: { label: tc("مفتوح", "Open"), color: "bg-blue-500", icon: AlertCircle },
+  in_progress: { label: tc("قيد المعالجة", "In Progress"), color: "bg-primary", icon: Clock },
+  waiting: { label: tc("بانتظار الرد", "Waiting for Reply"), color: "bg-purple-500", icon: Clock },
+  resolved: { label: tc("تم الحل", "Resolved"), color: "bg-green-500", icon: CheckCircle },
+  closed: { label: tc("مغلق", "Closed"), color: "bg-gray-500", icon: XCircle },
 };
 
 export default function SupportSystemPage() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const { data: businessConfig } = useQuery<any>({ queryKey: ['/api/business-config'] });
 
@@ -288,8 +290,8 @@ export default function SupportSystemPage() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-white">مركز الدعم</h1>
-              <p className="text-white/60 text-sm">نحن هنا لمساعدتك على مدار الساعة</p>
+              <h1 className="text-2xl font-bold text-white">{tc("مركز الدعم", "Support Center")}</h1>
+              <p className="text-white/60 text-sm">{tc("نحن هنا لمساعدتك على مدار الساعة", "We are here to help you 24/7")}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -315,7 +317,7 @@ export default function SupportSystemPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/60 text-sm">التذاكر المفتوحة</p>
+                  <p className="text-white/60 text-sm">{tc("التذاكر المفتوحة", "Open Tickets")}</p>
                   <p className="text-2xl font-bold text-white mt-1">{openTickets.length}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-blue-500/20">
@@ -329,7 +331,7 @@ export default function SupportSystemPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/60 text-sm">تم الحل</p>
+                  <p className="text-white/60 text-sm">{tc("تم الحل", "Resolved")}</p>
                   <p className="text-2xl font-bold text-white mt-1">{resolvedTickets.length}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-green-500/20">
@@ -343,8 +345,8 @@ export default function SupportSystemPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/60 text-sm">متوسط الرد</p>
-                  <p className="text-2xl font-bold text-white mt-1">2 ساعة</p>
+                  <p className="text-white/60 text-sm">{tc("متوسط الرد", "Avg. Response")}</p>
+                  <p className="text-2xl font-bold text-white mt-1">{tc("2 ساعة", "2 hours")}</p>
                 </div>
                 <div className="p-3 rounded-xl bg-primary/20">
                   <Clock className="w-6 h-6 text-accent" />
@@ -357,7 +359,7 @@ export default function SupportSystemPage() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-white/60 text-sm">رضا العملاء</p>
+                  <p className="text-white/60 text-sm">{tc("رضا العملاء", "Customer Satisfaction")}</p>
                   <p className="text-2xl font-bold text-white mt-1">98%</p>
                 </div>
                 <div className="p-3 rounded-xl bg-purple-500/20">
@@ -544,7 +546,7 @@ export default function SupportSystemPage() {
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center">
                     <Phone className="w-8 h-8 text-blue-400" />
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-2">اتصل بنا</h3>
+                  <h3 className="text-white font-bold text-lg mb-2">{tc("اتصل بنا", "Contact Us")}</h3>
                   <p className="text-white/60 text-sm mb-4">متاحون على مدار الساعة</p>
                   <p className="text-white font-mono text-lg">{businessConfig?.contactPhone || businessConfig?.socialLinks?.whatsapp?.replace(/\D/g, '').slice(-10) || '920-000-0000'}</p>
                 </CardContent>

@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -72,6 +73,7 @@ export default function EmployeeMenuManagement() {
  const [addImageUrls, setAddImageUrls] = useState<string[]>([]);
  const [editImageUrls, setEditImageUrls] = useState<string[]>([]);
  const { toast } = useToast();
+  const tc = useTranslate();
  const queryClient = useQueryClient();
  const [selectedIngredients, setSelectedIngredients] = useState<Array<{ingredientId: string, name: string, quantity: number, unit: string}>>([]);
  const [recipeItems, setRecipeItems] = useState<RecipeIngredient[]>([]);
@@ -317,15 +319,15 @@ const [aiEditDescription, setAiEditDescription] = useState("");
    setSelectedCategory("hot");
    setSelectedCoffeeStrength("classic");
    toast({
-     title: "تم إضافة المشروب",
-     description: "تم إضافة المشروب بنجاح إلى القائمة",
+     title: tc("تم إضافة المشروب", "Item Added"),
+     description: tc("تم إضافة المشروب بنجاح إلى القائمة", "Item was added successfully to the menu"),
    });
  },
  onError: (error: any) => {
    toast({
      variant: "destructive",
-     title: "فشل إضافة المشروب",
-     description: error.message || "حدث خطأ أثناء إضافة المشروب",
+     title: tc("فشل إضافة المشروب", "Failed to Add Item"),
+     description: error.message || tc("حدث خطأ أثناء إضافة المشروب", "An error occurred while adding the item"),
    });
  },
  });
@@ -349,15 +351,15 @@ const [aiEditDescription, setAiEditDescription] = useState("");
      setEditingRecipeItem(null);
      setRecipeItems([]);
      toast({
-       title: "تم حفظ الوصفة",
-       description: "تم حفظ مكونات الوصفة بنجاح",
+       title: tc("تم حفظ الوصفة", "Recipe Saved"),
+       description: tc("تم حفظ مكونات الوصفة بنجاح", "Recipe ingredients saved successfully"),
      });
    },
    onError: (error: any) => {
      toast({
        variant: "destructive",
-       title: "فشل حفظ الوصفة",
-       description: error.message || "حدث خطأ أثناء حفظ الوصفة",
+       title: tc("فشل حفظ الوصفة", "Failed to Save Recipe"),
+       description: error.message || tc("حدث خطأ أثناء حفظ الوصفة", "An error occurred while saving the recipe"),
      });
    },
  });
@@ -385,14 +387,14 @@ const [aiEditDescription, setAiEditDescription] = useState("");
  onSuccess: () => {
  queryClient.invalidateQueries({ queryKey: ["/api/coffee-items"] });
  toast({
- title: "تم التحديث بنجاح",
- description: "تم تحديث حالة توفر المشروب",
+ title: tc("تم التحديث بنجاح", "Updated Successfully"),
+ description: tc("تم تحديث حالة توفر المشروب", "Item availability updated"),
  });
  },
  onError: () => {
  toast({
- title: "خطأ",
- description: "فشل تحديث حالة توفر المشروب",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل تحديث حالة توفر المشروب", "Failed to update item availability"),
  variant: "destructive",
  });
  },
@@ -408,15 +410,15 @@ const [aiEditDescription, setAiEditDescription] = useState("");
  setIsEditDialogOpen(false);
  setEditingItem(null);
  toast({
- title: "تم التحديث",
- description: "تم تحديث المشروب بنجاح",
+ title: tc("تم التحديث", "Updated"),
+ description: tc("تم تحديث المشروب بنجاح", "Item updated successfully"),
  });
  },
  onError: (error: any) => {
  toast({
  variant: "destructive",
- title: "فشل التحديث",
- description: error.message || "حدث خطأ أثناء تحديث المشروب",
+ title: tc("فشل التحديث", "Update Failed"),
+ description: error.message || tc("حدث خطأ أثناء تحديث المشروب", "An error occurred while updating the item"),
  });
  },
  });
@@ -426,7 +428,7 @@ const [aiEditDescription, setAiEditDescription] = useState("");
    const res = await apiRequest("DELETE", `/api/coffee-items/${id}`);
    if (!res.ok) {
      const errorData = await res.json();
-     throw new Error(errorData.error || "فشل في حذف المشروب");
+     throw new Error(errorData.error || tc("فشل في حذف المشروب", "Failed to delete item"));
    }
    return await res.json();
  },
@@ -437,16 +439,16 @@ const [aiEditDescription, setAiEditDescription] = useState("");
    }
    setDeletingItemId(null);
    toast({
-     title: "تم الحذف",
-     description: "تم حذف المشروب بنجاح",
+     title: tc("تم الحذف", "Deleted"),
+     description: tc("تم حذف المشروب بنجاح", "Item deleted successfully"),
    });
  },
  onError: (error: any) => {
    setDeletingItemId(null);
    toast({
      variant: "destructive",
-     title: "فشل الحذف",
-     description: error.message || "حدث خطأ أثناء حذف المشروب. قد يكون المشروب مرتبطاً بطلبات حالية.",
+     title: tc("فشل الحذف", "Delete Failed"),
+     description: error.message || tc("حدث خطأ أثناء حذف المشروب. قد يكون المشروب مرتبطاً بطلبات حالية.", "Error deleting item. Item may be linked to current orders."),
    });
  },
  });
@@ -459,15 +461,15 @@ const [aiEditDescription, setAiEditDescription] = useState("");
  onSuccess: () => {
  queryClient.invalidateQueries({ queryKey: ["/api/coffee-items"] });
  toast({
- title: "تم التحديث",
- description: "تم تحديث حالة المنتج الجديد",
+ title: tc("تم التحديث", "Updated"),
+ description: tc("تم تحديث حالة المنتج الجديد", "New product status updated"),
  });
  },
  onError: (error: any) => {
  toast({
  variant: "destructive",
- title: "فشل التحديث",
- description: error.message || "حدث خطأ أثناء التحديث",
+ title: tc("فشل التحديث", "Update Failed"),
+ description: error.message || tc("حدث خطأ أثناء التحديث", "Error during update"),
  });
  },
  });
@@ -493,8 +495,8 @@ const [aiEditDescription, setAiEditDescription] = useState("");
    
    if (!nameAr || !selectedCategory || !price) {
      toast({
-       title: "خطأ",
-       description: "يرجى ملء جميع الحقول المطلوبة",
+       title: tc("خطأ", "Error"),
+       description: tc("يرجى ملء جميع الحقول المطلوبة", "Please fill all required fields"),
        variant: "destructive"
      });
      return;
@@ -635,8 +637,8 @@ const [aiEditDescription, setAiEditDescription] = useState("");
    
    if (recipeItems.length === 0) {
      toast({
-       title: "خطأ",
-       description: "يجب إضافة مكون واحد على الأقل للوصفة",
+       title: tc("خطأ", "Error"),
+       description: tc("يجب إضافة مكون واحد على الأقل للوصفة", "At least one ingredient must be added to the recipe"),
        variant: "destructive"
      });
      return;
@@ -698,14 +700,14 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  };
 
  const legacyCategoryNames: Record<string, string> = {
- basic: "قهوة أساسية",
- hot: "قهوة ساخنة",
- cold: "قهوة باردة",
- specialty: "مشروبات إضافية",
- drinks: "المشروبات",
- desserts: "الحلويات",
- food: "المأكولات",
- bakery: "المخبوزات",
+ basic: tc("قهوة أساسية", "Basic Coffee"),
+ hot: tc("قهوة ساخنة", "Hot Coffee"),
+ cold: tc("قهوة باردة", "Cold Coffee"),
+ specialty: tc("مشروبات إضافية", "Specialty Drinks"),
+ drinks: tc("المشروبات", "Drinks"),
+ desserts: tc("الحلويات", "Desserts"),
+ food: tc("المأكولات", "Food"),
+ bakery: tc("المخبوزات", "Bakery"),
  };
 
  const dynamicCategoryIds = menuCategories.map(c => c.id);
@@ -743,8 +745,8 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
          <Coffee className="w-6 h-6 text-white" />
          </div>
          <div>
-         <h1 className="text-2xl font-bold text-accent">إدارة القائمة</h1>
-         <p className="text-gray-400 text-sm">تحديث حالة توفر المنتجات</p>
+         <h1 className="text-2xl font-bold text-accent">{tc("إدارة القائمة", "Menu Management")}</h1>
+         <p className="text-gray-400 text-sm">{tc("تحديث حالة توفر المنتجات", "Update product availability")}</p>
          </div>
          </div>
          <div className="flex flex-wrap gap-2">
@@ -782,14 +784,14 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  data-testid="button-add-item"
  >
  <Plus className="w-4 h-4 ml-2" />
- {isFood ? 'إضافة صنف جديد' : 'إضافة مشروب جديد'}
+ {isFood ? tc('إضافة صنف جديد', 'Add New Item') : tc('إضافة مشروب جديد', 'Add New Drink')}
  </Button>
  </DialogTrigger>
  <DialogContent className="bg-[#2d1f1a] border-primary/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="text-accent">
    <div className="flex flex-col gap-3">
-     <span>إضافة مشروب جديد</span>
+     <span>{tc("إضافة مشروب جديد", "Add New Item")}</span>
      <div className="flex items-center gap-2 text-sm font-normal">
        <span className={`px-3 py-1 rounded-full ${addStep === 1 ? 'bg-primary text-white' : 'bg-gray-600 text-gray-300'}`}>
          1. المعلومات الأساسية
@@ -807,7 +809,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <form onSubmit={handleStep1Submit} className="space-y-4">
  <div className="grid grid-cols-2 gap-4">
  <div>
- <Label htmlFor="nameAr" className="text-gray-300">الاسم بالعربية *</Label>
+ <Label htmlFor="nameAr" className="text-gray-300">{tc("الاسم بالعربية *", "Arabic Name *")}</Label>
  <Input
  id="nameAr"
  name="nameAr"
@@ -821,7 +823,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div>
  <Label htmlFor="nameEn" className="text-gray-300">
    <span className="flex items-center justify-between">
-     <span>الاسم بالإنجليزية</span>
+     <span>{tc("الاسم بالإنجليزية", "English Name")}</span>
      <AIMenuAssistant
        nameAr={aiAddNameAr || step1Data?.nameAr || ""}
        nameEn={aiAddNameEn}
@@ -848,7 +850,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div>
  <Label htmlFor="description" className="text-gray-300">
    <span className="flex items-center justify-between mb-1">
-     <span>الوصف *</span>
+     <span>{tc("الوصف *", "Description *")}</span>
      <AIMenuAssistant
        nameAr={aiAddNameAr || step1Data?.nameAr || ""}
        nameEn={aiAddNameEn}
@@ -875,10 +877,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div className="grid grid-cols-2 gap-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div className="space-y-2">
-                       <Label htmlFor="category" className="text-gray-300">القسم *</Label>
+                       <Label htmlFor="category" className="text-gray-300">{tc("القسم *", "Category *")}</Label>
                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                          <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-category">
-                           <SelectValue placeholder="اختر القسم" />
+                           <SelectValue placeholder={tc("اختر القسم", "Select category")} />
                          </SelectTrigger>
                          <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
                            {UNIFIED_CATEGORIES.map(cat => (
@@ -893,12 +895,12 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                          checked={step1Data?.isGiftable || false}
                          onCheckedChange={(checked) => setStep1Data(prev => prev ? ({ ...prev, isGiftable: checked }) : null)}
                        />
-                       <Label htmlFor="isGiftable" className="text-gray-300">قابل للإهداء</Label>
+                       <Label htmlFor="isGiftable" className="text-gray-300">{tc("قابل للإهداء", "Giftable")}</Label>
                      </div>
                    </div>
 
                    <div>
-                   <Label htmlFor="price" className="text-gray-300">السعر (ريال) *</Label>
+                   <Label htmlFor="price" className="text-gray-300">{tc("السعر (ريال) *", "Price (SAR) *")}</Label>
  <Input
  id="price"
  name="price"
@@ -915,7 +917,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  <div className="grid grid-cols-2 gap-4">
  <div>
- <Label htmlFor="oldPrice" className="text-gray-300">السعر القديم (ريال)</Label>
+ <Label htmlFor="oldPrice" className="text-gray-300">{tc("السعر القديم (ريال)", "Old Price (SAR)")}</Label>
  <Input
  id="oldPrice"
  name="oldPrice"
@@ -928,7 +930,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  />
  </div>
 <div>
- <Label className="text-gray-300">صور المشروب (حتى 5 صور)</Label>
+ <Label className="text-gray-300">{tc("صور المشروب (حتى 5 صور)", "Item Photos (up to 5)")}</Label>
  <div className="mt-2 space-y-2">
    <div className="flex flex-wrap gap-2">
      {addImageUrls.map((url, idx) => (
@@ -937,13 +939,13 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
          <button type="button" onClick={() => setAddImageUrls(addImageUrls.filter((_, i) => i !== idx))} className="absolute -top-1 -right-1 bg-red-600 rounded-full w-5 h-5 flex items-center justify-center">
            <X className="w-3 h-3 text-white" />
          </button>
-         {idx === 0 && <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-primary/80 text-white rounded-b-lg">رئيسية</span>}
+         {idx === 0 && <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-primary/80 text-white rounded-b-lg">{tc("رئيسية", "Main")}</span>}
        </div>
      ))}
      {addImageUrls.length < 5 && (
        <button type="button" onClick={() => { setImageLibraryContext("add"); setIsImageLibraryOpen(true); }} className="w-20 h-20 border-2 border-dashed border-primary/30 rounded-lg flex flex-col items-center justify-center text-accent/60 hover:text-accent hover:border-accent/50 transition-colors">
          <Plus className="w-5 h-5" />
-         <span className="text-[10px] mt-1">إضافة</span>
+         <span className="text-[10px] mt-1">{tc("إضافة", "Add")}</span>
        </button>
      )}
    </div>
@@ -1509,7 +1511,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div>
  <Label htmlFor="edit-nameEn" className="text-gray-300">
    <span className="flex items-center justify-between">
-     <span>الاسم بالإنجليزية</span>
+     <span>{tc("الاسم بالإنجليزية", "English Name")}</span>
      <AIMenuAssistant
        nameAr={editingItem.nameAr}
        nameEn={aiEditNameEn}
@@ -1536,7 +1538,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div>
  <Label htmlFor="edit-description" className="text-gray-300">
    <span className="flex items-center justify-between mb-1">
-     <span>الوصف *</span>
+     <span>{tc("الوصف *", "Description *")}</span>
      <AIMenuAssistant
        nameAr={editingItem.nameAr}
        nameEn={aiEditNameEn}
@@ -1562,10 +1564,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  <div className="grid grid-cols-2 gap-4">
  <div>
- <Label htmlFor="edit-category" className="text-gray-300">القسم *</Label>
+ <Label htmlFor="edit-category" className="text-gray-300">{tc("القسم *", "Category *")}</Label>
  <Select name="category" defaultValue={editingItem.category} required>
  <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-edit-category">
- <SelectValue placeholder="اختر القسم" />
+ <SelectValue placeholder={tc("اختر القسم", "Select category")} />
  </SelectTrigger>
  <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
  {UNIFIED_CATEGORIES.map(cat => (
@@ -1575,7 +1577,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  </Select>
  </div>
  <div>
- <Label htmlFor="edit-price" className="text-gray-300">السعر (ريال) *</Label>
+ <Label htmlFor="edit-price" className="text-gray-300">{tc("السعر (ريال) *", "Price (SAR) *")}</Label>
  <Input
  id="edit-price"
  name="price"
@@ -1592,7 +1594,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  <div className="grid grid-cols-2 gap-4">
  <div>
- <Label htmlFor="edit-oldPrice" className="text-gray-300">السعر القديم (ريال)</Label>
+ <Label htmlFor="edit-oldPrice" className="text-gray-300">{tc("السعر القديم (ريال)", "Old Price (SAR)")}</Label>
  <Input
  id="edit-oldPrice"
  name="oldPrice"
@@ -1605,7 +1607,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  />
  </div>
 <div>
-<Label className="text-gray-300">صور المشروب (حتى 5 صور)</Label>
+<Label className="text-gray-300">{tc("صور المشروب (حتى 5 صور)", "Item Photos (up to 5)")}</Label>
 <div className="mt-2 space-y-2">
   <div className="flex flex-wrap gap-2">
     {editImageUrls.map((url, idx) => (
@@ -1614,13 +1616,13 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
         <button type="button" onClick={() => setEditImageUrls(editImageUrls.filter((_, i) => i !== idx))} className="absolute -top-1 -right-1 bg-red-600 rounded-full w-4 h-4 flex items-center justify-center">
           <X className="w-3 h-3 text-white" />
         </button>
-        {idx === 0 && <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-primary/80 text-white rounded-b-lg">رئيسية</span>}
+        {idx === 0 && <span className="absolute bottom-0 left-0 right-0 text-center text-[9px] bg-primary/80 text-white rounded-b-lg">{tc("رئيسية", "Main")}</span>}
       </div>
     ))}
     {editImageUrls.length < 5 && (
       <button type="button" onClick={() => { setImageLibraryContext("edit"); setIsImageLibraryOpen(true); }} className="w-16 h-16 border-2 border-dashed border-primary/30 rounded-lg flex flex-col items-center justify-center text-accent/60 hover:text-accent hover:border-accent/50 transition-colors">
         <Plus className="w-4 h-4" />
-        <span className="text-[10px] mt-1">إضافة</span>
+        <span className="text-[10px] mt-1">{tc("إضافة", "Add")}</span>
       </button>
     )}
   </div>

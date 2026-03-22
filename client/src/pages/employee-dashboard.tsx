@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useEffect, useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -51,6 +52,7 @@ interface Notification {
 
 export default function EmployeeDashboard() {
   const [, setLocation] = useLocation();
+  const tc = useTranslate();
   const { t, i18n } = useTranslation();
   const dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
   const [employee, setEmployee] = useState<Employee | null>(null);

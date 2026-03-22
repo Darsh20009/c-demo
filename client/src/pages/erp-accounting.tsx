@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -208,14 +209,14 @@ interface BalanceSheet {
 }
 
 const invoiceStatusLabels: Record<string, string> = {
-  draft: "مسودة",
-  issued: "صادرة",
-  sent: "مرسلة",
-  paid: "مدفوعة",
-  partially_paid: "مدفوعة جزئياً",
-  overdue: "متأخرة",
-  cancelled: "ملغاة",
-  voided: "ملغاة",
+  draft: tc("مسودة", "Draft"),
+  issued: tc("صادرة", "Issued"),
+  sent: tc("مرسلة", "Sent"),
+  paid: tc("مدفوعة", "Paid"),
+  partially_paid: tc("مدفوعة جزئياً", "Partially Paid"),
+  overdue: tc("متأخرة", "Overdue"),
+  cancelled: tc("ملغاة", "Cancelled"),
+  voided: tc("ملغاة", "Voided"),
 };
 
 const invoiceStatusColors: Record<string, string> = {
@@ -230,12 +231,12 @@ const invoiceStatusColors: Record<string, string> = {
 };
 
 const accountTypeLabels: Record<string, string> = {
-  asset: "أصول",
-  liability: "خصوم",
-  equity: "حقوق ملكية",
-  revenue: "إيرادات",
-  expense: "مصروفات",
-  contra: "حساب مقابل",
+  asset: tc("أصول", "Assets"),
+  liability: tc("خصوم", "Liabilities"),
+  equity: tc("حقوق ملكية", "Equity"),
+  revenue: tc("إيرادات", "Revenue"),
+  expense: tc("مصروفات", "Expenses"),
+  contra: tc("حساب مقابل", "Contra Account"),
 };
 
 const accountTypeColors: Record<string, string> = {
@@ -247,8 +248,8 @@ const accountTypeColors: Record<string, string> = {
 };
 
 const journalStatusLabels: Record<string, string> = {
-  draft: "مسودة",
-  posted: "مرحل",
+  draft: tc("مسودة", "Draft"),
+  posted: tc("مرحل", "Posted"),
 };
 
 const journalStatusColors: Record<string, string> = {
@@ -257,10 +258,10 @@ const journalStatusColors: Record<string, string> = {
 };
 
 const expenseStatusLabels: Record<string, string> = {
-  pending_approval: "بانتظار الموافقة",
-  approved: "معتمد",
-  rejected: "مرفوض",
-  paid: "مدفوع",
+  pending_approval: tc("بانتظار الموافقة", "Pending Approval"),
+  approved: tc("معتمد", "Approved"),
+  rejected: tc("مرفوض", "Rejected"),
+  paid: tc("مدفوع", "Paid"),
 };
 
 const expenseStatusColors: Record<string, string> = {
@@ -271,13 +272,13 @@ const expenseStatusColors: Record<string, string> = {
 };
 
 const expenseCategoryLabels: Record<string, string> = {
-  operating: "تشغيلية",
-  salary: "رواتب",
-  rent: "إيجار",
-  utilities: "مرافق",
-  marketing: "تسويق",
-  maintenance: "صيانة",
-  other: "أخرى",
+  operating: tc("تشغيلية", "Operating"),
+  salary: tc("رواتب", "Salary"),
+  rent: tc("إيجار", "Rent"),
+  utilities: tc("مرافق", "Utilities"),
+  marketing: tc("تسويق", "Marketing"),
+  maintenance: tc("صيانة", "Maintenance"),
+  other: tc("أخرى", "Other"),
 };
 
 function flattenAccounts(accounts: Account[]): Account[] {
@@ -377,6 +378,7 @@ function SummaryCard({
 
 export default function ErpAccountingPage() {
   const { toast } = useToast();
+  const tc = useTranslate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showAddAccountDialog, setShowAddAccountDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -438,10 +440,10 @@ export default function ErpAccountingPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/accounts"] });
       queryClient.invalidateQueries({ queryKey: ["/api/erp/accounts/tree"] });
-      toast({ title: "تم إنشاء دليل الحسابات بنجاح" });
+      toast({ title: tc("تم إنشاء دليل الحسابات بنجاح", "Chart of accounts created successfully") });
     },
     onError: () => {
-      toast({ title: "فشل في إنشاء دليل الحسابات", variant: "destructive" });
+      toast({ title: tc("فشل في إنشاء دليل الحسابات", "Failed to create chart of accounts"), variant: "destructive" });
     },
   });
 
@@ -452,10 +454,10 @@ export default function ErpAccountingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/accounts/tree"] });
       setShowAddAccountDialog(false);
       setNewAccount({ accountNumber: "", nameAr: "", nameEn: "", accountType: "asset", normalBalance: "debit", openingBalance: 0, parentAccountId: "" });
-      toast({ title: "تم إنشاء الحساب بنجاح" });
+      toast({ title: tc("تم إنشاء الحساب بنجاح", "Account created successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في إنشاء الحساب", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في إنشاء الحساب", "Failed to create account"), variant: "destructive" });
     },
   });
 
@@ -469,9 +471,9 @@ export default function ErpAccountingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/reports/balance-sheet"] });
       setShowAddJournalDialog(false);
       setNewJournal({ description: "", lines: [{ accountId: "", accountNumber: "", accountName: "", debit: 0, credit: 0 }, { accountId: "", accountNumber: "", accountName: "", debit: 0, credit: 0 }] });
-      toast({ title: "تم إنشاء القيد بنجاح" });
+      toast({ title: tc("تم إنشاء القيد بنجاح", "Journal entry created successfully") });
     },
-    onError: (error: any) => { toast({ title: error.message || "فشل في إنشاء القيد", variant: "destructive" }); },
+    onError: (error: any) => { toast({ title: error.message || tc("فشل في إنشاء القيد", "Failed to create journal entry"), variant: "destructive" }); },
   });
 
   const postJournalMutation = useMutation({
@@ -480,9 +482,9 @@ export default function ErpAccountingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/journal-entries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/erp/accounts/tree"] });
       queryClient.invalidateQueries({ queryKey: ["/api/erp/dashboard"] });
-      toast({ title: "تم ترحيل القيد بنجاح" });
+      toast({ title: tc("تم ترحيل القيد بنجاح", "Journal entry posted successfully") });
     },
-    onError: (error: any) => { toast({ title: error.message || "فشل في ترحيل القيد", variant: "destructive" }); },
+    onError: (error: any) => { toast({ title: error.message || tc("فشل في ترحيل القيد", "Failed to post journal entry"), variant: "destructive" }); },
   });
 
   const createExpenseMutation = useMutation({
@@ -492,9 +494,9 @@ export default function ErpAccountingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/dashboard"] });
       setShowAddExpenseDialog(false);
       setNewExpense({ description: "", amount: 0, category: "operating", accountId: "" });
-      toast({ title: "تم إضافة المصروف بنجاح" });
+      toast({ title: tc("تم إضافة المصروف بنجاح", "Expense added successfully") });
     },
-    onError: (error: any) => { toast({ title: error.message || "فشل في إضافة المصروف", variant: "destructive" }); },
+    onError: (error: any) => { toast({ title: error.message || tc("فشل في إضافة المصروف", "Failed to add expense"), variant: "destructive" }); },
   });
 
   const approveExpenseMutation = useMutation({
@@ -502,9 +504,9 @@ export default function ErpAccountingPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/erp/dashboard"] });
-      toast({ title: "تم اعتماد المصروف بنجاح" });
+      toast({ title: tc("تم اعتماد المصروف بنجاح", "Expense approved successfully") });
     },
-    onError: (error: any) => { toast({ title: error.message || "فشل في اعتماد المصروف", variant: "destructive" }); },
+    onError: (error: any) => { toast({ title: error.message || tc("فشل في اعتماد المصروف", "Failed to approve expense"), variant: "destructive" }); },
   });
 
   const createVendorMutation = useMutation({
@@ -513,9 +515,9 @@ export default function ErpAccountingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/vendors"] });
       setShowAddVendorDialog(false);
       setNewVendor({ nameAr: "", nameEn: "", phone: "", email: "", taxNumber: "" });
-      toast({ title: "تم إضافة المورد بنجاح" });
+      toast({ title: tc("تم إضافة المورد بنجاح", "Supplier added successfully") });
     },
-    onError: (error: any) => { toast({ title: error.message || "فشل في إضافة المورد", variant: "destructive" }); },
+    onError: (error: any) => { toast({ title: error.message || tc("فشل في إضافة المورد", "Failed to add supplier"), variant: "destructive" }); },
   });
 
   const summary = dashboardData?.summary;
@@ -537,8 +539,8 @@ export default function ErpAccountingPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold font-playfair text-foreground">نظام المحاسبة ERP</h1>
-            <p className="text-muted-foreground mt-1">إدارة الحسابات والتقارير المالية</p>
+            <h1 className="text-3xl font-bold font-playfair text-foreground">{tc("نظام المحاسبة ERP", "ERP Accounting System")}</h1>
+            <p className="text-muted-foreground mt-1">{tc("إدارة الحسابات والتقارير المالية", "Manage accounts and financial reports")}</p>
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -943,7 +945,7 @@ export default function ErpAccountingPage() {
 
           <TabsContent value="accounts" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">دليل الحسابات</h2>
+              <h2 className="text-xl font-semibold">{tc("دليل الحسابات", "Chart of Accounts")}</h2>
               <Button onClick={() => setShowAddAccountDialog(true)} data-testid="button-add-account">
                 <Plus className="h-4 w-4 ml-2" />
                 إضافة حساب
@@ -975,7 +977,7 @@ export default function ErpAccountingPage() {
 
           <TabsContent value="trial-balance" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">ميزان المراجعة</h2>
+              <h2 className="text-xl font-semibold">{tc("ميزان المراجعة", "Trial Balance")}</h2>
               <Button variant="outline" data-testid="button-export-trial-balance">
                 <Download className="h-4 w-4 ml-2" />
                 تصدير
@@ -1035,7 +1037,7 @@ export default function ErpAccountingPage() {
 
           <TabsContent value="income" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">قائمة الدخل</h2>
+              <h2 className="text-xl font-semibold">{tc("قائمة الدخل", "Income Statement")}</h2>
               <Button variant="outline" data-testid="button-export-income">
                 <Download className="h-4 w-4 ml-2" />
                 تصدير
@@ -1063,7 +1065,7 @@ export default function ErpAccountingPage() {
                       </div>
                     ))}
                     <div className="flex items-center justify-between py-3 font-bold bg-green-50 dark:bg-green-900/20 px-3 rounded">
-                      <span>إجمالي الإيرادات</span>
+                      <span>{tc("إجمالي الإيرادات", "Total Revenue")}</span>
                       <span className="font-mono text-green-600">{incomeStatement.totalRevenue.toLocaleString("ar-SA", { minimumFractionDigits: 2 })} <SarIcon /></span>
                     </div>
                   </CardContent>
@@ -1206,7 +1208,7 @@ export default function ErpAccountingPage() {
 
           <TabsContent value="expenses" className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">المصروفات</h2>
+              <h2 className="text-xl font-semibold">{tc("المصروفات", "Expenses")}</h2>
               <Button onClick={() => setShowAddExpenseDialog(true)} data-testid="button-add-expense">
                 <Plus className="h-4 w-4 ml-2" />
                 إضافة مصروف

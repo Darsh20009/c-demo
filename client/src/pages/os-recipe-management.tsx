@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useTranslate } from "@/lib/useTranslate";
 import { useState } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ import {
 import { Loader2, Save, Plus, Trash2, Calculator, Beaker } from "lucide-react";
 
 export default function OSRecipeManagement() {
+  const tc = useTranslate();
   const { toast } = useToast();
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [recipeIngredients, setRecipeIngredients] = useState<any[]>([]);
@@ -34,7 +36,7 @@ export default function OSRecipeManagement() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "تم حفظ الوصفة", description: "تم تحديث وصفة المنتج وتكلفته" });
+      toast({ title: tc("تم حفظ الوصفة", "Recipe Saved"), description: tc("تم تحديث وصفة المنتج وتكلفته", "Product recipe and cost updated") });
     },
   });
 
@@ -56,19 +58,19 @@ export default function OSRecipeManagement() {
   return (
     <div className="p-6 space-y-6 bg-background min-h-screen text-right" dir="rtl">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">هندسة الوصفات (Recipe Engine)</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{tc("هندسة الوصفات", "Recipe Engine")}</h1>
         <Beaker className="w-8 h-8 text-primary" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>اختر المنتج</CardTitle>
-            <CardDescription>اختر المشروب لإدارة مكوناته</CardDescription>
+            <CardTitle>{tc("اختر المنتج", "Select Product")}</CardTitle>
+            <CardDescription>{tc("اختر المشروب لإدارة مكوناته", "Select a drink to manage its ingredients")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Select onValueChange={setSelectedProduct} value={selectedProduct}>
-              <SelectTrigger><SelectValue placeholder="اختر المنتج" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={tc("اختر المنتج", "Select Product")} /></SelectTrigger>
               <SelectContent>
                 {products?.map((p: any) => (
                   <SelectItem key={p.id} value={p.id}>{p.nameAr}</SelectItem>
@@ -81,8 +83,8 @@ export default function OSRecipeManagement() {
         <Card className="md:col-span-3">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>مكونات الوصفة</CardTitle>
-              <CardDescription>حدد كميات المواد الخام لكل كوب</CardDescription>
+              <CardTitle>{tc("مكونات الوصفة", "Recipe Ingredients")}</CardTitle>
+              <CardDescription>{tc("حدد كميات المواد الخام لكل كوب", "Set raw material quantities per cup")}</CardDescription>
             </div>
             {selectedProduct && (
               <Button onClick={addIngredientToRecipe} variant="outline" size="sm">
@@ -92,16 +94,16 @@ export default function OSRecipeManagement() {
           </CardHeader>
           <CardContent>
             {!selectedProduct ? (
-              <div className="text-center p-12 text-muted-foreground italic">الرجاء اختيار منتج للبدء</div>
+              <div className="text-center p-12 text-muted-foreground italic">{tc("الرجاء اختيار منتج للبدء", "Please select a product to start")}</div>
             ) : (
               <div className="space-y-6">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-right">المادة الخام</TableHead>
-                      <TableHead className="text-right">الكمية</TableHead>
-                      <TableHead className="text-right">الوحدة</TableHead>
-                      <TableHead className="text-right">التكلفة المتوقعة</TableHead>
+                      <TableHead className="text-right">{tc("المادة الخام", "Raw Material")}</TableHead>
+                      <TableHead className="text-right">{tc("الكمية", "Quantity")}</TableHead>
+                      <TableHead className="text-right">{tc("الوحدة", "Unit")}</TableHead>
+                      <TableHead className="text-right">{tc("التكلفة المتوقعة", "Expected Cost")}</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -119,7 +121,7 @@ export default function OSRecipeManagement() {
                               }}
                               value={ri.ingredientId}
                             >
-                              <SelectTrigger><SelectValue placeholder="اختر مادة" /></SelectTrigger>
+                              <SelectTrigger><SelectValue placeholder={tc("اختر مادة", "Select material")} /></SelectTrigger>
                               <SelectContent>
                                 {ingredients?.map((i: any) => (
                                   <SelectItem key={i.id} value={i.id}>{i.nameAr}</SelectItem>

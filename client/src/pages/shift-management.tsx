@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useTranslation } from "react-i18next";
@@ -75,6 +76,7 @@ interface CashierShift {
 }
 
 function formatCurrency(amount: number) {
+  const tc = useTranslate();
   return `${(amount || 0).toFixed(2)} ر.س`;
 }
 
@@ -132,14 +134,14 @@ export default function ShiftManagement() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "تم فتح الوردية بنجاح", description: "يمكنك الآن استقبال الطلبات" });
+      toast({ title: tc("تم فتح الوردية بنجاح", "Shift Opened Successfully"), description: tc("يمكنك الآن استقبال الطلبات", "You can now accept orders") });
       queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
       setShowOpenDialog(false);
       setOpeningCash("");
       setOpeningNotes("");
     },
     onError: (error: any) => {
-      toast({ title: "خطأ", description: error.message || "فشل في فتح الوردية", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: error.message || tc("فشل في فتح الوردية", "Failed to open shift"), variant: "destructive" });
     },
   });
 
@@ -149,7 +151,7 @@ export default function ShiftManagement() {
       return res.json();
     },
     onSuccess: (data) => {
-      toast({ title: "تم إغلاق الوردية", description: "تم إنشاء تقرير Z بنجاح" });
+      toast({ title: tc("تم إغلاق الوردية", "Shift Closed"), description: tc("تم إنشاء تقرير Z بنجاح", "Z-report generated successfully") });
       queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/shifts/history'] });
       setShowCloseDialog(false);
@@ -161,7 +163,7 @@ export default function ShiftManagement() {
       }
     },
     onError: (error: any) => {
-      toast({ title: "خطأ", description: error.message || "فشل في إغلاق الوردية", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: error.message || tc("فشل في إغلاق الوردية", "Failed to close shift"), variant: "destructive" });
     },
   });
 
@@ -171,14 +173,14 @@ export default function ShiftManagement() {
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "تم تسجيل الحركة بنجاح" });
+      toast({ title: tc("تم تسجيل الحركة بنجاح", "Transaction Recorded") });
       queryClient.invalidateQueries({ queryKey: ['/api/shifts/active'] });
       setShowCashMovementDialog(false);
       setMovementAmount("");
       setMovementReason("");
     },
     onError: (error: any) => {
-      toast({ title: "خطأ", description: error.message || "فشل في تسجيل الحركة", variant: "destructive" });
+      toast({ title: tc("خطأ", "Error"), description: error.message || tc("فشل في تسجيل الحركة", "Failed to record transaction"), variant: "destructive" });
     },
   });
 

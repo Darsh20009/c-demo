@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { LoadingState, EmptyState } from "@/components/ui/states";
 import SarIcon from "@/components/sar-icon";
-import { 
-  Package, MapPin, Clock, Phone, User, CheckCircle, 
+import {
+  Package, MapPin, Clock, Phone, User, CheckCircle,
   Truck, Coffee, ArrowRight, Home, RefreshCw
 } from "lucide-react";
+import { useTranslate } from "@/lib/useTranslate";
 
 interface DeliveryOrder {
   _id: string;
@@ -36,32 +37,33 @@ interface DeliveryOrder {
   deliveredAt?: string;
 }
 
-const STATUS_STEPS = [
-  { key: "pending", label: "جاري التجهيز", icon: Package },
-  { key: "assigned", label: "تم تعيين المندوب", icon: User },
-  { key: "picked_up", label: "تم الاستلام", icon: Coffee },
-  { key: "on_the_way", label: "في الطريق", icon: Truck },
-  { key: "delivered", label: "تم التوصيل", icon: CheckCircle },
+const STATUS_STEPS_AR = [
+  { key: "pending", ar: "جاري التجهيز", en: "Preparing", icon: Package },
+  { key: "assigned", ar: "تم تعيين المندوب", en: "Driver Assigned", icon: User },
+  { key: "picked_up", ar: "تم الاستلام", en: "Picked Up", icon: Coffee },
+  { key: "on_the_way", ar: "في الطريق", en: "On the Way", icon: Truck },
+  { key: "delivered", ar: "تم التوصيل", en: "Delivered", icon: CheckCircle },
 ];
 
 const getStatusIndex = (status: string): number => {
-  const idx = STATUS_STEPS.findIndex(s => s.key === status);
+  const idx = STATUS_STEPS_AR.findIndex(s => s.key === status);
   return idx >= 0 ? idx : 0;
 };
 
 const getProgressPercent = (status: string): number => {
   const idx = getStatusIndex(status);
-  return ((idx + 1) / STATUS_STEPS.length) * 100;
+  return ((idx + 1) / STATUS_STEPS_AR.length) * 100;
 };
 
 export default function DeliveryTracking() {
   const [, params] = useRoute("/delivery/track/:orderId");
   const [, setLocation] = useLocation();
   const orderId = params?.orderId;
+  const tc = useTranslate();
 
   useEffect(() => {
-    document.title = "تتبع التوصيل - QIROX Cafe";
-  }, []);
+    document.title = tc("تتبع التوصيل - QIROX Cafe", "Delivery Tracking - QIROX Cafe");
+  }, [tc]);
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['/api/delivery/orders/by-order', orderId],
@@ -77,14 +79,14 @@ export default function DeliveryTracking() {
         <Card className="w-full max-w-md text-center">
           <CardHeader>
             <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <CardTitle>تتبع التوصيل</CardTitle>
+            <CardTitle>{tc("تتبع التوصيل", "Delivery Tracking")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">يرجى إدخال رقم الطلب للتتبع</p>
+            <p className="text-muted-foreground mb-4">{tc("يرجى إدخال رقم الطلب للتتبع", "Please enter an order number to track")}</p>
             <Link href="/menu">
               <Button className="w-full">
                 <ArrowRight className="w-4 h-4 ml-2" />
-                العودة للقائمة
+                {tc("العودة للقائمة", "Back to Menu")}
               </Button>
             </Link>
           </CardContent>
@@ -107,14 +109,14 @@ export default function DeliveryTracking() {
         <Card className="w-full max-w-md text-center">
           <CardHeader>
             <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <CardTitle>لم يتم العثور على الطلب</CardTitle>
+            <CardTitle>{tc("لم يتم العثور على الطلب", "Order Not Found")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">تأكد من رقم الطلب وحاول مرة أخرى</p>
+            <p className="text-muted-foreground mb-4">{tc("تأكد من رقم الطلب وحاول مرة أخرى", "Check the order number and try again")}</p>
             <Link href="/menu">
               <Button className="w-full">
                 <Home className="w-4 h-4 ml-2" />
-                العودة للقائمة
+                {tc("العودة للقائمة", "Back to Menu")}
               </Button>
             </Link>
           </CardContent>
@@ -136,10 +138,10 @@ export default function DeliveryTracking() {
             <Link href="/menu">
               <Button variant="ghost" size="sm">
                 <ArrowRight className="w-4 h-4 ml-2" />
-                العودة
+                {tc("العودة", "Back")}
               </Button>
             </Link>
-            <h1 className="font-bold text-foreground">تتبع الطلب</h1>
+            <h1 className="font-bold text-foreground">{tc("تتبع الطلب", "Track Order")}</h1>
             <Button variant="ghost" size="icon" onClick={() => refetch()} data-testid="button-refresh">
               <RefreshCw className="w-4 h-4" />
             </Button>
@@ -152,14 +154,14 @@ export default function DeliveryTracking() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">
-                طلب {order.orderNumber || orderId?.slice(-6)}
+                {tc("طلب", "Order")} {order.orderNumber || orderId?.slice(-6)}
               </CardTitle>
               {isCancelled ? (
-                <Badge variant="destructive">ملغي</Badge>
+                <Badge variant="destructive">{tc("ملغي", "Cancelled")}</Badge>
               ) : isDelivered ? (
-                <Badge className="bg-green-500 text-white">تم التوصيل</Badge>
+                <Badge className="bg-green-500 text-white">{tc("تم التوصيل", "Delivered")}</Badge>
               ) : (
-                <Badge className="bg-primary text-primary-foreground">جاري التوصيل</Badge>
+                <Badge className="bg-primary text-primary-foreground">{tc("جاري التوصيل", "In Delivery")}</Badge>
               )}
             </div>
           </CardHeader>
@@ -176,24 +178,22 @@ export default function DeliveryTracking() {
               <div className="mb-4">
                 <Progress value={progressPercent} className="h-2" />
               </div>
-              
+
               <div className="space-y-4">
-                {STATUS_STEPS.map((step, idx) => {
+                {STATUS_STEPS_AR.map((step, idx) => {
                   const Icon = step.icon;
                   const isCompleted = idx <= currentStepIndex;
                   const isCurrent = idx === currentStepIndex;
-                  
+
                   return (
-                    <div 
+                    <div
                       key={step.key}
-                      className={`flex items-center gap-3 ${
-                        isCompleted ? "text-foreground" : "text-muted-foreground"
-                      }`}
+                      className={`flex items-center gap-3 ${isCompleted ? "text-foreground" : "text-muted-foreground"}`}
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        isCompleted 
-                          ? isCurrent 
-                            ? "bg-primary text-primary-foreground animate-pulse" 
+                        isCompleted
+                          ? isCurrent
+                            ? "bg-primary text-primary-foreground animate-pulse"
                             : "bg-green-500 text-white"
                           : "bg-muted"
                       }`}>
@@ -201,12 +201,12 @@ export default function DeliveryTracking() {
                       </div>
                       <div className="flex-1">
                         <p className={`font-medium ${isCurrent ? "text-primary" : ""}`}>
-                          {step.label}
+                          {tc(step.ar, step.en)}
                         </p>
                         {isCurrent && order.estimatedMinutes && (
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            ~{order.estimatedMinutes} دقيقة متبقية
+                            ~{order.estimatedMinutes} {tc("دقيقة متبقية", "minutes remaining")}
                           </p>
                         )}
                       </div>
@@ -224,7 +224,7 @@ export default function DeliveryTracking() {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Truck className="w-5 h-5 text-primary" />
-                معلومات المندوب
+                {tc("معلومات المندوب", "Driver Info")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -235,10 +235,7 @@ export default function DeliveryTracking() {
               {order.driverPhone && (
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-muted-foreground" />
-                  <a 
-                    href={`tel:${order.driverPhone}`} 
-                    className="text-primary hover:underline"
-                  >
+                  <a href={`tel:${order.driverPhone}`} className="text-primary hover:underline">
                     {order.driverPhone}
                   </a>
                 </div>
@@ -251,7 +248,7 @@ export default function DeliveryTracking() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
-              عنوان التوصيل
+              {tc("عنوان التوصيل", "Delivery Address")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -264,7 +261,7 @@ export default function DeliveryTracking() {
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
                 <Coffee className="w-5 h-5 text-primary" />
-                تفاصيل الطلب
+                {tc("تفاصيل الطلب", "Order Details")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -276,7 +273,7 @@ export default function DeliveryTracking() {
                   </div>
                 ))}
                 <div className="border-t pt-2 mt-2 flex justify-between font-bold">
-                  <span>المجموع</span>
+                  <span>{tc("المجموع", "Total")}</span>
                   <span className="text-primary">{order.totalAmount?.toFixed(2)} <SarIcon /></span>
                 </div>
               </div>
@@ -288,11 +285,11 @@ export default function DeliveryTracking() {
           <Card className="bg-green-50 dark:bg-green-950/20 border-green-200">
             <CardContent className="pt-6 text-center">
               <CheckCircle className="w-16 h-16 mx-auto text-green-500 mb-4" />
-              <h3 className="text-xl font-bold text-green-600 mb-2">تم التوصيل بنجاح!</h3>
-              <p className="text-muted-foreground mb-4">شكراً لطلبك من QIROX Cafe</p>
+              <h3 className="text-xl font-bold text-green-600 mb-2">{tc("تم التوصيل بنجاح!", "Delivered Successfully!")}</h3>
+              <p className="text-muted-foreground mb-4">{tc("شكراً لطلبك من QIROX Cafe", "Thank you for ordering from QIROX Cafe")}</p>
               <Link href="/menu">
                 <Button className="w-full">
-                  طلب جديد
+                  {tc("طلب جديد", "New Order")}
                 </Button>
               </Link>
             </CardContent>

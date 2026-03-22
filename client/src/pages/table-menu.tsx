@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -59,6 +60,7 @@ interface MenuCategory {
 }
 
 export default function TableMenuNew() {
+  const tc = useTranslate();
   const [, navigate] = useLocation();
   const [match, params] = useRoute("/table-menu/:qrToken");
   const { toast } = useToast();
@@ -91,7 +93,7 @@ export default function TableMenuNew() {
     retry: 1,
     queryFn: async () => {
       const response = await fetch(`/api/tables/qr/${qrToken}`);
-      if (!response.ok) throw new Error("الطاولة غير موجودة");
+      if (!response.ok) throw new Error(tc("الطاولة غير موجودة", "Table not found"));
       return response.json();
     },
   });
@@ -108,7 +110,7 @@ export default function TableMenuNew() {
     enabled: !!table?.currentOrderId,
     queryFn: async () => {
       const response = await fetch(`/api/orders/${table?.currentOrderId}`);
-      if (!response.ok) throw new Error("الطلب غير موجود");
+      if (!response.ok) throw new Error(tc("الطلب غير موجود", "Order not found"));
       return response.json();
     },
   });
@@ -152,17 +154,17 @@ export default function TableMenuNew() {
     { id: "cold", name: t("menu.categories.cold"), icon: Snowflake, isSystem: true },
     { id: "specialty", name: t("menu.categories.specialty"), icon: Star, isSystem: true },
     { id: "drinks", name: t("menu.categories.drinks") || "المشروبات", icon: Coffee, isSystem: true },
-    { id: "additional_drinks", name: "مشروبات إضافية", icon: Plus, isSystem: true },
+    { id: "additional_drinks", name: tc("مشروبات إضافية", "Additional Drinks"), icon: Plus, isSystem: true },
     { id: "desserts", name: t("menu.categories.desserts"), icon: Cake, isSystem: true },
   ];
 
   const foodSystemCategories = [
     { id: "all", name: t("menu.categories.all"), icon: Utensils, isSystem: true },
     { id: "food", name: t("menu.categories.food"), icon: Utensils, isSystem: true },
-    { id: "sandwiches", name: "السندوتشات", icon: Utensils, isSystem: true },
+    { id: "sandwiches", name: tc("السندوتشات", "Sandwiches"), icon: Utensils, isSystem: true },
     { id: "bakery", name: t("menu.categories.bakery"), icon: Cake, isSystem: true },
-    { id: "croissant", name: "الكرواسون", icon: Cake, isSystem: true },
-    { id: "cake", name: "الكيك", icon: Cake, isSystem: true },
+    { id: "croissant", name: tc("الكرواسون", "Croissant"), icon: Cake, isSystem: true },
+    { id: "cake", name: tc("الكيك", "Cake"), icon: Cake, isSystem: true },
     { id: "desserts", name: t("menu.categories.desserts"), icon: Star, isSystem: true },
   ];
 
@@ -306,8 +308,8 @@ export default function TableMenuNew() {
     } catch (error) {
       console.error("Add to cart error:", error);
       toast({
-        title: "خطأ",
-        description: "فشل في إضافة المنتج للسلة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل في إضافة المنتج للسلة", "Failed to add product to cart"),
         variant: "destructive"
       });
     }
@@ -368,15 +370,15 @@ export default function TableMenuNew() {
       });
       if (response.ok) {
         toast({
-          title: "تم التمديد",
-          description: "تم تمديد الحجز لمدة ساعة إضافية",
+          title: tc("تم التمديد", "Extended"),
+          description: tc("تم تمديد الحجز لمدة ساعة إضافية", "Reservation extended by one hour"),
         });
         queryClient.invalidateQueries({ queryKey: ["/api/tables/qr", qrToken] });
       }
     } catch (error) {
       toast({
-        title: "خطأ",
-        description: "فشل تمديد الحجز",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل تمديد الحجز", "Failed to extend reservation"),
         variant: "destructive"
       });
     }
@@ -385,8 +387,8 @@ export default function TableMenuNew() {
   const handleCheckout = async () => {
     if (cart.length === 0) {
       toast({
-        title: "السلة فارغة",
-        description: "الرجاء إضافة عناصر للسلة أولاً",
+        title: tc("السلة فارغة", "Cart Empty"),
+        description: tc("الرجاء إضافة عناصر للسلة أولاً", "Please add items to cart first"),
         variant: "destructive",
       });
       return;
@@ -395,8 +397,8 @@ export default function TableMenuNew() {
     if (table?.reservedFor?.customerName) {
       if (reservationStatus === "after_window") {
         toast({
-          title: "انتهاء فترة الحجز",
-          description: "آسفون، فترة الحجز قد انتهت. يمكنك عمل طلب عادي جديد.",
+          title: tc("انتهاء فترة الحجز", "Reservation Expired"),
+          description: tc("آسفون، فترة الحجز قد انتهت. يمكنك عمل طلب عادي جديد.", "Sorry, reservation has expired. You can place a new regular order."),
           variant: "destructive",
         });
         return;
@@ -404,8 +406,8 @@ export default function TableMenuNew() {
 
       if (reservationStatus === "before_window") {
         toast({
-          title: "الحجز في وقت لاحق",
-          description: "الحجز لم يبدأ بعد. يمكنك عمل طلب عادي الآن.",
+          title: tc("الحجز في وقت لاحق", "Reservation Not Started"),
+          description: tc("الحجز لم يبدأ بعد. يمكنك عمل طلب عادي الآن.", "Reservation has not started yet. You can place a regular order now."),
         });
         setReservationPhoneVerified(true);
         return;
@@ -415,8 +417,8 @@ export default function TableMenuNew() {
         const phoneToVerify = reservationPhoneInput.trim();
         if (!phoneToVerify) {
           toast({
-            title: "التحقق من الحجز",
-            description: "الرجاء إدخال رقم الجوال المسجل في الحجز",
+            title: tc("التحقق من الحجز", "Verify Reservation"),
+            description: tc("الرجاء إدخال رقم الجوال المسجل في الحجز", "Please enter the phone number registered for this reservation"),
             variant: "destructive",
           });
           return;
@@ -427,8 +429,8 @@ export default function TableMenuNew() {
 
         if (reservationPhone !== inputPhone && reservationPhone !== phoneToVerify) {
           toast({
-            title: "خطأ في التحقق",
-            description: "رقم الجوال غير مطابق للحجز",
+            title: tc("خطأ في التحقق", "Verification Error"),
+            description: tc("رقم الجوال غير مطابق للحجز", "Phone number does not match reservation"),
             variant: "destructive",
           });
           return;
@@ -460,8 +462,8 @@ export default function TableMenuNew() {
     const isAvailable = item.isAvailable !== 0 && (item.availabilityStatus === 'available' || item.availabilityStatus === 'new' || !item.availabilityStatus);
     if (!isAvailable) {
       toast({
-        title: "غير متوفر",
-        description: "نعتذر، هذا المنتج غير متوفر حالياً",
+        title: tc("غير متوفر", "Unavailable"),
+        description: tc("نعتذر، هذا المنتج غير متوفر حالياً", "Sorry, this product is currently unavailable"),
         variant: "destructive"
       });
       return;
@@ -499,8 +501,8 @@ export default function TableMenuNew() {
       <div className="min-h-screen bg-background flex items-center justify-center" dir="rtl">
         <div className="text-center">
           <Coffee className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">طاولة غير موجودة</h2>
-          <p className="text-muted-foreground">عذراً، لم نتمكن من العثور على هذه الطاولة.</p>
+          <h2 className="text-2xl font-bold mb-2">{tc("طاولة غير موجودة", "Table Not Found")}</h2>
+          <p className="text-muted-foreground">{tc("عذراً، لم نتمكن من العثور على هذه الطاولة.", "Sorry, we could not find this table.")}</p>
         </div>
       </div>
     );
@@ -665,7 +667,7 @@ export default function TableMenuNew() {
                             });
                           } else {
                             toast({
-                              title: "خطأ",
+                              title: tc("خطأ", "Error"),
                               description: "رقم الجوال غير مطابق",
                               variant: "destructive",
                             });

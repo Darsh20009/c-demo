@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import EmployeeDashboard from "./employee-dashboard";
 import MenuView from "./menu-view";
 import { Button } from "@/components/ui/button";
 import { Layout, Coffee, Users, Maximize2, Minimize2 } from "lucide-react";
 
 export default function UnifiedHub() {
+  const tc = useTranslate();
  const [activeView, setActiveView] = useState<"both" | "employee" | "menu">("both");
 
  return (
@@ -16,7 +18,7 @@ export default function UnifiedHub() {
    <div className="flex items-center gap-3">
    <div className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg shadow-lg">
    <Layout className="w-5 h-5" />
-   <span className="font-bold text-sm">مركز التحكم الموحد</span>
+   <span className="font-bold text-sm">{tc("مركز التحكم الموحد", "Unified Control Center")}</span>
    </div>
    </div>
    
@@ -29,7 +31,7 @@ export default function UnifiedHub() {
    data-testid="button-view-both"
    >
    <Maximize2 className="w-4 h-4" />
-   <span className="hidden sm:inline">عرض مزدوج</span>
+   <span className="hidden sm:inline">{tc("عرض مزدوج", "Dual View")}</span>
    </Button>
    
    <Button
@@ -40,7 +42,7 @@ export default function UnifiedHub() {
    data-testid="button-view-employee"
    >
    <Users className="w-4 h-4" />
-   <span className="hidden sm:inline">الموظفين</span>
+   <span className="hidden sm:inline">{tc("الموظفين", "Staff")}</span>
    </Button>
    
    <Button
@@ -51,7 +53,7 @@ export default function UnifiedHub() {
    data-testid="button-view-menu"
    >
    <Coffee className="w-4 h-4" />
-   <span className="hidden sm:inline">المنيو</span>
+   <span className="hidden sm:inline">{tc("المنيو", "Menu")}</span>
    </Button>
    </div>
    </div>
@@ -65,7 +67,7 @@ export default function UnifiedHub() {
    <div className="bg-card/50 rounded-xl border border-primary/20 shadow-2xl overflow-hidden backdrop-blur-sm">
    <div className="bg-primary px-4 py-3 flex items-center gap-2">
    <Users className="w-5 h-5 text-white" />
-   <h2 className="text-white font-bold">لوحة الموظفين</h2>
+   <h2 className="text-white font-bold">{tc("لوحة الموظفين", "Staff Dashboard")}</h2>
    </div>
    <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
    <EmployeeDashboard />
@@ -76,7 +78,7 @@ export default function UnifiedHub() {
    <div className="bg-card/50 rounded-xl border border-primary/20 shadow-2xl overflow-hidden backdrop-blur-sm">
    <div className="bg-primary px-4 py-3 flex items-center gap-2">
    <Coffee className="w-5 h-5 text-white" />
-   <h2 className="text-white font-bold">منيو العرض</h2>
+   <h2 className="text-white font-bold">{tc("منيو العرض", "Display Menu")}</h2>
    </div>
    <div className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
    <MenuView />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,35 +16,36 @@ import qiroxLogoCustomer from "@assets/qirox-logo-customer.png";
 const SUBSCRIPTION_PLANS = [
   {
     id: "free",
-    nameAr: "مجاني",
+    nameAr: tc("مجاني", "Free"),
     nameEn: "Free",
     price: "0",
-    features: ["فرع واحد", "100 طلب/شهر", "بدون دعم"]
+    features: [tc("فرع واحد", "One Branch"), tc("100 طلب/شهر", "100 orders/month"), tc("بدون دعم", "No support")]
   },
   {
     id: "starter",
-    nameAr: "مبتدئ",
+    nameAr: tc("مبتدئ", "Starter"),
     nameEn: "Starter",
     price: "299",
-    features: ["فرعين", "1000 طلب/شهر", "بريد إلكتروني"]
+    features: [tc("فرعين", "2 Branches"), tc("1000 طلب/شهر", "1000 orders/month"), tc("بريد إلكتروني", "Email support")]
   },
   {
     id: "professional",
-    nameAr: "احترافي",
+    nameAr: tc("احترافي", "Professional"),
     nameEn: "Professional",
     price: "999",
-    features: ["5 فروع", "طلبات غير محدودة", "دعم كامل"]
+    features: [tc("5 فروع", "5 Branches"), tc("طلبات غير محدودة", "Unlimited orders"), tc("دعم كامل", "Full support")]
   },
   {
     id: "enterprise",
     nameAr: "enterprise",
     nameEn: "Enterprise",
-    price: "يتم تحديده",
-    features: ["فروع غير محدودة", "مميزات مخصصة", "حساب مخصص"]
+    price: tc("يتم تحديده", "Custom"),
+    features: [tc("فروع غير محدودة", "Unlimited branches"), tc("مميزات مخصصة", "Custom features"), tc("حساب مخصص", "Dedicated account")]
   }
 ];
 
 export default function TenantSignup() {
+  const tc = useTranslate();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -71,8 +73,8 @@ export default function TenantSignup() {
     // Validation
     if (!formData.nameAr.trim()) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال اسم المتجر بالعربية",
+        title: tc("خطأ", "Error"),
+        description: tc("الرجاء إدخال اسم المتجر بالعربية", "Please enter the store name in Arabic"),
         variant: "destructive"
       });
       return;
@@ -80,8 +82,8 @@ export default function TenantSignup() {
 
     if (!formData.email.trim() || !formData.email.includes("@")) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال بريد إلكتروني صحيح",
+        title: tc("خطأ", "Error"),
+        description: tc("الرجاء إدخال بريد إلكتروني صحيح", "Please enter a valid email address"),
         variant: "destructive"
       });
       return;
@@ -89,8 +91,8 @@ export default function TenantSignup() {
 
     if (!formData.phone.trim()) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال رقم الهاتف",
+        title: tc("خطأ", "Error"),
+        description: tc("الرجاء إدخال رقم الهاتف", "Please enter phone number"),
         variant: "destructive"
       });
       return;
@@ -131,7 +133,7 @@ export default function TenantSignup() {
 
       setSuccess(true);
       toast({
-        title: "تم الإنشاء بنجاح!",
+        title: tc("تم الإنشاء بنجاح!", "Created Successfully!"),
         description: `تم إنشاء متجرك "${formData.nameAr}" بنجاح`
       });
 
@@ -143,8 +145,8 @@ export default function TenantSignup() {
     } catch (error: any) {
       console.error("Signup error:", error);
       toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء إنشاء المتجر",
+        title: tc("خطأ", "Error"),
+        description: error.message || tc("حدث خطأ أثناء إنشاء المتجر", "An error occurred while creating the store"),
         variant: "destructive"
       });
     } finally {
@@ -190,8 +192,8 @@ export default function TenantSignup() {
         {/* Main Form */}
         <Card className="shadow-lg mb-8">
           <CardHeader>
-            <CardTitle>بيانات المتجر</CardTitle>
-            <CardDescription>أدخل معلومات متجرك والخطة المناسبة لك</CardDescription>
+            <CardTitle>{tc("بيانات المتجر", "Store Details")}</CardTitle>
+            <CardDescription>{tc("أدخل معلومات متجرك والخطة المناسبة لك", "Enter your store information and suitable plan")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">

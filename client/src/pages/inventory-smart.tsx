@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -57,31 +58,31 @@ import {
 
 const categoryLabels: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
   ingredient: { 
-    label: "مكون", 
+    label: tc("مكون", "Ingredient"), 
     icon: Coffee,
     color: "text-primary",
     bgColor: "bg-muted"
   },
   packaging: { 
-    label: "تغليف", 
+    label: tc("تغليف", "Packaging"), 
     icon: Box,
     color: "text-primary",
     bgColor: "bg-muted"
   },
   equipment: { 
-    label: "معدات", 
+    label: tc("معدات", "Equipment"), 
     icon: Wrench,
     color: "text-muted-foreground",
     bgColor: "bg-muted"
   },
   consumable: { 
-    label: "مستهلكات", 
+    label: tc("مستهلكات", "Consumables"), 
     icon: Droplet,
     color: "text-primary",
     bgColor: "bg-muted"
   },
   other: { 
-    label: "أخرى", 
+    label: tc("أخرى", "Other"), 
     icon: HelpCircle,
     color: "text-muted-foreground",
     bgColor: "bg-muted"
@@ -89,13 +90,13 @@ const categoryLabels: Record<string, { label: string; icon: any; color: string; 
 };
 
 const unitLabels: Record<string, string> = {
-  kg: "كيلو",
-  g: "جرام",
-  liter: "لتر",
-  ml: "مل",
-  piece: "قطعة",
-  box: "صندوق",
-  bag: "كيس",
+  kg: tc("كيلو", "kg"),
+  g: tc("جرام", "g"),
+  liter: tc("لتر", "L"),
+  ml: tc("مل", "ml"),
+  piece: tc("قطعة", "pcs"),
+  box: tc("صندوق", "box"),
+  bag: tc("كيس", "bag"),
 };
 
 interface RawItem {
@@ -128,6 +129,7 @@ interface Branch {
 }
 
 export default function InventorySmartPage() {
+  const tc = useTranslate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -176,10 +178,10 @@ export default function InventorySmartPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/branch-stocks"] });
       setIsQuickAdjustOpen(false);
       setAdjustQuantity(0);
-      toast({ title: "تم تعديل المخزون بنجاح" });
+      toast({ title: tc("تم تعديل المخزون بنجاح", "Inventory adjusted successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في تعديل المخزون", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في تعديل المخزون", "Failed to adjust inventory"), variant: "destructive" });
     },
   });
 
@@ -193,10 +195,10 @@ export default function InventorySmartPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/raw-items"] });
       setIsAddStockOpen(false);
       setNewStockData({ rawItemId: "", quantity: 0, unitCost: 0, notes: "" });
-      toast({ title: "تمت إضافة الدفعة بنجاح" });
+      toast({ title: tc("تمت إضافة الدفعة بنجاح", "Batch added successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في إضافة الدفعة", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في إضافة الدفعة", "Failed to add batch"), variant: "destructive" });
     },
   });
 
@@ -210,15 +212,15 @@ export default function InventorySmartPage() {
     const maxLevel = item.maxStockLevel || minLevel * 3;
     
     if (currentQty <= 0) {
-      return { status: "out", label: "نفد", color: "bg-destructive", textColor: "text-destructive" };
+      return { status: "out", label: tc("نفد", "Out of Stock"), color: "bg-destructive", textColor: "text-destructive" };
     }
     if (currentQty <= minLevel) {
-      return { status: "low", label: "منخفض", color: "bg-primary", textColor: "text-accent dark:text-accent" };
+      return { status: "low", label: tc("منخفض", "Low"), color: "bg-primary", textColor: "text-accent dark:text-accent" };
     }
     if (currentQty >= maxLevel * 0.8) {
-      return { status: "high", label: "مرتفع", color: "bg-green-500", textColor: "text-green-600 dark:text-green-400" };
+      return { status: "high", label: tc("مرتفع", "High"), color: "bg-green-500", textColor: "text-green-600 dark:text-green-400" };
     }
-    return { status: "normal", label: "طبيعي", color: "bg-primary", textColor: "text-primary" };
+    return { status: "normal", label: tc("طبيعي", "Normal"), color: "bg-primary", textColor: "text-primary" };
   };
 
   const getStockPercentage = (item: RawItem, stock?: BranchStock) => {

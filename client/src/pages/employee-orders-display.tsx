@@ -13,6 +13,7 @@ import { Clock, ChefHat, CheckCircle2, ArrowLeft } from "lucide-react";
 import type { Employee } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
+import { useTranslate } from "@/lib/useTranslate";
 
 interface Order {
   id: string;
@@ -32,10 +33,11 @@ interface Order {
 }
 
 const MAX_ORDERS_PER_STATUS = 5;
-const REFRESH_INTERVAL = 5000; // 5 seconds
+const REFRESH_INTERVAL = 5000;
 
 export default function EmployeeOrdersDisplay() {
   const [, setLocation] = useLocation();
+  const tc = useTranslate();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [branches, setBranches] = useState<any[]>([]);
@@ -70,7 +72,6 @@ export default function EmployeeOrdersDisplay() {
     fetchBranches();
   }, []);
 
-  // Fetch orders function
   const fetchOrders = useCallback(async () => {
     if (!selectedBranch) return;
     try {
@@ -87,7 +88,6 @@ export default function EmployeeOrdersDisplay() {
     }
   }, [selectedBranch]);
 
-  // Auto-refresh orders
   useEffect(() => {
     fetchOrders();
     const interval = setInterval(fetchOrders, REFRESH_INTERVAL);
@@ -107,11 +107,11 @@ export default function EmployeeOrdersDisplay() {
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
-      pending: "قيد الانتظار",
-      waiting: "قيد الانتظار",
-      preparing: "جاري التحضير",
-      in_progress: "جاري التحضير",
-      ready: "جاهز للاستلام",
+      pending: tc("قيد الانتظار", "Pending"),
+      waiting: tc("قيد الانتظار", "Pending"),
+      preparing: tc("جاري التحضير", "Preparing"),
+      in_progress: tc("جاري التحضير", "Preparing"),
+      ready: tc("جاهز للاستلام", "Ready"),
     };
     return labels[status] || status;
   };
@@ -149,12 +149,12 @@ export default function EmployeeOrdersDisplay() {
         <div className="flex justify-between items-start w-full mb-1">
           {order.orderType === 'dine-in' && order.tableNumber && (
             <Badge variant="outline" className="text-[10px] bg-primary/10 text-primary border-primary/20">
-              طاولة {order.tableNumber}
+              {tc("طاولة", "Table")} {order.tableNumber}
             </Badge>
           )}
           {order.orderType === 'car-pickup' && order.carInfo && (
             <Badge variant="outline" className="text-[10px] bg-blue-100 text-blue-700 border-blue-200">
-              سيارة: {order.carInfo.model} ({order.carInfo.color}) - {order.carInfo.plateNumber}
+              {tc("سيارة:", "Car:")} {order.carInfo.model} ({order.carInfo.color}) - {order.carInfo.plateNumber}
             </Badge>
           )}
           <span className="text-[10px] text-muted-foreground">{new Date(order.createdAt || "").toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -189,7 +189,7 @@ export default function EmployeeOrdersDisplay() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-muted-foreground py-8 font-semibold">لا توجد طلبات</p>
+            <p className="text-center text-muted-foreground py-8 font-semibold">{tc("لا توجد طلبات", "No orders")}</p>
           )}
         </div>
       </div>
@@ -198,7 +198,6 @@ export default function EmployeeOrdersDisplay() {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      {/* Header */}
       <div className="flex items-center justify-between mb-8 bg-card rounded-lg border border-border p-4">
         <Button
           onClick={() => setLocation("/employee/dashboard")}
@@ -210,20 +209,19 @@ export default function EmployeeOrdersDisplay() {
         </Button>
         <div className="flex items-center gap-3">
           <img src={qiroxLogoStaff} alt="QIROX" className="w-8 h-8 object-contain rounded-lg" />
-          <h1 className="text-3xl font-bold text-foreground">عرض الطلبات</h1>
+          <h1 className="text-3xl font-bold text-foreground">{tc("عرض الطلبات", "Orders Display")}</h1>
         </div>
         <div className="w-10" />
       </div>
 
-      {/* Branch Selection - Only show if not auto-detected */}
       {!selectedBranch && (
         <div className="bg-card rounded-lg border border-border p-4 mb-6">
           <label className="block text-sm font-semibold text-foreground mb-2">
-            اختر الفرع
+            {tc("اختر الفرع", "Select Branch")}
           </label>
           <Select value={selectedBranch} onValueChange={setSelectedBranch}>
             <SelectTrigger className="w-full border-2 border-border text-base h-12" data-testid="select-branch">
-              <SelectValue placeholder="اختر الفرع" />
+              <SelectValue placeholder={tc("اختر الفرع", "Select Branch")} />
             </SelectTrigger>
             <SelectContent>
               {branches.map((branch) => (
@@ -238,27 +236,27 @@ export default function EmployeeOrdersDisplay() {
 
       {isLoading && selectedBranch ? (
         <div className="text-center py-8">
-          <p className="text-lg text-muted-foreground font-semibold">جاري تحميل الطلبات...</p>
+          <p className="text-lg text-muted-foreground font-semibold">{tc("جاري تحميل الطلبات...", "Loading orders...")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <StatusSection 
-            title="قيد الانتظار" 
-            status="pending" 
-            icon={Clock} 
-            count={filterOrdersByStatus("pending").length} 
+          <StatusSection
+            title={tc("قيد الانتظار", "Pending")}
+            status="pending"
+            icon={Clock}
+            count={filterOrdersByStatus("pending").length}
           />
-          <StatusSection 
-            title="جاري التحضير" 
-            status="preparing" 
-            icon={ChefHat} 
-            count={filterOrdersByStatus("preparing").length + filterOrdersByStatus("in_progress").length} 
+          <StatusSection
+            title={tc("جاري التحضير", "Preparing")}
+            status="preparing"
+            icon={ChefHat}
+            count={filterOrdersByStatus("preparing").length + filterOrdersByStatus("in_progress").length}
           />
-          <StatusSection 
-            title="جاهز للاستلام" 
-            status="ready" 
-            icon={CheckCircle2} 
-            count={filterOrdersByStatus("ready").length} 
+          <StatusSection
+            title={tc("جاهز للاستلام", "Ready")}
+            status="ready"
+            icon={CheckCircle2}
+            count={filterOrdersByStatus("ready").length}
           />
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ import type { Employee, Order } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
 
 export default function ExecutiveDashboard() {
+  const tc = useTranslate();
   const [, setLocation] = useLocation();
   const [manager, setManager] = useState<Employee | null>(null);
   const [dateFilter, setDateFilter] = useState<"today" | "week" | "month" | "year">("month");
@@ -58,7 +60,7 @@ export default function ExecutiveDashboard() {
   });
 
   if (!manager) {
-    return <LoadingState message="جاري التحميل..." />;
+    return <LoadingState message={tc("جاري التحميل...", "Loading...")} />;
   }
 
   const getFilteredOrders = () => {
@@ -118,9 +120,9 @@ export default function ExecutiveDashboard() {
   const paymentData = (() => {
     const methods: Record<string, number> = {};
     filteredOrders.forEach(o => {
-      const method = o.paymentMethod === 'cash' ? 'نقدي' : 
-                     o.paymentMethod === 'card' ? 'بطاقة' : 
-                     o.paymentMethod === 'mada' ? 'مدى' : o.paymentMethod;
+      const method = o.paymentMethod === 'cash' ? tc('نقدي', 'Cash') : 
+                     : o.paymentMethod === 'card' ? tc('بطاقة', 'Card') : 
+                     : o.paymentMethod === 'mada' ? tc('مدى', 'Mada') : o.paymentMethod;
       methods[method] = (methods[method] || 0) + Number(o.totalAmount || 0);
     });
     return Object.entries(methods).map(([name, value]) => ({ name, value: Number(value.toFixed(2)) }));
@@ -131,7 +133,7 @@ export default function ExecutiveDashboard() {
     filteredOrders.forEach(order => {
       const orderItems = Array.isArray(order.items) ? order.items : [];
       orderItems.forEach((item: any) => {
-        const name = item.coffeeItem?.nameAr || item.nameAr || 'منتج';
+        const name = item.coffeeItem?.nameAr || item.nameAr || tc('منتج', 'Product');
         if (!items[name]) items[name] = { count: 0, revenue: 0 };
         items[name].count += item.quantity || 1;
         items[name].revenue += (item.quantity || 1) * Number(item.price || 0);
@@ -195,7 +197,7 @@ export default function ExecutiveDashboard() {
       const growth = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : 0;
       
       analytics[branch.id] = {
-        name: branch.name || branch.nameAr || 'فرع',
+        name: branch.name || branch.nameAr || tc('فرع', 'Branch'),
         revenue,
         orders: orderCount,
         avgOrder: orderCount > 0 ? revenue / orderCount : 0,
@@ -241,13 +243,13 @@ export default function ExecutiveDashboard() {
     
     return {
       byRole: Object.entries(roles).map(([role, data]) => ({
-        role: role === 'cashier' ? 'كاشير' : 
-              role === 'barista' ? 'باريستا' :
-              role === 'manager' ? 'مدير' :
-              role === 'admin' ? 'مشرف' :
-              role === 'driver' ? 'سائق' :
-              role === 'kitchen' ? 'مطبخ' :
-              role === 'waiter' ? 'نادل' : role,
+        role: role === 'cashier' ? tc('كاشير', 'Cashier') : 
+              : role === 'barista' ? tc('باريستا', 'Barista') :
+              : role === 'manager' ? tc('مدير', 'Manager') :
+              : role === 'admin' ? tc('مشرف', 'Admin') :
+              : role === 'driver' ? tc('سائق', 'Driver') :
+              : role === 'kitchen' ? tc('مطبخ', 'Kitchen') :
+              : role === 'waiter' ? tc('نادل', 'Waiter') : role,
         ...data
       })),
       totalCost: totalMonthlyLaborCost,
@@ -289,10 +291,10 @@ export default function ExecutiveDashboard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">اليوم</SelectItem>
-                <SelectItem value="week">هذا الأسبوع</SelectItem>
-                <SelectItem value="month">هذا الشهر</SelectItem>
-                <SelectItem value="year">هذا العام</SelectItem>
+                <SelectItem value="today">{tc("اليوم", "Today")}</SelectItem>
+                <SelectItem value="week">{tc("هذا الأسبوع", "This Week")}</SelectItem>
+                <SelectItem value="month">{tc("هذا الشهر", "This Month")}</SelectItem>
+                <SelectItem value="year">{tc("هذا العام", "This Year")}</SelectItem>
               </SelectContent>
             </Select>
             
@@ -329,7 +331,7 @@ export default function ExecutiveDashboard() {
                 +12.5%
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground mb-1">إجمالي الإيرادات</p>
+            <p className="text-sm text-muted-foreground mb-1">{tc("إجمالي الإيرادات", "Total Revenue")}</p>
             <p className="text-2xl font-bold text-foreground">{totalRevenue.toLocaleString('ar-SA')} <span className="text-sm font-normal"><SarIcon /></span></p>
           </div>
 

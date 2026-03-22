@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,29 +11,29 @@ import { useToast } from "@/hooks/use-toast";
 import { Key, Copy, Plus, Trash2, Eye, EyeOff, Code2, Globe, ShieldCheck, Loader2, RefreshCw } from "lucide-react";
 
 const PUBLIC_ENDPOINTS = [
-  { method: "GET", path: "/api/menu", description: "قائمة المنتجات المتاحة", auth: "none" },
-  { method: "GET", path: "/api/promo-offers", description: "العروض الترويجية النشطة", auth: "none" },
-  { method: "GET", path: "/api/gift-cards/check/:code", description: "التحقق من بطاقة هدية", auth: "none" },
-  { method: "POST", path: "/api/orders", description: "إنشاء طلب جديد", auth: "none" },
-  { method: "GET", path: "/api/orders/:id", description: "تفاصيل طلب", auth: "none" },
-  { method: "GET", path: "/api/discount-codes", description: "رموز الخصم المتاحة", auth: "none" },
-  { method: "POST", path: "/api/customers/register", description: "تسجيل عميل جديد", auth: "none" },
-  { method: "POST", path: "/api/customers/login", description: "تسجيل دخول العميل", auth: "none" },
-  { method: "GET", path: "/api/loyalty/cards/phone", description: "بطاقة ولاء العميل", auth: "customer" },
-  { method: "POST", path: "/api/cart", description: "إضافة للسلة", auth: "session" },
-  { method: "GET", path: "/api/cart", description: "محتوى السلة", auth: "session" },
+  { method: "GET", path: "/api/menu", description: tc("قائمة المنتجات المتاحة", "Available Products List"), auth: "none" },
+  { method: "GET", path: "/api/promo-offers", description: tc("العروض الترويجية النشطة", "Active Promo Offers"), auth: "none" },
+  { method: "GET", path: "/api/gift-cards/check/:code", description: tc("التحقق من بطاقة هدية", "Check Gift Card"), auth: "none" },
+  { method: "POST", path: "/api/orders", description: tc("إنشاء طلب جديد", "Create New Order"), auth: "none" },
+  { method: "GET", path: "/api/orders/:id", description: tc("تفاصيل طلب", "Order Details"), auth: "none" },
+  { method: "GET", path: "/api/discount-codes", description: tc("رموز الخصم المتاحة", "Available Discount Codes"), auth: "none" },
+  { method: "POST", path: "/api/customers/register", description: tc("تسجيل عميل جديد", "Register New Customer"), auth: "none" },
+  { method: "POST", path: "/api/customers/login", description: tc("تسجيل دخول العميل", "Customer Login"), auth: "none" },
+  { method: "GET", path: "/api/loyalty/cards/phone", description: tc("بطاقة ولاء العميل", "Customer Loyalty Card"), auth: "customer" },
+  { method: "POST", path: "/api/cart", description: tc("إضافة للسلة", "Add to Cart"), auth: "session" },
+  { method: "GET", path: "/api/cart", description: tc("محتوى السلة", "Cart Contents"), auth: "session" },
 ];
 
 const MANAGER_ENDPOINTS = [
-  { method: "GET", path: "/api/orders", description: "كل الطلبات", auth: "manager" },
-  { method: "PUT", path: "/api/orders/:id/status", description: "تحديث حالة الطلب", auth: "employee" },
-  { method: "GET", path: "/api/admin/promo-offers", description: "إدارة العروض", auth: "manager" },
-  { method: "POST", path: "/api/promo-offers", description: "إنشاء عرض ترويجي", auth: "manager" },
-  { method: "POST", path: "/api/gift-cards", description: "إنشاء بطاقة هدية", auth: "manager" },
-  { method: "GET", path: "/api/gift-cards", description: "قائمة بطاقات الهدايا", auth: "manager" },
-  { method: "GET", path: "/api/employees", description: "الموظفون", auth: "manager" },
-  { method: "GET", path: "/api/loyalty/cards", description: "بطاقات الولاء", auth: "manager" },
-  { method: "GET", path: "/api/discount-codes", description: "رموز الخصم", auth: "manager" },
+  { method: "GET", path: "/api/orders", description: tc("كل الطلبات", "All Orders"), auth: "manager" },
+  { method: "PUT", path: "/api/orders/:id/status", description: tc("تحديث حالة الطلب", "Update Order Status"), auth: "employee" },
+  { method: "GET", path: "/api/admin/promo-offers", description: tc("إدارة العروض", "Manage Offers"), auth: "manager" },
+  { method: "POST", path: "/api/promo-offers", description: tc("إنشاء عرض ترويجي", "Create Promo Offer"), auth: "manager" },
+  { method: "POST", path: "/api/gift-cards", description: tc("إنشاء بطاقة هدية", "Create Gift Card"), auth: "manager" },
+  { method: "GET", path: "/api/gift-cards", description: tc("قائمة بطاقات الهدايا", "Gift Cards List"), auth: "manager" },
+  { method: "GET", path: "/api/employees", description: tc("الموظفون", "Employees"), auth: "manager" },
+  { method: "GET", path: "/api/loyalty/cards", description: tc("بطاقات الولاء", "Loyalty Cards"), auth: "manager" },
+  { method: "GET", path: "/api/discount-codes", description: tc("رموز الخصم", "Discount Codes"), auth: "manager" },
   { method: "POST", path: "/api/discount-codes", description: "إنشاء رمز خصم", auth: "manager" },
 ];
 
@@ -62,6 +63,7 @@ interface ApiKey {
 }
 
 function generateApiKey() {
+  const tc = useTranslate();
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const prefix = 'qrx_';
   let result = prefix;

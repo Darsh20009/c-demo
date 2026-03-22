@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
+import { useTranslate } from "@/lib/useTranslate";
 import { Coffee, Settings, Wrench, Clock } from "lucide-react";
 import qiroxLogo from "@assets/qirox-logo-customer.png";
 
 export default function MaintenancePage({ reason = "maintenance" }: { reason?: string }) {
+  const tc = useTranslate();
 
-  const isUpdate = reason === "update" || reason === "تحديث";
+  const isUpdate = reason === "update" || reason === tc("تحديث", "update");
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center" dir="rtl">
@@ -26,12 +28,12 @@ export default function MaintenancePage({ reason = "maintenance" }: { reason?: s
 
         <div className="space-y-4">
           <h1 className="text-3xl font-bold text-foreground font-ibm-arabic">
-            {isUpdate ? "جاري التحديث..." : "الموقع تحت الصيانة"}
+            {isUpdate ? tc("جاري التحديث...", "Updating...") : tc("الموقع تحت الصيانة", "Site Under Maintenance")}
           </h1>
           <p className="text-muted-foreground text-lg leading-relaxed">
             {isUpdate 
-              ? "نحن نقوم بإضافة مميزات جديدة لنقدم لكم تجربة أفضل. سنعود قريباً جداً!" 
-              : "نحن نقوم ببعض أعمال الصيانة الدورية لنضمن لكم أفضل جودة. شكراً لصبركم!"}
+              ? tc("نحن نقوم بإضافة مميزات جديدة لنقدم لكم تجربة أفضل. سنعود قريباً جداً!", "We are adding new features to provide you with a better experience. We'll be back very soon!") 
+              : tc("نحن نقوم ببعض أعمال الصيانة الدورية لنضمن لكم أفضل جودة. شكراً لصبركم!", "We are performing routine maintenance to ensure the best quality for you. Thank you for your patience!")}
           </p>
         </div>
 

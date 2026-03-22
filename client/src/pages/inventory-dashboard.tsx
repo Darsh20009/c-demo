@@ -1,3 +1,4 @@
+import { useTranslate } from "@/lib/useTranslate";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -45,33 +46,33 @@ import {
   Warehouse,
 } from "lucide-react";
 
-const categoryLabels: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
+const categoryLabels: Record<string, { labelAr: string; labelEn: string; icon: any; color: string; bgColor: string }> = {
   ingredient: { 
-    label: "مكون", 
+    labelAr: "مكون", labelEn: "Ingredient", 
     icon: Coffee,
     color: "text-primary",
     bgColor: "bg-muted"
   },
   packaging: { 
-    label: "تغليف", 
+    labelAr: "تغليف", labelEn: "Packaging", 
     icon: Box,
     color: "text-primary",
     bgColor: "bg-muted"
   },
   equipment: { 
-    label: "معدات", 
+    labelAr: "معدات", labelEn: "Equipment", 
     icon: Wrench,
     color: "text-muted-foreground",
     bgColor: "bg-muted"
   },
   consumable: { 
-    label: "مستهلكات", 
+    labelAr: "مستهلكات", labelEn: "Consumable", 
     icon: Droplet,
     color: "text-primary",
     bgColor: "bg-muted"
   },
   other: { 
-    label: "أخرى", 
+    labelAr: "أخرى", labelEn: "Other", 
     icon: HelpCircle,
     color: "text-muted-foreground",
     bgColor: "bg-muted"
@@ -119,6 +120,7 @@ interface Branch {
 
 export default function InventoryDashboardPage() {
   const { toast } = useToast();
+  const tc = useTranslate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
@@ -165,10 +167,10 @@ export default function InventoryDashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/dashboard"] });
       setIsQuickAdjustOpen(false);
       setAdjustQuantity(0);
-      toast({ title: "تم تعديل المخزون بنجاح" });
+      toast({ title: tc("تم تعديل المخزون بنجاح", "Inventory adjusted successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في تعديل المخزون", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في تعديل المخزون", "Failed to adjust inventory"), variant: "destructive" });
     },
   });
 
@@ -181,10 +183,10 @@ export default function InventoryDashboardPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/dashboard"] });
       setIsAddStockOpen(false);
       setNewStockData({ rawItemId: "", quantity: 0, unitCost: 0, notes: "" });
-      toast({ title: "تمت إضافة الدفعة بنجاح" });
+      toast({ title: tc("تمت إضافة الدفعة بنجاح", "Batch added successfully") });
     },
     onError: (error: any) => {
-      toast({ title: error.message || "فشل في إضافة الدفعة", variant: "destructive" });
+      toast({ title: error.message || tc("فشل في إضافة الدفعة", "Failed to add batch"), variant: "destructive" });
     },
   });
 
@@ -248,7 +250,7 @@ export default function InventoryDashboardPage() {
 
   const handleAdjustSubmit = () => {
     if (!selectedItem || !selectedBranch || selectedBranch === "all") {
-      toast({ title: "يرجى اختيار الفرع أولاً", variant: "destructive" });
+      toast({ title: tc("يرجى اختيار الفرع أولاً", "Please select a branch first"), variant: "destructive" });
       return;
     }
     adjustStockMutation.mutate({
@@ -261,7 +263,7 @@ export default function InventoryDashboardPage() {
 
   const handleAddBatchSubmit = () => {
     if (!newStockData.rawItemId || !selectedBranch || selectedBranch === "all") {
-      toast({ title: "يرجى اختيار الفرع والمادة أولاً", variant: "destructive" });
+      toast({ title: tc("يرجى اختيار الفرع والمادة أولاً", "Please select a branch and item first"), variant: "destructive" });
       return;
     }
     addStockBatchMutation.mutate({
@@ -273,7 +275,7 @@ export default function InventoryDashboardPage() {
   if (loadingItems || loadingStocks) {
     return (
       <div dir="rtl">
-        <LoadingState message="جاري تحميل المخزون..." />
+        <LoadingState message={tc("جاري تحميل المخزون...", "Loading inventory...")} />
       </div>
     );
   }
@@ -287,9 +289,9 @@ export default function InventoryDashboardPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold font-playfair text-foreground">
-              لوحة تحكم المخزون
+              {tc("لوحة تحكم المخزون", "Inventory Dashboard")}
             </h1>
-            <p className="text-muted-foreground">إدارة ذكية ومبسطة للمخزون</p>
+            <p className="text-muted-foreground">{tc("إدارة ذكية ومبسطة للمخزون", "Smart and simplified inventory management")}</p>
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -298,7 +300,7 @@ export default function InventoryDashboardPage() {
               <SelectValue placeholder="اختر الفرع" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الفروع</SelectItem>
+              <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
               {branches.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id || ""}>
                   {branch.nameAr}
@@ -335,7 +337,7 @@ export default function InventoryDashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">مخزون منخفض</p>
+                <p className="text-sm font-medium text-muted-foreground">{tc("مخزون منخفض", "Low Stock")}</p>
                 <p className="text-4xl font-bold text-accent dark:text-accent" data-testid="text-low-stock">{lowStockItems}</p>
                 {lowStockItems > 0 && (
                   <p className="text-xs text-accent dark:text-accent mt-1 flex items-center gap-1">
@@ -355,7 +357,7 @@ export default function InventoryDashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">نفد المخزون</p>
+                <p className="text-sm font-medium text-muted-foreground">{tc("نفد المخزون", "Out of Stock")}</p>
                 <p className="text-4xl font-bold text-destructive" data-testid="text-out-stock">{outOfStockItems}</p>
                 {outOfStockItems > 0 && (
                   <p className="text-xs text-destructive mt-1 flex items-center gap-1">
@@ -375,7 +377,7 @@ export default function InventoryDashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">قيمة المخزون (COGS)</p>
+                <p className="text-sm font-medium text-muted-foreground">{tc("قيمة المخزون (COGS)", "Inventory Value (COGS)")}</p>
                 <p className="text-3xl font-bold text-green-600 dark:text-green-400" data-testid="text-cogs">
                   {totalCOGS.toFixed(0)}
                   <span className="text-lg mr-1"><SarIcon /></span>
@@ -455,7 +457,7 @@ export default function InventoryDashboardPage() {
                             variant="outline" 
                             className={`${stockStatus.textColor} border-current shrink-0`}
                           >
-                            {stockStatus.label}
+                            {stockStatus.labelAr}
                           </Badge>
                         </div>
 
@@ -515,7 +517,7 @@ export default function InventoryDashboardPage() {
                             : "bg-accent dark:bg-accent/20 text-accent dark:text-accent"
                         }`}>
                           <AlertTriangle className="h-4 w-4" />
-                          {stockStatus.status === "out" ? "نفد المخزون - يرجى إعادة التعبئة" : "المخزون منخفض - يرجى الطلب"}
+                          {stockStatus.status === "out" ? tc("نفد المخزون - يرجى إعادة التعبئة", "Out of stock - please restock") : tc("المخزون منخفض - يرجى الطلب", "Low stock - please reorder")}
                         </div>
                       )}
                     </CardContent>
@@ -536,7 +538,7 @@ export default function InventoryDashboardPage() {
               ) : (
                 <Minus className="h-5 w-5 text-destructive" />
               )}
-              {adjustType === "add" ? "إضافة كمية" : "خصم كمية"} - {selectedItem?.nameAr}
+              {adjustType === "add" ? tc("إضافة كمية", "Add Quantity") : tc("خصم كمية", "Deduct Quantity")} - {selectedItem?.nameAr}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -577,7 +579,7 @@ export default function InventoryDashboardPage() {
             {selectedBranch === "all" && (
               <div className="p-3 rounded-lg bg-muted border border-border">
                 <p className="text-sm text-muted-foreground">
-                  يرجى اختيار فرع محدد لتعديل المخزون
+                  {tc("يرجى اختيار فرع محدد لتعديل المخزون", "Please select a specific branch to adjust inventory")}
                 </p>
               </div>
             )}
@@ -593,7 +595,7 @@ export default function InventoryDashboardPage() {
               data-testid="button-confirm-adjust"
             >
               {adjustStockMutation.isPending && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
-              {adjustType === "add" ? "إضافة" : "خصم"}
+              {adjustType === "add" ? tc("إضافة", "Add") : tc("خصم", "Deduct")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -667,7 +669,7 @@ export default function InventoryDashboardPage() {
             {selectedBranch === "all" && (
               <div className="p-3 rounded-lg bg-muted border border-border">
                 <p className="text-sm text-muted-foreground">
-                  يرجى اختيار فرع محدد لإضافة دفعة المخزون
+                  {tc("يرجى اختيار فرع محدد لإضافة دفعة المخزون", "Please select a branch to add inventory batch")}
                 </p>
               </div>
             )}

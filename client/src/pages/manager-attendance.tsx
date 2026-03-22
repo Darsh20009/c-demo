@@ -217,33 +217,33 @@ export default function ManagerAttendance() {
       r.branch?.nameAr || r.branch?.name || '',
       formatTime(r.checkInTime),
       formatTime(r.checkOutTime),
-      r.status === 'checked_out' ? 'انصرف' : r.status === 'checked_in' ? 'حاضر' : 'غائب',
+      r.status === 'checked_out' ? tc('انصرف', 'Checked Out') : r.status === 'checked_in' ? tc('حاضر', 'Present') : tc('غائب', 'Absent'),
       r.lateMinutes ? r.lateMinutes : '-',
-      r.isAtBranch === 1 ? 'في الفرع' : 'خارج الفرع',
+      r.isAtBranch === 1 ? tc('في الفرع', 'At Branch') : tc('خارج الفرع', 'Off Branch'),
       r.distanceFromBranch ? Math.round(r.distanceFromBranch) : 0,
-      r.checkOutIsAtBranch === 1 ? 'في الفرع' : r.checkOutTime ? 'خارج الفرع' : '-',
+      r.checkOutIsAtBranch === 1 ? tc('في الفرع', 'At Branch') : r.checkOutTime ? tc('خارج الفرع', 'Off Branch') : '-',
       r.checkOutDistanceFromBranch ? Math.round(r.checkOutDistanceFromBranch) : 0
     ]);
 
     const headers = [
-      'الاسم',
-      'الدور',
-      'الفرع',
-      'وقت الحضور',
-      'وقت الانصراف',
-      'الحالة',
-      'تأخير (دقيقة)',
-      'الموقع عند الحضور',
-      'المسافة (متر)',
-      'موقع الانصراف',
-      'مسافة الانصراف (متر)'
+      tc('الاسم', 'Name'),
+      tc('الدور', 'Role'),
+      tc('الفرع', 'Branch'),
+      tc('وقت الحضور', 'Check-in Time'),
+      tc('وقت الانصراف', 'Check-out Time'),
+      tc('الحالة', 'Status'),
+      tc('تأخير (دقيقة)', 'Delay (min)'),
+      tc('الموقع عند الحضور', 'Check-in Location'),
+      tc('المسافة (متر)', 'Distance (m)'),
+      tc('موقع الانصراف', 'Check-out Location'),
+      tc('مسافة الانصراف (متر)', 'Check-out Distance (m)')
     ];
 
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...reportData]);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'سجل الحضور');
+    XLSX.utils.book_append_sheet(workbook, worksheet, tc('سجل الحضور', 'Attendance Log'));
     
-    const fileName = `سجل_حضور_${selectedDate}.xlsx`;
+    const fileName = `AttendanceLog_${selectedDate}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -345,7 +345,7 @@ export default function ManagerAttendance() {
                   <div className="relative">
                     <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      placeholder="بحث بالاسم أو الهاتف..."
+                      placeholder={tc("بحث بالاسم أو الهاتف...", "Search by name or phone...")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pr-10 bg-[#1a1410] border-primary/20 text-white"
@@ -371,10 +371,10 @@ export default function ManagerAttendance() {
                   <Select value={selectedBranch} onValueChange={setSelectedBranch}>
                     <SelectTrigger className="w-40 bg-[#1a1410] border-primary/20 text-white" data-testid="select-branch">
                       <Filter className="w-4 h-4 ml-2" />
-                      <SelectValue placeholder="جميع الفروع" />
+                      <SelectValue placeholder={tc("جميع الفروع", "All Branches")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">جميع الفروع</SelectItem>
+                      <SelectItem value="all">{tc("جميع الفروع", "All Branches")}</SelectItem>
                       {branches.map(branch => (
                         <SelectItem key={branch.id} value={branch.id}>
                           {branch.nameAr || branch.name}
@@ -387,11 +387,11 @@ export default function ManagerAttendance() {
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
                   <SelectTrigger className="w-40 bg-[#1a1410] border-primary/20 text-white" data-testid="select-role">
                     <Filter className="w-4 h-4 ml-2" />
-                    <SelectValue placeholder="جميع الأدوار" />
+                    <SelectValue placeholder={tc("جميع الأدوار", "All Roles")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع الأدوار</SelectItem>
-                    <SelectItem value="cashier">كاشير</SelectItem>
+                    <SelectItem value="all">{tc("جميع الأدوار", "All Roles")}</SelectItem>
+                    <SelectItem value="cashier">{tc("كاشير", "Cashier")}</SelectItem>
                     <SelectItem value="manager">مدير</SelectItem>
                     <SelectItem value="admin">إدمن</SelectItem>
                   </SelectContent>
@@ -582,7 +582,7 @@ export default function ManagerAttendance() {
                                   : 'bg-gray-500/20 text-gray-400'
                               }
                             >
-                              {record.status === 'checked_out' ? 'انصرف' : 'حاضر'}
+                              {record.status === 'checked_out' ? tc('انصرف', 'Checked Out') : tc('حاضر', 'Present')}
                             </Badge>
                           </div>
                         </td>
@@ -594,7 +594,7 @@ export default function ManagerAttendance() {
                                 : 'bg-red-500/20 text-red-400'
                             }`}
                           >
-                            {record.isAtBranch === 1 ? 'في الفرع' : `${Math.round(record.distanceFromBranch || 0)}م`}
+                            {record.isAtBranch === 1 ? tc('في الفرع', 'At Branch') : `${Math.round(record.distanceFromBranch || 0)}م`}
                           </Badge>
                         </td>
                         <td className="py-3 px-4">
@@ -682,7 +682,7 @@ export default function ManagerAttendance() {
                                 : 'bg-gray-500/20 text-gray-400'
                             }
                           >
-                            {record.status === 'checked_out' ? 'انصرف' : 'حاضر'}
+                            {record.status === 'checked_out' ? tc('انصرف', 'Checked Out') : tc('حاضر', 'Present')}
                           </Badge>
                         </div>
                         {record.isAtBranch !== undefined && (
@@ -694,7 +694,7 @@ export default function ManagerAttendance() {
                             }
                           >
                             <MapPin className="w-3 h-3 ml-1" />
-                            {record.isAtBranch === 1 ? 'في الفرع' : `خارج الفرع (${Math.round(record.distanceFromBranch || 0)}م)`}
+                            {record.isAtBranch === 1 ? tc('في الفرع', 'At Branch') : `خارج الفرع (${Math.round(record.distanceFromBranch || 0)}م)`}
                           </Badge>
                         )}
                       </div>

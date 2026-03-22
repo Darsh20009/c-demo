@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,7 @@ interface CoffeeItem {
 }
 
 export default function MenuView() {
+  const tc = useTranslate();
  const [, setLocation] = useLocation();
  const { toast } = useToast();
  const [viewMode, setViewMode] = useState<'elegant' | 'showcase' | 'grid' | 'mosaic' | 'waterfall' | 'tv-display' | 'window-display' | 'cinema' | 'magazine' | 'neon'>('elegant');
@@ -68,9 +70,9 @@ export default function MenuView() {
  }, {} as Record<string, CoffeeItem[]>);
 
  const categoryTitles: Record<string, string> = {
- "basic": "القهوة الأساسية",
- "hot": "المشروبات الساخنة", 
- "cold": "المشروبات الباردة"
+ "basic": tc("القهوة الأساسية", "Basic Coffee"),
+ "hot": tc("المشروبات الساخنة", "Hot Drinks"), 
+ "cold": tc("المشروبات الباردة", "Cold Drinks")
  };
 
 
@@ -79,7 +81,7 @@ export default function MenuView() {
  <div className="min-h-screen bg-gradient-to-br from-amber-50 via-primary/5 to-amber-100 flex items-center justify-center">
  <div className="text-center">
  <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
- <p className="text-primary text-xl font-semibold">جاري تحميل القائمة الفاخرة...</p>
+ <p className="text-primary text-xl font-semibold">{tc("جاري تحميل القائمة الفاخرة...", "Loading luxury menu...")}</p>
  </div>
  </div>
  );
@@ -101,7 +103,7 @@ export default function MenuView() {
  {/* Title Section */}
  <div className="flex justify-between items-center">
  <div className="bg-card/90 backdrop-blur-xl rounded-2xl px-4 md:px-6 py-2 md:py-3 border border-primary/20 shadow-xl">
- <h1 className="font-amiri text-lg md:text-2xl font-bold text-primary">قائمة القهوة الفاخرة</h1>
+ <h1 className="font-amiri text-lg md:text-2xl font-bold text-primary">{tc("قائمة القهوة الفاخرة", "Luxury Coffee Menu")}</h1>
  </div>
  
  <Button 
@@ -112,7 +114,7 @@ export default function MenuView() {
  data-testid="button-back"
  >
  <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 ml-2" />
- <span className="hidden sm:inline">العودة</span>
+ <span className="hidden sm:inline">{tc("العودة", "Back")}</span>
  </Button>
  </div>
 
@@ -127,7 +129,7 @@ export default function MenuView() {
  data-testid="button-elegant"
  >
  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">عرض أنيق</span>
+ <span className="hidden sm:inline">{tc("عرض أنيق", "Elegant View")}</span>
  </Button>
  <Button
  variant={viewMode === 'showcase' ? 'default' : 'ghost'}
@@ -137,7 +139,7 @@ export default function MenuView() {
  data-testid="button-showcase"
  >
  <Layers className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">عرض شامل</span>
+ <span className="hidden sm:inline">{tc("عرض شامل", "Full View")}</span>
  </Button>
  <Button
  variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -147,7 +149,7 @@ export default function MenuView() {
  data-testid="button-grid"
  >
  <Grid3X3 className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">شبكة</span>
+ <span className="hidden sm:inline">{tc("شبكة", "Grid")}</span>
  </Button>
  <Button
  variant={viewMode === 'mosaic' ? 'default' : 'ghost'}
@@ -157,7 +159,7 @@ export default function MenuView() {
  data-testid="button-mosaic"
  >
  <Palette className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">فسيفساء</span>
+ <span className="hidden sm:inline">{tc("فسيفساء", "Mosaic")}</span>
  </Button>
  <Button
  variant={viewMode === 'waterfall' ? 'default' : 'ghost'}
@@ -167,7 +169,7 @@ export default function MenuView() {
  data-testid="button-waterfall"
  >
  <Zap className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">شلال</span>
+ <span className="hidden sm:inline">{tc("شلال", "Waterfall")}</span>
  </Button>
  <Button
  variant={viewMode === 'tv-display' ? 'default' : 'ghost'}
@@ -177,7 +179,7 @@ export default function MenuView() {
  data-testid="button-tv"
  >
  <Tv className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">تلفزيوني</span>
+ <span className="hidden sm:inline">{tc("تلفزيوني", "TV")}</span>
  </Button>
  <Button
  variant={viewMode === 'window-display' ? 'default' : 'ghost'}
@@ -187,7 +189,7 @@ export default function MenuView() {
  data-testid="button-window"
  >
  <QrCode className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">النافذة</span>
+ <span className="hidden sm:inline">{tc("النافذة", "Window")}</span>
  </Button>
  <Button
  variant={viewMode === 'cinema' ? 'default' : 'ghost'}
@@ -197,7 +199,7 @@ export default function MenuView() {
  data-testid="button-cinema"
  >
  <Film className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">سينما</span>
+ <span className="hidden sm:inline">{tc("سينما", "Cinema")}</span>
  </Button>
  <Button
  variant={viewMode === 'magazine' ? 'default' : 'ghost'}
@@ -207,7 +209,7 @@ export default function MenuView() {
  data-testid="button-magazine"
  >
  <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">مجلة</span>
+ <span className="hidden sm:inline">{tc("مجلة", "Magazine")}</span>
  </Button>
  <Button
  variant={viewMode === 'neon' ? 'default' : 'ghost'}
@@ -217,7 +219,7 @@ export default function MenuView() {
  data-testid="button-neon"
  >
  <Flame className="w-3 h-3 sm:w-4 sm:h-4" />
- <span className="hidden sm:inline">نيون</span>
+ <span className="hidden sm:inline">{tc("نيون", "Neon")}</span>
  </Button>
  </div>
  </div>
@@ -406,7 +408,7 @@ export default function MenuView() {
  <QRCodeComponent 
  url="https://www.qiroxstudio.online"
  size="lg"
- title="امسح للطلب"
+ title={tc("امسح للطلب", "Scan to Order")}
  className="w-full"
  />
  <div className="bg-primary text-primary-foreground rounded-2xl p-4 text-center">
@@ -473,7 +475,7 @@ export default function MenuView() {
  <QRCodeComponent 
  url="https://www.qiroxstudio.online"
  size="lg"
- title="امسح للطلب"
+ title={tc("امسح للطلب", "Scan to Order")}
  className="w-full"
  />
  
@@ -601,7 +603,7 @@ export default function MenuView() {
  <QRCodeComponent 
  url="https://www.qiroxstudio.online"
  size="lg"
- title="امسح للطلب"
+ title={tc("امسح للطلب", "Scan to Order")}
  showURL={false}
  className="w-full"
  />
@@ -779,7 +781,7 @@ export default function MenuView() {
             <div className="bg-gradient-to-r from-primary via-primary/80 to-amber-600 rounded-3xl p-6 flex items-center justify-between gap-6 flex-wrap">
               <div className="text-white">
                 <h4 className="font-amiri text-3xl font-black mb-1">QIROX Cafe</h4>
-                <p className="text-white/80 text-lg">لكل لحظة قهوة ، لحظة نجاح</p>
+                <p className="text-white/80 text-lg">{tc("لكل لحظة قهوة ، لحظة نجاح", "Every coffee moment is a success moment")}</p>
               </div>
               <div className="bg-white rounded-2xl p-3">
                 <QRCodeComponent url="https://www.qiroxstudio.online" size="sm" title="اطلب الآن" />
@@ -832,7 +834,7 @@ export default function MenuView() {
                   <ShoppingCart className="w-5 h-5" /> أضف للسلة
                 </button>
                 <div className="self-end bg-white/5 border border-primary/20 rounded-2xl p-3">
-                  <QRCodeComponent url="https://www.qiroxstudio.online" size="sm" title="امسح للطلب" />
+                  <QRCodeComponent url="https://www.qiroxstudio.online" size="sm" title={tc("امسح للطلب", "Scan to Order")} />
                 </div>
               </div>
             </div>

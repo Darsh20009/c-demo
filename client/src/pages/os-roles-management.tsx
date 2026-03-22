@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useTranslate } from "@/lib/useTranslate";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Lock, Eye, Trash2 } from "lucide-react";
 
 const ROLES = [
   {
     name: "Cashier",
-    nameAr: "كاشير",
+    nameAr: tc("كاشير", "Cashier"),
     permissions: [
       "Create orders",
       "Apply discounts",
@@ -15,7 +16,7 @@ const ROLES = [
   },
   {
     name: "Barista",
-    nameAr: "باريستا",
+    nameAr: tc("باريستا", "Barista"),
     permissions: [
       "View prep queue",
       "Update order status",
@@ -25,7 +26,7 @@ const ROLES = [
   },
   {
     name: "Supervisor",
-    nameAr: "مشرف",
+    nameAr: tc("مشرف", "Supervisor"),
     permissions: [
       "Manage discounts",
       "Void orders",
@@ -36,7 +37,7 @@ const ROLES = [
   },
   {
     name: "Branch Manager",
-    nameAr: "مدير الفرع",
+    nameAr: tc("مدير الفرع", "Branch Manager"),
     permissions: [
       "All Supervisor permissions",
       "Manage inventory",
@@ -47,7 +48,7 @@ const ROLES = [
   },
   {
     name: "Owner/Admin",
-    nameAr: "المالك/الإداري",
+    nameAr: tc("المالك/الإداري", "Owner/Admin"),
     permissions: [
       "Full system access",
       "All permissions",
@@ -75,6 +76,7 @@ const PERMISSION_MATRIX = [
 ];
 
 export default function OSRolesManagement() {
+  const tc = useTranslate();
   const getIcon = (permission: boolean) => {
     return permission ? (
       <Eye className="w-4 h-4 text-green-600" />
@@ -86,7 +88,7 @@ export default function OSRolesManagement() {
   return (
     <div className="p-6 space-y-6 bg-background min-h-screen text-right" dir="rtl">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">نظام الأدوار والصلاحيات</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{tc("نظام الأدوار والصلاحيات", "Roles & Permissions System")}</h1>
         <Shield className="w-8 h-8 text-primary" />
       </div>
 
@@ -120,20 +122,20 @@ export default function OSRolesManagement() {
       {/* Permission Matrix */}
       <Card>
         <CardHeader>
-          <CardTitle>مصفوفة الصلاحيات التفصيلية</CardTitle>
-          <CardDescription>عرض كامل للصلاحيات حسب الدور</CardDescription>
+          <CardTitle>{tc("مصفوفة الصلاحيات التفصيلية", "Detailed Permissions Matrix")}</CardTitle>
+          <CardDescription>{tc("عرض كامل للصلاحيات حسب الدور", "Full view of permissions by role")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-right p-2">الميزة</th>
-                  <th className="text-center p-2">كاشير</th>
-                  <th className="text-center p-2">باريستا</th>
-                  <th className="text-center p-2">مشرف</th>
-                  <th className="text-center p-2">مدير</th>
-                  <th className="text-center p-2">مالك</th>
+                  <th className="text-right p-2">{tc("الميزة", "Feature")}</th>
+                  <th className="text-center p-2">{tc("كاشير", "Cashier")}</th>
+                  <th className="text-center p-2">{tc("باريستا", "Barista")}</th>
+                  <th className="text-center p-2">{tc("مشرف", "Supervisor")}</th>
+                  <th className="text-center p-2">{tc("مدير", "Manager")}</th>
+                  <th className="text-center p-2">{tc("مالك", "Owner")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,24 +158,24 @@ export default function OSRolesManagement() {
       {/* Implementation Status */}
       <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
         <CardHeader>
-          <CardTitle className="text-lg">حالة التنفيذ</CardTitle>
+          <CardTitle className="text-lg">{tc("حالة التنفيذ", "Implementation Status")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between p-3 bg-white dark:bg-card rounded">
             <span>API Role Middleware</span>
-            <Badge className="bg-green-600">مُنفذ</Badge>
+            <Badge className="bg-green-600">{tc("مُنفذ", "Implemented")}</Badge>
           </div>
           <div className="flex items-center justify-between p-3 bg-white dark:bg-card rounded">
             <span>UI Access Control</span>
-            <Badge className="bg-green-600">مُنفذ</Badge>
+            <Badge className="bg-green-600">{tc("مُنفذ", "Implemented")}</Badge>
           </div>
           <div className="flex items-center justify-between p-3 bg-white dark:bg-card rounded">
             <span>Audit Logging</span>
-            <Badge variant="outline">قيد التطوير</Badge>
+            <Badge variant="outline">{tc("قيد التطوير", "In Development")}</Badge>
           </div>
           <div className="flex items-center justify-between p-3 bg-white dark:bg-card rounded">
             <span>Role Management UI</span>
-            <Badge variant="outline">قيد التطوير</Badge>
+            <Badge variant="outline">{tc("قيد التطوير", "In Development")}</Badge>
           </div>
         </CardContent>
       </Card>

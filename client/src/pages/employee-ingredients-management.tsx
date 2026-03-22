@@ -10,6 +10,7 @@ import { ArrowRight, Coffee, Droplet, Cherry, Snowflake, Leaf, Sparkles, Package
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { RawItem, Employee } from "@shared/schema";
+import { useTranslate } from "@/lib/useTranslate";
 
 const getIngredientIcon = (nameAr: string, category?: string) => {
   if (category === 'packaging') return Package;
@@ -38,19 +39,20 @@ const getIngredientIcon = (nameAr: string, category?: string) => {
   return iconMap[nameAr] || Coffee;
 };
 
-const categoryLabels: Record<string, string> = {
-  ingredient: "المكونات",
-  packaging: "التغليف",
-  consumable: "المستهلكات",
-  equipment: "المعدات",
-  other: "أخرى"
-};
-
 export default function EmployeeIngredientsManagement() {
   const [, setLocation] = useLocation();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("ingredient");
   const { toast } = useToast();
+  const tc = useTranslate();
+
+  const categoryLabels: Record<string, string> = {
+    ingredient: tc("المكونات", "Ingredients"),
+    packaging:  tc("التغليف", "Packaging"),
+    consumable: tc("المستهلكات", "Consumables"),
+    equipment:  tc("المعدات", "Equipment"),
+    other:      tc("أخرى", "Other"),
+  };
 
   useEffect(() => {
     const storedEmployee = localStorage.getItem("currentEmployee");
@@ -101,8 +103,8 @@ export default function EmployeeIngredientsManagement() {
       queryClient.invalidateQueries({ queryKey: ["/api/coffee-items"] });
       
       toast({
-        title: "تم التحديث بنجاح",
-        description: "تم تحديث حالة توفر المادة",
+        title: tc("تم التحديث بنجاح", "Updated Successfully"),
+        description: tc("تم تحديث حالة توفر المادة", "Item availability updated"),
       });
     },
     onError: (error, variables, context: any) => {
@@ -110,8 +112,8 @@ export default function EmployeeIngredientsManagement() {
         queryClient.setQueryData(["/api/employee/raw-items/by-category", activeCategory], context.previousItems);
       }
       toast({
-        title: "خطأ",
-        description: "فشل تحديث حالة توفر المادة",
+        title: tc("خطأ", "Error"),
+        description: tc("فشل تحديث حالة توفر المادة", "Failed to update item availability"),
         variant: "destructive",
       });
     },
@@ -128,13 +130,12 @@ export default function EmployeeIngredientsManagement() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <div className="bg-primary text-primary-foreground p-6 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-3xl font-bold mb-2">إدارة المواد الخام</h1>
-              <p className="text-accent">مرحباً، {employee.fullName}</p>
+              <h1 className="text-3xl font-bold mb-2">{tc("إدارة المواد الخام", "Raw Materials Management")}</h1>
+              <p className="text-accent">{tc("مرحباً،", "Hello,")} {employee.fullName}</p>
             </div>
             <Button 
               onClick={() => setLocation("/employee/menu")}
@@ -144,60 +145,33 @@ export default function EmployeeIngredientsManagement() {
               data-testid="button-back-to-menu"
             >
               <ArrowRight className="w-5 h-5" />
-              العودة للقائمة
+              {tc("العودة للقائمة", "Back to Menu")}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
           <div className="bg-card rounded-lg border border-border border-r-4 border-r-primary p-4">
             <p className="text-gray-700 dark:text-gray-300">
-              <strong>تنبيه:</strong> عند تعطيل أي مادة، سيتم تلقائياً التأثير على جميع المشروبات التي تحتوي على هذه المادة في وصفاتها.
+              <strong>{tc("تنبيه:", "Notice:")}</strong> {tc("عند تعطيل أي مادة، سيتم تلقائياً التأثير على جميع المشروبات التي تحتوي على هذه المادة في وصفاتها.", "Disabling any ingredient will automatically affect all drinks that include it in their recipes.")}
             </p>
           </div>
         </div>
 
-        {/* Category Tabs */}
         <Tabs value={activeCategory} onValueChange={setActiveCategory} className="mb-6">
           <TabsList className="grid grid-cols-3 lg:grid-cols-5 gap-2 h-auto p-2 bg-card">
-            <TabsTrigger 
-              value="ingredient" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white"
-              data-testid="tab-ingredient"
-            >
-              المكونات
-            </TabsTrigger>
-            <TabsTrigger 
-              value="packaging" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white"
-              data-testid="tab-packaging"
-            >
-              التغليف
-            </TabsTrigger>
-            <TabsTrigger 
-              value="consumable" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white"
-              data-testid="tab-consumable"
-            >
-              المستهلكات
-            </TabsTrigger>
-            <TabsTrigger 
-              value="equipment" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white"
-              data-testid="tab-equipment"
-            >
-              المعدات
-            </TabsTrigger>
-            <TabsTrigger 
-              value="other" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-white"
-              data-testid="tab-other"
-            >
-              أخرى
-            </TabsTrigger>
+            {(["ingredient", "packaging", "consumable", "equipment", "other"] as const).map((cat) => (
+              <TabsTrigger 
+                key={cat}
+                value={cat}
+                className="data-[state=active]:bg-primary data-[state=active]:text-white"
+                data-testid={`tab-${cat}`}
+              >
+                {categoryLabels[cat]}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
 
@@ -223,7 +197,6 @@ export default function EmployeeIngredientsManagement() {
                   }`}
                   data-testid={`card-raw-item-${item.id}`}
                 >
-                  {/* Decorative background gradient */}
                   <div className={`absolute inset-0 rounded-lg bg-gradient-to-br ${
                     isAvailable 
                       ? 'from-primary/5 to-background dark:from-primary/20 dark:to-background' 
@@ -231,7 +204,6 @@ export default function EmployeeIngredientsManagement() {
                   } opacity-50`} />
                   
                   <CardContent className="relative p-6">
-                    {/* Icon and availability badge */}
                     <div className="flex items-start justify-between gap-2 mb-4">
                       <div className={`p-3 rounded-full ${
                         isAvailable 
@@ -242,18 +214,13 @@ export default function EmployeeIngredientsManagement() {
                       </div>
                       <Badge 
                         variant={isAvailable ? "default" : "secondary"}
-                        className={`${
-                          isAvailable 
-                            ? 'bg-green-500' 
-                            : 'bg-red-500'
-                        } text-white`}
+                        className={`${isAvailable ? 'bg-green-500' : 'bg-red-500'} text-white`}
                         data-testid={`badge-status-${item.id}`}
                       >
-                        {isAvailable ? "متوفر" : "غير متوفر"}
+                        {isAvailable ? tc("متوفر", "Available") : tc("غير متوفر", "Unavailable")}
                       </Badge>
                     </div>
 
-                    {/* Name */}
                     <div className="mb-4">
                       <h3 className="text-xl font-bold text-gray-800 dark:text-foreground mb-1" data-testid={`text-name-${item.id}`}>
                         {item.nameAr}
@@ -266,10 +233,9 @@ export default function EmployeeIngredientsManagement() {
                       </p>
                     </div>
 
-                    {/* Availability toggle */}
                     <div className="flex items-center justify-between gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        الحالة
+                        {tc("الحالة", "Status")}
                       </span>
                       <Switch
                         checked={isAvailable}
@@ -292,10 +258,10 @@ export default function EmployeeIngredientsManagement() {
               <Coffee className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              لا توجد مواد في هذه الفئة
+              {tc("لا توجد مواد في هذه الفئة", "No items in this category")}
             </h3>
             <p className="text-gray-500 dark:text-muted-foreground">
-              لم يتم إضافة أي مواد خام في فئة {categoryLabels[activeCategory]} بعد
+              {tc("لم يتم إضافة أي مواد خام في فئة", "No raw materials have been added to the")} {categoryLabels[activeCategory]} {tc("بعد", "category yet")}
             </p>
           </div>
         )}

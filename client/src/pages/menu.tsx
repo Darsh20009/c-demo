@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/cart-store";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ interface MenuCategory {
 }
 
 export default function MenuPage() {
+  const tc = useTranslate();
   const { cartItems, addToCart } = useCartStore();
   const { isAuthenticated, customer } = useCustomer();
   const queryClient = useQueryClient();
@@ -76,7 +78,7 @@ export default function MenuPage() {
 
   const handleToggleFavorite = (itemId: string) => {
     if (!isAuthenticated || !customerPhone) {
-      toast({ title: 'يجب تسجيل الدخول لإضافة المفضلة', variant: 'destructive' });
+      toast({ title: tc('يجب تسجيل الدخول لإضافة المفضلة', 'Please log in to add favorites'), variant: 'destructive' });
       return;
     }
     toggleFavoriteMutation.mutate(itemId);
@@ -143,7 +145,7 @@ export default function MenuPage() {
 
   const getStatusMessage = () => {
     if (!businessConfig) return null;
-    if (businessConfig.isEmergencyClosed) return "نعتذر، الكافيه مغلق حالياً لظروف طارئة";
+    if (businessConfig.isEmergencyClosed) return tc("نعتذر، الكافيه مغلق حالياً لظروف طارئة", "Sorry, the cafe is temporarily closed due to an emergency");
     
     const isOpen = isStoreOpen();
     if (isOpen) return null;
@@ -157,7 +159,7 @@ export default function MenuPage() {
       return `الكافيه مغلق حالياً، يفتح بعد ${timeStr}`;
     }
 
-    return "الكافيه مغلق حالياً";
+    return tc("الكافيه مغلق حالياً", "The cafe is currently closed");
   };
 
   const { data: coffeeItems = [], isLoading } = useQuery<CoffeeItem[]>({
@@ -309,12 +311,12 @@ export default function MenuPage() {
   };
 
   const systemCategories = [
-    { id: "all",        name: "الكل",            icon: Coffee,    isSystem: true },
-    { id: "hot",        name: "مشروبات ساخنة",   icon: Flame,     isSystem: true },
-    { id: "cold",       name: "مشروبات باردة",   icon: Snowflake, isSystem: true },
-    { id: "desserts",   name: "حلا والكيك",       icon: Cake,      isSystem: true },
-    { id: "bakery",     name: "المخبوزات",        icon: Cake,      isSystem: true },
-    { id: "sandwiches", name: "الساندوتشات",     icon: Utensils,  isSystem: true },
+    { id: "all",        name: tc("الكل", "All"),            icon: Coffee,    isSystem: true },
+    { id: "hot",        name: tc("مشروبات ساخنة", "Hot Drinks"),   icon: Flame,     isSystem: true },
+    { id: "cold",       name: tc("مشروبات باردة", "Cold Drinks"),   icon: Snowflake, isSystem: true },
+    { id: "desserts",   name: tc("حلا والكيك", "Desserts & Cake"),       icon: Cake,      isSystem: true },
+    { id: "bakery",     name: tc("المخبوزات", "Bakery"),        icon: Cake,      isSystem: true },
+    { id: "sandwiches", name: tc("الساندوتشات", "Sandwiches"),     icon: Utensils,  isSystem: true },
   ];
 
   const customCategories = dynamicCategories
@@ -411,8 +413,8 @@ export default function MenuPage() {
   const handleAddToCartDirect = (item: CoffeeItem) => {
     if (!isStoreOpen()) {
       toast({
-        title: "المتجر مغلق",
-        description: "نعتذر، لا يمكن إضافة الطلبات حالياً بسبب إغلاق المتجر.",
+        title: tc("المتجر مغلق", "Store Closed"),
+        description: tc("نعتذر، لا يمكن إضافة الطلبات حالياً بسبب إغلاق المتجر.", "Sorry, orders cannot be added right now as the store is closed."),
         variant: "destructive"
       });
       return;
@@ -420,8 +422,8 @@ export default function MenuPage() {
     const isAvailable = item.isAvailable !== 0 && (item.availabilityStatus === 'available' || item.availabilityStatus === 'new' || !item.availabilityStatus);
     if (!isAvailable) {
       toast({
-        title: "غير متوفر",
-        description: "نعتذر، هذا المنتج غير متوفر حالياً",
+        title: tc("غير متوفر", "Unavailable"),
+        description: tc("نعتذر، هذا المنتج غير متوفر حالياً", "Sorry, this product is currently unavailable"),
         variant: "destructive"
       });
       return;

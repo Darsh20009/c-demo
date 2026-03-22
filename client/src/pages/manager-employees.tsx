@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ interface Branch {
 }
 
 export default function ManagerEmployees() {
+  const tc = useTranslate();
   const { t, i18n } = useTranslation();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -52,25 +54,25 @@ export default function ManagerEmployees() {
   }, [editingEmployee]);
 
   const PERMISSIONS_OPTIONS = [
-    { id: 'create_order', label: 'إنشاء طلبات' },
-    { id: 'cancel_order', label: 'إلغاء طلبات' },
-    { id: 'manage_inventory', label: 'إدارة المخزون' },
-    { id: 'view_reports', label: 'عرض التقارير' },
-    { id: 'manage_employees', label: 'إدارة الموظفين' },
-    { id: 'manage_branches', label: 'إدارة الفروع' },
-    { id: 'manage_settings', label: 'إعدادات النظام' },
+    { id: 'create_order', label: tc('إنشاء طلبات', 'Create Orders') },
+    { id: 'cancel_order', label: tc('إلغاء طلبات', 'Cancel Orders') },
+    { id: 'manage_inventory', label: tc('إدارة المخزون', 'Manage Inventory') },
+    { id: 'view_reports', label: tc('عرض التقارير', 'View Reports') },
+    { id: 'manage_employees', label: tc('إدارة الموظفين', 'Manage Employees') },
+    { id: 'manage_branches', label: tc('إدارة الفروع', 'Manage Branches') },
+    { id: 'manage_settings', label: tc('إعدادات النظام', 'System Settings') },
   ];
 
   const PAGES_OPTIONS = [
-    { id: '/employee/pos', label: 'نقطة البيع' },
-    { id: '/employee/orders', label: 'الطلبات' },
-    { id: '/employee/inventory', label: 'المخزون' },
-    { id: '/employee/accounting', label: 'المحاسبة' },
-    { id: '/employee/attendance', label: 'التحضير' },
-    { id: '/employee/availability', label: 'التوفر' },
-    { id: '/employee/cashier', label: 'الكاشير' },
-    { id: '/manager/dashboard', label: 'لوحة التحكم' },
-    { id: '/manager/employees', label: 'إدارة الموظفين' },
+    { id: '/employee/pos', label: tc('نقطة البيع', 'POS') },
+    { id: '/employee/orders', label: tc('الطلبات', 'Orders') },
+    { id: '/employee/inventory', label: tc('المخزون', 'Inventory') },
+    { id: '/employee/accounting', label: tc('المحاسبة', 'Accounting') },
+    { id: '/employee/attendance', label: tc('التحضير', 'Attendance') },
+    { id: '/employee/availability', label: tc('التوفر', 'Availability') },
+    { id: '/employee/cashier', label: tc('الكاشير', 'Cashier') },
+    { id: '/manager/dashboard', label: tc('لوحة التحكم', 'Dashboard') },
+    { id: '/manager/employees', label: tc('إدارة الموظفين', 'Manage Employees') },
   ];
 
 
@@ -150,15 +152,15 @@ export default function ManagerEmployees() {
  setSelectedImage(null);
  setUploadedImageUrl(null);
  toast({
- title: "تم إضافة الموظف",
- description: "تم إضافة الموظف بنجاح. يمكنه الآن إنشاء كلمة المرور الخاصةبه.",
+ title: tc("تم إضافة الموظف", "Employee Added"),
+ description: tc("تم إضافة الموظف بنجاح. يمكنه الآن إنشاء كلمة المرور الخاصةبه.", "Employee added successfully. They can now create their password."),
  });
  },
  onError: (error: any) => {
  toast({
  variant: "destructive",
- title: "فشل إضافة الموظف",
- description: error.message || "حدث خطأ أثناء إضافة الموظف",
+ title: tc("فشل إضافة الموظف", "Failed to Add Employee"),
+ description: error.message || tc("حدث خطأ أثناء إضافة الموظف", "An error occurred while adding the employee"),
  });
  },
  });
@@ -172,15 +174,15 @@ export default function ManagerEmployees() {
  queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
  setEditingEmployee(null);
  toast({
- title: "تم تحديث الموظف",
- description: "تم تحديث بيانات الموظف بنجاح",
+ title: tc("تم تحديث الموظف", "Employee Updated"),
+ description: tc("تم تحديث بيانات الموظف بنجاح", "Employee data updated successfully"),
  });
  },
  onError: (error: any) => {
  toast({
  variant: "destructive",
- title: "فشل التحديث",
- description: error.message || "حدث خطأ أثناء تحديث الموظف",
+ title: tc("فشل التحديث", "Update Failed"),
+ description: error.message || tc("حدث خطأ أثناء تحديث الموظف", "Error updating employee"),
  });
  },
  });
@@ -268,16 +270,16 @@ export default function ManagerEmployees() {
  const data = await response.json();
  setUploadedImageUrl(data.url);
  toast({
- title: "تم رفع الصورة",
- description: "تم رفع صورة الموظف بنجاح"
+ title: tc("تم رفع الصورة", "Photo Uploaded"),
+ description: tc("تم رفع صورة الموظف بنجاح", "Employee photo uploaded successfully")
  });
  } else {
- throw new Error('فشل الرفع');
+ throw new Error(tc('فشل الرفع', 'Upload failed'));
  }
  } catch (error) {
  toast({
- title: "خطأ",
- description: "فشل رفع الصورة",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل رفع الصورة", "Failed to upload photo"),
  variant: "destructive"
  });
  setImagePreview(null);
@@ -307,16 +309,16 @@ export default function ManagerEmployees() {
  const data = await response.json();
  setEditUploadedImageUrl(data.url);
  toast({
- title: "تم رفع الصورة",
- description: "تم رفع صورة الموظف بنجاح"
+ title: tc("تم رفع الصورة", "Photo Uploaded"),
+ description: tc("تم رفع صورة الموظف بنجاح", "Employee photo uploaded successfully")
  });
  } else {
- throw new Error('فشل الرفع');
+ throw new Error(tc('فشل الرفع', 'Upload failed'));
  }
  } catch (error) {
  toast({
- title: "خطأ",
- description: "فشل رفع الصورة",
+ title: tc("خطأ", "Error"),
+ description: tc("فشل رفع الصورة", "Failed to upload photo"),
  variant: "destructive"
  });
  setEditImagePreview(null);
@@ -372,12 +374,12 @@ export default function ManagerEmployees() {
  </DialogTrigger>
  <DialogContent className="bg-[#2d1f1a] border-primary/20 text-white w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
- <DialogTitle className="text-accent">إضافة موظف جديد</DialogTitle>
+ <DialogTitle className="text-accent">{tc("إضافة موظف جديد", "Add New Employee")}</DialogTitle>
  </DialogHeader>
  <form onSubmit={handleSubmitNew} className="space-y-3 sm:space-y-4">
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
  <div>
- <Label htmlFor="fullName" className="text-gray-300">الاسم الكامل *</Label>
+ <Label htmlFor="fullName" className="text-gray-300">{tc("الاسم الكامل *", "Full Name *")}</Label>
  <Input
  id="fullName"
  name="fullName"
@@ -387,7 +389,7 @@ export default function ManagerEmployees() {
  />
  </div>
  <div>
- <Label htmlFor="username" className="text-gray-300">اسم المستخدم *</Label>
+ <Label htmlFor="username" className="text-gray-300">{tc("اسم المستخدم *", "Username *")}</Label>
  <Input
  id="username"
  name="username"
