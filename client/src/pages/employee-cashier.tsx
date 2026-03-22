@@ -4,6 +4,7 @@ import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import { cacheMenuItems, getCachedMenuItems, savePendingOrder, getPendingOrdersCount, syncPendingOrders } from "@/lib/offline-cashier";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -106,6 +107,8 @@ export default function EmployeeCashier() {
  const [usePointsDiscount, setUsePointsDiscount] = useState(false);
  const [orderType, setOrderType] = useState<'dine-in' | 'pickup' | 'delivery'>('pickup');
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(getPendingOrdersCount);
 
  const { toast } = useToast();
  const { i18n } = useTranslation();
@@ -153,6 +156,28 @@ export default function EmployeeCashier() {
  };
  loadEmployee();
  }, [setLocation]);
+
+ // Offline detection and auto-sync
+ useEffect(() => {
+   const handleOnline = () => {
+     setIsOffline(false);
+     syncPendingOrders((order) => {
+       setPendingOrdersCount(getPendingOrdersCount());
+       toast({ title: tc("✅ تمت مزامنة طلب معلق", "✅ Pending order synced"), description: tc("تم إرسال الطلب للخادم بنجاح", "Order sent to server successfully") });
+       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+     });
+   };
+   const handleOffline = () => {
+     setIsOffline(true);
+     setPendingOrdersCount(getPendingOrdersCount());
+   };
+   window.addEventListener('online', handleOnline);
+   window.addEventListener('offline', handleOffline);
+   return () => {
+     window.removeEventListener('online', handleOnline);
+     window.removeEventListener('offline', handleOffline);
+   };
+ }, [toast]);
 
  // Check POS device connection
  useEffect(() => {
@@ -254,9 +279,18 @@ export default function EmployeeCashier() {
  return () => clearTimeout(debounceTimer);
  }, [customerPhone, toast]);
 
- const { data: coffeeItems = [], isLoading } = useQuery<CoffeeItem[]>({
- queryKey: ["/api/coffee-items"],
+ const { data: fetchedItems = [], isLoading } = useQuery<CoffeeItem[]>({
+   queryKey: ["/api/coffee-items"],
+   retry: isOffline ? 0 : 3,
  });
+ // Use fetched items or fall back to cached items when offline
+ const coffeeItems: CoffeeItem[] = (fetchedItems.length > 0)
+   ? fetchedItems
+   : getCachedMenuItems() as CoffeeItem[];
+ // Cache items whenever fresh data arrives
+ useEffect(() => {
+   if (fetchedItems.length > 0) cacheMenuItems(fetchedItems);
+ }, [fetchedItems]);
 
  const { data: businessConfig } = useQuery<any>({
    queryKey: ["/api/business-config"],
@@ -274,12 +308,26 @@ export default function EmployeeCashier() {
         throw new Error("تم إلغاء تأكيد الدفع");
       }
 
+      // If offline, save order locally and return a fake success response
+      if (!navigator.onLine) {
+        const pending = savePendingOrder(orderData);
+        setPendingOrdersCount(getPendingOrdersCount());
+        return { orderNumber: pending.id, offline: true, status: 'pending_sync' };
+      }
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(orderData),
       });
+
+      // If response is 202 (queued by service worker offline), treat as pending
+      if (response.status === 202) {
+        const pending = savePendingOrder(orderData);
+        setPendingOrdersCount(getPendingOrdersCount());
+        return { orderNumber: pending.id, offline: true, status: 'pending_sync' };
+      }
       
       if (!response.ok) {
         throw new Error("Failed to create order");
@@ -324,14 +372,22 @@ export default function EmployeeCashier() {
  paymentMethod: paymentMethodAr
  };
  
- const whatsappLink = generateWhatsAppLink(whatsappData);
- window.open(whatsappLink, '_blank');
- 
- toast({
- title: tc("تم إنشاء الطلب بنجاح", "Order created successfully"),
- description: `${tc("رقم الطلب","Order #")}: ${order.orderNumber}`,
- className: "bg-green-600 text-white",
- });
+ if (order.offline) {
+   // Offline order — saved locally, will sync later
+   toast({
+     title: tc("✅ تم حفظ الطلب محلياً", "✅ Order saved offline"),
+     description: tc("لا يوجد اتصال بالإنترنت — سيُرسل الطلب تلقائياً عند الاتصال", "No internet — order will auto-sync when connected"),
+     className: "bg-orange-600 text-white",
+   });
+ } else {
+   const whatsappLink = generateWhatsAppLink(whatsappData);
+   window.open(whatsappLink, '_blank');
+   toast({
+     title: tc("تم إنشاء الطلب بنجاح", "Order created successfully"),
+     description: `${tc("رقم الطلب","Order #")}: ${order.orderNumber}`,
+     className: "bg-green-600 text-white",
+   });
+ }
  
  // تحديث قائمةالطلبات في صفحة الطلبات
  await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
@@ -855,6 +911,17 @@ export default function EmployeeCashier() {
  </div>
  </div>
  <div className="flex items-center gap-3 flex-wrap">
+ {isOffline && (
+   <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/30 rounded-lg px-3 py-1.5">
+     <WifiOff className="w-4 h-4 text-red-400" />
+     <span className="text-xs text-red-300">{tc("غير متصل بالإنترنت", "Offline")}</span>
+     {pendingOrdersCount > 0 && (
+       <Badge className="bg-orange-500/30 text-orange-300 border-orange-500/30 border text-[10px] px-1.5">
+         {pendingOrdersCount} {tc("معلق", "pending")}
+       </Badge>
+     )}
+   </div>
+ )}
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/cashier/phone-lookup")}

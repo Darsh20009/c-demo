@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
+import { preCacheOnLogin } from "@/lib/offline-cashier";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,6 +76,8 @@ export default function EmployeeLogin() {
         delete employee.restoreKey;
       }
       localStorage.setItem("currentEmployee", JSON.stringify(employee));
+      // Pre-cache menu and config for offline use
+      preCacheOnLogin().catch(() => {});
       window.location.href = "/employee/dashboard";
     },
     onError: (err: any) => {
