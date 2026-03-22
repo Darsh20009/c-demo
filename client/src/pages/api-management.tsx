@@ -64,7 +64,6 @@ interface ApiKey {
 }
 
 function generateApiKey() {
-  const tc = useTranslate();
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const prefix = 'qrx_';
   let result = prefix;

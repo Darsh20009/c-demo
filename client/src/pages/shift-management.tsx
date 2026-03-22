@@ -76,7 +76,6 @@ interface CashierShift {
 }
 
 function formatCurrency(amount: number) {
-  const tc = useTranslate();
   return `${(amount || 0).toFixed(2)} ر.س`;
 }
 
