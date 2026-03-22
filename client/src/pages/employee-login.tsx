@@ -5,7 +5,7 @@ import { preCacheOnLogin } from "@/lib/offline-cashier";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AtSign, Lock, Loader2, Eye, EyeOff, QrCode, Download, Phone, ArrowRight, CheckCircle2 } from "lucide-react";
+import { AtSign, Lock, Loader2, Eye, EyeOff, QrCode, Download } from "lucide-react";
 import type { Employee } from "@shared/schema";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
@@ -29,14 +29,10 @@ function useAutoRedirectIfLoggedIn() {
   });
 }
 
-type Step = "username" | "phone" | "password";
-
 export default function EmployeeLogin() {
   useAutoRedirectIfLoggedIn();
   const [, setLocation] = useLocation();
-  const [step, setStep] = useState<Step>("username");
   const [username, setUsername] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -62,26 +58,6 @@ export default function EmployeeLogin() {
     }
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
-
-  const verifyPhoneMutation = useMutation({
-    mutationFn: async ({ username, phone }: { username: string; phone: string }) => {
-      const res = await fetch("/api/employees/verify-phone", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, phone }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || tc("رقم الجوال غير صحيح", "Incorrect phone number"));
-      return data;
-    },
-    onSuccess: () => {
-      setError("");
-      setStep("password");
-    },
-    onError: (err: any) => {
-      setError(err?.message || tc("اسم المستخدم أو رقم الجوال غير صحيح", "Incorrect username or phone"));
-    },
-  });
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username?: string; employeeId?: string; password?: string }) => {
@@ -116,31 +92,11 @@ export default function EmployeeLogin() {
     },
   });
 
-  const handleUsernameNext = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!username.trim()) {
-      setError(tc("الرجاء إدخال اسم المستخدم", "Please enter your username"));
-      return;
-    }
-    setStep("phone");
-  };
-
-  const handlePhoneNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!phone.trim()) {
-      setError(tc("الرجاء إدخال رقم الجوال", "Please enter your phone number"));
-      return;
-    }
-    verifyPhoneMutation.mutate({ username: username.trim().toLowerCase(), phone: phone.trim() });
-  };
-
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!password) {
-      setError(tc("الرجاء إدخال كلمة المرور", "Please enter your password"));
+    if (!username || !password) {
+      setError(tc("الرجاء إدخال اسم المستخدم وكلمة المرور", "Please enter your username and password"));
       return;
     }
     loginMutation.mutate({ username: username.trim().toLowerCase(), password });
@@ -170,12 +126,6 @@ export default function EmployeeLogin() {
     qrScannerRef.current = scanner;
     return () => { qrScannerRef.current?.clear().catch(() => {}); };
   }, [showQRScanner]);
-
-  const stepConfig = {
-    username: { num: 1, label: tc("اسم المستخدم", "Username") },
-    phone:    { num: 2, label: tc("رقم الجوال", "Phone") },
-    password: { num: 3, label: tc("كلمة المرور", "Password") },
-  };
 
   return (
     <div dir="rtl" className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -212,166 +162,113 @@ export default function EmployeeLogin() {
               <CardTitle className="text-2xl text-center font-playfair text-foreground">
                 {tc("تسجيل الدخول", "Sign In")}
               </CardTitle>
-
-              {/* Step indicator - rendered LTR so numbers go 1→2→3 visually */}
-              <div className="flex items-center justify-center gap-2 pt-2" dir="ltr">
-                {(["username", "phone", "password"] as Step[]).map((s, i) => {
-                  const isDone = stepConfig[step].num > i + 1;
-                  const isActive = step === s;
-                  return (
-                    <div key={s} className="flex items-center gap-2">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold transition-all
-                        ${isDone ? "bg-primary text-primary-foreground" : isActive ? "bg-primary/20 text-primary border-2 border-primary" : "bg-muted text-muted-foreground"}`}>
-                        {isDone ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
-                      </div>
-                      {i < 2 && <div className={`w-8 h-0.5 ${isDone ? "bg-primary" : "bg-muted"}`} />}
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-center text-xs text-muted-foreground pt-1">
-                {tc("الخطوة", "Step")} {stepConfig[step].num} {tc("من", "of")} 3 — {stepConfig[step].label}
-              </p>
+              <CardDescription className="text-center text-muted-foreground">
+                {tc("أدخل بيانات حسابك للوصول", "Enter your account credentials to access")}
+              </CardDescription>
             </CardHeader>
-
             <CardContent>
-              {/* Step 1: Username */}
-              {step === "username" && (
-                <form onSubmit={handleUsernameNext} className="space-y-4">
-                  <div className="relative">
-                    <AtSign className="absolute right-3 top-3 h-5 w-5 text-primary" />
-                    <Input
-                      type="text"
-                      placeholder={tc("اسم المستخدم أو البريد الإلكتروني", "Username or Email")}
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="pr-10 bg-background border-border"
-                      data-testid="input-username"
-                      autoFocus
-                      autoComplete="username email"
-                    />
-                  </div>
-                  {error && <p className="text-destructive text-sm text-right" data-testid="text-error">{error}</p>}
-                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold" data-testid="button-next-username">
-                    <ArrowRight className="w-4 h-4 mr-2" />
-                    {tc("التالي", "Next")}
-                  </Button>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="relative">
+                  <AtSign className="absolute right-3 top-3 h-5 w-5 text-primary" />
+                  <Input
+                    type="text"
+                    placeholder={tc("اسم المستخدم أو البريد الإلكتروني", "Username or Email")}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="pr-10 bg-background border-border"
+                    data-testid="input-username"
+                    autoFocus
+                    autoComplete="username email"
+                    disabled={loginMutation.isPending}
+                  />
+                </div>
 
-                  <div className="pt-4 border-t border-border space-y-2">
-                    <Button type="button" variant="secondary" onClick={() => { setError(""); setShowQRScanner(true); }} className="w-full" data-testid="button-scan-qr">
-                      <QrCode className="w-4 h-4 ml-2" />
-                      {tc("مسح بطاقة الموظف", "Scan Employee Card")}
-                    </Button>
-                    <p className="text-sm text-muted-foreground text-center">{tc("موظف جديد؟", "New employee?")}</p>
-                    <Button type="button" variant="outline" onClick={() => setLocation("/employee/activate")} className="w-full border-primary/20 text-primary" data-testid="button-activate">
-                      {tc("تفعيل حساب جديد", "Activate New Account")}
-                    </Button>
-                    <Button type="button" variant="ghost" onClick={async () => {
-                      if (deferredPrompt) {
-                        deferredPrompt.prompt();
-                        const { outcome } = await deferredPrompt.userChoice;
-                        if (outcome === 'accepted') setDeferredPrompt(null);
+                <div className="relative">
+                  <Lock className="absolute right-3 top-3 h-5 w-5 text-primary" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder={tc("كلمة المرور", "Password")}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10 pl-10 bg-background border-border"
+                    data-testid="input-password"
+                    autoComplete="current-password"
+                    disabled={loginMutation.isPending}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-3 text-primary hover:text-primary/80"
+                    data-testid="button-toggle-password"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="remember-me"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label htmlFor="remember-me" className="text-sm text-muted-foreground">{tc("تذكرني", "Remember me")}</label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setLocation("/employee/forgot-password")}
+                    className="text-xs text-accent hover:text-accent/80 underline"
+                    data-testid="link-forgot-password"
+                  >
+                    {tc("نسيت كلمة المرور؟", "Forgot password?")}
+                  </button>
+                </div>
+
+                {error && (
+                  <p className="text-destructive text-sm text-right" data-testid="text-error">{error}</p>
+                )}
+
+                <Button
+                  type="submit"
+                  disabled={loginMutation.isPending}
+                  className="w-full bg-gradient-to-r from-accent to-accent/90 hover:from-accent/95 hover:to-accent/85 text-accent-foreground font-bold"
+                  data-testid="button-login"
+                >
+                  {loginMutation.isPending ? (
+                    <><Loader2 className="ml-2 h-4 w-4 animate-spin" />{tc("جاري تسجيل الدخول...", "Signing in...")}</>
+                  ) : tc("دخول", "Sign In")}
+                </Button>
+
+                <div className="pt-4 border-t border-border space-y-2">
+                  <Button type="button" variant="secondary" onClick={() => { setError(""); setShowQRScanner(true); }} className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground" data-testid="button-scan-qr">
+                    <QrCode className="w-4 h-4 ml-2" />
+                    {tc("مسح بطاقة الموظف", "Scan Employee Card")}
+                  </Button>
+                  <p className="text-sm text-muted-foreground text-center">{tc("موظف جديد؟", "New employee?")}</p>
+                  <Button type="button" variant="outline" onClick={() => setLocation("/employee/activate")} className="w-full border-primary/20 text-primary" data-testid="button-activate">
+                    {tc("تفعيل حساب جديد", "Activate New Account")}
+                  </Button>
+                  <Button type="button" variant="ghost" onClick={async () => {
+                    if (deferredPrompt) {
+                      deferredPrompt.prompt();
+                      const { outcome } = await deferredPrompt.userChoice;
+                      if (outcome === 'accepted') setDeferredPrompt(null);
+                    } else {
+                      const ua = navigator.userAgent.toLowerCase();
+                      if (/iphone|ipad|ipod/.test(ua)) {
+                        alert(tc("لتثبيت النظام على iPhone: اضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'", "To install on iPhone: tap 'Share' then 'Add to Home Screen'"));
                       } else {
-                        const ua = navigator.userAgent.toLowerCase();
-                        if (/iphone|ipad|ipod/.test(ua)) {
-                          alert(tc("لتثبيت النظام على iPhone: اضغط على زر 'مشاركة' ثم 'إضافة إلى الشاشة الرئيسية'", "To install on iPhone: tap 'Share' then 'Add to Home Screen'"));
-                        } else {
-                          alert(tc("لتثبيت النظام: اضغط على القائمة (⋮) ثم 'تثبيت التطبيق'", "To install: tap the menu (⋮) then 'Install App'"));
-                        }
+                        alert(tc("لتثبيت النظام: اضغط على القائمة (⋮) ثم 'تثبيت التطبيق'", "To install: tap the menu (⋮) then 'Install App'"));
                       }
-                    }} className="w-full text-primary font-bold hover:bg-primary/5">
-                      <Download className="ml-2 h-4 w-4" />
-                      {tc("تحميل نظام الموظفين", "Download Staff App")}
-                    </Button>
-                  </div>
-                </form>
-              )}
-
-              {/* Step 2: Phone */}
-              {step === "phone" && (
-                <form onSubmit={handlePhoneNext} className="space-y-4">
-                  <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm text-muted-foreground flex items-center gap-2 border border-border">
-                    <AtSign className="w-4 h-4 text-primary shrink-0" />
-                    <span className="font-medium text-foreground">{username}</span>
-                  </div>
-                  <div className="relative">
-                    <Phone className="absolute right-3 top-3 h-5 w-5 text-primary" />
-                    <Input
-                      type="tel"
-                      placeholder={tc("رقم الجوال (مثال: 0501234567)", "Phone number (e.g. 0501234567)")}
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="pr-10 bg-background border-border"
-                      data-testid="input-phone"
-                      autoFocus
-                      autoComplete="tel"
-                      disabled={verifyPhoneMutation.isPending}
-                    />
-                  </div>
-                  {error && <p className="text-destructive text-sm text-right" data-testid="text-error">{error}</p>}
-                  <Button type="submit" disabled={verifyPhoneMutation.isPending} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold" data-testid="button-verify-phone">
-                    {verifyPhoneMutation.isPending ? (
-                      <><Loader2 className="ml-2 h-4 w-4 animate-spin" />{tc("جاري التحقق...", "Verifying...")}</>
-                    ) : (
-                      <><ArrowRight className="w-4 h-4 mr-2" />{tc("التالي", "Next")}</>
-                    )}
+                    }
+                  }} className="w-full text-primary font-bold hover:bg-primary/5">
+                    <Download className="ml-2 h-4 w-4" />
+                    {tc("تحميل نظام الموظفين", "Download Staff App")}
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => { setError(""); setStep("username"); }} className="w-full text-muted-foreground" data-testid="button-back-username">
-                    {tc("رجوع", "Back")}
-                  </Button>
-                </form>
-              )}
-
-              {/* Step 3: Password */}
-              {step === "password" && (
-                <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                  <div className="bg-muted/50 rounded-lg px-4 py-3 text-sm flex items-center gap-2 border border-border">
-                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                    <span className="text-muted-foreground">{tc("تم التحقق من الهوية", "Identity verified")}</span>
-                    <span className="font-medium text-foreground mr-auto">{username}</span>
-                  </div>
-                  <div className="relative">
-                    <Lock className="absolute right-3 top-3 h-5 w-5 text-primary" />
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder={tc("كلمة المرور", "Password")}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pr-10 pl-10 bg-background border-border"
-                      data-testid="input-password"
-                      autoFocus
-                      autoComplete="current-password"
-                      disabled={loginMutation.isPending}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute left-3 top-3 text-primary hover:text-primary/80"
-                      data-testid="button-toggle-password"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  <div className="flex justify-end">
-                    <button type="button" onClick={() => setLocation("/employee/forgot-password")} className="text-xs text-accent hover:text-accent/80 underline" data-testid="link-forgot-password">
-                      {tc("نسيت كلمة المرور؟", "Forgot password?")}
-                    </button>
-                  </div>
-                  {error && <p className="text-destructive text-sm text-right" data-testid="text-error">{error}</p>}
-                  <div className="flex items-center space-x-2 space-x-reverse">
-                    <input type="checkbox" id="remember-me" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" />
-                    <label htmlFor="remember-me" className="text-sm text-muted-foreground mr-2">{tc("تذكرني", "Remember me")}</label>
-                  </div>
-                  <Button type="submit" disabled={loginMutation.isPending} className="w-full bg-gradient-to-r from-accent to-accent/90 hover:from-accent/95 hover:to-accent/85 text-accent-foreground font-bold" data-testid="button-login">
-                    {loginMutation.isPending ? (
-                      <><Loader2 className="ml-2 h-4 w-4 animate-spin" />{tc("جاري تسجيل الدخول...", "Signing in...")}</>
-                    ) : tc("دخول", "Sign In")}
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={() => { setError(""); setStep("phone"); }} className="w-full text-muted-foreground" data-testid="button-back-phone">
-                    {tc("رجوع", "Back")}
-                  </Button>
-                </form>
-              )}
+                </div>
+              </form>
             </CardContent>
           </Card>
         )}
