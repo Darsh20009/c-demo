@@ -3771,6 +3771,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Employee login via username/password
+  app.post("/api/employees/verify-phone", async (req, res) => {
+    try {
+      const { username, phone } = req.body;
+      if (!username || !phone) {
+        return res.status(400).json({ error: "الرجاء إدخال اسم المستخدم ورقم الجوال" });
+      }
+      const isEmail = username.includes("@");
+      const employee = await EmployeeModel.findOne(
+        isEmail ? { email: username.toLowerCase().trim() } : { username }
+      );
+      if (!employee) {
+        return res.status(401).json({ error: "اسم المستخدم أو رقم الجوال غير صحيح" });
+      }
+      const normalize = (p: string) => p.replace(/\s|-/g, "").replace(/^00966/, "0").replace(/^\+966/, "0");
+      const inputPhone = normalize(String(phone));
+      const storedPhone = normalize(String(employee.phone || ""));
+      if (!storedPhone || inputPhone !== storedPhone) {
+        return res.status(401).json({ error: "اسم المستخدم أو رقم الجوال غير صحيح" });
+      }
+      return res.json({ verified: true });
+    } catch (err) {
+      console.error("[AUTH] verify-phone error:", err);
+      return res.status(500).json({ error: "خطأ في التحقق" });
+    }
+  });
+
   app.post("/api/employees/login", async (req, res) => {
     try {
       const { username, password } = req.body;
