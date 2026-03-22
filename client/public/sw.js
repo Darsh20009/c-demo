@@ -34,7 +34,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
-          .filter(name => (name.startsWith('qirox-cache-') || name.startsWith('cluny-cache-')) && name !== CACHE_NAME)
+          .filter(name => name.startsWith('qirox-cache-') && name !== CACHE_NAME)
           .map(name => caches.delete(name))
       );
     })

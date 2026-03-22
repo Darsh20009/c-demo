@@ -184,8 +184,8 @@ export function TableQRCard({ tableNumber, qrToken, branchName, tableUrl }: Tabl
           ctx.fillStyle = BRAND.white;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          drawArcText(ctx, "C L U N Y   C A F E", logoCenterX, logoCenterY, logoOuterR - 18, -Math.PI / 2, true);
-          drawArcText(ctx, "C L U N Y   C A F E", logoCenterX, logoCenterY, logoOuterR - 18, Math.PI / 2, false);
+          drawArcText(ctx, sysBrand.nameEn.toUpperCase(), logoCenterX, logoCenterY, logoOuterR - 18, -Math.PI / 2, true);
+          drawArcText(ctx, sysBrand.nameEn.toUpperCase(), logoCenterX, logoCenterY, logoOuterR - 18, Math.PI / 2, false);
         }
 
         ctx.fillStyle = BRAND.textDark;
