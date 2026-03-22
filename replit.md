@@ -85,7 +85,7 @@ This is the **single source of truth** for ALL branding across the entire system
 - **Banner 1**: attached_assets/image_1773902463502.png
 - **Banner 2**: attached_assets/image_1773902748715.png
 - **Email Logo**: https://raw.githubusercontent.com/Darsh20009/QIROXsystem/main/client/public/logo.png
-- **Service Worker Cache**: `qirox-cache-v8`
+- **Service Worker Cache**: `qirox-cache-v9`
 
 ## Environment Variables
 
