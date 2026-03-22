@@ -16,11 +16,12 @@ import { LoadingState, EmptyState, ErrorState } from "@/components/ui/states";
 import BranchLocationPicker from "@/components/branch-location-picker";
 import CouponManagement from "@/components/coupon-management";
 import { DeliveryManagement } from "@/components/delivery-management";
+import { ManagerSidebar, MobileBottomNav } from "@/components/manager-sidebar";
 import { 
  Coffee, Users, ShoppingBag, TrendingUp, DollarSign, 
  Package, MapPin, Layers, ArrowLeft, Calendar, Warehouse,
  UserCheck, Receipt, BarChart3, Download, TrendingDown, Activity, Plus, Trash2, ExternalLink, Edit2, Search,
- Gift, Star, Banknote
+ Gift, Star, Banknote, Menu, Zap, Clock, Target, ChevronUp, ChevronDown
 } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { 
@@ -104,6 +105,7 @@ export default function ManagerDashboard() {
  const { toast } = useToast();
  const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
  const [ordersDisplayLimit, setOrdersDisplayLimit] = useState(20);
+ const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
  const deleteOrdersMutation = useMutation({
    mutationFn: async (ids: string[]) => {
@@ -707,212 +709,282 @@ export default function ManagerDashboard() {
  return Number((((currentRevenue - previousRevenue) / previousRevenue) * 100).toFixed(1));
  })();
 
+ const hourNow = new Date().getHours();
+ const greeting = hourNow < 12 ? "صباح الخير" : hourNow < 17 ? "مساء الخير" : "مساء النور";
+ const today = new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+ const todayOrders = orders.filter(o => {
+   if (!o.createdAt) return false;
+   const d = new Date(o.createdAt);
+   const now = new Date();
+   return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+ });
+ const todayRevenue = todayOrders.reduce((s, o) => s + Number(o.totalAmount || 0), 0);
+
  return (
  <>
- <div className="min-h-screen bg-background p-6" dir="rtl">
- <div className="max-w-7xl mx-auto">
- <header className="bg-card backdrop-blur-sm rounded-2xl border border-border p-6 mb-6">
- <div className="flex items-center justify-between gap-4 flex-wrap">
- <div className="flex items-center gap-4">
- <div className="w-14 h-14 bg-primary rounded-xl flex items-center justify-center shadow-lg">
- <Coffee className="w-7 h-7 text-primary-foreground" />
- </div>
- <div>
- <h1 className="text-2xl font-bold text-primary">
- {tc("لوحة تحكم المدير", "Manager Dashboard")}
- </h1>
- <p className="text-muted-foreground text-sm">{tc("مرحباً،", "Welcome,")} {manager.fullName}</p>
- </div>
- </div>
- <div className="flex items-center gap-3 flex-wrap">
- <Button
- variant="outline"
- onClick={() => setDemoManagerOpen(true)}
- className="text-muted-foreground hover:text-foreground"
- data-testid="button-demo-manager-header"
- >
- <FlaskConical className="w-4 h-4 ml-2" />
- {tc("البيانات التجريبية", "Demo Data")}
- </Button>
- <Button
- variant="outline"
- onClick={handleLogout}
- data-testid="button-logout"
- >
- {tc("تسجيل الخروج", "Logout")}
- </Button>
- <Button
- variant="outline"
- onClick={() => setLocation("/employee/dashboard")}
- data-testid="button-back"
- >
- <ArrowLeft className="w-4 h-4 ml-2" />
- {tc("رجوع", "Back")}
- </Button>
- </div>
- </div>
- </header>
+ <div className="flex h-screen overflow-hidden bg-[#070707]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
 
- <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
- <Button
- onClick={() => setLocation("/employee/pos")}
- className="h-20 flex flex-col gap-2 rounded-xl"
- data-testid="button-pos"
- >
- <Package className="w-6 h-6" />
- <span className="text-sm">{tc("نقاط البيع", "POS")}</span>
- </Button>
- <Button
- onClick={() => setLocation("/manager/inventory")}
- variant="outline"
- className="h-20 flex flex-col gap-2 rounded-xl"
- data-testid="button-inventory"
- >
- <Warehouse className="w-6 h-6" />
- <span className="text-sm">{tc("المخزون", "Inventory")}</span>
- </Button>
- <Button
- onClick={() => setLocation("/manager/attendance")}
- variant="outline"
- className="h-20 flex flex-col gap-2 rounded-xl"
- data-testid="button-attendance"
- >
- <UserCheck className="w-6 h-6" />
- <span className="text-sm">{tc("الحضور", "Attendance")}</span>
- </Button>
- <Button
- onClick={handleExportData}
- variant="outline"
- className="h-20 flex flex-col gap-2 rounded-xl"
- data-testid="button-export"
- >
- <Download className="w-6 h-6" />
- <span className="text-sm">{tc("تصدير Excel", "Export Excel")}</span>
- </Button>
- <Select value={dateFilter} onValueChange={(value: any) => setDateFilter(value)}>
- <SelectTrigger className="h-20 flex flex-col gap-2 bg-card border-border rounded-xl">
- <Calendar className="w-6 h-6" />
- <span className="text-sm">
- {dateFilter === "today" ? tc("اليوم", "Today") : dateFilter === "week" ? tc("أسبوع", "Week") : dateFilter === "month" ? tc("شهر", "Month") : tc("الكل", "All")}
- </span>
- </SelectTrigger>
- <SelectContent className="bg-card border-border">
- <SelectItem value="today">{tc("اليوم", "Today")}</SelectItem>
- <SelectItem value="week">{tc("آخر أسبوع", "Last Week")}</SelectItem>
- <SelectItem value="month">{tc("آخر شهر", "Last Month")}</SelectItem>
- <SelectItem value="all">{tc("كل الفترة", "All Time")}</SelectItem>
- </SelectContent>
- </Select>
- {isAdmin && (
-   <Button
-     variant="destructive"
-     onClick={() => {
-       if (confirm(tc('تحذير: هذا سيحذف جميع الطلبات والعملاء! هل تريد المتابعة؟', 'Warning: This will delete all orders and customers! Continue?'))) {
-         clearAllDataMutation.mutate();
-       }
-     }}
-     disabled={clearAllDataMutation.isPending}
-     className="h-20 flex flex-col gap-2 rounded-xl"
-     data-testid="button-clear-all-data"
-   >
-     <Trash2 className="w-6 h-6" />
-     <span className="text-xs">{clearAllDataMutation.isPending ? tc('جاري...', 'Loading...') : tc('تنظيف', 'Clear')}</span>
-   </Button>
- )}
- </div>
+   {/* ─── SIDEBAR ─── */}
+   <ManagerSidebar
+     manager={manager}
+     onLogout={handleLogout}
+     mobileOpen={mobileMenuOpen}
+     onMobileClose={() => setMobileMenuOpen(false)}
+   />
 
- <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
- <Card className="rounded-xl overflow-hidden">
- <div className="h-1 bg-primary" />
- <CardHeader className="pb-2 pt-4">
- <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
- <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
- <Users className="w-4 h-4 text-primary" />
- </div>
- {tc("إجمالي العملاء", "Total Customers")}
- </CardTitle>
- </CardHeader>
- <CardContent>
- <div className="text-4xl font-bold text-foreground">{customers.length}</div>
- <p className="text-xs text-muted-foreground mt-1">{tc("عميل مسجل في النظام", "Registered customers")}</p>
- </CardContent>
- </Card>
+   {/* ─── MAIN CONTENT ─── */}
+   <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
- <Card className="rounded-xl overflow-hidden">
- <div className="h-1 bg-accent" />
- <CardHeader className="pb-2 pt-4">
- <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
- <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
- <ShoppingBag className="w-4 h-4 text-accent" />
- </div>
- {tc("الطلبات", "Orders")}
- </CardTitle>
- </CardHeader>
- <CardContent>
- <div className="text-4xl font-bold text-foreground">{filteredOrders.length}</div>
- <div className="flex items-center gap-2 mt-1">
- <Badge variant="secondary">{completedOrders.length} {tc("مكتمل", "completed")}</Badge>
- <span className="text-xs text-muted-foreground">
- {dateFilter === "today" ? tc("اليوم", "Today") : dateFilter === "week" ? tc("الأسبوع", "This Week") : dateFilter === "month" ? tc("الشهر", "This Month") : tc("الكل", "All Time")}
- </span>
- </div>
- </CardContent>
- </Card>
+     {/* TOP HEADER */}
+     <header className="flex-shrink-0 bg-[#0a0a0a] border-b border-[#1a1a1a] px-4 lg:px-6 py-3 flex items-center justify-between gap-3">
+       <div className="flex items-center gap-3">
+         <button
+           className="lg:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-[#1a1a1a] text-[#888] hover:text-white"
+           onClick={() => setMobileMenuOpen(true)}
+         >
+           <Menu className="w-5 h-5" />
+         </button>
+         <div className="hidden sm:block">
+           <div className="text-white font-bold text-sm">{greeting}، <span className="text-[#2D9B6E]">{manager.fullName}</span></div>
+           <div className="text-[#555] text-xs">{today}</div>
+         </div>
+       </div>
+       <div className="flex items-center gap-2">
+         <Select value={dateFilter} onValueChange={(value: any) => setDateFilter(value)}>
+           <SelectTrigger className="h-8 w-32 text-xs bg-[#111] border-[#222] text-[#aaa]">
+             <Calendar className="w-3 h-3 ml-1" />
+             <SelectValue />
+           </SelectTrigger>
+           <SelectContent className="bg-[#111] border-[#222]">
+             <SelectItem value="today" className="text-xs">اليوم</SelectItem>
+             <SelectItem value="week" className="text-xs">آخر أسبوع</SelectItem>
+             <SelectItem value="month" className="text-xs">آخر شهر</SelectItem>
+             <SelectItem value="all" className="text-xs">كل الفترات</SelectItem>
+           </SelectContent>
+         </Select>
+         <Button variant="outline" size="sm" onClick={() => setDemoManagerOpen(true)} className="h-8 text-xs border-[#222] bg-[#111] text-[#888] hover:text-white hidden sm:flex">
+           <FlaskConical className="w-3 h-3 ml-1" />
+           تجريبي
+         </Button>
+         <Button variant="outline" size="sm" onClick={handleExportData} className="h-8 text-xs border-[#222] bg-[#111] text-[#888] hover:text-white">
+           <Download className="w-3 h-3 ml-1" />
+           Excel
+         </Button>
+       </div>
+     </header>
 
- <Card className="rounded-xl overflow-hidden">
- <div className="h-1 bg-primary" />
- <CardHeader className="pb-2 pt-4">
- <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
- <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
- <DollarSign className="w-4 h-4 text-primary" />
- </div>
- {tc("إجمالي المبيعات", "Total Revenue")}
- </CardTitle>
- </CardHeader>
- <CardContent>
- <div className="text-4xl font-bold text-primary">{totalRevenue.toFixed(2)}</div>
- <div className="flex items-center gap-2 mt-1">
- <span className="text-xs text-muted-foreground"><SarIcon /></span>
- {growthRate !== 0 && (
- <Badge variant={growthRate > 0 ? "default" : "destructive"}>
- {growthRate > 0 ? <TrendingUp className="w-3 h-3 ml-1" /> : <TrendingDown className="w-3 h-3 ml-1" />}
- {growthRate > 0 ? '+' : ''}{growthRate}%
- </Badge>
- )}
- </div>
- </CardContent>
- </Card>
+     {/* SCROLLABLE CONTENT */}
+     <main className="flex-1 overflow-y-auto pb-20 lg:pb-6">
+       <div className="p-4 lg:p-6 space-y-6 max-w-[1400px] mx-auto">
 
- <Card className="rounded-xl overflow-hidden">
- <div className="h-1 bg-secondary" />
- <CardHeader className="pb-2 pt-4">
- <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
- <div className="w-8 h-8 bg-secondary/10 rounded-lg flex items-center justify-center">
- <Activity className="w-4 h-4 text-secondary-foreground" />
- </div>
- {tc("متوسط الطلب", "Average Order")}
- </CardTitle>
- </CardHeader>
- <CardContent>
- <div className="text-4xl font-bold text-foreground">
- {filteredOrders.length > 0 ? (totalRevenue / filteredOrders.length).toFixed(2) : '0.00'}
- </div>
- <p className="text-xs text-muted-foreground mt-1">{tc("ريال سعودي لكل طلب", "SAR per order")}</p>
- </CardContent>
- </Card>
- </div>
+         {/* ── KPI CARDS ── */}
+         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+           {/* Revenue */}
+           <div className="relative overflow-hidden rounded-2xl p-4 lg:p-5" style={{ background: "linear-gradient(135deg, #0d2b1f 0%, #0a1a13 100%)", border: "1px solid #1a3d29" }}>
+             <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10" style={{ background: "#2D9B6E", filter: "blur(30px)", transform: "translate(30%, -30%)" }} />
+             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#2D9B6E22" }}>
+               <DollarSign className="w-5 h-5" style={{ color: "#2D9B6E" }} />
+             </div>
+             <div className="text-[#666] text-xs mb-1">إجمالي المبيعات</div>
+             <div className="text-2xl lg:text-3xl font-bold text-white">{totalRevenue.toLocaleString('ar-SA', { maximumFractionDigits: 0 })}</div>
+             <div className="text-[#2D9B6E] text-xs mt-1 flex items-center gap-1">
+               <SarIcon />
+               <span>ريال سعودي</span>
+               {growthRate !== 0 && (
+                 <Badge className="mr-1 text-[10px] h-4 px-1" style={{ background: growthRate > 0 ? "#0d2b1f" : "#2d0d0d", color: growthRate > 0 ? "#2D9B6E" : "#ef4444", border: "none" }}>
+                   {growthRate > 0 ? "↑" : "↓"} {Math.abs(growthRate)}%
+                 </Badge>
+               )}
+             </div>
+           </div>
 
- <Tabs defaultValue="orders" className="space-y-4">
- <TabsList className="grid w-full grid-cols-8 h-14">
- <TabsTrigger value="orders" className="rounded-lg">{tc("الطلبات", "Orders")}</TabsTrigger>
- <TabsTrigger value="analytics" className="rounded-lg">{tc("التحليلات", "Analytics")}</TabsTrigger>
- <TabsTrigger value="top-items" className="rounded-lg">{tc("الأكثر مبيعاً", "Top Items")}</TabsTrigger>
- <TabsTrigger value="employees" className="rounded-lg">{tc("أداء الموظفين", "Staff Performance")}</TabsTrigger>
- <TabsTrigger value="branches" className="rounded-lg">{tc("الفروع", "Branches")}</TabsTrigger>
- <TabsTrigger value="coupons" className="rounded-lg">{tc("الكوبونات", "Coupons")}</TabsTrigger>
- <TabsTrigger value="delivery" className="rounded-lg">{tc("التوصيل", "Delivery")}</TabsTrigger>
- <TabsTrigger value="erp" className="rounded-lg">{tc("المحاسبة", "Accounting")}</TabsTrigger>
- </TabsList>
+           {/* Orders */}
+           <div className="relative overflow-hidden rounded-2xl p-4 lg:p-5" style={{ background: "linear-gradient(135deg, #0d1b2b 0%, #0a1420 100%)", border: "1px solid #1a2d3d" }}>
+             <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10" style={{ background: "#3b82f6", filter: "blur(30px)", transform: "translate(30%, -30%)" }} />
+             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#3b82f622" }}>
+               <ShoppingBag className="w-5 h-5 text-blue-400" />
+             </div>
+             <div className="text-[#666] text-xs mb-1">الطلبات</div>
+             <div className="text-2xl lg:text-3xl font-bold text-white">{filteredOrders.length.toLocaleString('ar-SA')}</div>
+             <div className="text-blue-400 text-xs mt-1 flex items-center gap-1">
+               <span>{completedOrders.length} مكتمل</span>
+               <span className="text-[#444] mx-1">•</span>
+               <span className="text-amber-400">{filteredOrders.length - completedOrders.length} معلق</span>
+             </div>
+           </div>
+
+           {/* Customers */}
+           <div className="relative overflow-hidden rounded-2xl p-4 lg:p-5" style={{ background: "linear-gradient(135deg, #1a0d2b 0%, #13091a 100%)", border: "1px solid #2d1a3d" }}>
+             <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10" style={{ background: "#8b5cf6", filter: "blur(30px)", transform: "translate(30%, -30%)" }} />
+             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#8b5cf622" }}>
+               <Users className="w-5 h-5 text-purple-400" />
+             </div>
+             <div className="text-[#666] text-xs mb-1">العملاء</div>
+             <div className="text-2xl lg:text-3xl font-bold text-white">{customers.length.toLocaleString('ar-SA')}</div>
+             <div className="text-purple-400 text-xs mt-1">عميل مسجل</div>
+           </div>
+
+           {/* Avg Order */}
+           <div className="relative overflow-hidden rounded-2xl p-4 lg:p-5" style={{ background: "linear-gradient(135deg, #2b1a0d 0%, #1a1009 100%)", border: "1px solid #3d2a1a" }}>
+             <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-10" style={{ background: "#f59e0b", filter: "blur(30px)", transform: "translate(30%, -30%)" }} />
+             <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ background: "#f59e0b22" }}>
+               <Target className="w-5 h-5 text-amber-400" />
+             </div>
+             <div className="text-[#666] text-xs mb-1">متوسط الطلب</div>
+             <div className="text-2xl lg:text-3xl font-bold text-white">
+               {filteredOrders.length > 0 ? (totalRevenue / filteredOrders.length).toFixed(1) : '0'}
+             </div>
+             <div className="text-amber-400 text-xs mt-1 flex items-center gap-1"><SarIcon /> ريال / طلب</div>
+           </div>
+         </div>
+
+         {/* ── TODAY MINI STATS ── */}
+         <div className="grid grid-cols-3 gap-3">
+           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-3 text-center">
+             <div className="text-[#2D9B6E] font-bold text-xl">{todayOrders.length}</div>
+             <div className="text-[#555] text-xs mt-1">طلبات اليوم</div>
+           </div>
+           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-3 text-center">
+             <div className="text-[#3b82f6] font-bold text-xl">{todayRevenue.toFixed(0)}</div>
+             <div className="text-[#555] text-xs mt-1">مبيعات اليوم (ر.س)</div>
+           </div>
+           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl p-3 text-center">
+             <div className="text-[#f59e0b] font-bold text-xl">{employees.length}</div>
+             <div className="text-[#555] text-xs mt-1">الموظفون</div>
+           </div>
+         </div>
+
+         {/* ── CHARTS ── */}
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+           {/* Revenue Chart */}
+           <div className="lg:col-span-2 bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+             <div className="flex items-center justify-between mb-4">
+               <div>
+                 <div className="text-white font-bold text-sm">📈 المبيعات اليومية</div>
+                 <div className="text-[#555] text-xs">الاتجاه خلال الفترة المحددة</div>
+               </div>
+               <div className="w-8 h-8 rounded-lg bg-[#2D9B6E]/10 flex items-center justify-center">
+                 <TrendingUp className="w-4 h-4 text-[#2D9B6E]" />
+               </div>
+             </div>
+             <div className="h-[220px]">
+               <ResponsiveContainer width="100%" height="100%">
+                 <AreaChart data={dailyRevenueData}>
+                   <defs>
+                     <linearGradient id="mgRevGrad" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#2D9B6E" stopOpacity={0.3} />
+                       <stop offset="95%" stopColor="#2D9B6E" stopOpacity={0} />
+                     </linearGradient>
+                   </defs>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
+                   <XAxis dataKey="date" tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
+                   <YAxis tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
+                   <Tooltip contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '12px', color: '#fff', fontSize: 12 }} />
+                   <Area type="monotone" dataKey="revenue" stroke="#2D9B6E" strokeWidth={2} fill="url(#mgRevGrad)" dot={false} />
+                 </AreaChart>
+               </ResponsiveContainer>
+             </div>
+           </div>
+
+           {/* Payment Methods */}
+           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+             <div className="flex items-center justify-between mb-4">
+               <div>
+                 <div className="text-white font-bold text-sm">💳 طرق الدفع</div>
+                 <div className="text-[#555] text-xs">توزيع المعاملات</div>
+               </div>
+             </div>
+             <div className="h-[180px]">
+               <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                   <Pie data={paymentMethodsData} cx="50%" cy="50%" innerRadius={50} outerRadius={70} paddingAngle={4} dataKey="value">
+                     {paymentMethodsData.map((_, i) => (
+                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                     ))}
+                   </Pie>
+                   <Tooltip contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '12px', color: '#fff', fontSize: 11 }} />
+                   <Legend wrapperStyle={{ fontSize: 10, color: '#888' }} />
+                 </PieChart>
+               </ResponsiveContainer>
+             </div>
+           </div>
+         </div>
+
+         {/* ── TOP ITEMS ── */}
+         {topItemsData.length > 0 && (
+           <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+             <div className="flex items-center justify-between mb-4">
+               <div className="text-white font-bold text-sm">🏆 الأكثر مبيعاً</div>
+               <Button variant="ghost" size="sm" onClick={() => setLocation("/manager/analytics")} className="text-[#2D9B6E] hover:text-[#2D9B6E] text-xs h-7">
+                 التفاصيل ←
+               </Button>
+             </div>
+             <div className="h-[180px]">
+               <ResponsiveContainer width="100%" height="100%">
+                 <RechartsBar data={topItemsData.slice(0, 5)} layout="vertical" barSize={12}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" horizontal={false} />
+                   <XAxis type="number" tick={{ fill: '#555', fontSize: 10 }} axisLine={false} tickLine={false} />
+                   <YAxis dataKey="name" type="category" tick={{ fill: '#aaa', fontSize: 10 }} axisLine={false} tickLine={false} width={80} />
+                   <Tooltip contentStyle={{ background: '#111', border: '1px solid #222', borderRadius: '12px', color: '#fff', fontSize: 11 }} />
+                   <Bar dataKey="revenue" name="المبيعات" radius={[0, 6, 6, 0]}>
+                     {topItemsData.slice(0, 5).map((_, i) => (
+                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                     ))}
+                   </Bar>
+                 </RechartsBar>
+               </ResponsiveContainer>
+             </div>
+           </div>
+         )}
+
+         {/* ── QUICK ACTIONS GRID ── */}
+         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-4">
+           <div className="text-white font-bold text-sm mb-4">⚡ وصول سريع</div>
+           <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
+             {[
+               { label: "نقطة البيع", icon: "🛒", path: "/employee/pos", color: "#2D9B6E" },
+               { label: "الطلبات", icon: "📋", path: "/employee/orders", color: "#3b82f6" },
+               { label: "المخزون", icon: "📦", path: "/manager/inventory", color: "#f59e0b" },
+               { label: "المحاسبة", icon: "💰", path: "/manager/accounting", color: "#8b5cf6" },
+               { label: "الموظفون", icon: "👥", path: "/admin/employees", color: "#ec4899" },
+               { label: "التوصيل", icon: "🚚", path: "/manager/delivery", color: "#06b6d4" },
+               { label: "الولاء", icon: "🎁", path: "/manager/loyalty", color: "#f43f5e" },
+               { label: "التقارير", icon: "📊", path: "/manager/unified-reports", color: "#14b8a6" },
+               { label: "الرواتب", icon: "💸", path: "/manager/payroll", color: "#7c3aed" },
+               { label: "العروض", icon: "🏷️", path: "/manager/promotions", color: "#f97316" },
+               { label: "الوصفات", icon: "🧪", path: "/manager/inventory/recipes", color: "#84cc16" },
+               { label: "ZATCA", icon: "🧾", path: "/manager/zatca", color: "#a855f7" },
+               { label: "الحضور", icon: "⏰", path: "/manager/attendance", color: "#e879f9" },
+               { label: "الكيوسك", icon: "🖥️", path: "/kiosk", color: "#22c55e" },
+               { label: "الدعم", icon: "🎧", path: "/manager/support", color: "#64748b" },
+               { label: "الإعدادات", icon: "⚙️", path: "/admin/settings", color: "#94a3b8" },
+             ].map(item => (
+               <button
+                 key={item.path}
+                 onClick={() => setLocation(item.path)}
+                 className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-[#111] hover:bg-[#1a1a1a] border border-[#1a1a1a] hover:border-[#2a2a2a] transition-all group"
+               >
+                 <span className="text-xl group-hover:scale-110 transition-transform">{item.icon}</span>
+                 <span className="text-[10px] text-[#888] group-hover:text-[#aaa] text-center leading-tight">{item.label}</span>
+               </button>
+             ))}
+           </div>
+         </div>
+
+         {/* ── TABS (DETAILED SECTIONS) ── */}
+         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl overflow-hidden">
+         <Tabs defaultValue="orders" className="w-full">
+           <div className="border-b border-[#1a1a1a] overflow-x-auto">
+             <TabsList className="h-12 bg-transparent rounded-none px-2 gap-1 flex-nowrap min-w-max">
+               <TabsTrigger value="orders" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-[#2D9B6E] text-[#666] text-xs rounded-lg px-3 h-8">📋 الطلبات</TabsTrigger>
+               <TabsTrigger value="employees" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-blue-400 text-[#666] text-xs rounded-lg px-3 h-8">👥 الموظفون</TabsTrigger>
+               <TabsTrigger value="branches" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-amber-400 text-[#666] text-xs rounded-lg px-3 h-8">🏢 الفروع</TabsTrigger>
+               <TabsTrigger value="coupons" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-pink-400 text-[#666] text-xs rounded-lg px-3 h-8">🎟️ الكوبونات</TabsTrigger>
+               <TabsTrigger value="delivery" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-cyan-400 text-[#666] text-xs rounded-lg px-3 h-8">🚚 التوصيل</TabsTrigger>
+               <TabsTrigger value="erp" className="data-[state=active]:bg-[#1a1a1a] data-[state=active]:text-purple-400 text-[#666] text-xs rounded-lg px-3 h-8">📚 ERP</TabsTrigger>
+             </TabsList>
+           </div>
+
 
  <TabsContent value="orders" className="space-y-4">
  <Card>
@@ -1036,95 +1108,7 @@ export default function ManagerDashboard() {
  </Card>
  </TabsContent>
 
- <TabsContent value="analytics" className="space-y-4">
- <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
-   <Button variant="outline" onClick={() => setLocation("/manager/analytics")} className="flex flex-col h-16 gap-1" data-testid="btn-advanced-analytics">
-     <BarChart3 className="w-5 h-5 text-cyan-500" /><span className="text-xs">{tc("تحليلات متقدمة", "Analytics")}</span>
-   </Button>
-   <Button variant="outline" onClick={() => setLocation("/manager/gift-cards")} className="flex flex-col h-16 gap-1" data-testid="btn-gift-cards">
-     <Gift className="w-5 h-5 text-pink-500" /><span className="text-xs">{tc("بطاقات الهدايا", "Gift Cards")}</span>
-   </Button>
-   <Button variant="outline" onClick={() => setLocation("/manager/payroll")} className="flex flex-col h-16 gap-1" data-testid="btn-payroll">
-     <Banknote className="w-5 h-5 text-green-500" /><span className="text-xs">{tc("كشف الرواتب", "Payroll")}</span>
-   </Button>
-   <Button variant="outline" onClick={() => setLocation("/manager/reviews")} className="flex flex-col h-16 gap-1" data-testid="btn-reviews">
-     <Star className="w-5 h-5 text-amber-500" /><span className="text-xs">{tc("تقييمات العملاء", "Reviews")}</span>
-   </Button>
- </div>
- <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
- <Card>
- <CardHeader>
- <CardTitle>{tc("إجمالي المبيعات اليومية", "Daily Revenue")}</CardTitle>
- </CardHeader>
- <CardContent className="h-[300px]">
- <ResponsiveContainer width="100%" height="100%">
- <AreaChart data={dailyRevenueData}>
- <defs>
- <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
- <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
- <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
- </linearGradient>
- </defs>
- <CartesianGrid strokeDasharray="3 3" vertical={false} />
- <XAxis dataKey="date" />
- <YAxis />
- <Tooltip />
- <Area type="monotone" dataKey="revenue" name={tc("المبيعات", "Revenue")} stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorRevenue)" />
- </AreaChart>
- </ResponsiveContainer>
- </CardContent>
- </Card>
 
- <Card>
- <CardHeader>
- <CardTitle>{tc("توزيع طرق الدفع", "Payment Methods")}</CardTitle>
- </CardHeader>
- <CardContent className="h-[300px]">
- <ResponsiveContainer width="100%" height="100%">
- <PieChart>
- <Pie
- data={paymentMethodsData}
- cx="50%"
- cy="50%"
- innerRadius={60}
- outerRadius={80}
- paddingAngle={5}
- dataKey="value"
- >
- {paymentMethodsData.map((_, index) => (
- <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
- ))}
- </Pie>
- <Tooltip />
- <Legend />
- </PieChart>
- </ResponsiveContainer>
- </CardContent>
- </Card>
- </div>
- </TabsContent>
-
- <TabsContent value="top-items" className="space-y-4">
- <Card>
- <CardHeader>
- <CardTitle>{tc("المنتجات الأكثر مبيعاً", "Best Selling Items")}</CardTitle>
- <CardDescription>{tc("ترتيب المنتجات حسب عدد المبيعات", "Products ranked by sales count")}</CardDescription>
- </CardHeader>
- <CardContent>
- <div className="h-[400px]">
- <ResponsiveContainer width="100%" height="100%">
- <RechartsBar data={topItemsData} layout="vertical" margin={{ left: 40 }}>
- <CartesianGrid strokeDasharray="3 3" horizontal={false} />
- <XAxis type="number" />
- <YAxis dataKey="name" type="category" width={100} />
- <Tooltip />
- <Bar dataKey="count" name={tc("عدد المبيعات", "Sales Count")} fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
- </RechartsBar>
- </ResponsiveContainer>
- </div>
- </CardContent>
- </Card>
- </TabsContent>
 
  <TabsContent value="employees" className="space-y-4">
  <Card>
@@ -1726,8 +1710,12 @@ export default function ManagerDashboard() {
  </Card>
  </TabsContent>
  </Tabs>
+         </div>
+       </div>
+     </main>
+   </div>
  </div>
- </div>
+ <MobileBottomNav manager={manager} />
  <DemoDataManager open={demoManagerOpen} onOpenChange={setDemoManagerOpen} />
  </>
  );
