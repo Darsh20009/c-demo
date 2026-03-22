@@ -13985,6 +13985,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return addon ? {
           ...addon.toObject(),
           id: addon.id,
+          addonId: link.addonId,
           isDefault: link.isDefault,
           defaultValue: link.defaultValue,
           minQuantity: link.minQuantity,
