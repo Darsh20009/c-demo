@@ -6,13 +6,21 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#1a1a1a",
   "theme_color": "#2D9B6E",
   "orientation": "any",
   "lang": "ar",
   "dir": "rtl",
-  "categories": ["food", "lifestyle", "shopping"],
+  "categories": [
+    "food",
+    "lifestyle",
+    "shopping"
+  ],
   "prefer_related_applications": false,
   "handle_links": "preferred",
   "launch_handler": {
@@ -56,7 +64,55 @@
       "sizes": "540x720",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "QIROX Cafe Home"
+      "label": "QIROX Cafe POS"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "QIROX Cafe Dashboard"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "نقطة البيع",
+      "short_name": "POS",
+      "description": "Point of Sale",
+      "url": "/employee/pos",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "الطلبات",
+      "short_name": "Orders",
+      "description": "View Orders",
+      "url": "/employee/orders",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "المطبخ",
+      "short_name": "Kitchen",
+      "description": "Kitchen Display",
+      "url": "/employee/kitchen",
+      "icons": [
+        {
+          "src": "/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }

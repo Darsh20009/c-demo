@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v9';
+const CACHE_VERSION = 'v10';
 const CACHE_NAME = `qirox-cache-${CACHE_VERSION}`;
 
 // Essential shell files to pre-cache during install
@@ -296,7 +296,37 @@ self.addEventListener('sync', function(event) {
   if (event.tag === 'sync-orders') {
     event.waitUntil(syncPendingOrders());
   }
+  if (event.tag === 'sync-writes') {
+    event.waitUntil(syncPendingWrites());
+  }
 });
+
+async function syncPendingWrites() {
+  try {
+    const db = await openDB();
+    const tx = db.transaction('pending-writes', 'readonly');
+    const store = tx.objectStore('pending-writes');
+    const writes = await getAllFromStore(store);
+    for (const write of writes) {
+      try {
+        const response = await fetch(write.url, {
+          method: write.method,
+          headers: write.headers || { 'Content-Type': 'application/json' },
+          body: write.body,
+        });
+        if (response.ok) {
+          const deleteTx = db.transaction('pending-writes', 'readwrite');
+          deleteTx.objectStore('pending-writes').delete(write.id);
+          console.log('[SW] Synced offline write:', write.url);
+        }
+      } catch (err) {
+        console.error('[SW] Failed to sync write:', write.url, err);
+      }
+    }
+  } catch (error) {
+    console.log('[SW] Background sync writes - error:', error);
+  }
+}
 
 async function syncPendingOrders() {
   try {
@@ -329,11 +359,14 @@ async function syncPendingOrders() {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('qirox-offline', 1);
+    const request = indexedDB.open('qirox-offline', 2);
     request.onupgradeneeded = function(event) {
       const db = event.target.result;
       if (!db.objectStoreNames.contains('pending-orders')) {
         db.createObjectStore('pending-orders', { keyPath: 'id', autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains('pending-writes')) {
+        db.createObjectStore('pending-writes', { keyPath: 'id', autoIncrement: true });
       }
     };
     request.onsuccess = function(event) {
@@ -365,13 +398,61 @@ self.addEventListener('message', (event) => {
   }
 });
 
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
+// API endpoints to cache for offline reading
+const OFFLINE_API_CACHE = 'qirox-api-cache-v1';
+const CACHEABLE_APIS = ['/api/menu-items', '/api/business-config', '/api/categories', '/api/coffee-items', '/api/loyalty-config', '/api/tables'];
 
+async function queueWriteRequest(request) {
+  try {
+    const body = await request.text();
+    const db = await openDB();
+    const tx = db.transaction('pending-writes', 'readwrite');
+    const store = tx.objectStore('pending-writes');
+    store.add({ url: request.url, method: request.method, body, headers: { 'Content-Type': 'application/json' }, timestamp: Date.now() });
+    if ('sync' in self.registration) {
+      self.registration.sync.register('sync-writes').catch(() => {});
+    }
+    return new Response(JSON.stringify({ offline: true, queued: true, message: 'Request queued for sync' }), {
+      status: 202, headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'offline' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+  }
+}
+
+self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
+  // Handle write requests: queue them when offline
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(event.request.method) && url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(event.request.clone()).catch(() => queueWriteRequest(event.request.clone()))
+    );
+    return;
+  }
+
+  if (event.request.method !== 'GET') return;
+
+  // API GET requests: network-first with cache fallback for offline reading
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(fetch(event.request));
+    const isCacheable = CACHEABLE_APIS.some(api => url.pathname.startsWith(api));
+    if (isCacheable) {
+      event.respondWith(
+        fetch(event.request)
+          .then(response => {
+            if (response && response.status === 200) {
+              const clone = response.clone();
+              caches.open(OFFLINE_API_CACHE).then(cache => cache.put(event.request, clone));
+            }
+            return response;
+          })
+          .catch(() => caches.match(event.request, { cacheName: OFFLINE_API_CACHE })
+            .then(cached => cached || new Response(JSON.stringify({ offline: true, data: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } }))
+          )
+      );
+      return;
+    }
+    event.respondWith(fetch(event.request).catch(() => new Response(JSON.stringify({ offline: true }), { status: 503, headers: { 'Content-Type': 'application/json' } })));
     return;
   }
 

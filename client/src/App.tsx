@@ -15,6 +15,8 @@ import { CustomerProvider } from "@/contexts/CustomerContext";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PWAUpdateNotifier } from "@/components/PWAUpdateNotifier";
 import { GlobalPrompts } from "@/components/global-prompts";
+import { PWAInstallBanner } from "@/components/pwa-install";
+import { OfflineIndicator } from "@/components/offline-indicator";
 import MenuPage from "@/pages/menu"; 
 import CustomerProfile from "@/pages/customer-profile";
 import CartPage from "@/pages/cart-page";
@@ -138,6 +140,9 @@ const WelcomePage = lazy(() => import("@/pages/welcome"));
 const EmployeeHome = lazy(() => import("@/pages/employee-home"));
 const QiroxLogin = lazy(() => import("@/pages/qirox-login"));
 const QiroxDashboard = lazy(() => import("@/pages/qirox-dashboard"));
+const HardwareManagement = lazy(() => import("@/pages/hardware-management"));
+const B2BMarketplace = lazy(() => import("@/pages/b2b-marketplace"));
+const PartnerProgram = lazy(() => import("@/pages/partner-program"));
 import qiroxLogo from "@assets/qirox-logo-customer.png";
 import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 
@@ -356,6 +361,11 @@ function AppRouter() {
       <Route path="/erp/accounting"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><ErpAccountingPage /></AuthGuard></Route>
 
 
+      {/* Hardware, B2B & Partner routes */}
+      <Route path="/manager/hardware"><AuthGuard userType="manager"><HardwareManagement /></AuthGuard></Route>
+      <Route path="/manager/b2b"><AuthGuard userType="manager"><B2BMarketplace /></AuthGuard></Route>
+      <Route path="/manager/partners"><AuthGuard userType="manager"><PartnerProgram /></AuthGuard></Route>
+
       {/* Driver Portal routes */}
       <Route path="/driver/login"><DriverLogin /></Route>
       <Route path="/driver/portal"><DriverPortal /></Route>
@@ -426,6 +436,8 @@ function App() {
                 </WouterRouter>
                 <GlobalPrompts />
                 <PWAUpdateNotifier />
+                <PWAInstallBanner />
+                <OfflineIndicator />
               </ErrorBoundary>
             </CartProvider>
           </CustomerProvider>
