@@ -65,7 +65,9 @@ import {
   BookOpen,
   Users,
   Scale,
+  ArrowLeft,
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import { ar } from "date-fns/locale";
 import SarIcon from "@/components/sar-icon";
@@ -380,6 +382,7 @@ function SummaryCard({
 export default function ErpAccountingPage() {
   const { toast } = useToast();
   const tc = useTranslate();
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [showAddAccountDialog, setShowAddAccountDialog] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -540,9 +543,14 @@ export default function ErpAccountingPage() {
     <div dir="rtl" className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold font-playfair text-foreground">{tc("نظام المحاسبة ERP", "ERP Accounting System")}</h1>
-            <p className="text-muted-foreground mt-1">{tc("إدارة الحسابات والتقارير المالية", "Manage accounts and financial reports")}</p>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} data-testid="btn-back">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold font-playfair text-foreground">{tc("نظام المحاسبة ERP", "ERP Accounting System")}</h1>
+              <p className="text-muted-foreground mt-1">{tc("إدارة الحسابات والتقارير المالية", "Manage accounts and financial reports")}</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button

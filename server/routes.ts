@@ -2157,7 +2157,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (pg?.bankTransferEnabled) {
-        allMethods.push({ id: 'mada', nameAr: 'تحويل بنكي', nameEn: 'Bank Transfer', details: 'تحويل مباشر', icon: 'fas fa-university' });
+        allMethods.push({
+          id: 'mada',
+          nameAr: 'تحويل بنكي',
+          nameEn: 'Bank Transfer',
+          details: pg.bankIban ? `IBAN: ${pg.bankIban}` : 'تحويل مباشر',
+          icon: 'fas fa-university',
+          bankIban: pg.bankIban || '',
+          bankName: pg.bankName || '',
+          bankAccountHolder: pg.bankAccountHolder || '',
+        });
       }
 
       if (pg?.provider === 'neoleap') {
@@ -2227,6 +2236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         posEnabled: pg.posEnabled,
         qahwaCardEnabled: pg.qahwaCardEnabled,
         bankTransferEnabled: pg.bankTransferEnabled,
+        bankIban: pg.bankIban || '',
+        bankName: pg.bankName || '',
+        bankAccountHolder: pg.bankAccountHolder || '',
         stcPayEnabled: pg.stcPayEnabled,
         paymentTestMode: !!pg.paymentTestMode,
         neoleap: {
@@ -2279,6 +2291,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (body.posEnabled !== undefined) updates['paymentGateway.posEnabled'] = body.posEnabled;
       if (body.qahwaCardEnabled !== undefined) updates['paymentGateway.qahwaCardEnabled'] = body.qahwaCardEnabled;
       if (body.bankTransferEnabled !== undefined) updates['paymentGateway.bankTransferEnabled'] = body.bankTransferEnabled;
+      if (body.bankIban !== undefined) updates['paymentGateway.bankIban'] = body.bankIban;
+      if (body.bankName !== undefined) updates['paymentGateway.bankName'] = body.bankName;
+      if (body.bankAccountHolder !== undefined) updates['paymentGateway.bankAccountHolder'] = body.bankAccountHolder;
       if (body.stcPayEnabled !== undefined) updates['paymentGateway.stcPayEnabled'] = body.stcPayEnabled;
       if (body.paymentTestMode !== undefined) updates['paymentGateway.paymentTestMode'] = !!body.paymentTestMode;
 

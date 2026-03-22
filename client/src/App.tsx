@@ -302,7 +302,7 @@ function AppRouter() {
       <Route path="/manager/analytics"><AuthGuard userType="manager"><AdvancedAnalytics /></AuthGuard></Route>
       <Route path="/manager/gift-cards"><AuthGuard userType="manager"><GiftCardsManagement /></AuthGuard></Route>
       <Route path="/manager/promotions"><AuthGuard userType="manager"><PromotionsManagement /></AuthGuard></Route>
-      <Route path="/admin/api"><AuthGuard userType="admin"><ApiManagement /></AuthGuard></Route>
+      <Route path="/admin/api"><AuthGuard userType="manager" allowedRoles={["owner", "admin", "manager"]}><AdminLayout><ApiManagement /></AdminLayout></AuthGuard></Route>
       <Route path="/kiosk"><KioskPage /></Route>
       <Route path="/manager/payroll"><AuthGuard userType="manager"><PayrollManagement /></AuthGuard></Route>
       <Route path="/manager/reviews"><AuthGuard userType="manager"><ManagerReviews /></AuthGuard></Route>

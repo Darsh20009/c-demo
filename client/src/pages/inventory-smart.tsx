@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PlanGate } from "@/components/plan-gate";
 import { useTranslate, tc } from "@/lib/useTranslate";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +55,7 @@ import {
   Bell,
   BookOpen,
   ChevronLeft,
+  ArrowLeft,
 } from "lucide-react";
 
 const categoryLabels: Record<string, { label: string; icon: any; color: string; bgColor: string }> = {
@@ -132,6 +133,7 @@ interface Branch {
 export default function InventorySmartPage() {
   const tc = useTranslate();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
@@ -286,7 +288,10 @@ export default function InventorySmartPage() {
     <PlanGate feature="inventoryManagement">
     <div className="p-6 space-y-6 bg-background" dir="rtl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} data-testid="btn-back">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
           <div className="p-4 rounded-2xl bg-primary/10 shadow-lg">
             <Layers className="h-10 w-10 text-primary" />
           </div>

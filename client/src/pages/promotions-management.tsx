@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Tag, Percent, Package, ShoppingBag, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Percent, Package, ShoppingBag, Loader2, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface PromoOffer {
   _id: string;
@@ -53,6 +54,7 @@ const defaultForm = {
 
 export default function PromotionsManagement() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...defaultForm });
@@ -157,9 +159,14 @@ export default function PromotionsManagement() {
   return (
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-foreground">{tc("إدارة العروض الترويجية", "Promotions Management")}</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">{tc("باقات، خصومات، اشتر واحد واحصل على واحد", "Bundles, discounts, buy one get one")}</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} data-testid="btn-back">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-black text-foreground">{tc("إدارة العروض الترويجية", "Promotions Management")}</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">{tc("باقات، خصومات، اشتر واحد واحصل على واحد", "Bundles, discounts, buy one get one")}</p>
+          </div>
         </div>
         <Button onClick={openCreate} data-testid="button-create-offer">
           <Plus className="w-4 h-4 ml-2" /> عرض جديد

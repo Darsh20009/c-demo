@@ -439,6 +439,33 @@ export default function PaymentMethods({
                     </p>
                   </div>
                 </div>
+                {/* Bank Transfer IBAN Details */}
+                {isSelected && (method.id as string) === 'mada' && ((method as any).bankIban || (method as any).bankName) && (
+                  <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 space-y-2">
+                    <p className="text-xs font-bold text-blue-700 dark:text-blue-300">بيانات التحويل البنكي</p>
+                    {(method as any).bankAccountHolder && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">اسم الحساب</span>
+                        <span className="text-xs font-semibold text-foreground">{(method as any).bankAccountHolder}</span>
+                      </div>
+                    )}
+                    {(method as any).bankName && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">البنك</span>
+                        <span className="text-xs font-semibold text-foreground">{(method as any).bankName}</span>
+                      </div>
+                    )}
+                    {(method as any).bankIban && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">رقم الآيبان</span>
+                        <span className="text-xs font-mono font-bold text-blue-700 dark:text-blue-300 dir-ltr" dir="ltr">{(method as any).bankIban}</span>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1">
+                      يرجى التحويل وإرسال صورة الإيصال لإتمام الطلب
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

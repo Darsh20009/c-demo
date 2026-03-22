@@ -73,6 +73,9 @@ export default function AdminSettings() {
   const [pgPosEnabled, setPgPosEnabled] = useState(true);
   const [pgQahwaCardEnabled, setPgQahwaCardEnabled] = useState(true);
   const [pgBankTransferEnabled, setPgBankTransferEnabled] = useState(false);
+  const [pgBankIban, setPgBankIban] = useState("");
+  const [pgBankName, setPgBankName] = useState("");
+  const [pgBankAccountHolder, setPgBankAccountHolder] = useState("");
   const [pgStcPayEnabled, setPgStcPayEnabled] = useState(false);
   const [pgPaymentTestMode, setPgPaymentTestMode] = useState(false);
   const [neoleapClientId, setNeoleapClientId] = useState("");
@@ -104,6 +107,9 @@ export default function AdminSettings() {
       setPgPosEnabled(pgConfig.posEnabled !== false);
       setPgQahwaCardEnabled(pgConfig.qahwaCardEnabled !== false);
       setPgBankTransferEnabled(pgConfig.bankTransferEnabled || false);
+      setPgBankIban(pgConfig.bankIban || '');
+      setPgBankName(pgConfig.bankName || '');
+      setPgBankAccountHolder(pgConfig.bankAccountHolder || '');
       setPgStcPayEnabled(pgConfig.stcPayEnabled || false);
       setPgPaymentTestMode(pgConfig.paymentTestMode || false);
       if (pgConfig.neoleap) {
@@ -145,6 +151,9 @@ export default function AdminSettings() {
       posEnabled: pgPosEnabled,
       qahwaCardEnabled: pgQahwaCardEnabled,
       bankTransferEnabled: pgBankTransferEnabled,
+      bankIban: pgBankIban,
+      bankName: pgBankName,
+      bankAccountHolder: pgBankAccountHolder,
       stcPayEnabled: pgStcPayEnabled,
       paymentTestMode: pgPaymentTestMode,
     };
@@ -1684,6 +1693,49 @@ export default function AdminSettings() {
                   </div>
                 ))}
               </div>
+              {/* Bank Transfer IBAN Details */}
+              {pgBankTransferEnabled && (
+                <div className="mt-3 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800 space-y-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Banknote className="w-4 h-4 text-blue-600" />
+                    <Label className="text-sm font-bold text-blue-800 dark:text-blue-300">بيانات التحويل البنكي</Label>
+                  </div>
+                  <p className="text-[11px] text-blue-600 dark:text-blue-400">
+                    هذه البيانات ستظهر للعميل عند اختيار الدفع بالتحويل البنكي
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-semibold">رقم الآيبان (IBAN)</Label>
+                      <Input
+                        value={pgBankIban}
+                        onChange={e => setPgBankIban(e.target.value)}
+                        placeholder="SA00 0000 0000 0000 0000 0000"
+                        className="font-mono text-sm"
+                        dir="ltr"
+                        data-testid="input-bank-iban"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-semibold">اسم البنك</Label>
+                      <Input
+                        value={pgBankName}
+                        onChange={e => setPgBankName(e.target.value)}
+                        placeholder="مثال: البنك الأهلي السعودي"
+                        data-testid="input-bank-name"
+                      />
+                    </div>
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label className="text-xs font-semibold">اسم صاحب الحساب</Label>
+                      <Input
+                        value={pgBankAccountHolder}
+                        onChange={e => setPgBankAccountHolder(e.target.value)}
+                        placeholder="الاسم الكامل كما هو في البنك"
+                        data-testid="input-bank-account-holder"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
               {pgProvider !== 'none' && (
                 <p className="text-[10px] text-muted-foreground">
                   البطاقة البنكية {pgProvider !== 'paymob' ? 'و Apple Pay' : ''} ستظهر تلقائياً عند تفعيل بوابة {pgProvider === 'neoleap' ? 'نيو ليب' : pgProvider === 'paymob' ? 'Paymob' : 'جيديا'} وإدخال البيانات

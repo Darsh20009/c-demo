@@ -51,8 +51,10 @@ import {
   ArrowUpDown,
   Sparkles,
   Target,
-  CheckCircle2
+  CheckCircle2,
+  ArrowLeft,
 } from "lucide-react";
+import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 import SarIcon from "@/components/sar-icon";
@@ -136,6 +138,7 @@ const categoryConfig: Record<string, { label: string; icon: any; gradient: strin
 export default function InventoryStockPage() {
   const tc = useTranslate();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState<string>("all");
   const [stockFilter, setStockFilter] = useState<string>("all");
@@ -390,7 +393,10 @@ export default function InventoryStockPage() {
     <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} data-testid="btn-back">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
             <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-amber-500/20">
               <Warehouse className="h-8 w-8 text-white" />
             </div>

@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Key, Copy, Plus, Trash2, Eye, EyeOff, Code2, Globe, ShieldCheck, Loader2, RefreshCw } from "lucide-react";
+import { Key, Copy, Plus, Trash2, Eye, EyeOff, Code2, Globe, ShieldCheck, Loader2, RefreshCw, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 
 const PUBLIC_ENDPOINTS = [
   { method: "GET", path: "/api/menu", description: tc("قائمة المنتجات المتاحة", "Available Products List"), auth: "none" },
@@ -73,6 +74,7 @@ function generateApiKey() {
 
 export default function ApiManagement() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [showCreateKey, setShowCreateKey] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKeys, setRevealedKeys] = useState<Set<string>>(new Set());
@@ -136,9 +138,14 @@ export default function ApiManagement() {
     <PlanGate feature="apiAccess">
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-foreground">إدارة API</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">مفاتيح الوصول وتوثيق الواجهة البرمجية</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/admin/dashboard")} data-testid="btn-back">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-black text-foreground">إدارة API</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">مفاتيح الوصول وتوثيق الواجهة البرمجية</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="gap-1.5 text-primary border-primary/30 bg-primary/5">
