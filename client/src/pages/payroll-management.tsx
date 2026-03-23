@@ -165,6 +165,9 @@ export default function PayrollManagementPage() {
                         <div className="bg-card/50 rounded-lg p-2">
                           <p className="text-amber-400 font-bold">{emp.lateDays}</p>
                           <p className="text-muted-foreground text-xs">{tc("تأخير","Late")}</p>
+                          {(emp as any).totalLateMinutes > 0 && (
+                            <p className="text-amber-500 text-[10px]">{(emp as any).totalLateMinutes} {tc("د","min")}</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center justify-between mb-2">

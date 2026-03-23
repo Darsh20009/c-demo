@@ -16657,8 +16657,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Explicit absences (manager-recorded)
         const explicitAbsentDays = empAtt.filter(a => a.status === 'absent').length;
 
-        // Late days
-        const lateDays = empAtt.filter(a => (a as any).isLate === 1 || (a.lateMinutes ?? 0) > 0).length;
+        // Late days and total late minutes
+        const lateRecords = empAtt.filter(a => (a as any).isLate === 1 || (a.lateMinutes ?? 0) > 0);
+        const lateDays = lateRecords.length;
+        const totalLateMinutes = lateRecords.reduce((sum, a) => sum + (a.lateMinutes ?? 0), 0);
 
         // Scheduled working days for this employee based on their workDays config
         const scheduledDays = getScheduledWorkDays((emp as any).workDays || []);
@@ -16676,7 +16678,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const baseSalary = Number((emp as any).salary || (emp as any).baseSalary || 0);
         const dailyRate = baseSalary / (totalWorkingDays || 26);
         const deductions = absentDays * dailyRate;
-        const lateDeductions = lateDays * (dailyRate * 0.25);
+
+        // Calculate shift duration from employee's schedule (default 8 hours)
+        let shiftHours = 8;
+        const shiftStart = (emp as any).shiftStartTime as string | undefined;
+        const shiftEnd = (emp as any).shiftEndTime as string | undefined;
+        if (shiftStart && shiftEnd) {
+          const [sh, sm] = shiftStart.split(':').map(Number);
+          const [eh, em] = shiftEnd.split(':').map(Number);
+          const computed = (eh * 60 + em - sh * 60 - sm) / 60;
+          if (computed > 0) shiftHours = computed;
+        }
+        const minutesPerDay = shiftHours * 60;
+
+        // Late deduction proportional to actual late minutes (not flat 25%)
+        // e.g. 30 min late in an 8-hour day = 30/480 of daily rate
+        const lateDeductions = minutesPerDay > 0 ? (totalLateMinutes / minutesPerDay) * dailyRate : 0;
         const netSalary = Math.max(0, baseSalary - deductions - lateDeductions);
         return {
           employeeId: emp.id || String((emp as any)._id),
@@ -16688,6 +16705,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           explicitAbsentDays,
           implicitAbsentDays,
           lateDays,
+          totalLateMinutes,
+          shiftHours,
           totalWorkingDays,
           deductions: Math.round(deductions * 100) / 100,
           lateDeductions: Math.round(lateDeductions * 100) / 100,
