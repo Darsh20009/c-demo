@@ -16626,15 +16626,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const empQuery: any = { isActive: { $ne: false } };
       if (finalBranchId) empQuery.branchId = finalBranchId;
       const employees = await EmployeeModel.find(empQuery).lean();
-      const attQuery: any = { date: { $gte: startDate.toISOString().split('T')[0], $lte: endDate.toISOString().split('T')[0] } };
+
+      // Fix: use shiftDate (correct field name) instead of date
+      const attQuery: any = { shiftDate: { $gte: startDate, $lte: endDate } };
       if (finalBranchId) attQuery.branchId = finalBranchId;
       const attendances = await AttendanceModel.find(attQuery).lean();
+
+      // Saudi default work week: Sunday–Thursday
+      const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const DEFAULT_WORK_DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
+
+      // Build list of all working days in the month per employee schedule
+      function getScheduledWorkDays(workDays: string[]): string[] {
+        const schedule = workDays.length > 0 ? workDays.map(d => d.toLowerCase()) : DEFAULT_WORK_DAYS;
+        const days: string[] = [];
+        for (let d = new Date(startDate); d <= endDate; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+          if (schedule.includes(DAY_NAMES[d.getDay()])) {
+            days.push(d.toISOString().split('T')[0]);
+          }
+        }
+        return days;
+      }
+
       const payrollData = employees.map(emp => {
         const empAtt = attendances.filter(a => a.employeeId === emp.id || String(a.employeeId) === String((emp as any)._id));
-        const presentDays = empAtt.filter(a => a.status === 'checked_in' || a.status === 'checked_out' || a.checkInTime).length;
-        const absentDays = empAtt.filter(a => a.status === 'absent').length;
-        const lateDays = empAtt.filter(a => (a as any).isLate || (a.lateMinutes ?? 0) > 0).length;
-        const totalWorkingDays = new Date(targetYear, targetMonth + 1, 0).getDate();
+
+        // Days employee actually attended (any check-in record regardless of status)
+        const presentDays = empAtt.filter(a => a.status === 'checked_in' || a.status === 'checked_out' || a.status === 'late' || a.checkInTime).length;
+
+        // Explicit absences (manager-recorded)
+        const explicitAbsentDays = empAtt.filter(a => a.status === 'absent').length;
+
+        // Late days
+        const lateDays = empAtt.filter(a => (a as any).isLate === 1 || (a.lateMinutes ?? 0) > 0).length;
+
+        // Scheduled working days for this employee based on their workDays config
+        const scheduledDays = getScheduledWorkDays((emp as any).workDays || []);
+        const totalWorkingDays = scheduledDays.length;
+
+        // Implicit absences: scheduled days with NO attendance record at all
+        const attendedDates = new Set(
+          empAtt.map(a => new Date(a.shiftDate).toISOString().split('T')[0])
+        );
+        const implicitAbsentDays = scheduledDays.filter(day => !attendedDates.has(day)).length;
+
+        // Total absences = implicit (no-show) + explicit (marked absent)
+        const absentDays = implicitAbsentDays + explicitAbsentDays;
+
         const baseSalary = Number((emp as any).salary || (emp as any).baseSalary || 0);
         const dailyRate = baseSalary / (totalWorkingDays || 26);
         const deductions = absentDays * dailyRate;
@@ -16647,6 +16685,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           baseSalary,
           presentDays,
           absentDays,
+          explicitAbsentDays,
+          implicitAbsentDays,
           lateDays,
           totalWorkingDays,
           deductions: Math.round(deductions * 100) / 100,
