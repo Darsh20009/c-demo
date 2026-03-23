@@ -76,7 +76,8 @@ export function AddToCartModal({
   });
 
   const generalAddons = useMemo(() => {
-    if (!activeItem) return [];
+    // Only show general addons as fallback when no item-specific addons are configured
+    if (!activeItem || specificAddons.length > 0) return [];
     const itemMenuCategory = (activeItem as any).category || '';
     return allAddons.filter(addon => {
       if (!addon.isAvailable || addon.isAddonDrink) return false;
@@ -86,7 +87,7 @@ export function AddToCartModal({
       }
       return true; // No category restriction → show for all items
     });
-  }, [activeItem, allAddons]);
+  }, [activeItem, allAddons, specificAddons]);
 
   const drinkAddons = useMemo(() => {
     if (!activeItem) return [];

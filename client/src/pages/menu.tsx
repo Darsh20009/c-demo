@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCartStore } from "@/lib/cart-store";
@@ -169,6 +169,12 @@ export default function MenuPage() {
   const { data: allAddons = [] } = useQuery<IProductAddon[]>({
     queryKey: ["/api/product-addons"],
   });
+
+  const { data: itemsWithAddonsList = [] } = useQuery<string[]>({
+    queryKey: ["/api/coffee-items/with-addons"],
+    staleTime: 5 * 60 * 1000,
+  });
+  const itemsWithAddonsSet = useMemo(() => new Set(itemsWithAddonsList), [itemsWithAddonsList]);
 
   const { data: promoOffers = [] } = useQuery<IPromoOffer[]>({
     queryKey: ["/api/promo-offers"],
@@ -434,7 +440,7 @@ export default function MenuPage() {
     const group = groupedItems[groupKey] || [item];
     const hasMultipleVariants = group.length > 1;
     const hasSizes = item.availableSizes && item.availableSizes.length > 0;
-    const hasAddons = allAddons.filter(a => a.isAvailable === 1).length > 0;
+    const hasAddons = itemsWithAddonsSet.has((item as any).id);
 
     if (hasMultipleVariants || hasSizes || hasAddons) {
       setSelectedItem(item);

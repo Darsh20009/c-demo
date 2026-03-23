@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslate } from "@/lib/useTranslate";
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -130,6 +130,12 @@ export default function TableMenuNew() {
   const { data: allAddons = [] } = useQuery<IProductAddon[]>({
     queryKey: ["/api/product-addons"],
   });
+
+  const { data: itemsWithAddonsList = [] } = useQuery<string[]>({
+    queryKey: ["/api/coffee-items/with-addons"],
+    staleTime: 5 * 60 * 1000,
+  });
+  const itemsWithAddonsSet = useMemo(() => new Set(itemsWithAddonsList), [itemsWithAddonsList]);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -473,7 +479,7 @@ export default function TableMenuNew() {
     const group = groupedItems[groupKey] || [item];
     const hasMultipleVariants = group.length > 1;
     const hasSizes = item.availableSizes && item.availableSizes.length > 0;
-    const hasAddons = allAddons.filter(a => a.isAvailable === 1).length > 0;
+    const hasAddons = itemsWithAddonsSet.has(item.id);
 
     if (hasMultipleVariants || hasSizes || hasAddons) {
       setSelectedItem(item);
