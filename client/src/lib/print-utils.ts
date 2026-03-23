@@ -1,4 +1,5 @@
 import QRCode from "qrcode";
+import { VAT_RATE } from "@/lib/constants";
 
 interface OrderItem {
   coffeeItem: {
@@ -282,7 +283,6 @@ export async function printKitchenOrder(data: KitchenOrderData): Promise<void> {
   openPrintWindow(html, `طلب المطبخ - ${data.orderNumber}`, { paperWidth: '80mm', autoPrint: true, autoClose: true, showPrintButton: false });
 }
 
-const TAX_RATE = 0.15;
 const VAT_NUMBER = "311234567890003";
 const COMPANY_NAME = "QIROX Cafe";
 const COMPANY_NAME_EN = "QIROX Cafe";
@@ -353,7 +353,7 @@ export async function printUnifiedReceipt(data: TaxInvoiceData): Promise<void> {
   const totalAmount = parseNumber(data.total);
   const { date: formattedDate, time: formattedTime } = formatDate(data.date);
   
-  const subtotalBeforeTax = totalAmount / (1 + TAX_RATE);
+  const subtotalBeforeTax = totalAmount / (1 + VAT_RATE);
   const vatAmount = totalAmount - subtotalBeforeTax;
   
   const invoiceTimestamp = data.date ? new Date(data.date).toISOString() : new Date().toISOString();
@@ -556,11 +556,11 @@ export async function printTaxInvoice(data: TaxInvoiceData, config: PrintConfig 
   const invDiscountAmount = parseNumber(data.invoiceDiscount);
   const itemDiscountsTotal = data.items.reduce((sum, item) => sum + parseNumber(item.itemDiscount), 0);
   
-  const subtotalBeforeTax = totalAmount / (1 + TAX_RATE);
+  const subtotalBeforeTax = totalAmount / (1 + VAT_RATE);
   const vatAmount = totalAmount - subtotalBeforeTax;
   
   const totalDiscounts = codeDiscountAmount + invDiscountAmount + itemDiscountsTotal;
-  const subtotalBeforeAllDiscounts = subtotalBeforeTax + (totalDiscounts / (1 + TAX_RATE));
+  const subtotalBeforeAllDiscounts = subtotalBeforeTax + (totalDiscounts / (1 + VAT_RATE));
   
   const displayInvoiceNumber = data.invoiceNumber || `INV-${data.orderNumber}`;
   const { date: formattedDate, time: formattedTime } = formatDate(data.date);
@@ -711,7 +711,7 @@ export async function printTaxInvoice(data: TaxInvoiceData, config: PrintConfig 
     </table>
 
     <div class="totals">
-      ${totalDiscounts > 0 ? `<div class="t-row discount"><span>الخصومات:</span><span>-${(totalDiscounts / (1 + TAX_RATE)).toFixed(2)} ر.س</span></div>` : ''}
+      ${totalDiscounts > 0 ? `<div class="t-row discount"><span>الخصومات:</span><span>-${(totalDiscounts / (1 + VAT_RATE)).toFixed(2)} ر.س</span></div>` : ''}
       <div class="t-row"><span>قبل الضريبة:</span><span>${subtotalBeforeTax.toFixed(2)} ر.س</span></div>
       <div class="t-row"><span>ضريبة القيمة المضافة 15%:</span><span>${vatAmount.toFixed(2)} ر.س</span></div>
       <div class="t-row grand"><span>الإجمالي:</span><span>${totalAmount.toFixed(2)} ر.س</span></div>

@@ -63,6 +63,13 @@ import { Types } from "mongoose";
 import { nanoid } from "nanoid";
 const isValidObjectId = (id: string) => Types.ObjectId.isValid(id);
 
+// ─── Centralized VAT Rate ────────────────────────────────────────────────────
+// Saudi Arabia standard VAT rate (15%). Change here to update all calculations.
+// The value in BusinessConfigModel.taxRate is authoritative; this constant is
+// used as a fallback for synchronous calculations.
+const VAT_RATE = 0.15;
+// ─────────────────────────────────────────────────────────────────────────────
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import nodemailer from "nodemailer";
@@ -848,11 +855,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove redundant 'total' field if present
       delete orderData.total;
 
-      // Ensure subtotal and tax are always stored (VAT-inclusive pricing at 15%)
-      const ORDER_TAX_RATE = 0.15;
+      // Ensure subtotal and tax are always stored (VAT-inclusive pricing)
       const rawTotal = Number(orderData.totalAmount) || 0;
       if (rawTotal > 0 && (orderData.subtotal == null || orderData.tax == null)) {
-        const computedSubtotal = rawTotal / (1 + ORDER_TAX_RATE);
+        const computedSubtotal = rawTotal / (1 + VAT_RATE);
         const computedTax = rawTotal - computedSubtotal;
         if (orderData.subtotal == null) orderData.subtotal = computedSubtotal;
         if (orderData.tax == null) orderData.tax = computedTax;
@@ -1351,7 +1357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   nameAr: item.coffeeItem?.nameAr || item.nameAr || 'منتج',
                   quantity: item.quantity || 1,
                   unitPrice: item.coffeeItem?.price || item.unitPrice || 0,
-                  taxRate: 0.15,
+                  taxRate: VAT_RATE,
                   discountAmount: item.discountAmount || 0
                 })),
                 paymentMethod: order.paymentMethod || 'cash',
@@ -7186,7 +7192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate and send tax invoice if customer has email
       if (customerInfo && customerInfo.customerEmail) {
         try {
-          const taxRate = 0.15;
+          const taxRate = VAT_RATE;
           const invoiceSubtotal = parseFloat(totalAmount.toString()) / (1 + taxRate);
           const invoiceTax = invoiceSubtotal * taxRate;
           const invoiceNumber = `INV-${Date.now()}-${nanoid(6)}`;
@@ -7476,7 +7482,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Calculate totals - use stored values when available
       const totalAmount = parseFloat(serializedOrder.totalAmount || '0');
-      const taxRate = 0.15;
+      const taxRate = VAT_RATE;
       const subtotalBeforeTax = totalAmount / (1 + taxRate);
       const taxAmount = totalAmount - subtotalBeforeTax;
       
@@ -8017,7 +8023,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   nameAr: item.coffeeItem?.nameAr || item.nameAr || 'منتج',
                   quantity: item.quantity || 1,
                   unitPrice: item.coffeeItem?.price || item.unitPrice || 0,
-                  taxRate: 0.15,
+                  taxRate: VAT_RATE,
                   discountAmount: item.discountAmount || 0
                 }));
 
@@ -13627,7 +13633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const expenses = await ExpenseModel.find(expenseQuery);
         
         const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-        const totalVat = totalRevenue * 0.15 / 1.15;
+        const totalVat = totalRevenue * VAT_RATE / (1 + VAT_RATE);
         const cashRevenue = orders.filter(o => o.paymentMethod === 'cash').reduce((sum, o) => sum + (o.totalAmount || 0), 0);
         const cardRevenue = orders.filter(o => ['pos', 'stc', 'alinma', 'ur', 'barq', 'rajhi'].includes(o.paymentMethod)).reduce((sum, o) => sum + (o.totalAmount || 0), 0);
         const otherRevenue = totalRevenue - cashRevenue - cardRevenue;
@@ -16371,7 +16377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const o of orders) {
         const amount = Number(o.totalAmount) || 0;
-        const vatRate = 0.15;
+        const vatRate = VAT_RATE;
         const vatAmount = Math.round((amount * vatRate / (1 + vatRate)) * 100) / 100;
         const netAmount = Math.round((amount - vatAmount) * 100) / 100;
         const method = ((o.paymentMethod as string) || 'cash').toLowerCase();

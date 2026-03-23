@@ -4,6 +4,7 @@ import JsBarcode from "jsbarcode";
 import qiroxLogo from "@assets/qirox-logo-customer.png";
 import SarIcon from "@/components/sar-icon";
 import { brand } from "@/lib/brand";
+import { VAT_RATE } from "@/lib/constants";
 
 interface OrderItem {
   coffeeItem: {
@@ -37,7 +38,6 @@ interface TaxInvoiceProps {
   branchAddress?: string;
 }
 
-const TAX_RATE = 0.15;
 const VAT_NUMBER = "311234567890003";
 const COMPANY_NAME = brand.shortNameAr;
 const COMPANY_NAME_EN = brand.nameEn;
@@ -124,10 +124,10 @@ export const TaxInvoicePrint = forwardRef<HTMLDivElement, TaxInvoiceProps>(
     
     const totalDiscounts = codeDiscountAmount + invDiscountAmount + itemDiscountsTotal;
     
-    const subtotalBeforeTax = totalAmount / (1 + TAX_RATE);
+    const subtotalBeforeTax = totalAmount / (1 + VAT_RATE);
     const vatAmount = totalAmount - subtotalBeforeTax;
     
-    const subtotalBeforeAllDiscounts = subtotalBeforeTax + (totalDiscounts / (1 + TAX_RATE));
+    const subtotalBeforeAllDiscounts = subtotalBeforeTax + (totalDiscounts / (1 + VAT_RATE));
     
     const displayInvoiceNumber = invoiceNumber || `INV-${orderNumber}`;
     const { date: formattedDate, time: formattedTime } = formatDate(date);
@@ -312,21 +312,21 @@ export const TaxInvoicePrint = forwardRef<HTMLDivElement, TaxInvoiceProps>(
               {itemDiscountsTotal > 0 && (
                 <div className="flex justify-between text-green-700">
                   <span>خصومات الأصناف:</span>
-                  <span>({(itemDiscountsTotal / (1 + TAX_RATE)).toFixed(2)}) <SarIcon /></span>
+                  <span>({(itemDiscountsTotal / (1 + VAT_RATE)).toFixed(2)}) <SarIcon /></span>
                 </div>
               )}
               
               {discount && codeDiscountAmount > 0 && (
                 <div className="flex justify-between text-green-700">
                   <span>خصم {discount.code} ({discount.percentage}%):</span>
-                  <span>({(codeDiscountAmount / (1 + TAX_RATE)).toFixed(2)}) <SarIcon /></span>
+                  <span>({(codeDiscountAmount / (1 + VAT_RATE)).toFixed(2)}) <SarIcon /></span>
                 </div>
               )}
 
               {invDiscountAmount > 0 && (
                 <div className="flex justify-between text-green-700">
                   <span>خصم الفاتورة:</span>
-                  <span>({(invDiscountAmount / (1 + TAX_RATE)).toFixed(2)}) <SarIcon /></span>
+                  <span>({(invDiscountAmount / (1 + VAT_RATE)).toFixed(2)}) <SarIcon /></span>
                 </div>
               )}
 
