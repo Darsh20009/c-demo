@@ -64,18 +64,7 @@ interface KitchenOrderData {
 
 function openPrintWindow(html: string, title: string, config: PrintConfig = {}): Window | null {
   const { paperWidth = '80mm', autoClose = false, autoPrint = true, showPrintButton = true } = config;
-  
-  const printButtonHtml = showPrintButton ? `
-    <div class="no-print" style="text-align: center; margin-top: 20px; padding: 20px;">
-      <button onclick="window.print()" style="padding: 12px 32px; font-size: 16px; background: #b45309; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
-        طباعة
-      </button>
-      <button onclick="window.close()" style="padding: 12px 32px; font-size: 16px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
-        إغلاق
-      </button>
-    </div>
-  ` : '';
-  
+
   const dynamicStyles = `
     <style>
       @media print {
@@ -86,47 +75,59 @@ function openPrintWindow(html: string, title: string, config: PrintConfig = {}):
       }
     </style>
   `;
-  
-  let modifiedHtml = html;
+
+  let modifiedHtml = html.replace('</head>', `${dynamicStyles}</head>`);
+
+  if (autoPrint) {
+    // Use a hidden iframe to avoid popup blocker (works after async operations)
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentWindow?.document;
+    if (iframeDoc) {
+      iframeDoc.open();
+      iframeDoc.write(modifiedHtml);
+      iframeDoc.close();
+      if (iframe.contentDocument) {
+        iframe.contentDocument.title = title;
+      }
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch(e) {
+          console.error('iframe print error:', e);
+        }
+        setTimeout(() => {
+          if (document.body.contains(iframe)) document.body.removeChild(iframe);
+        }, autoClose ? 1500 : 4000);
+      }, 400);
+    }
+    return null;
+  }
+
+  // autoPrint = false → open a visible popup window with a print button
+  const printButtonHtml = showPrintButton ? `
+    <div class="no-print" style="text-align: center; margin-top: 20px; padding: 20px;">
+      <button onclick="window.print()" style="padding: 12px 32px; font-size: 16px; background: #b45309; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+        طباعة
+      </button>
+      <button onclick="window.close()" style="padding: 12px 32px; font-size: 16px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+        إغلاق
+      </button>
+    </div>
+  ` : '';
+
   if (showPrintButton && !modifiedHtml.includes('<div class="no-print"')) {
     modifiedHtml = modifiedHtml.replace('</body>', `${printButtonHtml}</body>`);
   }
-  modifiedHtml = modifiedHtml.replace('</head>', `${dynamicStyles}</head>`);
-  
+
   const printWindow = window.open('', '_blank', 'width=450,height=700,scrollbars=yes,resizable=yes');
   if (printWindow) {
     printWindow.document.write(modifiedHtml);
     printWindow.document.close();
     printWindow.document.title = title;
-    
-    if (autoPrint) {
-      printWindow.onload = function() {
-        setTimeout(() => {
-          printWindow.print();
-          if (autoClose) {
-            setTimeout(() => printWindow.close(), 1000);
-          }
-        }, 300);
-      };
-    }
-  } else {
-    // Popup was blocked — open a new tab instead so main page doesn't freeze
-    const fallbackWindow = window.open('', '_blank');
-    if (fallbackWindow) {
-      fallbackWindow.document.write(modifiedHtml);
-      fallbackWindow.document.close();
-      fallbackWindow.document.title = title;
-      if (autoPrint) {
-        fallbackWindow.onload = function() {
-          setTimeout(() => {
-            fallbackWindow.print();
-            if (autoClose) {
-              setTimeout(() => fallbackWindow.close(), 1000);
-            }
-          }, 300);
-        };
-      }
-    }
   }
   return printWindow;
 }
