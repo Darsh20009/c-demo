@@ -8459,7 +8459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: 'silver',
           nameAr: 'فضي',
           nameEn: 'Silver',
-          pointsRequired: 100,
+          pointsRequired: 500,
           benefits: ['خصم 15% على كل طلب', 'قهوة مجانية شهرياً', 'أولوية في الطلبات'],
           color: '#C0C0C0',
           icon: '🥈'
@@ -8468,7 +8468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: 'gold',
           nameAr: 'ذهبي',
           nameEn: 'Gold',
-          pointsRequired: 500,
+          pointsRequired: 2000,
           benefits: ['خصم 20% على كل طلب', 'قهوتين مجانيتين شهرياً', 'دعوات خاصة للفعاليات'],
           color: '#FFD700',
           icon: '🥇'
@@ -8477,7 +8477,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: 'platinum',
           nameAr: 'بلاتيني',
           nameEn: 'Platinum',
-          pointsRequired: 1000,
+          pointsRequired: 5000,
           benefits: ['خصم 25% على كل طلب', 'قهوة يومية مجانية', 'خدمة VIP', 'بطاقة فيزيائية مطبوعة'],
           color: '#E5E4E2',
           icon: 'platinum'
