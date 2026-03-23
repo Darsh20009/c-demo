@@ -312,7 +312,7 @@ export default function EmployeeCashier() {
       if (!navigator.onLine) {
         const pending = savePendingOrder(orderData);
         setPendingOrdersCount(getPendingOrdersCount());
-        return { orderNumber: pending.id, offline: true, status: 'pending_sync' };
+        return { orderNumber: pending.id, offline: true, status: 'pending_sync', totalAmount: orderData.totalAmount };
       }
 
       const response = await fetch("/api/orders", {
@@ -326,7 +326,7 @@ export default function EmployeeCashier() {
       if (response.status === 202) {
         const pending = savePendingOrder(orderData);
         setPendingOrdersCount(getPendingOrdersCount());
-        return { orderNumber: pending.id, offline: true, status: 'pending_sync' };
+        return { orderNumber: pending.id, offline: true, status: 'pending_sync', totalAmount: orderData.totalAmount };
       }
       
       if (!response.ok) {
@@ -823,6 +823,18 @@ export default function EmployeeCashier() {
      return;
    }
 
+   // Capture all values BEFORE mutateAsync (form is reset in onSuccess)
+   const capturedItems = [...orderItems];
+   const capturedCustomerName = customerName;
+   const capturedCustomerPhone = customerPhone;
+   const capturedPaymentMethod = paymentMethod;
+   const capturedTableNumber = tableNumber;
+   const capturedOrderType = orderType;
+   const capturedDiscount = appliedDiscount;
+   const capturedSubtotal = calculateSubtotal().toFixed(2);
+   const capturedDiscountAmount = appliedDiscount ? calculateDiscount().toFixed(2) : undefined;
+   const capturedEmployeeName = employee?.fullName || "";
+
    const totalAmount = calculateTotal();
    const orderData = {
      customerId: customerId || undefined,
@@ -863,30 +875,58 @@ export default function EmployeeCashier() {
          description: tc("جاري تحضير الفواتير...", "Preparing invoices..."),
        });
        
-       // Update lastOrder state for manual printing if needed
+       // Update lastOrder state using pre-captured values (form resets in onSuccess)
+       const pmLabel = capturedPaymentMethod === "cash" ? tc("نقدي","Cash") :
+         capturedPaymentMethod === "qahwa-card" || capturedPaymentMethod === "loyalty-card" ? tc("بطاقة كيروكس","QIROX Card") :
+         tc("إلكتروني","Electronic");
        setLastOrder({
          orderNumber: order.orderNumber,
-         customerName,
-         customerPhone,
-         items: orderItems,
-         subtotal: calculateSubtotal().toFixed(2),
-         discount: appliedDiscount ? {
-           code: appliedDiscount.code,
-           percentage: appliedDiscount.percentage,
-           amount: calculateDiscount().toFixed(2)
+         customerName: capturedCustomerName,
+         customerPhone: capturedCustomerPhone,
+         items: capturedItems,
+         subtotal: capturedSubtotal,
+         discount: capturedDiscount ? {
+           code: capturedDiscount.code,
+           percentage: capturedDiscount.percentage,
+           amount: capturedDiscountAmount || "0"
          } : undefined,
-         total: order.totalAmount,
-         paymentMethod: paymentMethod === "cash" ? tc("نقدي","Cash") : tc("إلكتروني","Electronic"),
-         employeeName: employee?.fullName || "",
-         tableNumber: tableNumber || undefined,
-         deliveryType: orderType,
+         total: order.totalAmount ?? parseFloat(totalAmount),
+         paymentMethod: pmLabel,
+         employeeName: capturedEmployeeName,
+         tableNumber: capturedTableNumber || undefined,
+         deliveryType: capturedOrderType,
          date: new Date().toISOString()
        });
 
-       // Small delay to ensure state updates if needed
-       setTimeout(() => {
-         handlePrintAllReceipts();
-       }, 500);
+       // Print directly with captured data (avoids stale closure issue)
+       const receiptTotal = parseFloat(String(order.totalAmount ?? totalAmount)).toFixed(2);
+       const receiptData = {
+         orderNumber: order.orderNumber,
+         customerName: capturedCustomerName,
+         customerPhone: capturedCustomerPhone,
+         items: capturedItems as any,
+         subtotal: capturedSubtotal,
+         discount: capturedDiscount ? {
+           code: capturedDiscount.code,
+           percentage: capturedDiscount.percentage,
+           amount: capturedDiscountAmount || "0"
+         } : undefined,
+         total: receiptTotal,
+         paymentMethod: pmLabel,
+         employeeName: capturedEmployeeName,
+         tableNumber: capturedTableNumber || undefined,
+         deliveryType: capturedOrderType,
+         date: new Date().toISOString(),
+         crNumber: businessConfig?.commercialRegistration,
+         vatNumber: businessConfig?.vatNumber,
+       };
+       setTimeout(async () => {
+         try {
+           await printAllReceipts(receiptData);
+         } catch (e) {
+           console.error("Auto-print error:", e);
+         }
+       }, 400);
      }
    } catch (error) {
      console.error("Order submission error:", error);
