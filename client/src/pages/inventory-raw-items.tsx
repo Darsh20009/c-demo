@@ -52,7 +52,7 @@ const categoryLabels: Record<string, { labelAr: string; labelEn: string; icon: a
   ingredient: { 
     labelAr: "مكون", labelEn: "Ingredient", 
     icon: Coffee,
-    color: "bg-primary text-accent border-primary dark:bg-primary/30 dark:text-accent dark:border-primary"
+    color: "bg-green-100 text-green-800 border-green-200"
   },
   packaging: { 
     labelAr: "تغليف", labelEn: "Packaging", 
@@ -432,7 +432,7 @@ export default function InventoryRawItemsPage() {
       </Card>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-2xl bg-[#F5F5DC]" dir="rtl">
+        <DialogContent className="max-w-2xl bg-white" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5 text-accent" />
@@ -576,7 +576,7 @@ export default function InventoryRawItemsPage() {
       </Dialog>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl bg-[#F5F5DC]" dir="rtl">
+        <DialogContent className="max-w-2xl bg-white" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5 text-accent" />

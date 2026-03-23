@@ -390,27 +390,27 @@ export default function InventoryStockPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
+    <div className="min-h-screen bg-white p-4 md:p-6" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} data-testid="btn-back">
+            <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} className="text-gray-600 hover:text-gray-900 hover:bg-gray-100" data-testid="btn-back">
               <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-amber-500/20">
+            <div className="p-3 rounded-2xl bg-green-600 shadow-md shadow-green-200">
               <Warehouse className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-primary bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                 {tc("إدارة المخزون","Inventory Management")}
               </h1>
-              <p className="text-muted-foreground text-sm">{tc("تحكم كامل في المواد الخام والمخزون","Full control of raw materials and stock")}</p>
+              <p className="text-gray-500 text-sm">{tc("تحكم كامل في المواد الخام والمخزون","Full control of raw materials and stock")}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Button
               onClick={() => setIsNewBatchOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-amber-500/20"
+              className="bg-green-600 hover:bg-green-700 text-white shadow-sm shadow-green-200"
               data-testid="button-new-batch"
             >
               <PackagePlus className="h-4 w-4 ml-2" />
@@ -428,69 +428,42 @@ export default function InventoryStockPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/50 dark:to-emerald-900/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{tc("مخزون سليم","Healthy Stock")}</p>
-                  <p className="text-3xl font-bold text-green-700 dark:text-green-400">{healthyItems}</p>
-                  <p className="text-xs text-green-600/70">{tc("من أصل","out of")} {totalItems} {tc("مادة","items")}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-green-500/20">
-                  <CheckCircle2 className="h-8 w-8 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-950/50 dark:to-amber-900/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{tc("مخزون منخفض","Low Stock")}</p>
-                  <p className="text-3xl font-bold text-yellow-700 dark:text-yellow-400">{lowStockItems}</p>
-                  <p className="text-xs text-yellow-600/70">{tc("يحتاج إعادة تعبئة","Needs refill")}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-yellow-500/20">
-                  <TrendingDown className="h-8 w-8 text-yellow-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-950/50 dark:to-rose-900/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{tc("نفاد المخزون","Out of Stock")}</p>
-                  <p className="text-3xl font-bold text-red-700 dark:text-red-400">{outOfStockItems}</p>
-                  <p className="text-xs text-red-600/70">{tc("يجب الطلب فوراً","Must order immediately")}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-red-500/20">
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950/50 dark:to-indigo-900/30">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{tc("قيمة المخزون","Stock Value")}</p>
-                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{totalStockValue.toFixed(0)}</p>
-                  <p className="text-xs text-blue-600/70">{tc("ريال سعودي","SAR")}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-blue-500/20">
-                  <DollarSign className="h-8 w-8 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl border border-green-100 bg-green-50 p-5 flex items-start gap-4">
+            <div className="bg-white rounded-xl p-2.5 shadow-sm"><CheckCircle2 className="h-6 w-6 text-green-600" /></div>
+            <div>
+              <p className="text-xs font-medium text-gray-500">{tc("مخزون سليم","Healthy Stock")}</p>
+              <p className="text-2xl font-black text-green-700">{healthyItems}</p>
+              <p className="text-xs text-gray-400">{tc("من أصل","of")} {totalItems}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-amber-100 bg-amber-50 p-5 flex items-start gap-4">
+            <div className="bg-white rounded-xl p-2.5 shadow-sm"><TrendingDown className="h-6 w-6 text-amber-600" /></div>
+            <div>
+              <p className="text-xs font-medium text-gray-500">{tc("مخزون منخفض","Low Stock")}</p>
+              <p className="text-2xl font-black text-amber-700">{lowStockItems}</p>
+              <p className="text-xs text-gray-400">{tc("يحتاج إعادة تعبئة","Needs refill")}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-red-100 bg-red-50 p-5 flex items-start gap-4">
+            <div className="bg-white rounded-xl p-2.5 shadow-sm"><AlertTriangle className="h-6 w-6 text-red-600" /></div>
+            <div>
+              <p className="text-xs font-medium text-gray-500">{tc("نفاد المخزون","Out of Stock")}</p>
+              <p className="text-2xl font-black text-red-700">{outOfStockItems}</p>
+              <p className="text-xs text-gray-400">{tc("يجب الطلب فوراً","Order immediately")}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 flex items-start gap-4">
+            <div className="bg-white rounded-xl p-2.5 shadow-sm"><DollarSign className="h-6 w-6 text-blue-600" /></div>
+            <div>
+              <p className="text-xs font-medium text-gray-500">{tc("قيمة المخزون","Stock Value")}</p>
+              <p className="text-2xl font-black text-blue-700">{totalStockValue.toFixed(0)}</p>
+              <p className="text-xs text-gray-400">{tc("ريال سعودي","SAR")}</p>
+            </div>
+          </div>
         </div>
 
         {(lowStockItems > 0 || outOfStockItems > 0) && (
-          <Card className="border-2 border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-background dark:from-yellow-950/30 dark:to-amber-950/30 shadow-lg">
+          <Card className="border-2 border-amber-200 bg-amber-50 shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-yellow-700 dark:text-yellow-400">
                 <Bell className="h-5 w-5 animate-pulse" />

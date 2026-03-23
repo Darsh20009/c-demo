@@ -68,7 +68,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useLocation } from "wouter";
-import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
+import { format, subDays, startOfMonth, endOfMonth, isValid } from "date-fns";
 import { ar } from "date-fns/locale";
 import SarIcon from "@/components/sar-icon";
 import {
@@ -86,6 +86,13 @@ import {
   LineChart,
   Line,
 } from "recharts";
+
+const safeFormat = (value: any, fmt: string, opts?: object) => {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (!isValid(d)) return "—";
+  return format(d, fmt, opts);
+};
 
 interface Account {
   id: string;
@@ -903,7 +910,7 @@ export default function ErpAccountingPage() {
                       <TableRow key={invoice.id}>
                         <TableCell className="font-mono font-medium">{invoice.invoiceNumber}</TableCell>
                         <TableCell>
-                          {format(new Date(invoice.invoiceDate), "dd/MM/yyyy", { locale: ar })}
+                          {safeFormat(invoice.invoiceDate, "dd/MM/yyyy", { locale: ar })}
                         </TableCell>
                         <TableCell>{invoice.customerName}</TableCell>
                         <TableCell>
@@ -1174,7 +1181,7 @@ export default function ErpAccountingPage() {
                       <TableRow key={entry.id}>
                         <TableCell className="font-mono font-medium">{entry.entryNumber}</TableCell>
                         <TableCell>
-                          {format(new Date(entry.entryDate), "dd/MM/yyyy", { locale: ar })}
+                          {safeFormat(entry.entryDate, "dd/MM/yyyy", { locale: ar })}
                         </TableCell>
                         <TableCell>{entry.description}</TableCell>
                         <TableCell className="text-left font-mono">
@@ -1256,7 +1263,7 @@ export default function ErpAccountingPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {format(new Date(expense.createdAt), "dd/MM/yyyy", { locale: ar })}
+                          {safeFormat(expense.createdAt, "dd/MM/yyyy", { locale: ar })}
                         </TableCell>
                         <TableCell className="text-center">
                           {expense.status === "pending_approval" && (
@@ -1596,7 +1603,7 @@ export default function ErpAccountingPage() {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    التاريخ: {format(new Date(selectedInvoice.invoiceDate), "dd/MM/yyyy HH:mm", { locale: ar })}
+                    التاريخ: {safeFormat(selectedInvoice.invoiceDate, "dd/MM/yyyy HH:mm", { locale: ar })}
                   </p>
                 </div>
 

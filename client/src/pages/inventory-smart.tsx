@@ -6,10 +6,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   Select,
@@ -39,9 +38,7 @@ import {
   HelpCircle,
   AlertTriangle,
   TrendingDown,
-  DollarSign,
   PackagePlus,
-  Eye,
   Layers,
   BarChart3,
   Users,
@@ -49,275 +46,192 @@ import {
   ArrowRightLeft,
   Bell,
   BookOpen,
-  ChevronLeft,
   ArrowLeft,
   CheckCircle2,
-  TrendingUp,
   RefreshCw,
   Boxes,
-  ChevronDown,
+  Warehouse,
+  ChevronRight,
+  Activity,
 } from "lucide-react";
 
-const categoryConfig: Record<string, { label: string; icon: any; color: string; bg: string; border: string }> = {
-  ingredient: {
-    label: tc("مكون أساسي", "Ingredient"),
-    icon: Coffee,
-    color: "text-emerald-700",
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-  },
-  packaging: {
-    label: tc("تغليف", "Packaging"),
-    icon: Box,
-    color: "text-blue-700",
-    bg: "bg-blue-50",
-    border: "border-blue-200",
-  },
-  equipment: {
-    label: tc("معدات", "Equipment"),
-    icon: Wrench,
-    color: "text-orange-700",
-    bg: "bg-orange-50",
-    border: "border-orange-200",
-  },
-  consumable: {
-    label: tc("مستهلكات", "Consumables"),
-    icon: Droplet,
-    color: "text-purple-700",
-    bg: "bg-purple-50",
-    border: "border-purple-200",
-  },
-  other: {
-    label: tc("أخرى", "Other"),
-    icon: HelpCircle,
-    color: "text-gray-600",
-    bg: "bg-gray-50",
-    border: "border-gray-200",
-  },
+// ─── Category config ───────────────────────────────────────────────────────────
+const CATEGORY_CFG: Record<string, { labelAr: string; Icon: any; accent: string }> = {
+  ingredient: { labelAr: "مكون أساسي", Icon: Coffee,    accent: "text-green-600" },
+  packaging:  { labelAr: "تغليف",      Icon: Box,       accent: "text-blue-600"  },
+  equipment:  { labelAr: "معدات",      Icon: Wrench,    accent: "text-orange-500"},
+  consumable: { labelAr: "مستهلكات",  Icon: Droplet,   accent: "text-purple-600"},
+  other:      { labelAr: "أخرى",       Icon: HelpCircle,accent: "text-gray-500"  },
 };
 
-const unitLabels: Record<string, string> = {
-  kg: "كيلو",
-  g: "جرام",
-  liter: "لتر",
-  ml: "مل",
-  piece: "قطعة",
-  box: "صندوق",
-  bag: "كيس",
+const UNIT_LABELS: Record<string, string> = {
+  kg: "كغ", g: "جرام", liter: "لتر", ml: "مل", piece: "قطعة", box: "صندوق", bag: "كيس",
 };
 
-interface RawItem {
-  id: string;
-  code: string;
-  nameAr: string;
-  nameEn?: string;
-  description?: string;
-  category: string;
-  unit: string;
-  unitCost: number;
-  minStockLevel: number;
-  maxStockLevel?: number;
-  isActive: number;
-}
-
-interface BranchStock {
-  id: string;
-  branchId: string;
-  rawItemId: string;
-  currentQuantity: number;
-  reservedQuantity: number;
-  lastUpdated: string;
-  rawItem?: RawItem;
-}
-
-interface Branch {
-  id?: string;
-  nameAr: string;
-}
-
-const navLinks = [
-  { href: "/manager/inventory/raw-items", icon: Coffee, label: "المواد الخام", desc: "إدارة مواد التصنيع" },
-  { href: "/manager/inventory/stock", icon: Boxes, label: "المخزون", desc: "مستويات المخزون" },
-  { href: "/manager/inventory/recipes", icon: BookOpen, label: "الوصفات", desc: "وصفات المنتجات" },
-  { href: "/manager/inventory/suppliers", icon: Users, label: "الموردين", desc: "إدارة الموردين" },
-  { href: "/manager/inventory/purchases", icon: ShoppingCart, label: "المشتريات", desc: "أوامر الشراء" },
-  { href: "/manager/inventory/transfers", icon: ArrowRightLeft, label: "التحويلات", desc: "تحويل بين الفروع" },
-  { href: "/manager/inventory/alerts", icon: Bell, label: "التنبيهات", desc: "تنبيهات المخزون", danger: true },
+const NAV_LINKS = [
+  { href: "/manager/inventory/raw-items",  Icon: Coffee,       label: "المواد الخام",  desc: "إدارة المواد" },
+  { href: "/manager/inventory/stock",      Icon: Boxes,        label: "مستوى المخزون",desc: "الكميات الحالية" },
+  { href: "/manager/inventory/recipes",    Icon: BookOpen,     label: "الوصفات",       desc: "وصفات المنتجات" },
+  { href: "/manager/inventory/suppliers",  Icon: Users,        label: "الموردين",      desc: "إدارة الموردين" },
+  { href: "/manager/inventory/purchases",  Icon: ShoppingCart, label: "المشتريات",    desc: "أوامر الشراء" },
+  { href: "/manager/inventory/transfers",  Icon: ArrowRightLeft,label:"التحويلات",    desc: "بين الفروع" },
+  { href: "/manager/inventory/alerts",     Icon: Bell,         label: "التنبيهات",    desc: "تنبيهات المخزون", danger: true },
 ];
 
+// ─── Interfaces ────────────────────────────────────────────────────────────────
+interface RawItem {
+  id: string; code: string; nameAr: string; nameEn?: string;
+  category: string; unit: string; unitCost: number;
+  minStockLevel: number; maxStockLevel?: number; isActive: number;
+}
+interface BranchStock {
+  id: string; branchId: string; rawItemId: string;
+  currentQuantity: number; reservedQuantity: number; lastUpdated: string;
+  rawItem?: RawItem;
+}
+interface Branch { id?: string; nameAr: string; }
+
+// ─── Status helper ─────────────────────────────────────────────────────────────
+function getStatus(item: RawItem, stock?: BranchStock) {
+  const qty  = stock?.currentQuantity ?? 0;
+  const min  = item.minStockLevel ?? 0;
+  const max  = item.maxStockLevel ?? min * 3 || 100;
+  const pct  = max > 0 ? Math.min(100, (qty / max) * 100) : 0;
+  if (qty <= 0)    return { key: "out",  label: "نفد المخزون", badge: "bg-red-100 text-red-700 border border-red-200",    bar: "bg-red-500",    pct };
+  if (qty <= min)  return { key: "low",  label: "مخزون منخفض", badge: "bg-amber-100 text-amber-700 border border-amber-200", bar: "bg-amber-500",  pct };
+  if (qty >= max * 0.8) return { key:"high", label:"وفير",      badge:"bg-green-100 text-green-700 border border-green-200", bar:"bg-green-500",  pct };
+  return               { key: "ok",   label: "طبيعي",       badge: "bg-blue-100 text-blue-700 border border-blue-200",   bar: "bg-blue-500",   pct };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function InventorySmartPage() {
-  const tc = useTranslate();
-  const { toast } = useToast();
-  const [, setLocation] = useLocation();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [selectedBranch, setSelectedBranch] = useState<string>("all");
-  const [isAddStockOpen, setIsAddStockOpen] = useState(false);
-  const [isQuickAdjustOpen, setIsQuickAdjustOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<RawItem | null>(null);
-  const [adjustQuantity, setAdjustQuantity] = useState<number>(1);
-  const [adjustType, setAdjustType] = useState<"add" | "subtract">("add");
-  const [newStockData, setNewStockData] = useState({
-    rawItemId: "",
-    quantity: 0,
-    unitCost: 0,
-    notes: "",
-  });
+  const { toast }       = useToast();
+  const [, nav]         = useLocation();
+  const [search, setSearch]                 = useState("");
+  const [catFilter, setCatFilter]           = useState("all");
+  const [branch, setBranch]                 = useState("all");
+  const [adjustOpen, setAdjustOpen]         = useState(false);
+  const [addBatchOpen, setAddBatchOpen]     = useState(false);
+  const [target, setTarget]                 = useState<RawItem | null>(null);
+  const [adjType, setAdjType]               = useState<"add"|"subtract">("add");
+  const [adjQty, setAdjQty]                 = useState(1);
+  const [batchData, setBatchData]           = useState({ rawItemId:"", quantity:0, unitCost:0, notes:"" });
 
-  const { data: rawItems = [], isLoading: loadingItems } = useQuery<RawItem[]>({
-    queryKey: ["/api/inventory/raw-items"],
-  });
-
-  const { data: branchStocks = [], isLoading: loadingStocks, refetch: refetchStocks } = useQuery<BranchStock[]>({
-    queryKey: ["/api/inventory/branch-stocks", selectedBranch],
+  const { data: rawItems=[], isLoading: loadRI }   = useQuery<RawItem[]>({ queryKey:["/api/inventory/raw-items"] });
+  const { data: stocks=[], isLoading: loadSt, refetch } = useQuery<BranchStock[]>({
+    queryKey:["/api/inventory/branch-stocks", branch],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (selectedBranch && selectedBranch !== "all") {
-        params.append("branchId", selectedBranch);
-      }
-      const response = await fetch(`/api/inventory/branch-stocks?${params.toString()}`);
-      if (!response.ok) throw new Error("Failed to fetch stocks");
-      return response.json();
+      const p = new URLSearchParams();
+      if (branch && branch !== "all") p.append("branchId", branch);
+      const r = await fetch(`/api/inventory/branch-stocks?${p}`);
+      if (!r.ok) throw new Error();
+      return r.json();
     },
   });
+  const { data: branches=[] } = useQuery<Branch[]>({ queryKey:["/api/branches"] });
 
-  const { data: branches = [] } = useQuery<Branch[]>({
-    queryKey: ["/api/branches"],
-  });
-
-  const adjustStockMutation = useMutation({
-    mutationFn: async (data: { rawItemId: string; branchId: string; quantity: number; type: "add" | "subtract"; notes?: string }) => {
-      return apiRequest("POST", "/api/inventory/stock-adjustment", data);
-    },
+  const adjMutation = useMutation({
+    mutationFn: (d: any) => apiRequest("POST","/api/inventory/stock-adjustment", d),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/branch-stocks"] });
-      setIsQuickAdjustOpen(false);
-      setAdjustQuantity(1);
-      toast({ title: "✅ تم تعديل المخزون بنجاح", className: "bg-green-600 text-white" });
+      queryClient.invalidateQueries({ queryKey:["/api/inventory/branch-stocks"] });
+      setAdjustOpen(false); setAdjQty(1);
+      toast({ title:"✅ تم تعديل المخزون", className:"bg-green-600 text-white" });
     },
-    onError: (error: any) => {
-      toast({ title: error.message || "فشل في تعديل المخزون", variant: "destructive" });
-    },
+    onError: (e:any) => toast({ title: e.message || "خطأ", variant:"destructive" }),
   });
 
-  const addStockBatchMutation = useMutation({
-    mutationFn: async (data: typeof newStockData & { branchId: string }) => {
-      return apiRequest("POST", "/api/inventory/stock-batch", data);
-    },
+  const batchMutation = useMutation({
+    mutationFn: (d: any) => apiRequest("POST","/api/inventory/stock-batch", d),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/branch-stocks"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/raw-items"] });
-      setIsAddStockOpen(false);
-      setNewStockData({ rawItemId: "", quantity: 0, unitCost: 0, notes: "" });
-      toast({ title: "✅ تمت إضافة الدفعة بنجاح", className: "bg-green-600 text-white" });
+      queryClient.invalidateQueries({ queryKey:["/api/inventory/branch-stocks"] });
+      queryClient.invalidateQueries({ queryKey:["/api/inventory/raw-items"] });
+      setAddBatchOpen(false);
+      setBatchData({ rawItemId:"", quantity:0, unitCost:0, notes:"" });
+      toast({ title:"✅ تمت إضافة الدفعة", className:"bg-green-600 text-white" });
     },
-    onError: (error: any) => {
-      toast({ title: error.message || "فشل في إضافة الدفعة", variant: "destructive" });
-    },
+    onError: (e:any) => toast({ title: e.message || "خطأ", variant:"destructive" }),
   });
 
-  const getStockForItem = (itemId: string) => branchStocks.find(s => s.rawItemId === itemId);
+  const getStock = (itemId: string) => stocks.find(s => s.rawItemId === itemId);
 
-  const getStockStatus = (item: RawItem, stock?: BranchStock) => {
-    const qty = stock?.currentQuantity || 0;
-    const min = item.minStockLevel || 0;
-    const max = item.maxStockLevel || min * 3 || 100;
-    if (qty <= 0) return { key: "out", label: "نفد المخزون", color: "bg-red-100 text-red-700 border border-red-200", barColor: "bg-red-400", alert: true };
-    if (qty <= min) return { key: "low", label: "منخفض", color: "bg-amber-100 text-amber-700 border border-amber-200", barColor: "bg-amber-400", alert: true };
-    if (qty >= max * 0.8) return { key: "high", label: "وفير", color: "bg-emerald-100 text-emerald-700 border border-emerald-200", barColor: "bg-emerald-500", alert: false };
-    return { key: "normal", label: "طبيعي", color: "bg-blue-100 text-blue-700 border border-blue-200", barColor: "bg-blue-400", alert: false };
-  };
+  // Summary stats
+  const totalItems    = rawItems.length;
+  const lowStock      = rawItems.filter(i => { const s=getStock(i.id); const q=s?.currentQuantity??0; return q>0 && q<=i.minStockLevel; }).length;
+  const outOfStock    = rawItems.filter(i => (getStock(i.id)?.currentQuantity??0) <= 0).length;
+  const stockValue    = rawItems.reduce((s,i) => s + ((getStock(i.id)?.currentQuantity??0) * i.unitCost), 0);
 
-  const getStockPercentage = (item: RawItem, stock?: BranchStock) => {
-    const qty = stock?.currentQuantity || 0;
-    const max = item.maxStockLevel || item.minStockLevel * 3 || 100;
-    return Math.min(100, (qty / max) * 100);
-  };
-
-  const filteredItems = rawItems.filter(item => {
-    const q = searchQuery.toLowerCase();
-    const matchSearch = item.nameAr.toLowerCase().includes(q) || item.code.toLowerCase().includes(q) || (item.nameEn?.toLowerCase().includes(q) ?? false);
-    const matchCat = categoryFilter === "all" || item.category === categoryFilter;
-    return matchSearch && matchCat;
+  const filtered = rawItems.filter(i => {
+    const q = search.toLowerCase();
+    return (i.nameAr.toLowerCase().includes(q) || i.code.toLowerCase().includes(q) || (i.nameEn?.toLowerCase().includes(q)??false))
+      && (catFilter === "all" || i.category === catFilter);
   });
 
-  const totalItems = rawItems.length;
-  const lowStockItems = rawItems.filter(item => {
-    const s = getStockForItem(item.id);
-    const qty = s?.currentQuantity || 0;
-    return qty > 0 && qty <= item.minStockLevel;
-  }).length;
-  const outOfStockItems = rawItems.filter(item => (getStockForItem(item.id)?.currentQuantity || 0) <= 0).length;
-  const totalCOGS = rawItems.reduce((sum, item) => sum + ((getStockForItem(item.id)?.currentQuantity || 0) * item.unitCost), 0);
-
-  const handleQuickAdjust = (item: RawItem, type: "add" | "subtract") => {
-    setSelectedItem(item);
-    setAdjustType(type);
-    setAdjustQuantity(1);
-    setIsQuickAdjustOpen(true);
-  };
-
-  const handleAdjustSubmit = () => {
-    if (!selectedItem || !selectedBranch || selectedBranch === "all") {
-      toast({ title: "⚠️ يرجى اختيار فرع محدد أولاً", variant: "destructive" });
-      return;
-    }
-    adjustStockMutation.mutate({ rawItemId: selectedItem.id, branchId: selectedBranch, quantity: adjustQuantity, type: adjustType });
-  };
-
-  if (loadingItems || loadingStocks) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-600 font-medium">جاري تحميل المخزون...</p>
+  if (loadRI || loadSt) return (
+    <div className="min-h-screen bg-white flex items-center justify-center" dir="rtl">
+      <div className="text-center space-y-5">
+        <div className="relative mx-auto w-20 h-20">
+          <div className="w-20 h-20 rounded-full border-4 border-green-100 border-t-green-600 animate-spin" />
+          <Warehouse className="absolute inset-0 m-auto w-8 h-8 text-green-600" />
         </div>
+        <p className="text-gray-700 font-semibold text-lg">جاري تحميل المخزون…</p>
+        <p className="text-gray-400 text-sm">يُرجى الانتظار لحظة</p>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <PlanGate feature="inventoryManagement">
-      <div className="min-h-screen bg-gray-50" dir="rtl">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="min-h-screen bg-white" dir="rtl">
+
+        {/* ─── Sticky header ───────────────────────────────────── */}
+        <div className="bg-white border-b border-gray-100 sticky top-0 z-20 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => setLocation("/manager/dashboard")} className="text-gray-600 hover:text-gray-900" data-testid="btn-back">
+                <button
+                  onClick={() => nav("/manager/dashboard")}
+                  className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800"
+                  data-testid="btn-back"
+                >
                   <ArrowLeft className="w-5 h-5" />
-                </Button>
-                <div className="p-2.5 rounded-xl bg-green-600 shadow-md shadow-green-200">
-                  <Layers className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">المخزون الذكي</h1>
-                  <p className="text-sm text-gray-500">إدارة مبسطة وذكية للمخزون</p>
+                </button>
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2.5 rounded-xl bg-green-600 shadow-md shadow-green-200">
+                    <Layers className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-xl font-bold text-gray-900">نظام المخزون</h1>
+                    <p className="text-xs text-gray-400">إدارة ذكية للمواد والمخزون</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => refetchStocks()}
-                  className="text-gray-600 border-gray-300"
-                >
-                  <RefreshCw className="h-4 w-4 ml-1" />
-                  تحديث
-                </Button>
-                <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-                  <SelectTrigger className="w-[160px] border-gray-300 bg-white" data-testid="select-branch">
-                    <SelectValue placeholder="اختر الفرع" />
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Branch selector */}
+                <Select value={branch} onValueChange={setBranch}>
+                  <SelectTrigger className="w-40 border-gray-200 bg-white text-gray-700 text-sm" data-testid="select-branch">
+                    <SelectValue placeholder="اختر فرعاً" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">🏪 جميع الفروع</SelectItem>
-                    {branches.map(branch => (
-                      <SelectItem key={branch.id} value={branch.id || ""}>{branch.nameAr}</SelectItem>
-                    ))}
+                    {branches.map(b => <SelectItem key={b.id} value={b.id||""}>{b.nameAr}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <Button onClick={() => setIsAddStockOpen(true)} className="bg-green-600 hover:bg-green-700 text-white shadow-sm" data-testid="button-add-stock-batch">
-                  <PackagePlus className="h-4 w-4 ml-2" />
+
+                <button
+                  onClick={() => refetch()}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  تحديث
+                </button>
+
+                <Button
+                  onClick={() => setAddBatchOpen(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white shadow-sm shadow-green-200"
+                  data-testid="button-add-stock-batch"
+                >
+                  <PackagePlus className="h-4 w-4 ml-1.5" />
                   إضافة دفعة
                 </Button>
               </div>
@@ -326,456 +240,397 @@ export default function InventorySmartPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-          {/* Branch Warning */}
-          {selectedBranch === "all" && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+
+          {/* ─── Branch warning ──────────────────────────────────── */}
+          {branch === "all" && (
+            <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-amber-800">اختر فرعاً محدداً لتعديل المخزون</p>
-                <p className="text-xs text-amber-600 mt-0.5">عرض "جميع الفروع" للمعاينة فقط — يجب اختيار فرع لإضافة أو خصم كميات</p>
+                <p className="text-sm font-semibold text-amber-800">اختر فرعاً محدداً لتعديل الكميات</p>
+                <p className="text-xs text-amber-600 mt-0.5">أنت الآن في وضع عرض فقط — اختر فرعاً للإضافة أو الخصم</p>
               </div>
             </div>
           )}
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">إجمالي المواد</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1" data-testid="text-total-items">{totalItems}</p>
-                    <p className="text-xs text-gray-400 mt-1">صنف مخزني</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-blue-50">
-                    <Package className="h-7 w-7 text-blue-600" />
-                  </div>
+          {/* ─── KPI cards ───────────────────────────────────────── */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { label:"إجمالي الأصناف",  value: totalItems,           sub:"صنف مُسجَّل",     icon: Package,    color:"bg-blue-50  border-blue-100",  textColor:"text-blue-700" },
+              { label:"مخزون منخفض",     value: lowStock,             sub:"يحتاج إعادة طلب", icon:TrendingDown, color:"bg-amber-50 border-amber-100", textColor:"text-amber-700"},
+              { label:"نفد المخزون",     value: outOfStock,           sub:"تعبئة فورية",     icon:AlertTriangle,color:"bg-red-50   border-red-100",   textColor:"text-red-700"  },
+              { label:"قيمة المخزون",    value:`${stockValue.toFixed(0)} ر.س`, sub:"التكلفة الإجمالية", icon:BarChart3, color:"bg-green-50 border-green-100",textColor:"text-green-700"},
+            ].map(({ label, value, sub, icon: Icon, color, textColor }, i) => (
+              <div key={i} className={`rounded-2xl border p-5 ${color} flex items-start gap-4`}>
+                <div className="bg-white rounded-xl p-2.5 shadow-sm">
+                  <Icon className={`h-6 w-6 ${textColor}`} />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">منخفض المخزون</p>
-                    <p className="text-3xl font-bold text-amber-600 mt-1" data-testid="text-low-stock">{lowStockItems}</p>
-                    <p className="text-xs text-gray-400 mt-1">يحتاج إعادة طلب</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-amber-50">
-                    <TrendingDown className="h-7 w-7 text-amber-600" />
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-gray-500 truncate">{label}</p>
+                  <p className={`text-2xl font-black mt-0.5 ${textColor}`} data-testid={`kpi-${i}`}>{value}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">نفد المخزون</p>
-                    <p className="text-3xl font-bold text-red-600 mt-1" data-testid="text-out-stock">{outOfStockItems}</p>
-                    <p className="text-xs text-gray-400 mt-1">يحتاج تعبئة فورية</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-red-50">
-                    <AlertTriangle className="h-7 w-7 text-red-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">قيمة المخزون</p>
-                    <p className="text-2xl font-bold text-green-700 mt-1" data-testid="text-cogs">
-                      {totalCOGS.toFixed(0)} <span className="text-lg"><SarIcon /></span>
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">التكلفة الإجمالية</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-green-50">
-                    <DollarSign className="h-7 w-7 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            ))}
           </div>
 
-          {/* Quick Navigation */}
+          {/* ─── Quick Navigation ────────────────────────────────── */}
           <div>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">الأقسام الفرعية</h2>
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7">
-              {navLinks.map(({ href, icon: Icon, label, desc, danger }) => (
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">الأقسام الفرعية</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+              {NAV_LINKS.map(({ href, Icon, label, desc, danger }) => (
                 <Link key={href} href={href}>
-                  <Card className={`bg-white border shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group ${danger ? "border-red-100 hover:border-red-300" : "border-gray-200 hover:border-green-300"}`}>
-                    <CardContent className="p-4 flex flex-col items-center gap-2 text-center">
-                      <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${danger ? "bg-red-50" : "bg-green-50"}`}>
-                        <Icon className={`h-5 w-5 ${danger ? "text-red-600" : "text-green-600"}`} />
-                      </div>
-                      <p className={`font-semibold text-xs ${danger ? "text-red-700" : "text-gray-800"}`}>{label}</p>
-                      <p className="text-xs text-gray-400 hidden sm:block">{desc}</p>
-                    </CardContent>
-                  </Card>
+                  <div className={`group bg-white border rounded-2xl p-4 flex flex-col items-center gap-2 text-center cursor-pointer transition-all duration-200 hover:shadow-md ${danger ? "border-red-100 hover:border-red-300" : "border-gray-200 hover:border-green-300"}`}>
+                    <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${danger ? "bg-red-50" : "bg-green-50"}`}>
+                      <Icon className={`h-5 w-5 ${danger ? "text-red-600" : "text-green-600"}`} />
+                    </div>
+                    <p className={`font-semibold text-xs ${danger ? "text-red-700" : "text-gray-800"}`}>{label}</p>
+                    <p className="text-xs text-gray-400 hidden sm:block">{desc}</p>
+                    <ChevronRight className={`h-3 w-3 ${danger ? "text-red-400" : "text-gray-400"} group-hover:translate-x-0.5 transition-transform hidden sm:block`} />
+                  </div>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Inventory Grid */}
-          <Card className="bg-white border-gray-200 shadow-sm">
-            <CardHeader className="border-b border-gray-100 bg-gray-50 rounded-t-xl">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="بحث بالاسم أو الكود..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="pr-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
-                    data-testid="input-search"
-                  />
+          {/* ─── Alerts strip ────────────────────────────────────── */}
+          {(lowStock > 0 || outOfStock > 0) && (
+            <div className="bg-white border-2 border-amber-200 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 bg-amber-100 rounded-lg">
+                  <Bell className="h-4 w-4 text-amber-600 animate-pulse" />
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  {[{ key: "all", label: "الكل" }, ...Object.entries(categoryConfig).map(([k, v]) => ({ key: k, label: v.label }))].map(({ key, label }) => (
-                    <button
-                      key={key}
-                      onClick={() => setCategoryFilter(key)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        categoryFilter === key
-                          ? "bg-green-600 text-white shadow-sm shadow-green-200"
-                          : "bg-white border border-gray-200 text-gray-600 hover:border-green-300 hover:text-green-700"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500">{filteredItems.length} صنف</span>
+                <span className="font-bold text-gray-900 text-sm">تنبيهات عاجلة ({lowStock + outOfStock} صنف)</span>
               </div>
-            </CardHeader>
+              <div className="flex flex-wrap gap-2">
+                {rawItems
+                  .filter(i => { const q=getStock(i.id)?.currentQuantity??0; return q<=i.minStockLevel; })
+                  .slice(0,8)
+                  .map(i => {
+                    const q = getStock(i.id)?.currentQuantity ?? 0;
+                    const isOut = q <= 0;
+                    return (
+                      <button
+                        key={i.id}
+                        onClick={() => { setTarget(i); setAdjType("add"); setAdjQty(1); setAdjustOpen(true); }}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all hover:scale-105 ${isOut ? "bg-red-50 border-red-200 text-red-700" : "bg-amber-50 border-amber-200 text-amber-700"}`}
+                      >
+                        <AlertTriangle className="h-3.5 w-3.5" />
+                        <span>{i.nameAr}</span>
+                        <span className="opacity-70">{q} {UNIT_LABELS[i.unit]||""}</span>
+                        <Plus className="h-3 w-3 opacity-60" />
+                      </button>
+                    );
+                  })
+                }
+              </div>
+            </div>
+          )}
 
-            <CardContent className="p-5">
-              {filteredItems.length === 0 ? (
-                <div className="text-center py-16 space-y-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                    <Package className="h-8 w-8 text-gray-400" />
+          {/* ─── Inventory grid ──────────────────────────────────── */}
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+            {/* Toolbar */}
+            <div className="p-4 border-b border-gray-100 bg-gray-50 flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-[200px]">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="ابحث بالاسم أو الكود…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="pr-10 bg-white border-gray-200 text-gray-900 placeholder:text-gray-400"
+                  data-testid="input-search"
+                />
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {[{key:"all",label:"الكل"}, ...Object.entries(CATEGORY_CFG).map(([k,v])=>({key:k,label:v.labelAr}))].map(({key,label})=>(
+                  <button
+                    key={key}
+                    onClick={() => setCatFilter(key)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${catFilter===key ? "bg-green-600 text-white shadow-sm" : "bg-white border border-gray-200 text-gray-600 hover:border-green-300 hover:text-green-700"}`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-sm text-gray-400 mr-auto">{filtered.length} صنف</span>
+            </div>
+
+            {/* Grid */}
+            <div className="p-5">
+              {filtered.length === 0 ? (
+                <div className="text-center py-20 space-y-4">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                    <Package className="h-10 w-10 text-gray-300" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-700">لا توجد مواد</p>
-                    <p className="text-sm text-gray-400 mt-1">أضف مواد خام جديدة للبدء أو غيّر فلتر البحث</p>
+                    <p className="font-semibold text-gray-700">لا توجد مواد مطابقة</p>
+                    <p className="text-sm text-gray-400 mt-1">أضف مواد خام أو غيّر فلتر البحث</p>
                   </div>
                   <Link href="/manager/inventory/raw-items">
                     <Button variant="outline" size="sm" className="border-green-300 text-green-700 hover:bg-green-50">
-                      <Plus className="h-4 w-4 ml-1" />
-                      إضافة مادة خام
+                      <Plus className="h-4 w-4 ml-1" /> إضافة مادة خام
                     </Button>
                   </Link>
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {filteredItems.map(item => {
-                    const catConfig = categoryConfig[item.category] || categoryConfig.other;
-                    const CatIcon = catConfig.icon;
-                    const stock = getStockForItem(item.id);
-                    const status = getStockStatus(item, stock);
-                    const pct = getStockPercentage(item, stock);
-                    const qty = stock?.currentQuantity || 0;
+                  {filtered.map(item => {
+                    const cfg   = CATEGORY_CFG[item.category] || CATEGORY_CFG.other;
+                    const CIcon = cfg.Icon;
+                    const stk   = getStock(item.id);
+                    const st    = getStatus(item, stk);
+                    const qty   = stk?.currentQuantity ?? 0;
+                    const val   = qty * item.unitCost;
 
                     return (
                       <div
                         key={item.id}
-                        className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200 hover:border-green-200 group"
+                        className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-green-200 transition-all duration-200 group"
                         data-testid={`card-item-${item.id}`}
                       >
-                        {/* Top colored strip */}
-                        <div className={`h-1.5 ${status.barColor} transition-all duration-500`} />
+                        {/* Status bar */}
+                        <div className={`h-1 ${st.bar} transition-all duration-700`} />
 
                         <div className="p-4 space-y-3">
                           {/* Header */}
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2.5">
-                              <div className={`p-2 rounded-lg ${catConfig.bg} ${catConfig.border} border`}>
-                                <CatIcon className={`h-4 w-4 ${catConfig.color}`} />
+                              <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl group-hover:bg-green-50 group-hover:border-green-100 transition-colors">
+                                <CIcon className={`h-4 w-4 ${cfg.accent} group-hover:text-green-600 transition-colors`} />
                               </div>
                               <div>
-                                <h3 className="font-bold text-gray-900 text-sm leading-tight">{item.nameAr}</h3>
-                                <code className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded mt-0.5 inline-block">
-                                  {item.code}
-                                </code>
+                                <p className="font-bold text-gray-900 text-sm leading-tight">{item.nameAr}</p>
+                                <code className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded mt-0.5 inline-block">{item.code}</code>
                               </div>
                             </div>
-                            <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${status.color}`}>
-                              {status.label}
-                            </span>
+                            <span className={`text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap ${st.badge}`}>{st.label}</span>
                           </div>
 
-                          {/* Quantity */}
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <div className="flex items-end justify-between mb-2">
-                              <span className="text-3xl font-black text-gray-900" data-testid={`text-qty-${item.id}`}>
-                                {qty < 1 && qty > 0 ? qty.toFixed(3) : qty.toFixed(1)}
+                          {/* Quantity + progress */}
+                          <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                            <div className="flex items-end justify-between">
+                              <div>
+                                <span className="text-2xl font-black text-gray-900" data-testid={`qty-${item.id}`}>
+                                  {qty < 1 && qty > 0 ? qty.toFixed(3) : qty.toFixed(1)}
+                                </span>
+                                <span className="text-xs text-gray-400 mr-1">{UNIT_LABELS[item.unit]||item.unit}</span>
+                              </div>
+                              <span className="text-xs text-gray-400">
+                                حد أدنى: <span className="font-medium text-gray-600">{item.minStockLevel}</span>
                               </span>
-                              <span className="text-sm text-gray-500 mb-1">{unitLabels[item.unit] || item.unit}</span>
                             </div>
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs text-gray-400">
-                                <span>حد أدنى: {item.minStockLevel}</span>
-                                <span>{pct.toFixed(0)}%</span>
-                              </div>
-                              <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                <div
-                                  className={`h-2 rounded-full transition-all duration-700 ${status.barColor}`}
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
+                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${st.bar} rounded-full transition-all duration-700`}
+                                style={{ width:`${st.pct}%` }}
+                              />
                             </div>
                           </div>
 
-                          {/* Cost */}
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm">
-                              <span className="text-gray-400">التكلفة: </span>
-                              <span className="font-semibold text-gray-700">{item.unitCost.toFixed(2)}</span>
-                              <span className="text-gray-400 text-xs ml-1"><SarIcon /></span>
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-gray-400">الإجمالي: </span>
-                              <span className="font-bold text-green-700">{(qty * item.unitCost).toFixed(0)}</span>
-                              <span className="text-gray-400 text-xs ml-1"><SarIcon /></span>
-                            </div>
+                          {/* Value */}
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>القيمة: <span className="font-semibold text-gray-800">{val.toFixed(2)} ر.س</span></span>
+                            <span className="text-gray-400">{cfg.labelAr}</span>
                           </div>
 
-                          {/* Action Buttons */}
+                          {/* Action buttons */}
                           <div className="flex gap-2 pt-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleQuickAdjust(item, "subtract")}
-                              disabled={qty <= 0}
-                              className="flex-1 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 disabled:opacity-30"
-                              data-testid={`button-minus-${item.id}`}
+                            <button
+                              onClick={() => { setTarget(item); setAdjType("add"); setAdjQty(1); setAdjustOpen(true); }}
+                              disabled={branch === "all"}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-green-600 text-white text-xs font-semibold hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              data-testid={`btn-add-${item.id}`}
                             >
-                              <Minus className="h-3.5 w-3.5 ml-1" />
-                              خصم
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => handleQuickAdjust(item, "add")}
-                              className="flex-1 bg-green-600 hover:bg-green-700 text-white shadow-sm"
-                              data-testid={`button-plus-${item.id}`}
+                              <Plus className="h-3.5 w-3.5" /> إضافة
+                            </button>
+                            <button
+                              onClick={() => { setTarget(item); setAdjType("subtract"); setAdjQty(1); setAdjustOpen(true); }}
+                              disabled={branch === "all" || qty <= 0}
+                              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-gray-200 text-gray-700 text-xs font-semibold hover:border-red-300 hover:text-red-700 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              data-testid={`btn-sub-${item.id}`}
                             >
-                              <Plus className="h-3.5 w-3.5 ml-1" />
-                              إضافة
-                            </Button>
+                              <Minus className="h-3.5 w-3.5" /> خصم
+                            </button>
                           </div>
                         </div>
-
-                        {/* Alert Banner */}
-                        {status.alert && (
-                          <div className={`px-4 py-2 flex items-center gap-2 text-xs font-medium border-t ${
-                            status.key === "out" ? "bg-red-50 text-red-700 border-red-100" : "bg-amber-50 text-amber-700 border-amber-100"
-                          }`}>
-                            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                            {status.key === "out" ? "نفد المخزون — يرجى إعادة التعبئة فوراً" : "المخزون منخفض — يُنصح بالطلب"}
-                          </div>
-                        )}
                       </div>
                     );
                   })}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
-        {/* Quick Adjust Dialog */}
-        <Dialog open={isQuickAdjustOpen} onOpenChange={setIsQuickAdjustOpen}>
-          <DialogContent className="max-w-md bg-white" dir="rtl">
+        {/* ─── Quick Adjust Dialog ─────────────────────────────── */}
+        <Dialog open={adjustOpen} onOpenChange={setAdjustOpen}>
+          <DialogContent className="bg-white border-0 shadow-2xl rounded-2xl max-w-sm" dir="rtl">
             <DialogHeader>
-              <DialogTitle className={`flex items-center gap-2 ${adjustType === "add" ? "text-green-700" : "text-red-700"}`}>
-                {adjustType === "add" ? <Plus className="h-5 w-5" /> : <Minus className="h-5 w-5" />}
-                {adjustType === "add" ? "إضافة كمية" : "خصم كمية"} — {selectedItem?.nameAr}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-5 py-4">
-              {/* Branch requirement notice */}
-              {selectedBranch === "all" ? (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                  <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
-                  <p className="font-semibold text-amber-800 text-sm">يرجى اختيار فرع محدد أولاً</p>
-                  <p className="text-xs text-amber-600 mt-1">أغلق هذا النافذة واختر الفرع من القائمة أعلى الصفحة</p>
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`p-2.5 rounded-xl ${adjType==="add" ? "bg-green-100" : "bg-red-100"}`}>
+                  {adjType === "add"
+                    ? <Plus className="h-5 w-5 text-green-700" />
+                    : <Minus className="h-5 w-5 text-red-700" />
+                  }
                 </div>
-              ) : (
-                <>
-                  <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-green-700 font-medium">
-                      الفرع المحدد: {branches.find(b => b.id === selectedBranch)?.nameAr || selectedBranch}
-                    </span>
-                  </div>
+                <DialogTitle className="text-gray-900">{adjType==="add" ? "إضافة كمية" : "خصم كمية"}</DialogTitle>
+              </div>
+              {target && <p className="text-sm text-gray-500 font-medium">{target.nameAr} • <code className="bg-gray-100 px-1 rounded">{target.code}</code></p>}
+            </DialogHeader>
 
-                  <div className="space-y-2">
-                    <Label className="text-gray-700 font-semibold">الكمية ({unitLabels[selectedItem?.unit || ""] || selectedItem?.unit})</Label>
-                    <div className="flex items-center gap-3">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => setAdjustQuantity(Math.max(0, adjustQuantity - 1))}
-                        className="border-gray-300 hover:bg-gray-100"
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <Input
-                        type="number"
-                        value={adjustQuantity}
-                        onChange={e => setAdjustQuantity(parseFloat(e.target.value) || 0)}
-                        className="text-center text-2xl font-bold h-14 border-gray-300"
-                        min={0}
-                        step={0.1}
-                        data-testid="input-adjust-qty"
-                      />
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => setAdjustQuantity(adjustQuantity + 1)}
-                        className="border-gray-300 hover:bg-gray-100"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </>
+            <div className="space-y-4 py-2">
+              <div>
+                <Label className="text-gray-700 font-medium text-sm">الكمية ({UNIT_LABELS[target?.unit||""]||target?.unit||""})</Label>
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    onClick={() => setAdjQty(q => Math.max(0.1, q - 1))}
+                    className="p-2.5 rounded-xl border border-gray-200 hover:border-gray-300 text-gray-600 transition-colors"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <Input
+                    type="number"
+                    min="0.001"
+                    value={adjQty}
+                    onChange={e => setAdjQty(parseFloat(e.target.value)||0)}
+                    className="text-center text-xl font-black border-gray-200 text-gray-900"
+                    data-testid="input-adjust-qty"
+                  />
+                  <button
+                    onClick={() => setAdjQty(q => q + 1)}
+                    className="p-2.5 rounded-xl border border-gray-200 hover:border-green-300 text-gray-600 hover:text-green-700 transition-colors"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {adjType === "add" && (
+                <div className="bg-green-50 border border-green-100 rounded-xl p-3 text-xs text-green-700">
+                  <Activity className="h-3.5 w-3.5 inline ml-1" />
+                  سيتم تسجيل الإضافة في سجل حركة المخزون تلقائياً
+                </div>
               )}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsQuickAdjustOpen(false)} className="border-gray-300">إلغاء</Button>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setAdjustOpen(false)} className="border-gray-200 text-gray-700">إلغاء</Button>
               <Button
-                onClick={handleAdjustSubmit}
-                disabled={adjustStockMutation.isPending || selectedBranch === "all" || adjustQuantity <= 0}
-                className={adjustType === "add" ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"}
+                onClick={() => {
+                  if (!target || branch==="all") { toast({title:"⚠️ اختر فرعاً محدداً",variant:"destructive"}); return; }
+                  if (!adjQty || adjQty<=0) { toast({title:"أدخل كمية صحيحة",variant:"destructive"}); return; }
+                  adjMutation.mutate({ rawItemId:target.id, branchId:branch, quantity:adjQty, type:adjType });
+                }}
+                disabled={adjMutation.isPending}
+                className={adjType==="add" ? "bg-green-600 hover:bg-green-700 text-white" : "bg-red-600 hover:bg-red-700 text-white"}
+                data-testid="btn-confirm-adjust"
               >
-                {adjustStockMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
-                {adjustType === "add" ? "✅ تأكيد الإضافة" : "🗑️ تأكيد الخصم"}
+                {adjMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (adjType==="add" ? "تأكيد الإضافة" : "تأكيد الخصم")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Add Stock Batch Dialog */}
-        <Dialog open={isAddStockOpen} onOpenChange={setIsAddStockOpen}>
-          <DialogContent className="max-w-lg bg-white" dir="rtl">
+        {/* ─── Add Batch Dialog ────────────────────────────────── */}
+        <Dialog open={addBatchOpen} onOpenChange={setAddBatchOpen}>
+          <DialogContent className="bg-white border-0 shadow-2xl rounded-2xl max-w-md" dir="rtl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-green-700">
-                <PackagePlus className="h-5 w-5" />
-                إضافة دفعة مخزون جديدة
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              {selectedBranch === "all" && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    <p className="font-semibold text-amber-800 text-sm">يجب اختيار فرع محدد</p>
-                  </div>
-                  <p className="text-xs text-amber-600">أغلق هذا النافذة واختر الفرع من الزر أعلى الصفحة</p>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 bg-green-100 rounded-xl">
+                  <PackagePlus className="h-5 w-5 text-green-700" />
                 </div>
-              )}
+                <DialogTitle className="text-gray-900">إضافة دفعة جديدة</DialogTitle>
+              </div>
+              <p className="text-sm text-gray-500">أضف كميات جديدة من المواد الخام للمخزون</p>
+            </DialogHeader>
 
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-semibold">المادة الخام</Label>
-                <Select
-                  value={newStockData.rawItemId}
-                  onValueChange={value => {
-                    const item = rawItems.find(i => i.id === value);
-                    setNewStockData({ ...newStockData, rawItemId: value, unitCost: item?.unitCost || 0 });
-                  }}
-                >
-                  <SelectTrigger className="border-gray-300 bg-white" data-testid="select-raw-item">
-                    <SelectValue placeholder="اختر المادة الخام..." />
+            <div className="space-y-4 py-2">
+              <div>
+                <Label className="text-gray-700 font-medium text-sm">المادة الخام</Label>
+                <Select value={batchData.rawItemId} onValueChange={v => setBatchData(d => ({...d, rawItemId:v}))}>
+                  <SelectTrigger className="mt-1.5 border-gray-200 text-gray-900" data-testid="select-batch-item">
+                    <SelectValue placeholder="اختر المادة…" />
                   </SelectTrigger>
                   <SelectContent>
-                    {rawItems.map(item => (
-                      <SelectItem key={item.id} value={item.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{item.nameAr}</span>
-                          <code className="text-xs text-gray-400">{item.code}</code>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {rawItems.map(i => <SelectItem key={i.id} value={i.id}>{i.nameAr} ({i.code})</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-gray-700 font-semibold">الكمية</Label>
+              <div>
+                <Label className="text-gray-700 font-medium text-sm">الفرع</Label>
+                <Select value={branch!=="all"?branch:""} onValueChange={v => setBranch(v)}>
+                  <SelectTrigger className="mt-1.5 border-gray-200 text-gray-900" data-testid="select-batch-branch">
+                    <SelectValue placeholder="اختر الفرع…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches.map(b => <SelectItem key={b.id} value={b.id||""}>{b.nameAr}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-gray-700 font-medium text-sm">الكمية</Label>
                   <Input
                     type="number"
-                    value={newStockData.quantity}
-                    onChange={e => setNewStockData({ ...newStockData, quantity: parseFloat(e.target.value) || 0 })}
-                    min={0}
-                    step={0.1}
-                    className="border-gray-300"
+                    min="0"
+                    value={batchData.quantity||""}
+                    onChange={e => setBatchData(d => ({...d, quantity:parseFloat(e.target.value)||0}))}
+                    placeholder="0"
+                    className="mt-1.5 border-gray-200 text-gray-900"
                     data-testid="input-batch-qty"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-gray-700 font-semibold">تكلفة الوحدة</Label>
+                <div>
+                  <Label className="text-gray-700 font-medium text-sm">تكلفة الوحدة (اختياري)</Label>
                   <Input
                     type="number"
-                    value={newStockData.unitCost}
-                    onChange={e => setNewStockData({ ...newStockData, unitCost: parseFloat(e.target.value) || 0 })}
-                    min={0}
-                    step={0.01}
-                    className="border-gray-300"
+                    min="0"
+                    value={batchData.unitCost||""}
+                    onChange={e => setBatchData(d => ({...d, unitCost:parseFloat(e.target.value)||0}))}
+                    placeholder="ر.س"
+                    className="mt-1.5 border-gray-200 text-gray-900"
                     data-testid="input-batch-cost"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-700 font-semibold">ملاحظات (اختياري)</Label>
+              <div>
+                <Label className="text-gray-700 font-medium text-sm">ملاحظات (اختياري)</Label>
                 <Input
-                  value={newStockData.notes}
-                  onChange={e => setNewStockData({ ...newStockData, notes: e.target.value })}
-                  placeholder="سبب الإضافة أو تفاصيل أخرى..."
-                  className="border-gray-300"
+                  value={batchData.notes}
+                  onChange={e => setBatchData(d => ({...d, notes:e.target.value}))}
+                  placeholder="مثال: طلبية من المورد..."
+                  className="mt-1.5 border-gray-200 text-gray-900"
                   data-testid="input-batch-notes"
                 />
               </div>
 
-              {newStockData.rawItemId && newStockData.quantity > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-green-700 font-medium text-sm">إجمالي التكلفة:</span>
-                    <span className="text-2xl font-bold text-green-700">
-                      {(newStockData.quantity * newStockData.unitCost).toFixed(2)} <SarIcon />
-                    </span>
-                  </div>
-                  <p className="text-xs text-green-600 mt-1">
-                    {newStockData.quantity} × {newStockData.unitCost.toFixed(2)} ر.س
-                  </p>
-                </div>
-              )}
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-xs text-blue-700">
+                <CheckCircle2 className="h-3.5 w-3.5 inline ml-1" />
+                سيتم تسجيل القيد المحاسبي تلقائياً عند إضافة الدفعة
+              </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddStockOpen(false)} className="border-gray-300">إلغاء</Button>
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setAddBatchOpen(false)} className="border-gray-200 text-gray-700">إلغاء</Button>
               <Button
                 onClick={() => {
-                  if (selectedBranch !== "all") {
-                    addStockBatchMutation.mutate({ ...newStockData, branchId: selectedBranch });
-                  }
+                  if (!batchData.rawItemId) { toast({title:"اختر المادة الخام",variant:"destructive"}); return; }
+                  if (branch==="all") { toast({title:"اختر فرعاً محدداً",variant:"destructive"}); return; }
+                  if (!batchData.quantity || batchData.quantity<=0) { toast({title:"أدخل كمية صحيحة",variant:"destructive"}); return; }
+                  batchMutation.mutate({ ...batchData, branchId:branch });
                 }}
-                disabled={addStockBatchMutation.isPending || selectedBranch === "all" || !newStockData.rawItemId || newStockData.quantity <= 0}
+                disabled={batchMutation.isPending}
                 className="bg-green-600 hover:bg-green-700 text-white"
+                data-testid="btn-confirm-batch"
               >
-                {addStockBatchMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : <PackagePlus className="h-4 w-4 ml-2" />}
-                إضافة الدفعة
+                {batchMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "تأكيد الإضافة"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
       </div>
     </PlanGate>
   );

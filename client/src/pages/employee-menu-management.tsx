@@ -767,11 +767,13 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
   setIsAddDialogOpen(open);
   if (open) {
     // Initialize step1Data when opening the dialog
+    const initCategory = isFood ? 'desserts' : 'hot';
+    setSelectedCategory(initCategory);
     setStep1Data({
       nameAr: '',
       nameEn: '',
       description: '',
-      category: 'hot',
+      category: initCategory,
       price: '0',
       oldPrice: '0',
       coffeeStrength: 'classic',

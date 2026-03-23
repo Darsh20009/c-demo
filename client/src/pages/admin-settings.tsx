@@ -203,6 +203,9 @@ export default function AdminSettings() {
   const [newCategoryIcon, setNewCategoryIcon] = useState('Coffee');
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editDepartment, setEditDepartment] = useState<'drinks' | 'food'>('drinks');
+  const [deletingCategory, setDeletingCategory] = useState<MenuCategory | null>(null);
+  const [categoryItemsPreview, setCategoryItemsPreview] = useState<Array<{nameAr: string; category: string}>>([]);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   const [isEmergencyClosed, setIsEmergencyClosed] = useState(false);
   const [storeHours, setStoreHours] = useState<any>(null);
@@ -491,15 +494,35 @@ export default function AdminSettings() {
       const res = await apiRequest("DELETE", `/api/menu-categories/${categoryId}`);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/menu-categories"] });
-      toast({ title: "تم حذف القسم بنجاح", className: "bg-green-600 text-white" });
+      setDeletingCategory(null);
+      const moved = data?.reassignedCount || 0;
+      toast({
+        title: "تم حذف القسم بنجاح",
+        description: moved > 0 ? `تم نقل ${moved} صنف إلى أقسام مناسبة تلقائياً` : "لم تكن هناك أصناف في هذا القسم",
+        className: "bg-green-600 text-white"
+      });
     },
     onError: (error: any) => {
       const msg = error?.message || "فشل في حذف القسم";
       toast({ title: msg, variant: "destructive" });
     }
   });
+
+  const openDeleteCategoryDialog = async (cat: MenuCategory) => {
+    setDeletingCategory(cat);
+    setLoadingPreview(true);
+    try {
+      const res = await fetch(`/api/coffee-items/category/${encodeURIComponent(cat.id)}`);
+      const data = await res.json();
+      setCategoryItemsPreview(Array.isArray(data) ? data : []);
+    } catch {
+      setCategoryItemsPreview([]);
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
 
   const iconOptions = [
     { value: 'Coffee', label: 'قهوة', Icon: Coffee },
@@ -526,6 +549,65 @@ export default function AdminSettings() {
 
   return (
     <div className="p-6 space-y-6 bg-white dark:bg-background min-h-screen" dir="rtl">
+
+      {/* Smart Delete Category Dialog */}
+      <Dialog open={!!deletingCategory} onOpenChange={(open) => { if (!open) setDeletingCategory(null); }}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              حذف القسم: {deletingCategory?.nameAr}
+            </DialogTitle>
+            <DialogDescription>
+              سيتم نقل الأصناف الموجودة في هذا القسم تلقائياً إلى أقسام مناسبة بناءً على نوعها.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {loadingPreview ? (
+              <div className="flex items-center justify-center py-6 text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                جاري فحص الأصناف...
+              </div>
+            ) : categoryItemsPreview.length === 0 ? (
+              <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg text-green-700 text-sm">
+                <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                لا توجد أصناف في هذا القسم، يمكن الحذف بأمان.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-amber-700 flex items-center gap-1.5">
+                  <AlertTriangle className="w-4 h-4" />
+                  {categoryItemsPreview.length} صنف سيتم نقله تلقائياً:
+                </p>
+                <div className="bg-amber-50 rounded-lg p-3 max-h-40 overflow-y-auto space-y-1">
+                  {categoryItemsPreview.map((item, i) => (
+                    <div key={i} className="text-sm text-amber-900 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                      {item.nameAr}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">سيقوم النظام بتحليل كل صنف وإعادة تصنيفه بذكاء للقسم الأنسب.</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2 flex-row-reverse">
+            <Button
+              variant="destructive"
+              onClick={() => deletingCategory && deleteCategoryMutation.mutate(deletingCategory.id)}
+              disabled={deleteCategoryMutation.isPending || loadingPreview}
+              data-testid="button-confirm-delete-category"
+            >
+              {deleteCategoryMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-1" /> : <Trash2 className="w-4 h-4 ml-1" />}
+              {categoryItemsPreview.length > 0 ? "حذف ونقل الأصناف" : "حذف القسم"}
+            </Button>
+            <Button variant="outline" onClick={() => setDeletingCategory(null)} data-testid="button-cancel-delete-category">
+              إلغاء
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -1176,11 +1258,7 @@ export default function AdminSettings() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => {
-                            if (confirm("هل أنت متأكد من حذف هذا القسم؟")) {
-                              deleteCategoryMutation.mutate(cat.id);
-                            }
-                          }}
+                          onClick={() => openDeleteCategoryDialog(cat)}
                           data-testid={`button-delete-category-${cat.id}`}
                         >
                           <Trash2 className="w-3.5 h-3.5 text-destructive" />
@@ -1246,11 +1324,7 @@ export default function AdminSettings() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => {
-                            if (confirm("هل أنت متأكد من حذف هذا القسم؟")) {
-                              deleteCategoryMutation.mutate(cat.id);
-                            }
-                          }}
+                          onClick={() => openDeleteCategoryDialog(cat)}
                           data-testid={`button-delete-category-${cat.id}`}
                         >
                           <Trash2 className="w-3.5 h-3.5 text-destructive" />
