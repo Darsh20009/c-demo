@@ -40,6 +40,7 @@
   export interface PendingOrder {
     id: string;
     payload: any;
+    receiptData?: any;
     createdAt: string;
     synced: boolean;
   }
@@ -57,6 +58,17 @@
       localStorage.setItem(OFFLINE_PENDING_ORDERS_KEY, JSON.stringify(existing));
     } catch {}
     return order;
+  }
+
+  export function updatePendingOrderReceiptData(id: string, receiptData: any): void {
+    try {
+      const orders = getPendingOrders();
+      const idx = orders.findIndex(o => o.id === id);
+      if (idx !== -1) {
+        orders[idx].receiptData = receiptData;
+        localStorage.setItem(OFFLINE_PENDING_ORDERS_KEY, JSON.stringify(orders));
+      }
+    } catch {}
   }
 
   export function getPendingOrders(): PendingOrder[] {
@@ -128,4 +140,3 @@
       }
     } catch {}
   }
-  

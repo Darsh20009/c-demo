@@ -62,8 +62,55 @@ interface KitchenOrderData {
   timestamp: string;
 }
 
-function openPrintWindow(html: string, title: string, config: PrintConfig = {}): Window | null {
-  const { paperWidth = '80mm', autoClose = false, autoPrint = true, showPrintButton = true } = config;
+// Global print queue to serialize multiple print calls
+let _printQueue: Array<{ html: string; paperWidth: string }> = [];
+let _isPrinting = false;
+
+function _drainPrintQueue() {
+  if (_isPrinting || _printQueue.length === 0) return;
+  _isPrinting = true;
+  const { html, paperWidth } = _printQueue.shift()!;
+
+  const styleId = 'qirox-print-style-' + Date.now();
+  const overlayId = 'qirox-print-overlay-' + Date.now();
+
+  const styleEl = document.createElement('style');
+  styleEl.id = styleId;
+  styleEl.textContent = `
+    @media print {
+      @page { size: ${paperWidth} auto; margin: 0; }
+      body > *:not(#${overlayId}) { display: none !important; visibility: hidden !important; }
+      #${overlayId} { display: block !important; visibility: visible !important; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999; background: white; }
+      .no-print { display: none !important; }
+    }
+    #${overlayId} { display: none; }
+  `;
+
+  const overlay = document.createElement('div');
+  overlay.id = overlayId;
+  overlay.innerHTML = html;
+
+  document.head.appendChild(styleEl);
+  document.body.appendChild(overlay);
+
+  const cleanup = () => {
+    styleEl.remove();
+    overlay.remove();
+    _isPrinting = false;
+    setTimeout(_drainPrintQueue, 300);
+  };
+
+  window.addEventListener('afterprint', cleanup, { once: true });
+
+  setTimeout(() => {
+    window.print();
+    // Fallback cleanup (afterprint may not fire in all browsers)
+    setTimeout(cleanup, 8000);
+  }, 250);
+}
+
+function openPrintWindow(html: string, _title: string, config: PrintConfig = {}): Window | null {
+  const { paperWidth = '80mm', autoPrint = true, showPrintButton = true } = config;
 
   const dynamicStyles = `
     <style>
@@ -79,38 +126,19 @@ function openPrintWindow(html: string, title: string, config: PrintConfig = {}):
   let modifiedHtml = html.replace('</head>', `${dynamicStyles}</head>`);
 
   if (autoPrint) {
-    // Use a hidden iframe to avoid popup blocker (works after async operations)
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
-    document.body.appendChild(iframe);
+    // Extract body content for in-page printing
+    const bodyMatch = modifiedHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    const bodyContent = bodyMatch ? bodyMatch[1] : modifiedHtml;
+    const styleMatch = modifiedHtml.match(/<style[\s\S]*?<\/style>/gi) || [];
+    const styles = styleMatch.join('\n');
+    const printContent = `<div style="font-family:Arial,sans-serif;">${styles}<div>${bodyContent}</div></div>`;
 
-    const iframeDoc = iframe.contentWindow?.document;
-    if (iframeDoc) {
-      let printed = false;
-      const doPrint = () => {
-        if (printed) return;
-        printed = true;
-        try {
-          iframe.contentWindow?.focus();
-          iframe.contentWindow?.print();
-        } catch(e) {
-          console.error('iframe print error:', e);
-        }
-        setTimeout(() => {
-          if (document.body.contains(iframe)) document.body.removeChild(iframe);
-        }, autoClose ? 1500 : 5000);
-      };
-      iframe.onload = () => setTimeout(doPrint, 200);
-      // Fallback timeout in case onload doesn't fire (e.g. same-origin iframe with no resources)
-      setTimeout(doPrint, 800);
-      iframeDoc.open();
-      iframeDoc.write(modifiedHtml);
-      iframeDoc.close();
-    }
+    _printQueue.push({ html: printContent, paperWidth });
+    _drainPrintQueue();
     return null;
   }
 
-  // autoPrint = false → open a visible popup window with a print button
+  // autoPrint = false → open a popup window with print button (user gesture context)
   const printButtonHtml = showPrintButton ? `
     <div class="no-print" style="text-align: center; margin-top: 20px; padding: 20px;">
       <button onclick="window.print()" style="padding: 12px 32px; font-size: 16px; background: #b45309; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
@@ -130,9 +158,15 @@ function openPrintWindow(html: string, title: string, config: PrintConfig = {}):
   if (printWindow) {
     printWindow.document.write(modifiedHtml);
     printWindow.document.close();
-    printWindow.document.title = title;
+    printWindow.document.title = _title;
   }
   return printWindow;
+}
+
+// Export for direct use from manual print buttons (user gesture context)
+export function printHtmlInPage(html: string, paperWidth: string = '80mm'): void {
+  _printQueue.push({ html, paperWidth });
+  _drainPrintQueue();
 }
 
 export async function printEmployeeCard(data: EmployeePrintData): Promise<void> {

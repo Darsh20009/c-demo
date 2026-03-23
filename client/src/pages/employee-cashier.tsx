@@ -4,7 +4,7 @@ import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import { cacheMenuItems, getCachedMenuItems, savePendingOrder, getPendingOrdersCount, syncPendingOrders } from "@/lib/offline-cashier";
+import { cacheMenuItems, getCachedMenuItems, savePendingOrder, getPendingOrdersCount, getPendingOrders, updatePendingOrderReceiptData, syncPendingOrders, type PendingOrder } from "@/lib/offline-cashier";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -110,6 +110,8 @@ export default function EmployeeCashier() {
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [pendingOrdersCount, setPendingOrdersCount] = useState(getPendingOrdersCount);
+  const [showPendingPanel, setShowPendingPanel] = useState(false);
+  const [pendingOrdersList, setPendingOrdersList] = useState<PendingOrder[]>([]);
 
  const { toast } = useToast();
  const { i18n } = useTranslation();
@@ -899,7 +901,7 @@ export default function EmployeeCashier() {
          date: new Date().toISOString()
        });
 
-       // Print directly with captured data (avoids stale closure issue)
+       // Build receipt data from captured values
        const receiptTotal = parseFloat(String(order.totalAmount ?? totalAmount)).toFixed(2);
        const receiptData = {
          orderNumber: order.orderNumber,
@@ -921,13 +923,19 @@ export default function EmployeeCashier() {
          crNumber: businessConfig?.commercialRegistration,
          vatNumber: businessConfig?.vatNumber,
        };
-       setTimeout(async () => {
-         try {
-           await printAllReceipts(receiptData);
-         } catch (e) {
-           console.error("Auto-print error:", e);
-         }
-       }, 400);
+
+       // If offline, save receipt data so user can re-print from pending panel
+       if (order.offline) {
+         updatePendingOrderReceiptData(order.orderNumber, receiptData);
+         setPendingOrdersList(getPendingOrders());
+       }
+
+       // Auto-print receipts
+       try {
+         await printAllReceipts(receiptData);
+       } catch (e) {
+         console.error("Auto-print error:", e);
+       }
      }
    } catch (error) {
      console.error("Order submission error:", error);
@@ -952,15 +960,23 @@ export default function EmployeeCashier() {
  </div>
  </div>
  <div className="flex items-center gap-3 flex-wrap">
+ {pendingOrdersCount > 0 && (
+   <button
+     onClick={() => { setPendingOrdersList(getPendingOrders()); setShowPendingPanel(true); }}
+     className="flex items-center gap-2 bg-orange-600/20 border border-orange-500/40 rounded-lg px-3 py-1.5 hover:bg-orange-600/30 transition-colors cursor-pointer"
+     data-testid="button-pending-orders"
+   >
+     <Printer className="w-4 h-4 text-orange-400" />
+     <span className="text-xs text-orange-300 font-medium">{tc("طلبات معلقة","Pending Orders")}</span>
+     <Badge className="bg-orange-500 text-white border-0 text-[10px] px-1.5 py-0">
+       {pendingOrdersCount}
+     </Badge>
+   </button>
+ )}
  {isOffline && (
    <div className="flex items-center gap-2 bg-red-600/20 border border-red-500/30 rounded-lg px-3 py-1.5">
      <WifiOff className="w-4 h-4 text-red-400" />
      <span className="text-xs text-red-300">{tc("غير متصل بالإنترنت", "Offline")}</span>
-     {pendingOrdersCount > 0 && (
-       <Badge className="bg-orange-500/30 text-orange-300 border-orange-500/30 border text-[10px] px-1.5">
-         {pendingOrdersCount} {tc("معلق", "pending")}
-       </Badge>
-     )}
    </div>
  )}
  <Button
@@ -1687,6 +1703,73 @@ export default function EmployeeCashier() {
  </div>
  </div>
  </div>
+
+
+ {/* Pending Orders Panel */}
+ <Dialog open={showPendingPanel} onOpenChange={setShowPendingPanel}>
+   <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto bg-[#1a1008] border-orange-500/30" dir="rtl">
+     <DialogHeader>
+       <DialogTitle className="text-orange-300 flex items-center gap-2">
+         <Printer className="w-5 h-5" />
+         {tc('الطلبات المعلقة', 'Pending Orders')}
+         <Badge className="bg-orange-500 text-white border-0 mr-2">{pendingOrdersList.filter(o => !o.synced).length}</Badge>
+       </DialogTitle>
+     </DialogHeader>
+     <div className="space-y-3 mt-2">
+       {pendingOrdersList.filter(o => !o.synced).length === 0 ? (
+         <p className="text-gray-400 text-center py-6">{tc('لا توجد طلبات معلقة', 'No pending orders')}</p>
+       ) : (
+         pendingOrdersList.filter(o => !o.synced).map((po) => {
+           const rd = po.receiptData || po.payload;
+           const customerName = rd?.customerName || rd?.customerInfo?.customerName || tc('عميل','Customer');
+           const total = rd?.total || rd?.totalAmount || '—';
+           const itemCount = (rd?.items || []).length;
+           const createdAt = new Date(po.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+           return (
+             <div key={po.id} className="bg-[#2d1f1a] border border-orange-500/20 rounded-xl p-4">
+               <div className="flex items-start justify-between gap-3">
+                 <div className="flex-1 min-w-0">
+                   <div className="flex items-center gap-2 mb-1">
+                     <span className="text-white font-semibold text-sm">{customerName}</span>
+                     <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 border text-[10px] px-1.5">{tc('غير مرسل','Unsynced')}</Badge>
+                   </div>
+                   <p className="text-gray-400 text-xs">{tc('الوقت:','Time:')} {createdAt} • {itemCount} {tc('منتجات','items')} • {tc('الإجمالي:','Total:')} {total} {tc('ر.س','SAR')}</p>
+                   <p className="text-gray-500 text-xs mt-0.5">{tc('رقم:','No:')} {po.id.slice(-8)}</p>
+                 </div>
+                 <div className="flex flex-col gap-2">
+                   {po.receiptData ? (
+                     <Button
+                       size="sm"
+                       className="bg-primary hover:bg-primary/80 text-white text-xs px-3 py-1.5 h-auto"
+                       onClick={async () => {
+                         try {
+                           await printAllReceipts(po.receiptData);
+                           toast({ title: tc('جاري الطباعة...','Printing...'), className: 'bg-green-700 text-white' });
+                         } catch(e) {
+                           toast({ title: tc('خطأ في الطباعة','Print Error'), variant: 'destructive' });
+                         }
+                       }}
+                     >
+                       <Printer className="w-3 h-3 ml-1" />
+                       {tc('طباعة','Print')}
+                     </Button>
+                   ) : (
+                     <span className="text-gray-500 text-xs">{tc('لا يوجد بيانات طباعة','No print data')}</span>
+                   )}
+                 </div>
+               </div>
+             </div>
+           );
+         })
+       )}
+     </div>
+     <div className="mt-4 pt-3 border-t border-orange-500/20">
+       <p className="text-xs text-gray-500 text-center">
+         {tc('الطلبات المعلقة ستُرسل تلقائياً عند استعادة الاتصال','Pending orders will sync when internet is restored')}
+       </p>
+     </div>
+   </DialogContent>
+ </Dialog>
 
  <MobileBottomNav employeeRole={employee?.role} />
  </div>
