@@ -117,9 +117,10 @@ export default function InventorySmartPage() {
   const [adjQty, setAdjQty]                 = useState(1);
   const [batchData, setBatchData]           = useState({ rawItemId:"", quantity:0, unitCost:0, notes:"" });
 
-  const { data: rawItems=[], isLoading: loadRI }   = useQuery<RawItem[]>({ queryKey:["/api/inventory/raw-items"] });
+  const { data: rawItems=[], isLoading: loadRI }   = useQuery<RawItem[]>({ queryKey:["/api/inventory/raw-items"], refetchInterval: 30000 });
   const { data: stocks=[], isLoading: loadSt, refetch } = useQuery<BranchStock[]>({
     queryKey:["/api/inventory/branch-stocks", branch],
+    refetchInterval: 30000,
     queryFn: async () => {
       const p = new URLSearchParams();
       if (branch && branch !== "all") p.append("branchId", branch);
@@ -129,6 +130,10 @@ export default function InventorySmartPage() {
     },
   });
   const { data: branches=[] } = useQuery<Branch[]>({ queryKey:["/api/branches"] });
+  const { data: allRecipes=[] } = useQuery<any[]>({ queryKey:["/api/inventory/all-recipes"], staleTime: 60000 });
+
+  // Build a set of rawItemIds that have recipes linked
+  const rawItemsWithRecipes = new Set<string>((allRecipes || []).map((r: any) => r.rawItemId).filter(Boolean));
 
   const adjMutation = useMutation({
     mutationFn: (d: any) => apiRequest("POST","/api/inventory/stock-adjustment", d),
@@ -272,6 +277,36 @@ export default function InventorySmartPage() {
               </div>
             ))}
           </div>
+
+          {/* ─── Auto-deduction info strip ──────────────────────── */}
+          {rawItems.length > 0 && (
+            (() => {
+              const withRecipes = rawItems.filter(i => rawItemsWithRecipes.has(i.id)).length;
+              const withoutRecipes = rawItems.length - withRecipes;
+              return withoutRecipes > 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+                  <div className="p-2 bg-amber-100 rounded-xl flex-shrink-0">
+                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-amber-800 text-sm">الخصم التلقائي غير مفعّل لبعض المواد</p>
+                    <p className="text-amber-700 text-xs mt-0.5">
+                      {withoutRecipes} مادة لا تحتوي على وصفة مرتبطة — الخصم التلقائي يعمل فقط عند ربط وصفات المشروبات بالمواد الخام.
+                      {withRecipes > 0 && ` (${withRecipes} مادة مربوطة وتُخصم تلقائياً)`}
+                    </p>
+                    <p className="text-xs text-amber-600 mt-1">لربط الوصفات: اذهب إلى إدارة المشروبات ← أضف وصفة لكل مشروب.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-3 flex items-center gap-3">
+                  <div className="p-1.5 bg-green-100 rounded-xl flex-shrink-0">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                  <p className="text-green-700 text-sm font-medium">جميع المواد مربوطة بوصفات — الخصم التلقائي يعمل عند بيع المشروبات</p>
+                </div>
+              );
+            })()
+          )}
 
           {/* ─── Quick Navigation ────────────────────────────────── */}
           <div>
@@ -426,10 +461,14 @@ export default function InventorySmartPage() {
                             </div>
                           </div>
 
-                          {/* Value */}
+                          {/* Value + recipe badge */}
                           <div className="flex items-center justify-between text-xs text-gray-500">
                             <span>القيمة: <span className="font-semibold text-gray-800">{val.toFixed(2)} ر.س</span></span>
-                            <span className="text-gray-400">{cfg.labelAr}</span>
+                            {rawItemsWithRecipes.has(item.id) ? (
+                              <span className="flex items-center gap-1 text-green-600 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />وصفة مربوطة</span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-amber-500 font-medium"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />بدون وصفة</span>
+                            )}
                           </div>
 
                           {/* Action buttons */}

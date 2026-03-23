@@ -161,6 +161,7 @@ export default function InventoryStockPage() {
 
   const { data: stockData = [], isLoading } = useQuery<BranchStock[]>({
     queryKey: ["/api/inventory/stock"],
+    refetchInterval: 30000,
   });
 
   const { data: branches = [] } = useQuery<Branch[]>({

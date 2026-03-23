@@ -1798,6 +1798,9 @@ export class DBStorage implements IStorage {
     );
 
     for (const { item, recipe } of recipeResults) {
+      if (recipe.length === 0) {
+        console.warn(`[INVENTORY] No recipe found for coffeeItemId="${item.coffeeItemId}" — skipping inventory deduction for this item`);
+      }
       for (const r of recipe) {
         tasks.push({ rawItemId: r.rawItemId, required: r.quantity * item.quantity, unit: r.unit, source: 'Recipe' });
       }
@@ -1809,17 +1812,40 @@ export class DBStorage implements IStorage {
       }
     }
 
-    // Fetch all stock and raw items in parallel
-    const [stockResults, rawResults] = await Promise.all([
-      Promise.all(tasks.map(t => BranchStockModel.findOne({ branchId, rawItemId: t.rawItemId }))),
-      Promise.all(tasks.map(t => RawItemModel.findOne({ id: t.rawItemId }).lean()))
-    ]);
+    if (tasks.length === 0) {
+      console.warn(`[INVENTORY] No deduction tasks for order ${orderId} — no recipes linked to any item in this order`);
+      return { success: true, costOfGoods: 0, deductionDetails: [], shortages: [], warnings: ['No recipes linked to order items — inventory not deducted'], errors: [] };
+    }
+
+    // Fetch all raw items in parallel
+    const rawResults = await Promise.all(tasks.map(t => RawItemModel.findOne({ id: t.rawItemId }).lean()));
+
+    // For each unique rawItemId, find best stock source:
+    // 1st: exact branchId  2nd: any branch with sufficient qty (fallback for branchId mismatch)
+    const uniqueRawItemIds = [...new Set(tasks.map(t => t.rawItemId))];
+    const allStocksForItems = await BranchStockModel.find({ rawItemId: { $in: uniqueRawItemIds } }).lean();
+
+    const stockResults = tasks.map(task => {
+      // Prefer exact branch match
+      const exactMatch = allStocksForItems.find(s => s.branchId === branchId && s.rawItemId === task.rawItemId);
+      if (exactMatch) return exactMatch;
+      // Fallback: pick branch with maximum available quantity for this raw item
+      const candidates = allStocksForItems
+        .filter(s => s.rawItemId === task.rawItemId && s.currentQuantity > 0)
+        .sort((a, b) => b.currentQuantity - a.currentQuantity);
+      if (candidates.length > 0) {
+        console.log(`[INVENTORY] BranchId fallback: order branchId="${branchId}", using stock from branchId="${candidates[0].branchId}" for rawItemId="${task.rawItemId}"`);
+        return candidates[0];
+      }
+      return null;
+    });
 
     // Process each task with atomic $inc updates
     await Promise.all(tasks.map(async (task, idx) => {
-      const stock = stockResults[idx];
+      const stock = stockResults[idx] as any;
       const raw = rawResults[idx];
       const { rawItemId, required, unit, source } = task;
+      const effectiveBranchId = stock?.branchId || branchId;
 
       if (stock && stock.currentQuantity >= required) {
         const previousQuantity = stock.currentQuantity;
@@ -1827,11 +1853,11 @@ export class DBStorage implements IStorage {
 
         // Atomic deduction to avoid race conditions
         await BranchStockModel.findOneAndUpdate(
-          { branchId, rawItemId, currentQuantity: { $gte: required } },
+          { branchId: effectiveBranchId, rawItemId, currentQuantity: { $gte: required } },
           { $inc: { currentQuantity: -required }, $set: { lastUpdated: new Date() } }
         );
 
-        const unitCost = Number((raw as any)?.lastCost || 0);
+        const unitCost = Number((raw as any)?.lastCost || (raw as any)?.unitCost || 0);
         const totalCost = unitCost * required;
         costOfGoods += totalCost;
 
@@ -1850,7 +1876,7 @@ export class DBStorage implements IStorage {
 
         StockMovementModel.create({
           id: nanoid(),
-          branchId,
+          branchId: effectiveBranchId,
           rawItemId,
           movementType: 'sale',
           quantity: required,
@@ -1862,6 +1888,7 @@ export class DBStorage implements IStorage {
           notes: `Order #${orderId} - ${source} Item`
         }).catch(err => console.error('[INVENTORY] StockMovement create error:', err));
       } else {
+        console.warn(`[INVENTORY] Shortage: rawItemId="${rawItemId}" required=${required} available=${stock?.currentQuantity ?? 0}`);
         shortages.push({
           rawItemId,
           rawItemName: (raw as any)?.nameAr || "Unknown",
