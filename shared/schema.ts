@@ -5397,3 +5397,91 @@ CashierShiftSchema.index({ openedAt: -1 });
 CashierShiftSchema.index({ tenantId: 1 });
 
 export const CashierShiftModel = mongoose.models['CashierShift'] || mongoose.model<ICashierShift>("CashierShift", CashierShiftSchema);
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Payroll Snapshot — frozen monthly payroll record
+// ──────────────────────────────────────────────────────────────────────────────
+export interface IPayrollSnapshot extends Document {
+  id: string;
+  tenantId: string;
+  branchId?: string;
+  year: number;
+  month: number; // 1-12
+  status: 'frozen' | 'approved';
+  employees: Array<{
+    employeeId: string;
+    name: string;
+    role: string;
+    baseSalary: number;
+    presentDays: number;
+    absentDays: number;
+    explicitAbsentDays: number;
+    implicitAbsentDays: number;
+    lateDays: number;
+    totalLateMinutes: number;
+    shiftHours: number;
+    totalWorkingDays: number;
+    deductions: number;
+    lateDeductions: number;
+    netSalary: number;
+    attendanceRate: number;
+  }>;
+  totals: {
+    totalBaseSalary: number;
+    totalDeductions: number;
+    totalNetSalary: number;
+    employeeCount: number;
+  };
+  frozenAt: Date;
+  frozenBy: string;
+  approvedAt?: Date;
+  approvedBy?: string;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const PayrollSnapshotSchema = new Schema<IPayrollSnapshot>({
+  id: { type: String, required: true, unique: true },
+  tenantId: { type: String, required: true },
+  branchId: { type: String },
+  year: { type: Number, required: true },
+  month: { type: Number, required: true, min: 1, max: 12 },
+  status: { type: String, enum: ['frozen', 'approved'], default: 'frozen', required: true },
+  employees: [{
+    employeeId: { type: String, required: true },
+    name: { type: String },
+    role: { type: String },
+    baseSalary: { type: Number, default: 0 },
+    presentDays: { type: Number, default: 0 },
+    absentDays: { type: Number, default: 0 },
+    explicitAbsentDays: { type: Number, default: 0 },
+    implicitAbsentDays: { type: Number, default: 0 },
+    lateDays: { type: Number, default: 0 },
+    totalLateMinutes: { type: Number, default: 0 },
+    shiftHours: { type: Number, default: 8 },
+    totalWorkingDays: { type: Number, default: 0 },
+    deductions: { type: Number, default: 0 },
+    lateDeductions: { type: Number, default: 0 },
+    netSalary: { type: Number, default: 0 },
+    attendanceRate: { type: Number, default: 0 },
+  }],
+  totals: {
+    totalBaseSalary: { type: Number, default: 0 },
+    totalDeductions: { type: Number, default: 0 },
+    totalNetSalary: { type: Number, default: 0 },
+    employeeCount: { type: Number, default: 0 },
+  },
+  frozenAt: { type: Date, required: true },
+  frozenBy: { type: String, required: true },
+  approvedAt: { type: Date },
+  approvedBy: { type: String },
+  notes: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+});
+
+PayrollSnapshotSchema.index({ tenantId: 1, year: 1, month: 1 }, { unique: true });
+PayrollSnapshotSchema.index({ tenantId: 1, status: 1 });
+
+export const PayrollSnapshotModel = mongoose.models['PayrollSnapshot'] || mongoose.model<IPayrollSnapshot>("PayrollSnapshot", PayrollSnapshotSchema);

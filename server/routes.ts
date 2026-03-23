@@ -16789,6 +16789,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ── Payroll Snapshot CRUD ──────────────────────────────────────────────────
+
+  // GET /api/payroll/snapshots?year=&month= — fetch existing snapshot for a month
+  app.get("/api/payroll/snapshots", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { PayrollSnapshotModel } = await import("@shared/schema");
+      const tenantId = (req as any).employee?.tenantId || 'demo-tenant';
+      const query: any = { tenantId };
+      if (req.query.year) query.year = Number(req.query.year);
+      if (req.query.month) query.month = Number(req.query.month);
+      const snapshots = await PayrollSnapshotModel.find(query).sort({ year: -1, month: -1 }).lean();
+      res.json(snapshots.map(serializeDoc));
+    } catch (error) {
+      res.status(500).json({ error: "فشل جلب سجلات الرواتب المجمدة" });
+    }
+  });
+
+  // POST /api/payroll/snapshots — freeze payroll for a given month (saves live calculation)
+  app.post("/api/payroll/snapshots", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { PayrollSnapshotModel } = await import("@shared/schema");
+      const tenantId = (req as any).employee?.tenantId || 'demo-tenant';
+      const { year, month, employees, totals, notes } = req.body;
+
+      if (!year || !month || !employees) {
+        return res.status(400).json({ error: "year و month و employees مطلوبة" });
+      }
+
+      // Prevent duplicate snapshots for the same month
+      const existing = await PayrollSnapshotModel.findOne({ tenantId, year, month });
+      if (existing) {
+        return res.status(409).json({ error: "يوجد كشف رواتب مجمد بالفعل لهذا الشهر", snapshotId: existing.id });
+      }
+
+      const snapshot = await PayrollSnapshotModel.create({
+        id: nanoid(),
+        tenantId,
+        year,
+        month,
+        status: 'frozen',
+        employees,
+        totals,
+        notes: notes || '',
+        frozenAt: new Date(),
+        frozenBy: (req as any).employee?.id || 'unknown',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      res.status(201).json(serializeDoc(snapshot));
+    } catch (error: any) {
+      if (error.code === 11000) {
+        return res.status(409).json({ error: "يوجد كشف رواتب مجمد بالفعل لهذا الشهر" });
+      }
+      res.status(500).json({ error: "فشل تجميد كشف الرواتب" });
+    }
+  });
+
+  // PATCH /api/payroll/snapshots/:id/approve — approve a frozen snapshot
+  app.patch("/api/payroll/snapshots/:id/approve", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { PayrollSnapshotModel } = await import("@shared/schema");
+      const tenantId = (req as any).employee?.tenantId || 'demo-tenant';
+      const snapshot = await PayrollSnapshotModel.findOneAndUpdate(
+        { id: req.params.id, tenantId, status: 'frozen' },
+        {
+          $set: {
+            status: 'approved',
+            approvedAt: new Date(),
+            approvedBy: (req as any).employee?.id || 'unknown',
+            updatedAt: new Date(),
+          }
+        },
+        { new: true }
+      );
+      if (!snapshot) return res.status(404).json({ error: "الكشف غير موجود أو تمت الموافقة عليه مسبقاً" });
+      res.json(serializeDoc(snapshot));
+    } catch (error) {
+      res.status(500).json({ error: "فشل اعتماد كشف الرواتب" });
+    }
+  });
+
+  // DELETE /api/payroll/snapshots/:id — unfreeze (only draft/frozen, not approved)
+  app.delete("/api/payroll/snapshots/:id", requireAuth, requireManager, async (req: AuthRequest, res) => {
+    try {
+      const { PayrollSnapshotModel } = await import("@shared/schema");
+      const tenantId = (req as any).employee?.tenantId || 'demo-tenant';
+      const snapshot = await PayrollSnapshotModel.findOne({ id: req.params.id, tenantId });
+      if (!snapshot) return res.status(404).json({ error: "الكشف غير موجود" });
+      if (snapshot.status === 'approved') {
+        return res.status(403).json({ error: "لا يمكن حذف كشف راتب معتمد" });
+      }
+      await PayrollSnapshotModel.deleteOne({ id: req.params.id, tenantId });
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "فشل حذف كشف الرواتب" });
+    }
+  });
+  // ──────────────────────────────────────────────────────────────────────────
+
   // ============================================================
   // COGS / PROFIT MARGIN REPORT
   // ============================================================
