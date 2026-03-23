@@ -6,6 +6,9 @@ import { applyBrandColors } from "./lib/brand";
 // Apply brand colors from the central brand config to CSS variables
 applyBrandColors();
 
+// Enable dark mode globally — the UI is designed for dark backgrounds
+document.documentElement.classList.add('dark');
+
 createRoot(document.getElementById("root")!).render(<App />);
 
 // Register Service Worker for PWA
