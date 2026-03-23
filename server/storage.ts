@@ -1591,7 +1591,8 @@ export class DBStorage implements IStorage {
   }
 
   async getPurchaseInvoice(id: string): Promise<PurchaseInvoice | undefined> {
-    const invoice = await PurchaseInvoiceModel.findOne({ id }).lean();
+    const invoice = await PurchaseInvoiceModel.findOne({ id }).lean()
+      || await PurchaseInvoiceModel.findById(id).lean().catch(() => null);
     return invoice ? serializeDoc(invoice) : undefined;
   }
 
@@ -1606,12 +1607,16 @@ export class DBStorage implements IStorage {
   }
 
   async updatePurchaseInvoice(id: string, updates: Partial<PurchaseInvoice>): Promise<PurchaseInvoice | undefined> {
-    const invoice = await PurchaseInvoiceModel.findOneAndUpdate({ id }, { $set: updates }, { new: true }).lean();
+    let invoice = await PurchaseInvoiceModel.findOneAndUpdate({ id }, { $set: updates }, { new: true }).lean();
+    if (!invoice) {
+      invoice = await PurchaseInvoiceModel.findByIdAndUpdate(id, { $set: updates }, { new: true }).lean().catch(() => null);
+    }
     return invoice ? serializeDoc(invoice) : undefined;
   }
 
   async receivePurchaseInvoice(id: string, receivedBy: string): Promise<PurchaseInvoice | undefined> {
-    const invoice = await PurchaseInvoiceModel.findOne({ id });
+    const invoice = await PurchaseInvoiceModel.findOne({ id })
+      || await PurchaseInvoiceModel.findById(id).catch(() => null);
     if (!invoice || invoice.status === "received") return undefined;
     
     // Update stock for each item in the invoice
@@ -1696,7 +1701,8 @@ export class DBStorage implements IStorage {
   }
 
   async updatePurchaseInvoicePayment(id: string, paidAmount: number): Promise<PurchaseInvoice | undefined> {
-    const invoice = await PurchaseInvoiceModel.findOne({ id });
+    const invoice = await PurchaseInvoiceModel.findOne({ id })
+      || await PurchaseInvoiceModel.findById(id).catch(() => null);
     if (!invoice) return undefined;
     invoice.paidAmount = (invoice.paidAmount || 0) + paidAmount;
     invoice.paymentStatus = invoice.paidAmount >= (invoice.totalAmount || 0) ? "paid" : "partial";

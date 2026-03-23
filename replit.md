@@ -528,6 +528,29 @@ CSS Variables defined in `client/src/index.css`:
 - `POST /api/pos/print-receipt` - Print receipt
 - `POST /api/pos/cash-drawer/open` - Open cash drawer
 
+## Bug Fixes (March 2026 Session)
+
+### Fixed: Inventory Recipes Query URL
+- `client/src/pages/inventory-recipes.tsx`: Added custom `queryFn` calling `/api/inventory/recipes/${coffeeItemId}` with `.items` extraction from `{ items, totalCost }` response
+
+### Fixed: ERP Income Statement Fallback
+- `server/erp-accounting-service.ts`: Added fallback to read directly from completed orders when no journal entries exist; also includes approved ERP expenses
+- Route returns `{ success: true, incomeStatement: { source, totalRevenue, totalExpenses, cogs, grossProfit, netIncome, revenue, expenses } }`
+
+### Fixed: ERP Expense Categories
+- Added `operating` and `salary` to `IExpenseErp` interface, Mongoose schema enum, and `insertExpenseErpSchema` Zod (all 7 categories including 'operating' and 'salary' now work)
+
+### Fixed: ERP Vendor Creation - Auto-generate Code
+- `server/routes.ts` POST `/api/erp/vendors`: When `code` field not provided, auto-generates `VND-XXXX` format based on vendor count per tenant
+
+### Fixed: Purchase Invoice Status Operations
+- `server/storage.ts` methods `getPurchaseInvoice`, `updatePurchaseInvoice`, `receivePurchaseInvoice`, `updatePurchaseInvoicePayment`: Added fallback to `findById()` when `findOne({ id })` returns null (since PurchaseInvoiceSchema has no custom `id` field, only MongoDB `_id`)
+
+### Key Known Behaviors
+- Purchase invoice `invoiceNumber` auto-generation: creates `PO-YYYYMM-XXXXX` format
+- ERP income statement source: `"orders"` when no journal entries, `"journal"` when accounts exist
+- ERP expense approval flow: draft → pending_approval → approved → paid (via PATCH `/api/erp/expenses/:id/approve`)
+
 ## Deployment
 
 Configured for autoscale deployment:

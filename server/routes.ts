@@ -15432,9 +15432,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/erp/vendors", requireAuth, requireManager, async (req: AuthRequest, res) => {
     try {
       const tenantId = getTenantIdFromRequest(req) || req.body.tenantId || "demo-tenant";
+      let code = req.body.code;
+      if (!code) {
+        const count = await VendorModel.countDocuments({ tenantId });
+        code = `VND-${String(count + 1).padStart(4, "0")}`;
+      }
       const vendor = await ErpAccountingService.createVendor({
         tenantId,
         ...req.body,
+        code,
       });
       res.json({ success: true, vendor: serializeDoc(vendor) });
     } catch (error: any) {

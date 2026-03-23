@@ -4326,7 +4326,7 @@ export interface IExpenseErp extends Document {
   branchId: string;
   expenseNumber: string;
   expenseDate: Date;
-  category: 'inventory' | 'salaries' | 'rent' | 'utilities' | 'marketing' | 'maintenance' | 'supplies' | 'other';
+  category: 'inventory' | 'salaries' | 'salary' | 'rent' | 'utilities' | 'marketing' | 'maintenance' | 'supplies' | 'other' | 'operating';
   subcategory?: string;
   description: string;
   amount: number;
@@ -4369,7 +4369,7 @@ const ExpenseErpSchema = new Schema<IExpenseErp>({
   branchId: { type: String, required: true },
   expenseNumber: { type: String, required: true },
   expenseDate: { type: Date, required: true },
-  category: { type: String, enum: ['inventory', 'salaries', 'rent', 'utilities', 'marketing', 'maintenance', 'supplies', 'other'], required: true },
+  category: { type: String, enum: ['inventory', 'salaries', 'salary', 'rent', 'utilities', 'marketing', 'maintenance', 'supplies', 'other', 'operating'], required: true },
   subcategory: { type: String },
   description: { type: String, required: true },
   amount: { type: Number, required: true },
@@ -4717,7 +4717,7 @@ export const insertExpenseErpSchema = z.object({
   tenantId: z.string(),
   branchId: z.string(),
   expenseDate: z.date(),
-  category: z.enum(['inventory', 'salaries', 'rent', 'utilities', 'marketing', 'maintenance', 'supplies', 'other']),
+  category: z.enum(['inventory', 'salaries', 'salary', 'rent', 'utilities', 'marketing', 'maintenance', 'supplies', 'other', 'operating']),
   subcategory: z.string().optional(),
   description: z.string(),
   amount: z.number(),
