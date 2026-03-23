@@ -848,6 +848,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove redundant 'total' field if present
       delete orderData.total;
 
+      // Ensure subtotal and tax are always stored (VAT-inclusive pricing at 15%)
+      const ORDER_TAX_RATE = 0.15;
+      const rawTotal = Number(orderData.totalAmount) || 0;
+      if (rawTotal > 0 && (orderData.subtotal == null || orderData.tax == null)) {
+        const computedSubtotal = rawTotal / (1 + ORDER_TAX_RATE);
+        const computedTax = rawTotal - computedSubtotal;
+        if (orderData.subtotal == null) orderData.subtotal = computedSubtotal;
+        if (orderData.tax == null) orderData.tax = computedTax;
+      }
+
       const order = await storage.createOrder(orderData);
       const serializedOrder = serializeDoc(order);
       
