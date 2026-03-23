@@ -304,6 +304,11 @@ export default function PosSystem() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: menuCategories = [] } = useQuery<Array<{ id: string; nameAr: string; nameEn?: string; icon?: string; department: string }>>({
+    queryKey: ["/api/menu-categories"],
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: itemsWithAddons = [] } = useQuery<string[]>({
     queryKey: ["/api/coffee-items/with-addons"],
     staleTime: 5 * 60 * 1000,
@@ -455,9 +460,21 @@ export default function PosSystem() {
   }, [productsData, selectedCategory, searchQuery, groupedItemsMap]);
 
   const visibleCategories = useMemo(() => {
-    const cats = Array.from(new Set(productsData?.map(p => p.category) || []));
-    return cats.map(c => ({ id: c, name: c, icon: Tag, color: "text-primary" }));
-  }, [productsData]);
+    const legacyNames: Record<string, string> = {
+      hot: 'مشروبات ساخنة', cold: 'مشروبات باردة', desserts: 'حلا والكيك',
+      bakery: 'المخبوزات', sandwiches: 'الساندوتشات', food: 'المأكولات',
+      drinks: 'المشروبات', specialty: 'مشروبات إضافية', basic: 'قهوة أساسية',
+    };
+    const dynamicNameMap: Record<string, string> = {};
+    menuCategories.forEach(c => { dynamicNameMap[c.id] = c.nameAr; });
+    const cats = Array.from(new Set(productsData?.map(p => p.category).filter(Boolean) || []));
+    return cats.map(c => ({
+      id: c,
+      name: dynamicNameMap[c] || legacyNames[c] || c,
+      icon: Tag,
+      color: "text-primary"
+    }));
+  }, [productsData, menuCategories]);
 
   const calculateTotal = useMemo(() => {
     return orderItems.reduce((sum, item) => {

@@ -136,9 +136,11 @@ const [aiEditDescription, setAiEditDescription] = useState("");
   });
 
   useEffect(() => {
-    if (menuCategories.length > 0) {
-      const firstCat = menuCategories[0];
-      if (firstCat) setSelectedCategory(firstCat.id);
+    const deptCategories = menuCategories.filter(c => c.department === (isFood ? 'food' : 'drinks'));
+    if (deptCategories.length > 0) {
+      setSelectedCategory(deptCategories[0].id);
+    } else {
+      setSelectedCategory(isFood ? 'desserts' : 'hot');
     }
   }, [menuCategories, isFood]);
 
@@ -316,7 +318,7 @@ const [aiEditDescription, setAiEditDescription] = useState("");
    setAddImageUrls([]);
    setAddStep(1);
    setStep1Data(null);
-   setSelectedCategory("hot");
+   setSelectedCategory(defaultCategory);
    setSelectedCoffeeStrength("classic");
    toast({
      title: tc("تم إضافة المشروب", "Item Added"),
@@ -719,6 +721,16 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  );
  const categoryNames: Record<string, string> = { ...legacyCategoryNames, ...unifiedCategoryNames, ...dynamicCategoryNames };
 
+ const DRINK_UNIFIED_IDS = ['hot', 'cold'];
+ const FOOD_UNIFIED_IDS  = ['desserts', 'bakery', 'sandwiches'];
+
+ const availableForDropdown = [
+   ...UNIFIED_CATEGORIES.filter(c => isFood ? FOOD_UNIFIED_IDS.includes(c.id) : DRINK_UNIFIED_IDS.includes(c.id)),
+   ...menuCategories.filter(c => c.department === (isFood ? 'food' : 'drinks')),
+ ];
+
+ const defaultCategory = isFood ? 'desserts' : 'hot';
+
  const allowedCategories = [...UNIFIED_CATEGORY_IDS, ...LEGACY_FOOD_CATEGORIES, ...LEGACY_DRINK_CATEGORIES, ...dynamicCategoryIds];
 
  const filteredItems = coffeeItems.filter(item => allowedCategories.includes(item.category) || true);
@@ -774,7 +786,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
     setSelectedIngredients([]);
     setAddImageUrls([]);
     setAddEditableAddons([]);
-    setSelectedCategory("hot");
+    setSelectedCategory(defaultCategory);
     setSelectedCoffeeStrength("classic");
   }
 }}>
@@ -883,7 +895,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                            <SelectValue placeholder={tc("اختر القسم", "Select category")} />
                          </SelectTrigger>
                          <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
-                           {UNIFIED_CATEGORIES.map(cat => (
+                           {availableForDropdown.map(cat => (
                              <SelectItem key={cat.id} value={cat.id}>{cat.nameAr}</SelectItem>
                            ))}
                          </SelectContent>
@@ -1066,7 +1078,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  type="button"
  variant="outline"
- onClick={() => { setIsAddDialogOpen(false); setAddImageUrls([]); setAddEditableAddons([]); setSelectedIngredients([]); setRecipeItems([]); setSelectedBranches([]); setAddStep(1); setStep1Data(null); setSelectedCategory("hot"); setSelectedCoffeeStrength("classic"); setAiAddNameAr(""); setAiAddNameEn(""); setAiAddDescription(""); }}
+ onClick={() => { setIsAddDialogOpen(false); setAddImageUrls([]); setAddEditableAddons([]); setSelectedIngredients([]); setRecipeItems([]); setSelectedBranches([]); setAddStep(1); setStep1Data(null); setSelectedCategory(defaultCategory); setSelectedCoffeeStrength("classic"); setAiAddNameAr(""); setAiAddNameEn(""); setAiAddDescription(""); }}
  className="border-gray-600 text-gray-300"
  data-testid="button-cancel"
  >
@@ -1570,7 +1582,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <SelectValue placeholder={tc("اختر القسم", "Select category")} />
  </SelectTrigger>
  <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
- {UNIFIED_CATEGORIES.map(cat => (
+ {availableForDropdown.map(cat => (
    <SelectItem key={cat.id} value={cat.id}>{cat.nameAr}</SelectItem>
  ))}
  </SelectContent>
