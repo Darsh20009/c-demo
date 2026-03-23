@@ -440,7 +440,7 @@ export default function PaymentMethods({
                   </div>
                 </div>
                 {/* Bank Transfer IBAN Details */}
-                {isSelected && (method.id as string) === 'mada' && ((method as any).bankIban || (method as any).bankName) && (
+                {isSelected && ((method as any).bankIban || (method as any).bankName) && (
                   <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 space-y-2">
                     <p className="text-xs font-bold text-blue-700 dark:text-blue-300">بيانات التحويل البنكي</p>
                     {(method as any).bankAccountHolder && (

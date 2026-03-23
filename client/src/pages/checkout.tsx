@@ -19,7 +19,7 @@ import { useCustomer } from "@/contexts/CustomerContext";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useTranslate, tc } from "@/lib/useTranslate";
-import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft } from "lucide-react";
+import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft, Upload, Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { PaymentMethodInfo, PaymentMethod } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
@@ -213,6 +213,10 @@ export default function CheckoutPage() {
   const isAr = i18n.language === 'ar';
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+  const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+  const receiptInputRef = useRef<HTMLInputElement>(null);
   const [cashDistanceError, setCashDistanceError] = useState<string | null>(null);
   const [cashDistanceChecking, setCashDistanceChecking] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -310,7 +314,36 @@ export default function CheckoutPage() {
     if (selectedPaymentMethod === 'qahwa-card') {
       setSelectedPaymentMethod(null);
     }
+    setReceiptFile(null);
+    setReceiptPreview(null);
   }, [selectedPaymentMethod]);
+
+  const handleReceiptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setReceiptFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setReceiptPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const uploadReceiptToServer = async (file: File): Promise<string | null> => {
+    try {
+      setIsUploadingReceipt(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/upload-receipt', { method: 'POST', body: formData });
+      if (res.ok) {
+        const data = await res.json();
+        return data.url || null;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      setIsUploadingReceipt(false);
+    }
+  };
 
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
   const pendingGeideaOrderData = useRef<any>(null);
@@ -587,6 +620,11 @@ export default function CheckoutPage() {
       toast({ variant: "destructive", title: 'جاري التحقق من موقعك...', description: 'الرجاء الانتظار' });
       return;
     }
+    const selectedMethodInfo = paymentMethods.find(m => m.id === selectedPaymentMethod);
+    if (selectedMethodInfo?.requiresReceipt && !receiptFile) {
+      toast({ variant: "destructive", title: tc("يرجى رفع إيصال التحويل", "Please upload the payment receipt") });
+      return;
+    }
     if (!customerName.trim()) {
       toast({ variant: "destructive", title: t("checkout.enter_customer_name") });
       return;
@@ -673,6 +711,15 @@ export default function CheckoutPage() {
       } : {}),
       channel: "online",
     };
+
+    if (receiptFile) {
+      const uploadedUrl = await uploadReceiptToServer(receiptFile);
+      if (uploadedUrl) {
+        (orderData as any).paymentReceiptUrl = uploadedUrl;
+      } else {
+        (orderData as any).paymentReceiptUrl = receiptPreview || undefined;
+      }
+    }
 
     if (isCardPaymentMethod(selectedPaymentMethod)) {
       pendingGeideaOrderData.current = orderData;
@@ -842,6 +889,54 @@ export default function CheckoutPage() {
                   onSelectMethod={setSelectedPaymentMethod}
                   comingSoon={false}
                 />
+
+                {/* Receipt Upload for bank transfer methods */}
+                {selectedPaymentMethod && paymentMethods.find(m => m.id === selectedPaymentMethod)?.requiresReceipt && (
+                  <div className="border border-border rounded-xl p-4 bg-amber-50 dark:bg-amber-950/20 space-y-3" data-testid="section-receipt-upload">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                        <Upload className="w-4 h-4 text-amber-700 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-amber-900 dark:text-amber-300">{tc("ارفع إيصال التحويل", "Upload Transfer Receipt")}</p>
+                        <p className="text-xs text-amber-700 dark:text-amber-400">{tc("مطلوب لتأكيد الدفع", "Required to confirm payment")}</p>
+                      </div>
+                    </div>
+                    <input
+                      ref={receiptInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleReceiptFileChange}
+                      data-testid="input-receipt-file"
+                    />
+                    {receiptPreview ? (
+                      <div className="space-y-2">
+                        <img src={receiptPreview} alt="إيصال التحويل" className="w-full max-h-48 object-contain rounded-lg border border-border bg-white" />
+                        <button
+                          type="button"
+                          onClick={() => { setReceiptFile(null); setReceiptPreview(null); if (receiptInputRef.current) receiptInputRef.current.value = ''; }}
+                          className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                          data-testid="button-remove-receipt"
+                        >
+                          <X className="w-3 h-3" />
+                          {tc("إزالة الإيصال", "Remove receipt")}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => receiptInputRef.current?.click()}
+                        className="w-full flex flex-col items-center justify-center gap-2 py-5 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-xl bg-white dark:bg-amber-950/10 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                        data-testid="button-upload-receipt"
+                      >
+                        <Camera className="w-8 h-8 text-amber-400" />
+                        <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">{tc("انقر لرفع صورة الإيصال", "Tap to upload receipt image")}</span>
+                        <span className="text-xs text-amber-600 dark:text-amber-500">{tc("JPG, PNG مقبولة", "JPG, PNG accepted")}</span>
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {selectedPaymentMethod === 'cash' && cashDistanceChecking && (
                   <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg text-blue-700 dark:text-blue-300 text-sm" data-testid="status-cash-distance-checking">

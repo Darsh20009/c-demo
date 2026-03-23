@@ -627,56 +627,43 @@ export default function DeliverySelectionPage() {
               })}
             </div>
 
-            {/* Car Pickup Details — Neon Drive-Thru */}
+            {/* Car Pickup Details */}
             {selectedMethod === 'car-pickup' && (
-              <div className="rounded-2xl overflow-hidden" style={{ background: '#0b0f1e', border: '1.5px solid #00e5ff44', boxShadow: '0 0 32px #00e5ff22, 0 0 8px #00e5ff11' }}>
-
-                {/* DRIVE-THRU Neon Header */}
-                <div className="relative px-4 py-4 flex flex-col items-center gap-1 overflow-hidden" style={{ background: 'linear-gradient(135deg, #080c18 0%, #111827 100%)', borderBottom: '1px solid #00e5ff33' }}>
-                  {/* Road dashes top */}
-                  <div className="absolute top-0 left-0 right-0 h-1 flex gap-2 overflow-hidden opacity-40">
-                    {[...Array(20)].map((_, i) => <div key={i} className="flex-1 h-full" style={{ background: '#facc15' }} />)}
+              <Card className="border border-border shadow-sm">
+                {/* Header */}
+                <div className="flex items-center gap-3 px-4 py-3 border-b bg-muted/30">
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Car className="w-5 h-5 text-primary" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span style={{ fontSize: 22 }}>🚗</span>
-                    <p className="font-black text-lg tracking-[0.15em] uppercase" style={{ color: '#00e5ff', textShadow: '0 0 18px #00e5ff, 0 0 40px #00e5ff88' }}>
-                      DRIVE-THRU
-                    </p>
-                    <span style={{ fontSize: 22 }}>☕</span>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">{tc("بيانات السيارة", "Car Details")}</p>
+                    <p className="text-xs text-muted-foreground">{tc("سنُحضر طلبك إليك مباشرة", "We'll bring your order to you")}</p>
                   </div>
-                  <p className="text-xs font-medium tracking-wider" style={{ color: '#aaff0099' }}>
-                    {tc("أدخل بيانات سيارتك — سنُحضر طلبك إليك مباشرة", "Enter your car details — we'll bring your order to you")}
-                  </p>
                 </div>
 
-                {/* Car Preview — Asphalt Zone */}
-                <div className="relative flex flex-col items-center gap-3 py-5 px-4" style={{ background: 'repeating-linear-gradient(180deg, #0f1420 0px, #0f1420 38px, #0d1119 38px, #0d1119 40px)' }}>
-                  {/* Road lane lines */}
-                  <div className="absolute inset-0 flex justify-center pointer-events-none" style={{ opacity: 0.15 }}>
-                    <div className="w-0.5 h-full" style={{ background: 'repeating-linear-gradient(180deg, #facc15 0px, #facc15 16px, transparent 16px, transparent 28px)' }} />
+                {/* Car Preview */}
+                <div className="flex justify-center items-center py-4 bg-muted/10 border-b">
+                  <div className="flex flex-col items-center gap-2">
+                    <CarSVG color={carHex} className="w-40 h-auto" />
+                    {carInfo.model && carInfo.color && (
+                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border">
+                        <span className="w-3 h-3 rounded-full border border-border" style={{ backgroundColor: carHex }} />
+                        <span className="text-xs font-semibold text-foreground">{carInfo.model}</span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs text-muted-foreground">{carInfo.color}</span>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ filter: `drop-shadow(0 0 16px ${carHex}88) drop-shadow(0 0 4px ${carHex})` }}>
-                    <CarSVG color={carHex} className="w-full max-w-xs h-auto" />
-                  </div>
-                  {carInfo.model && carInfo.color && (
-                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full" style={{ background: '#ffffff0f', border: `1px solid ${carHex}44`, boxShadow: `0 0 10px ${carHex}33` }}>
-                      <span className="w-3 h-3 rounded-full border border-white/20" style={{ backgroundColor: carHex, boxShadow: `0 0 6px ${carHex}` }} />
-                      <span className="text-sm font-bold" style={{ color: '#e0f4ff' }}>{carInfo.model}</span>
-                      <span className="text-xs" style={{ color: '#00e5ff66' }}>—</span>
-                      <span className="text-sm" style={{ color: '#a0c4d8' }}>{carInfo.color}</span>
-                    </div>
-                  )}
                 </div>
 
-                {/* Form Content */}
-                <div className="p-4 space-y-5">
+                <CardContent className="p-4 space-y-5">
 
                   {/* Car Brand */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold tracking-widest uppercase flex items-center gap-1.5" style={{ color: '#00e5ffcc' }}>
-                      <Car className="w-3.5 h-3.5" />
+                    <Label className="text-sm font-semibold flex items-center gap-1.5">
+                      <Car className="w-4 h-4 text-primary" />
                       {tc("نوع السيارة", "Car Brand")}
-                    </label>
+                    </Label>
                     <div className="grid grid-cols-4 gap-1.5">
                       {CAR_BRANDS.map((brand) => {
                         const isSel = carInfo.model === brand;
@@ -686,13 +673,11 @@ export default function DeliverySelectionPage() {
                             type="button"
                             onClick={() => setCarInfo({ ...carInfo, model: brand })}
                             data-testid={`btn-car-brand-${brand}`}
-                            className="py-2 rounded-xl text-xs font-semibold transition-all duration-200"
-                            style={{
-                              background: isSel ? '#00e5ff18' : '#ffffff08',
-                              border: `1.5px solid ${isSel ? '#00e5ff' : '#ffffff18'}`,
-                              color: isSel ? '#00e5ff' : '#94a3b8',
-                              boxShadow: isSel ? '0 0 10px #00e5ff44' : 'none',
-                            }}
+                            className={`py-2 px-1 rounded-lg text-xs font-semibold border transition-all duration-150 ${
+                              isSel
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-background text-foreground border-border hover:border-primary/50 hover:bg-primary/5'
+                            }`}
                           >
                             {brand}
                           </button>
@@ -704,16 +689,15 @@ export default function DeliverySelectionPage() {
                       onChange={(e) => setCarInfo({ ...carInfo, model: e.target.value })}
                       placeholder={tc("أو اكتب نوع السيارة...", "Or type your car brand...")}
                       data-testid="input-car-model"
-                      className="mt-1 text-sm"
-                      style={{ background: '#ffffff08', border: '1px solid #00e5ff33', color: '#e0f4ff' }}
+                      className="text-sm"
                     />
                   </div>
 
                   {/* Car Color */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold tracking-widest uppercase" style={{ color: '#00e5ffcc' }}>
+                    <Label className="text-sm font-semibold">
                       {tc("لون السيارة", "Car Color")}
-                    </label>
+                    </Label>
                     <div className="grid grid-cols-5 gap-2">
                       {CAR_COLORS.map((color) => {
                         const isSel = carInfo.color === color.name;
@@ -723,18 +707,15 @@ export default function DeliverySelectionPage() {
                             type="button"
                             onClick={() => setCarInfo({ ...carInfo, color: color.name, colorHex: color.hex })}
                             data-testid={`btn-car-color-${color.name}`}
-                            className="flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200"
-                            style={{
-                              background: isSel ? '#ffffff10' : '#ffffff06',
-                              border: `1.5px solid ${isSel ? color.hex : '#ffffff15'}`,
-                              boxShadow: isSel ? `0 0 12px ${color.hex}88` : 'none',
-                            }}
+                            className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all duration-150 ${
+                              isSel ? 'border-primary bg-primary/5' : 'border-border bg-background hover:border-primary/40'
+                            }`}
                           >
                             <span
-                              className={`w-7 h-7 rounded-full ${color.border ? 'border border-white/30' : ''}`}
-                              style={{ backgroundColor: color.hex, boxShadow: isSel ? `0 0 8px ${color.hex}` : 'none' }}
+                              className={`w-7 h-7 rounded-full ${color.border ? 'border border-border' : ''}`}
+                              style={{ backgroundColor: color.hex }}
                             />
-                            <span className="text-[10px] font-medium" style={{ color: isSel ? '#e0f4ff' : '#64748b' }}>{color.name}</span>
+                            <span className={`text-[10px] font-medium ${isSel ? 'text-primary' : 'text-muted-foreground'}`}>{color.name}</span>
                           </button>
                         );
                       })}
@@ -743,32 +724,30 @@ export default function DeliverySelectionPage() {
 
                   {/* Plate Number — Saudi style */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold tracking-widest uppercase flex items-center gap-1.5" style={{ color: '#00e5ffcc' }}>
+                    <Label className="text-sm font-semibold">
                       {tc("رقم اللوحة", "Plate Number")}
-                    </label>
-                    <div className="relative rounded-xl overflow-hidden" style={{ border: '2px solid #aaff0066', boxShadow: '0 0 14px #aaff0022' }}>
-                      {/* Green Saudi stripe */}
-                      <div className="absolute inset-y-0 right-0 w-2" style={{ background: 'linear-gradient(180deg, #1a6b2a 0%, #2d9e3f 100%)' }} />
+                    </Label>
+                    <div className="relative rounded-xl overflow-hidden border-2 border-border">
+                      <div className="absolute inset-y-0 right-0 w-2 bg-green-700" />
                       <Input
                         id="car-plate"
                         placeholder={tc("مثال: أ ب ج 1234", "e.g. A B C 1234")}
                         value={carInfo.plateNumber}
                         onChange={(e) => setCarInfo({ ...carInfo, plateNumber: e.target.value })}
                         data-testid="input-car-plate"
-                        className="text-center font-mono text-2xl font-black tracking-[0.35em] border-0 h-16 pr-5 focus-visible:ring-0"
-                        style={{ background: '#f5f0dc', color: '#1a1a1a', letterSpacing: '0.35em' }}
+                        className="text-center font-mono text-2xl font-black tracking-[0.35em] border-0 h-16 pr-5 focus-visible:ring-0 bg-amber-50 dark:bg-amber-950/20"
                         dir="ltr"
                       />
                     </div>
-                    <p className="text-xs" style={{ color: '#4a7a8a' }}>{tc("أدخل الحروف والأرقام كما تظهر على اللوحة", "Enter letters and numbers as they appear on the plate")}</p>
+                    <p className="text-xs text-muted-foreground">{tc("أدخل الحروف والأرقام كما تظهر على اللوحة", "Enter letters and numbers as they appear on the plate")}</p>
                   </div>
 
                   {/* Arrival Time */}
                   <div className="space-y-2">
-                    <label className="text-xs font-bold tracking-widest uppercase flex items-center gap-1.5" style={{ color: '#00e5ffcc' }}>
-                      <Clock className="w-3.5 h-3.5" />
+                    <Label className="text-sm font-semibold flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-primary" />
                       {tc("وقت الوصول المتوقع", "Expected Arrival Time")}
-                    </label>
+                    </Label>
                     <Input
                       id="arrival-time-car"
                       type="time"
@@ -776,157 +755,73 @@ export default function DeliverySelectionPage() {
                       onChange={(e) => setArrivalTime(e.target.value)}
                       data-testid="input-arrival-time-car"
                       className="h-12"
-                      style={{ background: '#ffffff08', border: '1px solid #00e5ff33', color: '#e0f4ff' }}
                     />
                   </div>
 
                   {/* Save car toggle */}
-                  <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#00e5ff0a', border: '1px solid #00e5ff22' }}>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border">
                     <Checkbox
                       id="save-car-info"
                       checked={saveCarInfo}
                       onCheckedChange={(checked) => setSaveCarInfo(checked as boolean)}
                       data-testid="checkbox-save-car"
                     />
-                    <Label htmlFor="save-car-info" className="text-sm cursor-pointer flex items-center gap-1.5 flex-1" style={{ color: '#94c8e0' }}>
-                      <Bookmark className="w-3.5 h-3.5" style={{ color: '#00e5ff' }} />
+                    <Label htmlFor="save-car-info" className="text-sm cursor-pointer flex items-center gap-1.5 flex-1 text-foreground">
+                      <Bookmark className="w-3.5 h-3.5 text-primary" />
                       {tc("حفظ بيانات السيارة للطلبات القادمة", "Save car info for future orders")}
                     </Label>
                   </div>
 
-                  {/* Parking Slot Selector — Neon Lot */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold tracking-widest uppercase flex items-center gap-1.5" style={{ color: '#00e5ffcc' }}>
+                  {/* Parking Slot Selector */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold flex items-center gap-1.5">
                       <span>🅿️</span>
                       {tc("موقف سيارتك", "Your Parking Spot")}
                       {carInfo.parkingSlot && (
-                        <span className="mr-auto text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ background: `${carHex}22`, border: `1px solid ${carHex}`, color: carHex, boxShadow: `0 0 8px ${carHex}66` }}>
-                          P{carInfo.parkingSlot}
-                        </span>
+                        <Badge variant="outline" className="mr-auto text-primary border-primary">
+                          {tc("موقف", "Slot")} {carInfo.parkingSlot}
+                        </Badge>
                       )}
-                    </label>
-                    <p className="text-xs -mt-1" style={{ color: '#4a7a8a' }}>{tc("اختر رقم الموقف الذي تقف فيه حتى يجدك الموظف بسرعة", "Select your parking slot so staff can find you quickly")}</p>
+                    </Label>
+                    <p className="text-xs text-muted-foreground">{tc("اختياري — يساعد الموظف على إيجادك بسرعة", "Optional — helps staff find you faster")}</p>
 
-                    {/* Neon Parking Lot */}
-                    <div className="rounded-2xl overflow-hidden p-3" style={{ background: '#0a0e1a', border: '1px solid #00e5ff22' }}>
-                      {/* Entrance sign */}
-                      <div className="flex justify-center mb-3">
-                        <div className="text-[10px] font-black tracking-[0.2em] uppercase px-4 py-1.5 rounded-sm" style={{ background: '#0f1420', color: '#aaff00', border: '1.5px solid #aaff00', boxShadow: '0 0 12px #aaff0066, inset 0 0 8px #aaff0011', textShadow: '0 0 8px #aaff00' }}>
-                          ▼ {tc("مدخل الكافيه", "CAFE ENTRANCE")} ▼
-                        </div>
-                      </div>
-
-                      {/* Slots grid */}
-                      <div className="flex gap-1">
-                        <div className="flex-1 grid grid-cols-3 gap-1">
-                          {[1, 3, 5, 7, 9, 11].map((slot) => {
-                            const isSelected = carInfo.parkingSlot === String(slot);
-                            return (
-                              <button
-                                key={slot}
-                                type="button"
-                                onClick={() => setCarInfo({ ...carInfo, parkingSlot: isSelected ? '' : String(slot) })}
-                                data-testid={`btn-parking-slot-${slot}`}
-                                className="relative flex flex-col items-center justify-center rounded-lg h-14 transition-all duration-200"
-                                style={{
-                                  background: isSelected ? `${carHex}18` : '#ffffff06',
-                                  border: `1.5px solid ${isSelected ? carHex : '#ffffff15'}`,
-                                  boxShadow: isSelected ? `0 0 14px ${carHex}66, inset 0 0 8px ${carHex}11` : 'none',
-                                }}
-                              >
-                                {isSelected && (
-                                  <svg viewBox="0 0 40 20" className="w-8 h-4 mb-0.5" fill={carHex}>
-                                    <rect x="4" y="4" width="32" height="12" rx="4"/>
-                                    <rect x="8" y="2" width="10" height="8" rx="2"/>
-                                    <rect x="22" y="2" width="10" height="8" rx="2"/>
-                                    <circle cx="10" cy="16" r="3" fill="#111"/>
-                                    <circle cx="30" cy="16" r="3" fill="#111"/>
-                                  </svg>
-                                )}
-                                <span className="text-xs font-bold" style={{ color: isSelected ? carHex : '#334155', textShadow: isSelected ? `0 0 6px ${carHex}` : 'none' }}>{slot}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        {/* Central neon lane */}
-                        <div className="w-5 flex flex-col justify-around items-center py-1">
-                          {[...Array(6)].map((_, i) => (
-                            <div key={i} className="w-1 h-2.5 rounded-full" style={{ background: '#facc15', boxShadow: '0 0 6px #facc1599', opacity: 0.8 }} />
-                          ))}
-                        </div>
-
-                        <div className="flex-1 grid grid-cols-3 gap-1">
-                          {[2, 4, 6, 8, 10, 12].map((slot) => {
-                            const isSelected = carInfo.parkingSlot === String(slot);
-                            return (
-                              <button
-                                key={slot}
-                                type="button"
-                                onClick={() => setCarInfo({ ...carInfo, parkingSlot: isSelected ? '' : String(slot) })}
-                                data-testid={`btn-parking-slot-${slot}`}
-                                className="relative flex flex-col items-center justify-center rounded-lg h-14 transition-all duration-200"
-                                style={{
-                                  background: isSelected ? `${carHex}18` : '#ffffff06',
-                                  border: `1.5px solid ${isSelected ? carHex : '#ffffff15'}`,
-                                  boxShadow: isSelected ? `0 0 14px ${carHex}66, inset 0 0 8px ${carHex}11` : 'none',
-                                }}
-                              >
-                                {isSelected && (
-                                  <svg viewBox="0 0 40 20" className="w-8 h-4 mb-0.5" fill={carHex}>
-                                    <rect x="4" y="4" width="32" height="12" rx="4"/>
-                                    <rect x="8" y="2" width="10" height="8" rx="2"/>
-                                    <rect x="22" y="2" width="10" height="8" rx="2"/>
-                                    <circle cx="10" cy="16" r="3" fill="#111"/>
-                                    <circle cx="30" cy="16" r="3" fill="#111"/>
-                                  </svg>
-                                )}
-                                <span className="text-xs font-bold" style={{ color: isSelected ? carHex : '#334155', textShadow: isSelected ? `0 0 6px ${carHex}` : 'none' }}>{slot}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Legend */}
-                      <div className="flex justify-center gap-5 mt-3">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded-sm" style={{ background: '#ffffff06', border: '1px solid #ffffff15' }} />
-                          <span className="text-[10px]" style={{ color: '#475569' }}>{tc("فارغ", "Empty")}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded-sm" style={{ border: `1.5px solid ${carHex}`, background: `${carHex}22`, boxShadow: `0 0 6px ${carHex}66` }} />
-                          <span className="text-[10px]" style={{ color: '#475569' }}>{tc("موقفك", "Your spot")}</span>
-                        </div>
-                      </div>
+                    <div className="grid grid-cols-6 gap-1.5">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((slot) => {
+                        const isSelected = carInfo.parkingSlot === String(slot);
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setCarInfo({ ...carInfo, parkingSlot: isSelected ? '' : String(slot) })}
+                            data-testid={`btn-parking-slot-${slot}`}
+                            className={`flex items-center justify-center rounded-lg h-10 text-sm font-bold border transition-all duration-150 ${
+                              isSelected
+                                ? 'bg-primary text-primary-foreground border-primary'
+                                : 'bg-background text-foreground border-border hover:border-primary/40 hover:bg-primary/5'
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Car Summary — Neon Badge */}
+                  {/* Car Summary */}
                   {carInfo.model && carInfo.color && carInfo.plateNumber && (
-                    <div className="p-4 rounded-2xl relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0e1a 0%, #0f1420 100%)', border: `1.5px solid ${carHex}55`, boxShadow: `0 0 20px ${carHex}22` }}>
-                      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 80% 50%, ${carHex}08 0%, transparent 70%)` }} />
-                      <div className="flex items-center gap-1 mb-3">
-                        <Zap className="w-3.5 h-3.5" style={{ color: '#aaff00' }} />
-                        <p className="text-xs font-black tracking-wider uppercase" style={{ color: '#aaff00', textShadow: '0 0 8px #aaff00' }}>{tc("ملخص بيانات سيارتك", "Your Car Summary")}</p>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div
-                          className="w-12 h-12 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: carHex, boxShadow: `0 0 20px ${carHex}, 0 0 40px ${carHex}44`, border: '2px solid #ffffff22' }}
-                        />
-                        <div>
-                          <p className="font-black text-sm" style={{ color: '#e0f4ff' }}>{carInfo.model} — {carInfo.color}</p>
-                          <p className="text-base font-black font-mono tracking-[0.25em] mt-0.5" dir="ltr" style={{ color: '#aaff00', textShadow: '0 0 8px #aaff0088' }}>{carInfo.plateNumber}</p>
-                          {carInfo.parkingSlot && (
-                            <p className="text-xs font-bold mt-0.5" style={{ color: carHex, textShadow: `0 0 6px ${carHex}` }}>🅿️ {tc("موقف", "Slot")} {carInfo.parkingSlot}</p>
-                          )}
-                        </div>
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800">
+                      <div className="w-10 h-10 rounded-full flex-shrink-0 border-2 border-green-300 dark:border-green-700" style={{ backgroundColor: carHex }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-green-900 dark:text-green-200">{carInfo.model} · {carInfo.color}</p>
+                        <p className="text-base font-black font-mono tracking-widest text-green-700 dark:text-green-400 mt-0.5" dir="ltr">{carInfo.plateNumber}</p>
+                        {carInfo.parkingSlot && (
+                          <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">🅿️ {tc("موقف", "Slot")} {carInfo.parkingSlot}</p>
+                        )}
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Dine-In Details */}

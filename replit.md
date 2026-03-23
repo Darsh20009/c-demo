@@ -546,6 +546,22 @@ CSS Variables defined in `client/src/index.css`:
 ### Fixed: Purchase Invoice Status Operations
 - `server/storage.ts` methods `getPurchaseInvoice`, `updatePurchaseInvoice`, `receivePurchaseInvoice`, `updatePurchaseInvoicePayment`: Added fallback to `findById()` when `findOne({ id })` returns null (since PurchaseInvoiceSchema has no custom `id` field, only MongoDB `_id`)
 
+### Fixed: Bank Transfer Receipt Upload Flow (Customer Checkout)
+- `client/src/pages/checkout.tsx`: Added `receiptFile`/`receiptPreview`/`isUploadingReceipt` state, `handleReceiptFileChange`, `uploadReceiptToServer` function
+- Added receipt upload UI (camera icon, file input, preview) that appears when a payment method with `requiresReceipt: true` is selected
+- Added validation in `handleProceedPayment` to require receipt before proceeding
+- Added `paymentReceiptUrl` to order data in `confirmAndCreateOrder` (uploads to `/api/upload-receipt` first, falls back to base64)
+
+### Fixed: IBAN Display for Bank Transfer Methods
+- `client/src/components/payment-methods.tsx`: Removed incorrect `method.id === 'mada'` condition — IBAN details now show for ANY method with `bankIban`/`bankName` field (including `rajhi`, `alinma`, etc.)
+
+### Fixed: Receipt Display With Order
+- `client/src/components/OrderMeta.tsx`: Re-enabled the "عرض الإيصال" button — was incorrectly commented out. Now shows when order has `paymentReceiptUrl`
+
+### Fixed: Drive-Thru / Car Pickup UI Design
+- `client/src/pages/delivery-selection.tsx`: Replaced dark neon/glow "DRIVE-THRU" design (lines 630-929) with clean professional card layout
+- All functionality preserved: car brand selector, color picker, plate number (Saudi style), arrival time, save car, parking slot (1-12 grid), car summary
+
 ### Key Known Behaviors
 - Purchase invoice `invoiceNumber` auto-generation: creates `PO-YYYYMM-XXXXX` format
 - ERP income statement source: `"orders"` when no journal entries, `"journal"` when accounts exist
