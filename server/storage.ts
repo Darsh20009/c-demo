@@ -1820,24 +1820,20 @@ export class DBStorage implements IStorage {
     // Fetch all raw items in parallel
     const rawResults = await Promise.all(tasks.map(t => RawItemModel.findOne({ id: t.rawItemId }).lean()));
 
-    // For each unique rawItemId, find best stock source:
-    // 1st: exact branchId  2nd: any branch with sufficient qty (fallback for branchId mismatch)
+    // Only deduct from the order's own branch — no cross-branch fallback.
+    // Cross-branch deduction caused phantom stock discrepancies across branches.
     const uniqueRawItemIds = [...new Set(tasks.map(t => t.rawItemId))];
-    const allStocksForItems = await BranchStockModel.find({ rawItemId: { $in: uniqueRawItemIds } }).lean();
+    const branchStocksForItems = await BranchStockModel.find({
+      branchId,
+      rawItemId: { $in: uniqueRawItemIds }
+    }).lean();
 
     const stockResults = tasks.map(task => {
-      // Prefer exact branch match
-      const exactMatch = allStocksForItems.find(s => s.branchId === branchId && s.rawItemId === task.rawItemId);
-      if (exactMatch) return exactMatch;
-      // Fallback: pick branch with maximum available quantity for this raw item
-      const candidates = allStocksForItems
-        .filter(s => s.rawItemId === task.rawItemId && s.currentQuantity > 0)
-        .sort((a, b) => b.currentQuantity - a.currentQuantity);
-      if (candidates.length > 0) {
-        console.log(`[INVENTORY] BranchId fallback: order branchId="${branchId}", using stock from branchId="${candidates[0].branchId}" for rawItemId="${task.rawItemId}"`);
-        return candidates[0];
+      const exactMatch = branchStocksForItems.find(s => s.rawItemId === task.rawItemId);
+      if (!exactMatch) {
+        console.warn(`[INVENTORY] No stock record for rawItemId="${task.rawItemId}" in branchId="${branchId}" — shortage recorded`);
       }
-      return null;
+      return exactMatch ?? null;
     });
 
     // Process each task with atomic $inc updates
@@ -1845,15 +1841,14 @@ export class DBStorage implements IStorage {
       const stock = stockResults[idx] as any;
       const raw = rawResults[idx];
       const { rawItemId, required, unit, source } = task;
-      const effectiveBranchId = stock?.branchId || branchId;
 
       if (stock && stock.currentQuantity >= required) {
         const previousQuantity = stock.currentQuantity;
         const newQuantity = previousQuantity - required;
 
-        // Atomic deduction to avoid race conditions
+        // Atomic deduction to avoid race conditions — always use order's branchId
         await BranchStockModel.findOneAndUpdate(
-          { branchId: effectiveBranchId, rawItemId, currentQuantity: { $gte: required } },
+          { branchId, rawItemId, currentQuantity: { $gte: required } },
           { $inc: { currentQuantity: -required }, $set: { lastUpdated: new Date() } }
         );
 
@@ -1876,7 +1871,7 @@ export class DBStorage implements IStorage {
 
         StockMovementModel.create({
           id: nanoid(),
-          branchId: effectiveBranchId,
+          branchId,
           rawItemId,
           movementType: 'sale',
           quantity: required,
@@ -1888,14 +1883,33 @@ export class DBStorage implements IStorage {
           notes: `Order #${orderId} - ${source} Item`
         }).catch(err => console.error('[INVENTORY] StockMovement create error:', err));
       } else {
-        console.warn(`[INVENTORY] Shortage: rawItemId="${rawItemId}" required=${required} available=${stock?.currentQuantity ?? 0}`);
+        const available = stock ? stock.currentQuantity : 0;
+        console.warn(`[INVENTORY] Shortage in branch "${branchId}": rawItemId="${rawItemId}" required=${required} available=${available}`);
         shortages.push({
           rawItemId,
           rawItemName: (raw as any)?.nameAr || "Unknown",
           required,
-          available: stock ? stock.currentQuantity : 0,
+          available,
           unit
         });
+        // Auto-create a stock alert so branch managers are notified of the shortage
+        StockAlertModel.findOneAndUpdate(
+          { branchId, rawItemId, isResolved: { $ne: 1 } },
+          {
+            $setOnInsert: {
+              id: nanoid(),
+              branchId,
+              rawItemId,
+              alertType: 'out_of_stock',
+              currentQuantity: available,
+              thresholdQuantity: required,
+              isRead: 0,
+              isResolved: 0,
+              createdAt: new Date(),
+            }
+          },
+          { upsert: true }
+        ).catch(err => console.error('[INVENTORY] StockAlert create error:', err));
       }
     }));
 
