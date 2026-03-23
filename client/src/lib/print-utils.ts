@@ -86,13 +86,10 @@ function openPrintWindow(html: string, title: string, config: PrintConfig = {}):
 
     const iframeDoc = iframe.contentWindow?.document;
     if (iframeDoc) {
-      iframeDoc.open();
-      iframeDoc.write(modifiedHtml);
-      iframeDoc.close();
-      if (iframe.contentDocument) {
-        iframe.contentDocument.title = title;
-      }
-      setTimeout(() => {
+      let printed = false;
+      const doPrint = () => {
+        if (printed) return;
+        printed = true;
         try {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
@@ -101,8 +98,14 @@ function openPrintWindow(html: string, title: string, config: PrintConfig = {}):
         }
         setTimeout(() => {
           if (document.body.contains(iframe)) document.body.removeChild(iframe);
-        }, autoClose ? 1500 : 4000);
-      }, 400);
+        }, autoClose ? 1500 : 5000);
+      };
+      iframe.onload = () => setTimeout(doPrint, 200);
+      // Fallback timeout in case onload doesn't fire (e.g. same-origin iframe with no resources)
+      setTimeout(doPrint, 800);
+      iframeDoc.open();
+      iframeDoc.write(modifiedHtml);
+      iframeDoc.close();
     }
     return null;
   }

@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Coffee, ShoppingBag, User, Phone, Trash2, Plus, Minus, ArrowRight, Check, Scan, Search, X, Gift, Printer, MonitorSmartphone, Settings, Wifi, WifiOff, FileText, Store, Truck, MapPin, Wallet, CreditCard } from "lucide-react";
+import qiroxLogoStaff from "@assets/qirox-logo-staff.png";
 import QRScanner from "@/components/qr-scanner";
 import BarcodeScanner from "@/components/barcode-scanner";
 import { TableOccupancyAlerts } from "@/components/table-occupancy-alerts";
@@ -942,8 +943,8 @@ export default function EmployeeCashier() {
  <div className="max-w-7xl mx-auto">
  <div className="flex items-center justify-between mb-6">
  <div className="flex items-center gap-3">
- <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center">
- <Coffee className="w-6 h-6 text-white" />
+ <div className="w-12 h-12 flex-shrink-0">
+ <img src={qiroxLogoStaff} alt="QIROX" className="w-full h-full object-contain rounded-2xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
  </div>
  <div>
  <h1 className="text-2xl font-bold text-accent">{tc("نظام الكاشير","Cashier System")}</h1>

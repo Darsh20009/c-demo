@@ -7,6 +7,7 @@ import { Coffee, LogOut, ShoppingCart, ClipboardList, User, ChefHat, Warehouse, 
 import type { Employee } from "@shared/schema";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { useTranslate } from "@/lib/useTranslate";
+import qiroxLogo from "@assets/qirox-logo-staff.png";
 
 export default function EmployeeHome() {
   const [, setLocation] = useLocation();
@@ -56,8 +57,8 @@ export default function EmployeeHome() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <Coffee className="w-5 h-5 sm:w-8 sm:h-8 text-white" />
+              <div className="w-10 h-10 sm:w-16 sm:h-16 flex-shrink-0">
+                <img src={qiroxLogo} alt="QIROX" className="w-full h-full object-contain rounded-2xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
               <div>
                 <h1 className="text-xl sm:text-3xl font-bold text-accent">{tc("لوحة التحكم", "Control Panel")}</h1>
