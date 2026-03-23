@@ -14302,30 +14302,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete menu category (soft delete)
+  // Delete menu category with smart product reassignment
   app.delete("/api/menu-categories/:id", requireAuth, requireManager, async (req: AuthRequest, res) => {
     try {
-      const { MenuCategoryModel } = await import("@shared/schema");
+      const { MenuCategoryModel, CoffeeItemModel } = await import("@shared/schema");
       const tenantId = getTenantIdFromRequest(req) || "demo-tenant";
       
-      // Check if it's a system category
+      // Find the category to delete
       const category = await MenuCategoryModel.findOne({ id: req.params.id, tenantId });
       if (!category) {
         return res.status(404).json({ error: "القسم غير موجود" });
       }
       if (category.isSystem) {
-        return res.status(400).json({ error: "لا يمكن حذف قسم أساسي" });
+        return res.status(400).json({ error: "لا يمكن حذف قسم أساسي من النظام" });
       }
       
-      // Soft delete by setting isActive to 0
+      // Find all active categories except the one being deleted (same department preferred)
+      const remainingCategories = await MenuCategoryModel.find({
+        tenantId,
+        isActive: 1,
+        id: { $ne: req.params.id },
+      }).lean();
+      
+      // Find all items that belong to this category
+      const orphanedItems = await (CoffeeItemModel as any).find({
+        tenantId,
+        category: req.params.id,
+      }).lean();
+      
+      let reassignedCount = 0;
+      
+      if (orphanedItems.length > 0 && remainingCategories.length > 0) {
+        // Smart keyword-based reassignment
+        const deletedName = (category.nameAr || "").toLowerCase();
+        
+        // Keyword groups for smart matching
+        const keywordGroups: Record<string, string[]> = {
+          coffee:    ["قهوة", "كوفي", "اسبريسو", "cappuccino", "latte", "coffee", "espresso", "قهوه"],
+          tea:       ["شاي", "tea", "تي", "أعشاب", "herbs"],
+          cold:      ["بارد", "مثلج", "عصير", "ice", "cold", "فريش", "fresh", "مشروب"],
+          hot:       ["ساخن", "hot", "دافئ", "warm"],
+          food:      ["أكل", "طعام", "وجبة", "food", "meal", "ساندوتش", "sandwich", "سلطة", "salad"],
+          dessert:   ["حلوى", "كيك", "cake", "dessert", "حلو", "sweet", "بسكويت"],
+          bakery:    ["مخبوزات", "خبز", "bread", "bakery", "معجنات", "croissant"],
+          seasonal:  ["موسمي", "seasonal", "خاص", "special", "محدود", "limited"],
+        };
+        
+        const getKeywordGroup = (name: string): string | null => {
+          const lower = name.toLowerCase();
+          for (const [group, keywords] of Object.entries(keywordGroups)) {
+            if (keywords.some(kw => lower.includes(kw))) return group;
+          }
+          return null;
+        };
+        
+        const deletedGroup = getKeywordGroup(deletedName);
+        
+        for (const item of orphanedItems) {
+          let bestCategory: any = null;
+          
+          // 1. Try same department + keyword similarity
+          const sameDeptCats = remainingCategories.filter(c => c.department === category.department);
+          const pool = sameDeptCats.length > 0 ? sameDeptCats : remainingCategories;
+          
+          const itemGroup = getKeywordGroup((item as any).nameAr || "");
+          
+          // Priority 1: matching keyword group
+          if (deletedGroup || itemGroup) {
+            const targetGroup = itemGroup || deletedGroup;
+            bestCategory = pool.find(c => getKeywordGroup(c.nameAr || "") === targetGroup);
+          }
+          
+          // Priority 2: first same-department category
+          if (!bestCategory) {
+            bestCategory = pool[0];
+          }
+          
+          // Priority 3: any remaining category
+          if (!bestCategory) {
+            bestCategory = remainingCategories[0];
+          }
+          
+          if (bestCategory) {
+            await (CoffeeItemModel as any).updateOne(
+              { _id: (item as any)._id },
+              { $set: { category: bestCategory.id, updatedAt: new Date() } }
+            );
+            reassignedCount++;
+          }
+        }
+      }
+      
+      // Soft delete the category
       await MenuCategoryModel.findOneAndUpdate(
         { id: req.params.id, tenantId },
         { $set: { isActive: 0, updatedAt: new Date() } }
       );
-      // Clear server-side cache so next GET reflects the deletion
+      
+      // Clear cache
       cache.invalidate('menu-cats:' + tenantId);
-      res.json({ success: true, message: "تم حذف القسم بنجاح" });
+      cache.invalidate('coffee-items:' + tenantId);
+      
+      res.json({
+        success: true,
+        message: `تم حذف القسم بنجاح${reassignedCount > 0 ? ` وتم نقل ${reassignedCount} منتج إلى أقسام مناسبة تلقائياً` : ""}`,
+        reassignedCount,
+      });
     } catch (error) {
+      console.error("Error deleting category:", error);
       res.status(500).json({ error: "فشل في حذف القسم" });
     }
   });

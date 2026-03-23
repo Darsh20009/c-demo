@@ -400,7 +400,7 @@ export default function ErpAccountingPage() {
   const [showAddExpenseDialog, setShowAddExpenseDialog] = useState(false);
   const [showAddVendorDialog, setShowAddVendorDialog] = useState(false);
   const [newJournal, setNewJournal] = useState({ description: "", lines: [{ accountId: "", accountNumber: "", accountName: "", debit: 0, credit: 0 }, { accountId: "", accountNumber: "", accountName: "", debit: 0, credit: 0 }] });
-  const [newExpense, setNewExpense] = useState({ description: "", amount: 0, category: "operating", accountId: "" });
+  const [newExpense, setNewExpense] = useState({ description: "", amount: 0, category: "operating", accountId: "", paymentMethod: "cash" });
   const [newVendor, setNewVendor] = useState({ nameAr: "", nameEn: "", phone: "", email: "", taxNumber: "" });
 
   const { data: dashboardData, isLoading: dashboardLoading } = useQuery<{ success: boolean; summary: DashboardSummary }>({
@@ -497,7 +497,7 @@ export default function ErpAccountingPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/erp/expenses"] });
       queryClient.invalidateQueries({ queryKey: ["/api/erp/dashboard"] });
       setShowAddExpenseDialog(false);
-      setNewExpense({ description: "", amount: 0, category: "operating", accountId: "" });
+      setNewExpense({ description: "", amount: 0, category: "operating", accountId: "", paymentMethod: "cash" });
       toast({ title: tc("تم إضافة المصروف بنجاح", "Expense added successfully") });
     },
     onError: (error: any) => { toast({ title: error.message || tc("فشل في إضافة المصروف", "Failed to add expense"), variant: "destructive" }); },
@@ -1862,6 +1862,24 @@ export default function ErpAccountingPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>طريقة الدفع</Label>
+              <Select
+                value={newExpense.paymentMethod}
+                onValueChange={(value) => setNewExpense({ ...newExpense, paymentMethod: value })}
+              >
+                <SelectTrigger data-testid="select-expense-payment-method">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">نقدي</SelectItem>
+                  <SelectItem value="bank_transfer">تحويل بنكي</SelectItem>
+                  <SelectItem value="credit_card">بطاقة ائتمان</SelectItem>
+                  <SelectItem value="check">شيك</SelectItem>
+                  <SelectItem value="mada">مدى</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>
