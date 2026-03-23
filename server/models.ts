@@ -88,6 +88,9 @@ const businessConfigSchema = new mongoose.Schema({
     posEnabled: { type: Boolean, default: true },
     qahwaCardEnabled: { type: Boolean, default: true },
     bankTransferEnabled: { type: Boolean, default: false },
+    bankIban: { type: String, default: '' },
+    bankName: { type: String, default: '' },
+    bankAccountHolder: { type: String, default: '' },
     stcPayEnabled: { type: Boolean, default: false },
     neoleap: {
       clientId: String,

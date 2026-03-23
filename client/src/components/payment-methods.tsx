@@ -440,9 +440,9 @@ export default function PaymentMethods({
                   </div>
                 </div>
                 {/* Bank Transfer IBAN Details */}
-                {isSelected && ((method as any).bankIban || (method as any).bankName) && (
+                {isSelected && ((method as any).requiresReceipt || (method as any).bankIban || (method as any).bankName) && (
                   <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800 space-y-2">
-                    <p className="text-xs font-bold text-blue-700 dark:text-blue-300">بيانات التحويل البنكي</p>
+                    <p className="text-xs font-bold text-blue-700 dark:text-blue-300">بيانات التحويل</p>
                     {(method as any).bankAccountHolder && (
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">اسم الحساب</span>
@@ -459,6 +459,12 @@ export default function PaymentMethods({
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">رقم الآيبان</span>
                         <span className="text-xs font-mono font-bold text-blue-700 dark:text-blue-300 dir-ltr" dir="ltr">{(method as any).bankIban}</span>
+                      </div>
+                    )}
+                    {!(method as any).bankIban && !(method as any).bankName && method.details && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">رقم الحساب</span>
+                        <span className="text-xs font-mono font-bold text-blue-700 dark:text-blue-300 dir-ltr" dir="ltr">{method.details}</span>
                       </div>
                     )}
                     <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1">

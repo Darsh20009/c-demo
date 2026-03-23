@@ -2183,8 +2183,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/payment-methods", async (req, res) => {
     try {
       const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
-      const config = await BusinessConfigModel.findOne({ tenantId });
-      const pg = config?.paymentGateway;
+      const configDoc = await BusinessConfigModel.findOne({ tenantId });
+      const pg = configDoc?.toObject()?.paymentGateway;
 
       const allMethods: any[] = [];
 
@@ -2215,6 +2215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           nameEn: 'Bank Transfer',
           details: pg.bankIban ? `IBAN: ${pg.bankIban}` : 'تحويل مباشر',
           icon: 'fas fa-university',
+          requiresReceipt: true,
           bankIban: pg.bankIban || '',
           bankName: pg.bankName || '',
           bankAccountHolder: pg.bankAccountHolder || '',
@@ -2258,7 +2259,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "غير مصرح" });
       }
       const tenantId = getTenantIdFromRequest(req) || 'demo-tenant';
-      const config = await BusinessConfigModel.findOne({ tenantId });
+      const configDoc = await BusinessConfigModel.findOne({ tenantId });
+      const config = configDoc?.toObject();
       const pg = config?.paymentGateway;
       if (!pg) {
         return res.json({
@@ -2372,7 +2374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const config = await BusinessConfigModel.findOneAndUpdate(
         { tenantId },
         { $set: updates },
-        { new: true, upsert: true }
+        { new: true, upsert: true, strict: false }
       );
 
       res.json({ success: true, message: "تم حفظ إعدادات الدفع بنجاح" });
