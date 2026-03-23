@@ -291,8 +291,18 @@ export default function InventoryRecipesPage() {
   });
 
   const { data: recipes = [], isLoading: loadingRecipes, isFetched: recipesFetched } = useQuery<RecipeItem[]>({
-    queryKey: selectedCoffeeItem?.id ? ["/api/inventory/recipes", selectedCoffeeItem.id] : ["/api/inventory/recipes"],
+    queryKey: ["/api/inventory/recipes", selectedCoffeeItem?.id],
     enabled: !!selectedCoffeeItem?.id,
+    queryFn: async () => {
+      if (!selectedCoffeeItem?.id) return [];
+      const res = await fetch(`/api/inventory/recipes/${selectedCoffeeItem.id}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("فشل في جلب الوصفة");
+      const data = await res.json();
+      // Route returns { items: RecipeItem[], totalCost: number }
+      return Array.isArray(data) ? data : (data.items || []);
+    },
   });
 
   const { data: allRecipes = [] } = useQuery<RecipeItem[]>({

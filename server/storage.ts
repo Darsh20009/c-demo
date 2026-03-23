@@ -1596,7 +1596,12 @@ export class DBStorage implements IStorage {
   }
 
   async createPurchaseInvoice(invoice: InsertPurchaseInvoice): Promise<PurchaseInvoice> {
-    const newInvoice = await PurchaseInvoiceModel.create(invoice);
+    // Auto-generate a unique invoice number if not provided
+    const year = new Date().getFullYear();
+    const month = String(new Date().getMonth() + 1).padStart(2, "0");
+    const count = await PurchaseInvoiceModel.countDocuments({});
+    const invoiceNumber = `PO-${year}${month}-${String(count + 1).padStart(5, "0")}`;
+    const newInvoice = await PurchaseInvoiceModel.create({ ...invoice, invoiceNumber });
     return serializeDoc(newInvoice);
   }
 
