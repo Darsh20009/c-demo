@@ -245,7 +245,7 @@ async function deductInventoryForOrder(orderId: string, branchId: string, employ
       try {
         // Update Customer document if customerId exists
         if (order.customerId) {
-          await CustomerModel.findByIdAndUpdate(order.customerId, {
+          await CustomerModel.findOneAndUpdate({ id: order.customerId }, {
             $inc: { points: totalPointsToAward, pendingPoints: -Math.abs(totalPointsToAward) }
           });
         }
@@ -653,7 +653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/send-email", requireAuth, requireManager, async (req: AuthRequest, res) => {
     try {
       const { customerId, subject, message } = req.body;
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
       if (!customer || !customer.email) {
         return res.status(404).json({ error: "Customer not found or has no email" });
       }
@@ -1261,7 +1261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       setImmediate(async () => {
         try {
           if (order.customerId) {
-            const customer = await CustomerModel.findById(order.customerId);
+            const customer = await CustomerModel.findOne({ id: order.customerId });
             if (customer && customer.email) {
               const { sendOrderNotificationEmail } = await import("./mail-service");
               await sendOrderNotificationEmail(
@@ -4022,7 +4022,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "يجب أن تكون النقاط من مضاعفات 100" });
       }
 
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
       if (!customer || (customer.points || 0) < points) {
         return res.status(400).json({ error: "النقاط غير كافية" });
       }
@@ -4053,7 +4053,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fromId = (req as any).customer?.id || req.employee?.id;
       if (!fromId) return res.status(401).json({ error: "غير مصرح لك" });
 
-      const fromCustomer = await CustomerModel.findById(fromId);
+      const fromCustomer = await CustomerModel.findOne({ id: fromId });
       if (!fromCustomer) return res.status(404).json({ error: "حساب المرسل غير موجود" });
 
       // Verify PIN
@@ -4160,7 +4160,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         attempts: 0,
       });
 
-      const customer = await CustomerModel.findById(loyaltyCard.customerId);
+      const customer = await CustomerModel.findOne({ id: loyaltyCard.customerId });
       const customerEmail = customer?.email;
       const customerName = customer?.name || loyaltyCard.customerName || 'عميل';
 
@@ -4252,7 +4252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/wallet/pay", requireAuth, async (req: AuthRequest, res) => {
     try {
       const { customerId, amount } = req.body;
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
       if (!customer) return res.status(404).json({ error: "العميل غير موجود" });
       
       if ((customer.walletBalance || 0) < amount) {
@@ -14593,7 +14593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerId = (req as any).user?.id;
 
       // Get customer info
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
       if (!customer || !customer.email) {
         return res.status(400).json({ error: "بريد العميل غير متوفر" });
       }
@@ -14619,7 +14619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/send-referral-email", requireAuth, async (req, res) => {
     try {
       const customerId = (req as any).user?.id;
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
 
       if (!customer || !customer.email) {
         return res.status(400).json({ error: "بريد العميل غير متوفر" });
@@ -14648,7 +14648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { pointsEarned } = req.body;
       const customerId = (req as any).user?.id;
 
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
       if (!customer || !customer.email) {
         return res.status(400).json({ error: "بريد العميل غير متوفر" });
       }
@@ -14675,7 +14675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { customerId, promotionTitle, promotionDescription, discountCode } =
         req.body;
 
-      const customer = await CustomerModel.findById(customerId);
+      const customer = await CustomerModel.findOne({ id: customerId });
       if (!customer || !customer.email) {
         return res.status(400).json({ error: "بريد العميل غير متوفر" });
       }
