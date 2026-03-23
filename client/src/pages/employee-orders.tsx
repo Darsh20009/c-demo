@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Coffee, BellRing, RefreshCw, ArrowRight, Search, DollarSign, XCircle, Undo2, Clock, User, Phone, CreditCard, Banknote, CheckCircle, PlayCircle, Loader2, MapPin, Printer } from "lucide-react";
+import { Coffee, BellRing, RefreshCw, ArrowRight, Search, DollarSign, XCircle, Undo2, Clock, User, Phone, CreditCard, Banknote, CheckCircle, PlayCircle, Loader2, MapPin, Printer, Eye, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import { ReceiptInvoice } from "@/components/receipt-invoice";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import SarIcon from "@/components/sar-icon";
 import { useTranslate } from "@/lib/useTranslate";
+import { PaymentReceiptDialog } from "@/components/PaymentReceiptDialog";
 
 export default function EmployeeOrders() {
   const { toast } = useToast();
@@ -31,6 +32,31 @@ export default function EmployeeOrders() {
   const [currentOrder, setCurrentOrder] = useState<any>(null);
   const [receivedAmount, setReceivedAmount] = useState<string>("");
   const [changeAmount, setChangeAmount] = useState<number>(0);
+  const [receiptDialogOrder, setReceiptDialogOrder] = useState<any>(null);
+
+  const BANK_TRANSFER_METHODS = ['mada', 'rajhi', 'alinma', 'ur', 'barq', 'bank_transfer'];
+
+  const getPaymentLabel = (method: string) => {
+    const labels: Record<string, { label: string; icon: any }> = {
+      cash:           { label: tc("نقداً", "Cash"),           icon: Banknote },
+      pos:            { label: tc("شبكة", "Network"),         icon: CreditCard },
+      'pos-network':  { label: tc("شبكة", "Network"),         icon: CreditCard },
+      mada:           { label: tc("تحويل بنكي", "Bank Transfer"), icon: Building2 },
+      rajhi:          { label: tc("بنك الراجحي", "Al Rajhi"), icon: Building2 },
+      alinma:         { label: tc("Alinma Pay", "Alinma Pay"), icon: Building2 },
+      ur:             { label: tc("Ur Pay", "Ur Pay"),         icon: Building2 },
+      barq:           { label: tc("Barq", "Barq"),             icon: Building2 },
+      'qahwa-card':   { label: tc("بطاقة كيروكس", "QIROX Card"), icon: CreditCard },
+      'loyalty-card': { label: tc("بطاقة ولاء", "Loyalty Card"), icon: CreditCard },
+      'stc-pay':      { label: tc("STC Pay", "STC Pay"),       icon: CreditCard },
+      'apple_pay':    { label: tc("Apple Pay", "Apple Pay"),   icon: CreditCard },
+    };
+    return labels[method] || { label: method || tc("شبكة", "Card"), icon: CreditCard };
+  };
+
+  const isPaymentConfirmed = (order: any) =>
+    order.paymentStatus === 'paid' ||
+    ['payment_confirmed', 'completed'].includes(order.status);
 
   useEffect(() => {
     const stored = localStorage.getItem("currentEmployee");
@@ -457,16 +483,30 @@ export default function EmployeeOrders() {
                             <Printer className="w-3.5 h-3.5 ml-1" />
                             {tc("طباعة", "Print")}
                           </Button>
-                          <Badge variant={order.paymentStatus === 'paid' ? 'success' : 'outline'} className="text-[10px]">
-                            {order.paymentStatus === 'paid' ? tc('مدفوع', 'Paid') : tc('غير مدفوع', 'Unpaid')}
+                          <Badge variant={isPaymentConfirmed(order) ? 'success' : 'outline'} className="text-[10px]">
+                            {isPaymentConfirmed(order) ? tc('مدفوع', 'Paid') : tc('غير مدفوع', 'Unpaid')}
                           </Badge>
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                            {order.paymentMethod === 'cash' ? (
-                              <><Banknote className="w-3 h-3" /> {tc("نقدي", "Cash")}</>
-                            ) : (
-                              <><CreditCard className="w-3 h-3" /> {tc("شبكة", "Card")}</>
-                            )}
-                          </span>
+                          {(() => {
+                            const pm = getPaymentLabel(order.paymentMethod);
+                            const Icon = pm.icon;
+                            return (
+                              <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                                <Icon className="w-3 h-3" /> {pm.label}
+                              </span>
+                            );
+                          })()}
+                          {order.paymentReceiptUrl && BANK_TRANSFER_METHODS.includes(order.paymentMethod) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-[10px] text-blue-600 border-blue-300"
+                              onClick={() => setReceiptDialogOrder(order)}
+                              data-testid={`button-view-receipt-${orderId}`}
+                            >
+                              <Eye className="w-3 h-3 ml-1" />
+                              {tc("عرض التحويل", "View Transfer")}
+                            </Button>
+                          )}
                         </div>
                       </div>
 
@@ -516,13 +556,19 @@ export default function EmployeeOrders() {
                           </Button>
                         )}
 
-                        {order.paymentStatus !== 'paid' && !['completed', 'cancelled'].includes(order.status) && (
+                        {!isPaymentConfirmed(order) && !['completed', 'cancelled'].includes(order.status) && (
                           <Button 
                             size="sm" 
                             variant="outline" 
                             onClick={() => {
                               if (order.paymentMethod === 'cash') {
                                 handleCashPayment(order);
+                              } else if (BANK_TRANSFER_METHODS.includes(order.paymentMethod)) {
+                                if (order.paymentReceiptUrl) {
+                                  setReceiptDialogOrder({ ...order, confirmOnClose: true });
+                                } else {
+                                  updatePaymentMutation.mutate({ id: orderId, paymentStatus: 'paid' });
+                                }
                               } else {
                                 updatePaymentMutation.mutate({ id: orderId, paymentStatus: 'paid' });
                               }
@@ -531,7 +577,7 @@ export default function EmployeeOrders() {
                             data-testid={`button-confirm-payment-${orderId}`}
                           >
                             <DollarSign className="w-3.5 h-3.5 ml-1" />
-                            تأكيد الدفع
+                            {BANK_TRANSFER_METHODS.includes(order.paymentMethod) ? tc("تأكيد التحويل", "Confirm Transfer") : tc("تأكيد الدفع", "Confirm Payment")}
                           </Button>
                         )}
 
@@ -667,6 +713,30 @@ export default function EmployeeOrders() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {/* Payment Receipt View Dialog */}
+      {receiptDialogOrder && (
+        <PaymentReceiptDialog
+          open={!!receiptDialogOrder}
+          onOpenChange={(open) => {
+            if (!open) {
+              if (receiptDialogOrder?.confirmOnClose) {
+                const orderId = receiptDialogOrder.id || receiptDialogOrder._id;
+                updatePaymentMutation.mutate({ id: orderId, paymentStatus: 'paid' });
+              }
+              setReceiptDialogOrder(null);
+            }
+          }}
+          orderId={receiptDialogOrder.id || receiptDialogOrder._id}
+          receiptUrl={receiptDialogOrder.paymentReceiptUrl}
+          showConfirm={receiptDialogOrder?.confirmOnClose}
+          onConfirm={() => {
+            const orderId = receiptDialogOrder.id || receiptDialogOrder._id;
+            updatePaymentMutation.mutate({ id: orderId, paymentStatus: 'paid' });
+            setReceiptDialogOrder(null);
+          }}
+        />
+      )}
+
       <MobileBottomNav employeeRole={employee?.role} />
     </div>
   );

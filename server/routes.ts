@@ -10607,6 +10607,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates: any = { paymentStatus };
       if (paymentDetails) updates.paymentDetails = paymentDetails;
 
+      // If marking as paid, also move pending orders to payment_confirmed so kitchen sees them
+      const existingOrder = await OrderModel.findOne({ id }) || await OrderModel.findById(id);
+      if (paymentStatus === 'paid' && existingOrder?.status === 'pending') {
+        updates.status = 'payment_confirmed';
+      }
+
       let updatedOrder = await OrderModel.findOneAndUpdate(
         { id },
         { $set: updates },
