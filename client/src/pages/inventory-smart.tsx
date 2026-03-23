@@ -95,7 +95,7 @@ interface Branch { id?: string; nameAr: string; }
 function getStatus(item: RawItem, stock?: BranchStock) {
   const qty  = stock?.currentQuantity ?? 0;
   const min  = item.minStockLevel ?? 0;
-  const max  = item.maxStockLevel ?? min * 3 || 100;
+  const max  = item.maxStockLevel ?? (min * 3 || 100);
   const pct  = max > 0 ? Math.min(100, (qty / max) * 100) : 0;
   if (qty <= 0)    return { key: "out",  label: "نفد المخزون", badge: "bg-red-100 text-red-700 border border-red-200",    bar: "bg-red-500",    pct };
   if (qty <= min)  return { key: "low",  label: "مخزون منخفض", badge: "bg-amber-100 text-amber-700 border border-amber-200", bar: "bg-amber-500",  pct };
