@@ -658,64 +658,55 @@ export default function AccountingDashboardPage() {
                   </Card>
 
                   <Card 
-                    className={`bg-gradient-to-br ${dashboardData.netProfit >= 0 ? 'from-blue-500 to-blue-600' : 'from-red-600 to-red-700'} text-white cursor-pointer transition-transform hover:scale-[1.02]`}
-                    onClick={() => openDrilldown('orders')}
-                    data-testid="card-profit-drilldown"
+                    className="bg-gradient-to-br from-orange-500 to-orange-600 text-white cursor-pointer transition-transform hover:scale-[1.02]"
+                    onClick={() => openDrilldown('cogs')}
+                    data-testid="card-cogs-total-drilldown"
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between gap-2">
                         <div>
-                          <p className={`${dashboardData.netProfit >= 0 ? 'text-blue-100' : 'text-red-100'} text-sm flex items-center gap-1`}>
-                            صافي الربح
+                          <p className="text-orange-100 text-sm flex items-center gap-1">
+                            إجمالي المصروفات (شامل المخزون)
                             <Eye className="w-3 h-3" />
                           </p>
-                          <p className="text-3xl font-bold mt-1" data-testid="text-net-profit">{dashboardData.netProfit.toFixed(2)}</p>
-                          <p className={`${dashboardData.netProfit >= 0 ? 'text-blue-200' : 'text-red-200'} text-xs mt-1`}>ريال سعودي - انقر للتفاصيل</p>
+                          <p className="text-3xl font-bold mt-1" data-testid="text-total-all-expenses">{(dashboardData.totalCogs + dashboardData.totalExpenses).toFixed(2)}</p>
+                          <p className="text-orange-200 text-xs mt-1">ريال سعودي - انقر للتفاصيل</p>
                         </div>
-                        <PiggyBank className={`w-12 h-12 ${dashboardData.netProfit >= 0 ? 'text-blue-200' : 'text-red-200'}`} />
+                        <TrendingDown className="w-12 h-12 text-orange-200" />
                       </div>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Profit Breakdown Card */}
+                {/* Expenses Breakdown Card */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="w-5 h-5 text-green-600" />
-                      تحليل الأرباح التفصيلي
+                      <DollarSign className="w-5 h-5 text-red-600" />
+                      تحليل المصروفات التفصيلي
                     </CardTitle>
-                    <CardDescription>تفاصيل حسابات الأرباح وهوامش الربح</CardDescription>
+                    <CardDescription>تفاصيل الإيرادات والمصروفات (تكلفة المخزون + التشغيل)</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                       <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                        <p className="text-muted-foreground text-sm">{tc("إجمالي الربح", "Gross Profit")}</p>
-                        <p className="text-2xl font-bold text-green-600" data-testid="text-gross-profit">{dashboardData.grossProfit.toFixed(2)}</p>
+                        <p className="text-muted-foreground text-sm">إجمالي الإيرادات</p>
+                        <p className="text-2xl font-bold text-green-600" data-testid="text-gross-profit">{dashboardData.totalRevenue.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground"><SarIcon /></p>
                       </div>
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                        <p className="text-muted-foreground text-sm">هامش الربح الإجمالي</p>
-                        <p className="text-2xl font-bold text-blue-600">
-                          {dashboardData.totalRevenue > 0 
-                            ? ((dashboardData.grossProfit / dashboardData.totalRevenue) * 100).toFixed(1) 
-                            : "0"}%
-                        </p>
-                        <p className="text-xs text-muted-foreground">من الإيرادات</p>
-                      </div>
-                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
-                        <p className="text-muted-foreground text-sm">{tc("صافي الربح", "Net Profit")}</p>
-                        <p className={`text-2xl font-bold ${dashboardData.netProfit >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
-                          {dashboardData.netProfit.toFixed(2)}
+                      <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-center">
+                        <p className="text-muted-foreground text-sm">تكلفة المخزون المستخدم</p>
+                        <p className="text-2xl font-bold text-orange-600">
+                          {dashboardData.totalCogs.toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground"><SarIcon /></p>
                       </div>
-                      <div className="p-4 bg-background dark:bg-primary/20 rounded-lg text-center">
-                        <p className="text-muted-foreground text-sm">هامش صافي الربح</p>
-                        <p className={`text-2xl font-bold ${dashboardData.profitMargin >= 0 ? 'text-accent' : 'text-red-600'}`}>
-                          {dashboardData.profitMargin.toFixed(1)}%
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                        <p className="text-muted-foreground text-sm">المصروفات التشغيلية</p>
+                        <p className="text-2xl font-bold text-red-600">
+                          {dashboardData.totalExpenses.toFixed(2)}
                         </p>
-                        <p className="text-xs text-muted-foreground">من الإيرادات</p>
+                        <p className="text-xs text-muted-foreground"><SarIcon /></p>
                       </div>
                     </div>
                     
@@ -730,21 +721,17 @@ export default function AccountingDashboardPage() {
                           <span className="font-medium text-accent">-{dashboardData.totalVat.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between">
-                          <span>{tc("تكلفة المكونات (COGS)", "Ingredients Cost (COGS)")}</span>
-                          <span className="font-medium text-red-600">-{dashboardData.totalCogs.toFixed(2)} <SarIcon /></span>
-                        </div>
-                        <div className="flex justify-between border-t pt-2">
-                          <span className="font-medium">= إجمالي الربح</span>
-                          <span className="font-bold text-green-600">{dashboardData.grossProfit.toFixed(2)} <SarIcon /></span>
+                          <span>تكلفة مخزون المشروبات (مصروف)</span>
+                          <span className="font-medium text-orange-600">-{dashboardData.totalCogs.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between">
                           <span>{tc("المصروفات التشغيلية", "Operating Expenses")}</span>
                           <span className="font-medium text-red-600">-{dashboardData.totalExpenses.toFixed(2)} <SarIcon /></span>
                         </div>
                         <div className="flex justify-between border-t pt-2 border-primary">
-                          <span className="font-bold">= صافي الربح</span>
-                          <span className={`font-bold text-lg ${dashboardData.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {dashboardData.netProfit.toFixed(2)} <SarIcon />
+                          <span className="font-bold">= إجمالي المصروفات (المخزون + التشغيل)</span>
+                          <span className="font-bold text-lg text-red-600">
+                            {(dashboardData.totalCogs + dashboardData.totalExpenses).toFixed(2)} <SarIcon />
                           </span>
                         </div>
                       </div>
@@ -757,7 +744,7 @@ export default function AccountingDashboardPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <BarChart3 className="w-5 h-5 text-accent" />
-                      صافي الربح اليومي (آخر 7 أيام)
+                      الإيرادات اليومية (آخر 7 أيام)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -793,12 +780,12 @@ export default function AccountingDashboardPage() {
                             />
                             <Area 
                               type="monotone" 
-                              dataKey="netProfit" 
+                              dataKey="cogs" 
                               stackId="2"
-                              stroke="#3b82f6" 
-                              fill="#3b82f6" 
+                              stroke="#f97316" 
+                              fill="#f97316" 
                               fillOpacity={0.6}
-                              name="صافي الربح"
+                              name="تكلفة المخزون"
                             />
                           </AreaChart>
                         </ResponsiveContainer>
@@ -814,7 +801,7 @@ export default function AccountingDashboardPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-purple-600" />
-                      صافي الربح الأسبوعي (آخر 4 أسابيع)
+                      الإيرادات والمصروفات الأسبوعية (آخر 4 أسابيع)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -828,9 +815,8 @@ export default function AccountingDashboardPage() {
                             <Tooltip formatter={(value: number) => [`${value.toFixed(2)} ر.س`]} />
                             <Legend />
                             <Bar dataKey="revenue" fill="#10b981" name="الإيرادات" />
-                            <Bar dataKey="cogs" fill="#f97316" name="تكلفة المكونات" />
-                            <Bar dataKey="expenses" fill="#ef4444" name="المصروفات" />
-                            <Bar dataKey="netProfit" fill="#3b82f6" name="صافي الربح" />
+                            <Bar dataKey="cogs" fill="#f97316" name="تكلفة مخزون المشروبات" />
+                            <Bar dataKey="expenses" fill="#ef4444" name="المصروفات التشغيلية" />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -1225,13 +1211,13 @@ export default function AccountingDashboardPage() {
                         <p className="text-2xl font-bold text-red-800 dark:text-red-300">{dashboardData.totalExpenses.toFixed(2)}</p>
                         <p className="text-xs text-red-600"><SarIcon /></p>
                       </div>
-                      <div className={`p-4 rounded-xl border ${dashboardData.netProfit >= 0 ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800' : 'bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/20 border-red-200 dark:border-red-800'}`}>
+                      <div className="p-4 rounded-xl border bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-900/20 border-orange-200 dark:border-orange-800">
                         <div className="flex items-center gap-2 mb-2">
-                          <PiggyBank className={`w-5 h-5 ${dashboardData.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`} />
-                          <span className={`text-sm font-medium ${dashboardData.netProfit >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-red-700 dark:text-red-400'}`}>{tc("صافي الربح", "Net Profit")}</span>
+                          <Package className="w-5 h-5 text-orange-600" />
+                          <span className="text-sm font-medium text-orange-700 dark:text-orange-400">إجمالي المصروفات (مخزون+تشغيل)</span>
                         </div>
-                        <p className={`text-2xl font-bold ${dashboardData.netProfit >= 0 ? 'text-blue-800 dark:text-blue-300' : 'text-red-800 dark:text-red-300'}`}>{dashboardData.netProfit.toFixed(2)}</p>
-                        <p className={`text-xs ${dashboardData.netProfit >= 0 ? 'text-blue-600' : 'text-red-600'}`}><SarIcon /></p>
+                        <p className="text-2xl font-bold text-orange-800 dark:text-orange-300">{(dashboardData.totalCogs + dashboardData.totalExpenses).toFixed(2)}</p>
+                        <p className="text-xs text-orange-600"><SarIcon /></p>
                       </div>
                     </div>
 
@@ -1261,24 +1247,19 @@ export default function AccountingDashboardPage() {
                             <TableCell>{dashboardData.totalRevenue > 0 ? ((dashboardData.totalVat / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell className="font-medium">{tc("تكلفة المكونات (COGS)", "Ingredients Cost (COGS)")}</TableCell>
-                            <TableCell className="text-accent">{dashboardData.totalCogs.toFixed(2)} <SarIcon /></TableCell>
+                            <TableCell className="font-medium">تكلفة مخزون المشروبات (مصروف)</TableCell>
+                            <TableCell className="text-orange-600">{dashboardData.totalCogs.toFixed(2)} <SarIcon /></TableCell>
                             <TableCell>{dashboardData.totalRevenue > 0 ? ((dashboardData.totalCogs / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
-                          </TableRow>
-                          <TableRow className="bg-green-50/50 dark:bg-green-900/20">
-                            <TableCell className="font-bold">= إجمالي الربح</TableCell>
-                            <TableCell className="text-green-700 font-bold">{dashboardData.grossProfit.toFixed(2)} <SarIcon /></TableCell>
-                            <TableCell className="font-medium">{dashboardData.totalRevenue > 0 ? ((dashboardData.grossProfit / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
                           <TableRow>
                             <TableCell className="font-medium">{tc("المصروفات التشغيلية", "Operating Expenses")}</TableCell>
                             <TableCell className="text-red-600">{dashboardData.totalExpenses.toFixed(2)} <SarIcon /></TableCell>
                             <TableCell>{dashboardData.totalRevenue > 0 ? ((dashboardData.totalExpenses / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
-                          <TableRow className={`${dashboardData.netProfit >= 0 ? 'bg-blue-50/50 dark:bg-blue-900/20' : 'bg-red-50/50 dark:bg-red-900/20'}`}>
-                            <TableCell className="font-bold text-lg">= صافي الربح</TableCell>
-                            <TableCell className={`font-bold text-lg ${dashboardData.netProfit >= 0 ? 'text-blue-700' : 'text-red-700'}`}>{dashboardData.netProfit.toFixed(2)} <SarIcon /></TableCell>
-                            <TableCell className="font-bold">{dashboardData.profitMargin.toFixed(1)}%</TableCell>
+                          <TableRow className="bg-red-50/50 dark:bg-red-900/20">
+                            <TableCell className="font-bold text-lg">= إجمالي المصروفات</TableCell>
+                            <TableCell className="font-bold text-lg text-red-700">{(dashboardData.totalCogs + dashboardData.totalExpenses).toFixed(2)} <SarIcon /></TableCell>
+                            <TableCell className="font-bold">{dashboardData.totalRevenue > 0 ? (((dashboardData.totalCogs + dashboardData.totalExpenses) / dashboardData.totalRevenue) * 100).toFixed(1) : 0}%</TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>
@@ -1352,8 +1333,9 @@ export default function AccountingDashboardPage() {
                               <YAxis />
                               <Tooltip formatter={(value: number) => [`${value.toFixed(2)} ر.س`]} />
                               <Legend />
-                              <Bar dataKey="netProfit" fill="#10b981" name="صافي الربح" />
-                              <Bar dataKey="expenses" fill="#ef4444" name="المصروفات" />
+                              <Bar dataKey="revenue" fill="#10b981" name="الإيرادات" />
+                              <Bar dataKey="cogs" fill="#f97316" name="تكلفة المخزون" />
+                              <Bar dataKey="expenses" fill="#ef4444" name="المصروفات التشغيلية" />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1514,11 +1496,11 @@ export default function AccountingDashboardPage() {
                         <p className="text-sm text-muted-foreground">متوسط قيمة الطلب</p>
                       </div>
                       <div className="text-center p-4 bg-muted/50 rounded-lg">
-                        <Percent className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                        <p className={`text-2xl font-bold ${dashboardData.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {dashboardData.profitMargin.toFixed(1)}%
+                        <Percent className="w-8 h-8 mx-auto mb-2 text-orange-600" />
+                        <p className="text-2xl font-bold text-orange-600">
+                          {dashboardData.totalRevenue > 0 ? ((dashboardData.totalCogs / dashboardData.totalRevenue) * 100).toFixed(1) : "0"}%
                         </p>
-                        <p className="text-sm text-muted-foreground">هامش الربح الصافي</p>
+                        <p className="text-sm text-muted-foreground">نسبة تكلفة المخزون</p>
                       </div>
                     </div>
                   </CardContent>

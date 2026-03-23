@@ -657,18 +657,16 @@ export default function ErpAccountingPage() {
                     trendValue={summary.usingOrderData ? `${summary.orderCount || 0} طلب` : "+12%"}
                   />
                   <SummaryCard
-                    title="إجمالي المصروفات"
+                    title="مصروفات التشغيل"
                     value={summary.totalExpenses}
                     icon={TrendingDown}
                     color="bg-red-500"
                   />
                   <SummaryCard
-                    title="صافي الدخل"
-                    value={summary.netIncome}
-                    icon={DollarSign}
-                    color="bg-primary"
-                    trend={summary.netIncome > 0 ? "up" : "down"}
-                    trendValue={summary.netIncome > 0 ? "ربح" : "خسارة"}
+                    title="الذمم الدائنة (موردين)"
+                    value={summary.accountsPayable}
+                    icon={TrendingDown}
+                    color="bg-orange-500"
                   />
                   <SummaryCard
                     title="رصيد الصندوق"
@@ -758,9 +756,9 @@ export default function ErpAccountingPage() {
                                 fill: "#ef4444",
                               },
                               {
-                                name: "صافي الدخل",
-                                value: Math.abs(summary.netIncome),
-                                fill: summary.netIncome >= 0 ? "#3b82f6" : "#f97316",
+                                name: "الذمم الدائنة",
+                                value: summary.accountsPayable,
+                                fill: "#f97316",
                               },
                             ]}
                             layout="vertical"
@@ -1129,9 +1127,9 @@ export default function ErpAccountingPage() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">صافي الدخل</p>
-                        <p className={`text-2xl font-bold ${incomeStatement.netIncome >= 0 ? "text-green-600" : "text-red-600"}`}>
-                          {incomeStatement.netIncome.toLocaleString("ar-SA", { minimumFractionDigits: 2 })} <SarIcon />
+                        <p className="text-sm text-muted-foreground mb-1">إجمالي المصروفات (مخزون+تشغيل)</p>
+                        <p className="text-2xl font-bold text-red-600">
+                          {(incomeStatement.cogs + incomeStatement.totalExpenses).toLocaleString("ar-SA", { minimumFractionDigits: 2 })} <SarIcon />
                         </p>
                       </div>
                     </div>
