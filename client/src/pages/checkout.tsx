@@ -524,16 +524,7 @@ export default function CheckoutPage() {
       if (usePointsAsDiscount) {
         try { await refetchLoyaltyCard(); } catch {}
       }
-      // Redeem gift card balance after successful order
-      if (appliedGiftCard && giftCardDiscount > 0) {
-        try {
-          await fetch(`/api/gift-cards/${appliedGiftCard.code}/redeem-customer`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount: giftCardDiscount })
-          });
-        } catch {}
-      }
+      // Gift card is now redeemed atomically inside POST /api/orders — no separate call needed
       setOrderDetails(data);
       clearCart();
       customerStorage.clearActiveOffer();
@@ -700,6 +691,11 @@ export default function CheckoutPage() {
       pointsRedeemed: usePointsAsDiscount ? pointsToRedeem : 0,
       pointsValue: usePointsAsDiscount ? Math.min(pointsDiscountSAR, getBaseTotal()) : 0,
       bypassPointsVerification: true,
+      // Gift card — server will validate + deduct atomically
+      ...(appliedGiftCard && giftCardDiscount > 0 ? {
+        giftCardCode: appliedGiftCard.code,
+        giftCardAmount: giftCardDiscount,
+      } : {}),
       ...(deliveryInfo?.type === 'car-pickup' && deliveryInfo?.carInfo ? {
         carType: deliveryInfo.carInfo.carType,
         carColor: deliveryInfo.carInfo.carColor,

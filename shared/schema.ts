@@ -1194,6 +1194,9 @@ export interface IOrder extends Document {
   subtotal?: number;
   tax?: number;
   channel?: 'online' | 'web' | 'pos' | 'app' | 'whatsapp' | string;
+  giftCardCode?: string;
+  giftCardAmountUsed?: number;
+  giftCardRemainingBalance?: number;
   notes?: string;
   statusHistory?: Array<{
     status: string;
@@ -1252,6 +1255,9 @@ const OrderSchema = new Schema<IOrder>({
     notes: { type: String }
   }],
   pointsAwarded: { type: Boolean, default: false },
+  giftCardCode: { type: String },
+  giftCardAmountUsed: { type: Number },
+  giftCardRemainingBalance: { type: Number },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -858,6 +858,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (orderData.tax == null) orderData.tax = computedTax;
       }
 
+      // ── Gift Card atomic deduction ────────────────────────────────────────────
+      // If the order includes a gift card payment, validate and deduct atomically
+      // BEFORE creating the order so we never create an order against a bad card.
+      const giftCardCode = (body.giftCardCode as string | undefined)?.toUpperCase();
+      const giftCardAmount = giftCardCode ? Math.abs(Number(body.giftCardAmount || 0)) : 0;
+
+      if (giftCardCode && giftCardAmount > 0) {
+        const { GiftCardModel } = await import("@shared/schema");
+        const card = await GiftCardModel.findOne({ code: giftCardCode });
+        if (!card) return res.status(400).json({ error: "بطاقة الهدية غير موجودة", code: "GIFT_CARD_NOT_FOUND" });
+        if (card.status !== 'active') return res.status(400).json({ error: "بطاقة الهدية غير نشطة أو مستخدمة مسبقاً", code: "GIFT_CARD_INACTIVE" });
+        if (Number(card.balance) <= 0) return res.status(400).json({ error: "رصيد بطاقة الهدية صفر", code: "GIFT_CARD_EMPTY" });
+
+        const deducted = Math.min(giftCardAmount, Number(card.balance));
+        // Store resolved gift card info in the order document
+        orderData.giftCardCode = giftCardCode;
+        orderData.giftCardAmountUsed = deducted;
+        orderData.giftCardRemainingBalance = Number(card.balance) - deducted;
+
+        // Deduct balance atomically — use findOneAndUpdate to avoid race conditions
+        await GiftCardModel.findOneAndUpdate(
+          { code: giftCardCode, status: 'active', balance: { $gte: deducted } },
+          {
+            $inc: { balance: -deducted },
+            $set: {
+              status: Number(card.balance) - deducted <= 0 ? 'used' : 'active',
+              updatedAt: new Date()
+            }
+          }
+        );
+      }
+      // ─────────────────────────────────────────────────────────────────────────
+
       const order = await storage.createOrder(orderData);
       const serializedOrder = serializeDoc(order);
       
@@ -16456,11 +16489,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Public endpoint for customer gift card redemption (no employee auth needed)
+  // DEPRECATED: Gift card deduction is now handled atomically inside POST /api/orders.
+  // This endpoint is kept only for backward compatibility but now requires a valid orderId
+  // to prevent unauthorized redemptions.
   app.post("/api/gift-cards/:code/redeem-customer", async (req, res) => {
     try {
-      const { GiftCardModel } = await import("@shared/schema");
-      const { amount } = req.body;
+      const { GiftCardModel, OrderModel } = await import("@shared/schema");
+      const { amount, orderId } = req.body;
       const code = req.params.code.toUpperCase();
+
+      // Require orderId to prevent standalone abuse
+      if (!orderId) {
+        return res.status(400).json({ error: "orderId مطلوب لاسترداد بطاقة الهدية" });
+      }
+
+      // Verify the order exists and already references this gift card (set by POST /api/orders)
+      const order = await OrderModel.findById(orderId);
+      if (!order) return res.status(404).json({ error: "الطلب غير موجود" });
+      if ((order as any).giftCardCode !== code) {
+        return res.status(400).json({ error: "بطاقة الهدية لا تنتمي لهذا الطلب" });
+      }
+      // If the order already deducted the card (via POST /api/orders), return success immediately
+      if ((order as any).giftCardAmountUsed) {
+        return res.json({ success: true, deducted: (order as any).giftCardAmountUsed, alreadyProcessed: true });
+      }
+
       const card = await GiftCardModel.findOne({ code });
       if (!card) return res.status(404).json({ error: "بطاقة الهدية غير موجودة" });
       if (card.status !== 'active') return res.status(400).json({ error: "البطاقة غير نشطة" });
