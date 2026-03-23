@@ -58,6 +58,7 @@ export default function EmployeeLoyalty() {
     queryKey: ["/api/public/loyalty-settings"],
   });
   const pointsValueInSar = settings?.pointsValueInSar ?? 0.05;
+  const pointsForFreeDrink = settings?.pointsForFreeDrink ?? 500;
 
   const handleSearch = () => {
     const clean = phone.replace(/\D/g, '');
@@ -97,6 +98,18 @@ export default function EmployeeLoyalty() {
     onSuccess: () => {
       invalidateCard();
       toast({ title: tc("✓ تم استرداد المشروب المجاني", "✓ Free Drink Redeemed"), description: tc("يمكن للعميل الآن استلام مشروبه", "Customer can now collect their drink") });
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: e.message }),
+  });
+
+  const redeemDrinkWithPointsMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/loyalty/employee/redeem-drink-with-points", { phone: searchedPhone });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      invalidateCard();
+      toast({ title: tc("✓ تم استرداد المشروب بالنقاط", "✓ Drink Redeemed with Points"), description: `${tc("استُخدمت", "Used")} ${data.pointsUsed} ${tc("نقطة", "points")}` });
     },
     onError: (e: any) => toast({ variant: "destructive", title: tc("خطأ", "Error"), description: e.message }),
   });
@@ -282,6 +295,25 @@ export default function EmployeeLoyalty() {
                       ? `${tc("استرداد مشروب مجاني", "Redeem Free Drink")} (${availableCups} ${tc("متاح", "available")})`
                       : tc("لا يوجد مشروب مجاني", "No Free Drink Available")}
                   </Button>
+
+                  {(() => {
+                    const currentPoints = card?.points || 0;
+                    const canRedeemWithPoints = currentPoints >= pointsForFreeDrink;
+                    return (
+                      <Button
+                        onClick={() => redeemDrinkWithPointsMutation.mutate()}
+                        disabled={redeemDrinkWithPointsMutation.isPending || !canRedeemWithPoints}
+                        variant={canRedeemWithPoints ? "default" : "outline"}
+                        className={`h-14 gap-2 flex-col text-sm font-bold col-span-2 ${canRedeemWithPoints ? "bg-primary/90 hover:bg-primary" : ""}`}
+                        data-testid="button-redeem-drink-points"
+                      >
+                        {redeemDrinkWithPointsMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Coins className="w-5 h-5" />}
+                        {canRedeemWithPoints
+                          ? `${tc("استرداد مشروب بالنقاط", "Redeem Drink with Points")} (${currentPoints.toLocaleString()} / ${pointsForFreeDrink.toLocaleString()})`
+                          : `${tc("يحتاج", "Needs")} ${pointsForFreeDrink.toLocaleString()} ${tc("نقطة", "pts")} (${tc("لديه", "has")} ${currentPoints.toLocaleString()})`}
+                      </Button>
+                    );
+                  })()}
                 </div>
 
                 <p className="text-center text-xs text-muted-foreground font-mono" data-testid="text-card-number">

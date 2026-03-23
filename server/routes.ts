@@ -8842,6 +8842,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Employee: Redeem a free drink using points (pointsForFreeDrink threshold)
+  app.post("/api/loyalty/employee/redeem-drink-with-points", requireAuth, async (req: AuthRequest, res) => {
+    try {
+      const { phone } = req.body;
+      if (!phone) return res.status(400).json({ error: "رقم الهاتف مطلوب" });
+
+      const cleanPhone = phone.replace(/\D/g, '').slice(-9);
+      const card = await storage.getLoyaltyCardByPhone(cleanPhone);
+      if (!card) return res.status(404).json({ error: "بطاقة الولاء غير موجودة" });
+
+      const tenantId = (card as any).tenantId || 'demo-tenant';
+      const { BusinessConfigModel: BizCfg } = await import("@shared/schema");
+      const bizCfg = await BizCfg.findOne({ tenantId }).lean() as any;
+      const pointsPerSar = Number(bizCfg?.loyaltyConfig?.pointsPerSar) || 20;
+      const cfgFallback = Number(bizCfg?.loyaltyConfig?.pointsForFreeDrink) || 500;
+      const requiredPoints = await calcFreeDrinkThreshold(tenantId, pointsPerSar, cfgFallback);
+
+      const currentPoints = Number(card.points) || 0;
+      if (currentPoints < requiredPoints) {
+        return res.status(400).json({
+          error: "رصيد النقاط غير كافٍ للحصول على مشروب مجاني",
+          currentPoints,
+          requiredPoints,
+        });
+      }
+
+      const cardId = (card as any)._id?.toString() || (card as any).id;
+      const newPoints = currentPoints - requiredPoints;
+
+      let tier = (card as any).tier || 'bronze';
+      if (newPoints >= 5000) tier = 'platinum';
+      else if (newPoints >= 2000) tier = 'gold';
+      else if (newPoints >= 500) tier = 'silver';
+      else tier = 'bronze';
+
+      await storage.updateLoyaltyCard(cardId, { points: newPoints, tier });
+      await storage.createLoyaltyTransaction({
+        cardId,
+        type: 'redeem',
+        pointsChange: -requiredPoints,
+        discountAmount: 0,
+        orderAmount: 0,
+        description: `استرداد مشروب مجاني مقابل ${requiredPoints} نقطة`,
+        employeeId: req.employee?.id,
+      } as any);
+
+      const updatedCard = await storage.getLoyaltyCardByPhone(cleanPhone);
+      res.json({ success: true, card: updatedCard, pointsUsed: requiredPoints });
+    } catch (error) {
+      console.error("[LOYALTY REDEEM DRINK WITH POINTS]", error);
+      res.status(500).json({ error: "فشل في استرداد المشروب بالنقاط" });
+    }
+  });
+
   // Employee: Redeem points for discount
   app.post("/api/loyalty/employee/redeem-points", requireAuth, async (req: AuthRequest, res) => {
     try {
