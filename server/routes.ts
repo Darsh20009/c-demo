@@ -10797,9 +10797,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const branchQuery: any = {};
       if ((req as any).employee?.branchId) branchQuery.branchId = (req as any).employee.branchId;
       
-      // Update ALL orders to completed (no status restriction)
+      // Update all active (non-completed, non-cancelled) orders to completed
       const result = await OrderModel.updateMany(
-        { tenantId, ...branchQuery },
+        { tenantId, ...branchQuery, status: { $nin: ['completed', 'cancelled'] } },
         {
           $set: {
             status: 'completed',

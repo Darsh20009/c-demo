@@ -169,7 +169,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#070707]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
+    <div className="dark flex h-screen overflow-hidden bg-[#070707]" dir="rtl" style={{ fontFamily: "'Cairo', sans-serif" }}>
       <ManagerSidebar
         manager={manager}
         onLogout={handleLogout}

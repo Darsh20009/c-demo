@@ -273,12 +273,12 @@ export default function EmployeeOrders() {
             </Select>
             <Button 
               onClick={() => {
-                const readyOrders = orders.filter(o => o.status === 'ready');
-                if (readyOrders.length === 0) {
-                  toast({ title: "لا توجد طلبات جاهزة" });
+                const activeOrders = orders.filter(o => !['completed', 'cancelled'].includes(o.status));
+                if (activeOrders.length === 0) {
+                  toast({ title: tc("لا توجد طلبات مفتوحة", "No open orders") });
                   return;
                 }
-                if (confirm("هل تريد حقاً إكمال جميع الطلبات الجاهزة؟")) {
+                if (confirm(tc(`هل تريد إكمال ${activeOrders.length} طلب مفتوح؟`, `Complete ${activeOrders.length} open orders?`))) {
                   completeAllOrdersMutation.mutate();
                 }
               }} 
@@ -286,7 +286,7 @@ export default function EmployeeOrders() {
               data-testid="button-complete-all"
             >
               {completeAllOrdersMutation.isPending ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <CheckCircle className="w-4 h-4 ml-2" />}
-              {tc("إكمال الطلبات الجاهزة", "Complete Ready Orders")}
+              {tc("إكمال جميع الطلبات", "Complete All Orders")}
             </Button>
             <Button 
               onClick={() => {
