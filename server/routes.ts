@@ -262,7 +262,7 @@ async function deductInventoryForOrder(orderId: string, branchId: string, employ
         if (order.customerId) {
           loyaltyCard = await mongoose.model('LoyaltyCard').findOne({ customerId: order.customerId });
         }
-        // Fallback: search by phone from order
+        // Fallback 1: search by phone from order
         if (!loyaltyCard) {
           const customerPhone = order.customerPhone || order.customerInfo?.customerPhone;
           if (customerPhone) {
@@ -270,10 +270,21 @@ async function deductInventoryForOrder(orderId: string, branchId: string, employ
             loyaltyCard = await mongoose.model('LoyaltyCard').findOne({ phoneNumber: { $in: [cleanPhone, customerPhone, `+966${cleanPhone.slice(1)}`, `966${cleanPhone.slice(1)}`] } });
           }
         }
+        // Fallback 2: look up customer by customerId to get phone, then search card by phone
+        if (!loyaltyCard && order.customerId) {
+          const cust = await CustomerModel.findOne({ id: order.customerId }).lean();
+          if (cust?.phone) {
+            const p = cust.phone.replace(/\D/g, '').replace(/^966/, '0').replace(/^9665/, '05');
+            loyaltyCard = await mongoose.model('LoyaltyCard').findOne({ phoneNumber: { $in: [p, cust.phone, `+966${p.slice(1)}`, `966${p.slice(1)}`] } });
+            // Link customerId to card for future lookups
+            if (loyaltyCard && !loyaltyCard.customerId) {
+              loyaltyCard.customerId = order.customerId;
+            }
+          }
+        }
 
         if (loyaltyCard) {
           loyaltyCard.points = (Number(loyaltyCard.points) || 0) + totalPointsToAward;
-          loyaltyCard.stamps = (Number(loyaltyCard.stamps) || 0) + orderItems.reduce((s: number, i: any) => s + (i.quantity || 1), 0);
           loyaltyCard.pendingPoints = Math.max(0, (Number(loyaltyCard.pendingPoints) || 0) - totalPointsToAward);
           await loyaltyCard.save();
           console.log(`[LOYALTY] Awarded ${totalPointsToAward} points to card ${loyaltyCard.id} (${loyaltyCard.phoneNumber})`);
@@ -948,14 +959,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const pendingPts = totalDrinks * pointsPerDrinkCfg;
 
           let card = await mongoose.model('LoyaltyCard').findOne({ phoneNumber: { $in: phoneVariants } });
+          const customerName = body.customerName || body.customerInfo?.customerName || 'عميل';
+          // Also try to link by customerId if available
+          if (!card && body.customerId) {
+            card = await mongoose.model('LoyaltyCard').findOne({ customerId: body.customerId });
+          }
           if (!card) {
-            const customerName = body.customerName || body.customerInfo?.customerName || 'عميل';
             card = await storage.createLoyaltyCard({
               customerName,
               phoneNumber: cleanPhone,
+              customerId: body.customerId || undefined,
             } as any);
-            console.log(`[LOYALTY] Created new card for ${cleanPhone}, pending: ${pendingPts}`);
-          } else if (pendingPts > 0) {
+            console.log(`[LOYALTY] Created new card for ${cleanPhone}`);
+          }
+          // Ensure customerId is linked
+          if (card && body.customerId && !card.customerId) {
+            await mongoose.model('LoyaltyCard').findByIdAndUpdate(card._id, { $set: { customerId: body.customerId } });
+          }
+          if (card && pendingPts > 0) {
             await mongoose.model('LoyaltyCard').findByIdAndUpdate(card._id, {
               $inc: { pendingPoints: pendingPts },
               $set: { lastUsedAt: new Date() },
