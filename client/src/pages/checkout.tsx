@@ -629,15 +629,11 @@ export default function CheckoutPage() {
 
   const isCardPaymentMethod = (method: string | null) => {
     if (!method) return false;
-    const cardMethods = ['geidea', 'bank_card', 'credit_card', 'card', 'neoleap', 'paymob-card'];
+    const cardMethods = ['geidea', 'bank_card', 'credit_card', 'card', 'neoleap', 'paymob-card', 'stc-pay', 'apple_pay', 'neoleap-apple-pay'];
     return cardMethods.includes(method);
   };
 
-  const isOnlinePaymentMethod = (method: string | null) => {
-    if (!method) return false;
-    const onlineMethods = ['apple_pay', 'neoleap-apple-pay', 'paymob-wallet'];
-    return onlineMethods.includes(method);
-  };
+  const isOnlinePaymentMethod = (_method: string | null) => false;
 
   const confirmAndCreateOrder = async () => {
     let finalTotal = getFinalAmount();
@@ -1130,6 +1126,7 @@ export default function CheckoutPage() {
                   <div className="rounded-2xl border border-border bg-card p-5 shadow-md" data-testid="section-simulated-card">
                     <SimulatedCardPayment
                       amount={pendingGeideaOrderData.current?.totalAmount || getFinalTotalWithPoints()}
+                      paymentMethod={selectedPaymentMethod || "card"}
                       onSuccess={() => {
                         const od = pendingGeideaOrderData.current;
                         if (od) {

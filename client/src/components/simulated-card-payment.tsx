@@ -1,429 +1,563 @@
 import { useState, useRef, useEffect } from "react";
-import { brand as sysConfig } from "@/lib/brand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle, Lock, Shield, ArrowLeft, Wifi, CreditCard } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, CheckCircle, Eye, EyeOff, Shield, ArrowLeft, Lock } from "lucide-react";
+import stcLogoPath from "@assets/image_1774411835083.png";
+import visaMadaLogoPath from "@assets/image_1774411855417.png";
 
-interface SimulatedCardPaymentProps {
+type CardType = "mada" | "visa" | "mastercard" | "amex" | "unknown";
+type PaymentStep = "form" | "processing" | "success";
+type StcStep = "phone" | "otp" | "processing" | "success";
+
+interface Props {
   amount: number;
-  onSuccess: () => void;
+  paymentMethod?: string;
+  onSuccess: (txId?: string) => void;
   onCancel: () => void;
 }
 
-type CardBrand = "visa" | "mastercard" | "mada" | "amex" | "unknown";
-type PayStep = "form" | "processing" | "success";
-type ActiveField = "number" | "name" | "expiry" | "cvv" | null;
-
-function detectCardBrand(num: string): CardBrand {
-  const n = num.replace(/\D/g, "");
-  if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n)) return "mastercard";
-  if (/^3[47]/.test(n)) return "amex";
-  if (/^4/.test(n)) {
-    const prefix6 = parseInt(n.substring(0, 6) || "0");
-    const madaPrefixes = [427415, 427672, 428331, 440533, 440647, 440795, 440981, 441082, 445564, 446393, 446404, 446672, 448536, 448609, 448660, 455708, 457865, 458456, 462220, 468540, 468541, 468542, 468543, 417633, 446393];
-    if (madaPrefixes.some(p => prefix6 === p) || (prefix6 >= 446200 && prefix6 <= 446204)) return "mada";
-    return "visa";
-  }
+// ─── Card type detection ────────────────────────────────────────────────────
+function detectCardType(num: string): CardType {
+  const clean = num.replace(/\s/g, "");
+  if (/^(4002|4007|4009|4030|4082|4083|4084|4085|4086|4087|4088|4089|4218|4264|4342|4400|4407|4408|4429|4434|4436|4439|4440|4443|4445|4449|4450|4451|4453|4455|4456|4458|4459|4462|4464|4467|4469|4472|4473|4475|4477|4479|4481|4482|4483|4485|4486|4487|4489|4491|4495|4497|4502|4562|4580|4652|4776|4777|4900|4901)/.test(clean)) return "mada";
+  if (/^3[47]/.test(clean)) return "amex";
+  if (/^5[1-5]|^2[2-7]/.test(clean)) return "mastercard";
+  if (/^4/.test(clean)) return "visa";
   return "unknown";
 }
 
-function CardBrandLogo({ brand }: { brand: CardBrand }) {
-  if (brand === "visa") return (
-    <div className="bg-white/90 rounded px-2 py-0.5 shadow-sm">
-      <span className="text-blue-800 font-black text-sm italic tracking-tighter">VISA</span>
-    </div>
-  );
-  if (brand === "mastercard") return (
-    <div className="flex items-center">
-      <div className="w-6 h-6 rounded-full bg-red-500 opacity-90 shadow-sm" />
-      <div className="w-6 h-6 rounded-full bg-yellow-400 opacity-90 -ml-3 shadow-sm" />
-    </div>
-  );
-  if (brand === "mada") return (
-    <div className="bg-white/90 rounded px-2 py-0.5 shadow-sm">
-      <span className="text-green-700 font-black text-sm tracking-tight">mada</span>
-    </div>
-  );
-  if (brand === "amex") return (
-    <div className="bg-white/90 rounded px-2 py-0.5 shadow-sm">
-      <span className="text-blue-600 font-black text-xs tracking-tight">AMEX</span>
-    </div>
-  );
-  return null;
+function formatCardNumber(value: string, type: CardType): string {
+  const clean = value.replace(/\D/g, "");
+  if (type === "amex") {
+    return [clean.slice(0, 4), clean.slice(4, 10), clean.slice(10, 15)].filter(Boolean).join(" ");
+  }
+  return clean.replace(/(.{4})/g, "$1 ").trim();
 }
 
-function formatCardNumber(val: string) {
-  return val.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
-}
-function formatExpiry(val: string) {
-  const digits = val.replace(/\D/g, "").slice(0, 4);
-  if (digits.length >= 3) return digits.slice(0, 2) + "/" + digits.slice(2);
-  return digits;
-}
-
-const CARD_GRADIENTS: Record<CardBrand, string> = {
-  mastercard: "from-[#1a1a1a] via-[#2a2a2a] to-[#0d0d0d]",
-  visa: "from-[#1A1F71] via-[#243299] to-[#0d1255]",
+const CARD_GRADIENTS: Record<CardType, string> = {
   mada: "from-[#006c35] via-[#008a45] to-[#004d26]",
+  visa: "from-[#1A1F71] via-[#243299] to-[#0d1255]",
+  mastercard: "from-[#1a1a1a] via-[#2a2a2a] to-[#0d0d0d]",
   amex: "from-[#2c6b5a] via-[#3d8a72] to-[#1a4d3f]",
   unknown: "from-[#1c2340] via-[#2a3460] to-[#0f1429]",
 };
 
-export default function SimulatedCardPayment({ amount, onSuccess, onCancel }: SimulatedCardPaymentProps) {
+const CARD_TYPE_LABELS: Record<CardType, string> = {
+  mada: "مدى", visa: "Visa", mastercard: "Mastercard", amex: "Amex", unknown: "",
+};
+
+// ─── 3D Card Visual ─────────────────────────────────────────────────────────
+function CardVisual({ cardNumber, cardName, expiry, cvv, cardType, isFlipped }: {
+  cardNumber: string; cardName: string; expiry: string; cvv: string;
+  cardType: CardType; isFlipped: boolean;
+}) {
+  const grad = CARD_GRADIENTS[cardType];
+  const displayNum = cardNumber || "•••• •••• •••• ••••";
+  return (
+    <div className="w-full" style={{ perspective: "1000px" }}>
+      <div
+        className="relative w-full h-44 transition-transform duration-700"
+        style={{ transformStyle: "preserve-3d", transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+      >
+        {/* Front */}
+        <div
+          className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${grad} text-white p-5 shadow-2xl flex flex-col justify-between`}
+          style={{ backfaceVisibility: "hidden" }}
+        >
+          <div className="flex justify-between items-start">
+            <div className="w-10 h-7 bg-yellow-400/80 rounded-md" />
+            {cardType !== "unknown" && (
+              <span className="text-xs font-bold bg-white/20 rounded px-2 py-0.5">{CARD_TYPE_LABELS[cardType]}</span>
+            )}
+          </div>
+          <div>
+            <p className="font-mono tracking-widest text-lg font-bold" dir="ltr">{displayNum}</p>
+            <div className="flex justify-between mt-2 text-xs">
+              <span className="opacity-70">{cardName.trim() || "CARD HOLDER"}</span>
+              <span className="opacity-70">{expiry || "MM/YY"}</span>
+            </div>
+          </div>
+        </div>
+        {/* Back */}
+        <div
+          className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${grad} text-white p-5 shadow-2xl flex flex-col justify-center gap-3`}
+          style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+        >
+          <div className="bg-black/40 h-8 w-full rounded" />
+          <div className="flex items-center justify-end gap-2">
+            <span className="text-xs opacity-60">CVV</span>
+            <div className="bg-white/90 text-black font-mono font-bold px-3 py-1 rounded text-sm tracking-widest">
+              {cvv ? cvv.replace(/./g, "•") : "•••"}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Card Payment ────────────────────────────────────────────────────────────
+function CardPayment({ amount, onSuccess, onCancel }: { amount: number; onSuccess: (tx: string) => void; onCancel: () => void }) {
+  const { toast } = useToast();
+  const [step, setStep] = useState<PaymentStep>("form");
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
+  const [showCvv, setShowCvv] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [activeField, setActiveField] = useState<ActiveField>(null);
-  const [step, setStep] = useState<PayStep>("form");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const cardType = detectCardType(cardNumber);
 
-  const cvvInputRef = useRef<HTMLInputElement>(null);
-
-  const brand = detectCardBrand(cardNumber);
-  const gradient = CARD_GRADIENTS[brand];
-
-  const handleCvvFocus = () => {
-    setActiveField("cvv");
-    setIsFlipped(true);
-  };
-  const handleCvvBlur = () => {
-    setActiveField(null);
-    setIsFlipped(false);
-  };
-  const handleFocus = (field: ActiveField) => {
-    setActiveField(field);
-    setIsFlipped(false);
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    const maxLen = detectCardType(raw) === "amex" ? 15 : 16;
+    setCardNumber(formatCardNumber(raw.slice(0, maxLen), detectCardType(raw)));
   };
 
-  const validate = () => {
-    const e: Record<string, string> = {};
-    const num = cardNumber.replace(/\s/g, "");
-    if (num.length < 16) e.number = "رقم البطاقة غير مكتمل";
-    if (!cardName.trim() || cardName.trim().length < 3) e.name = "اكتب اسمك كما هو على البطاقة";
-    const [m, y] = expiry.split("/");
-    if (!m || !y || parseInt(m) < 1 || parseInt(m) > 12) {
-      e.expiry = "تاريخ انتهاء غير صحيح";
-    } else {
-      const now = new Date();
-      const expYear = 2000 + parseInt(y);
-      if (expYear < now.getFullYear() || (expYear === now.getFullYear() && parseInt(m) < now.getMonth() + 1)) {
-        e.expiry = "البطاقة منتهية الصلاحية";
-      }
-    }
-    if (cvv.length < 3) e.cvv = "رمز CVV غير صحيح";
-    setErrors(e);
-    return Object.keys(e).length === 0;
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw.length <= 2) setExpiry(raw);
+    else setExpiry(`${raw.slice(0, 2)}/${raw.slice(2, 4)}`);
   };
 
   const handlePay = () => {
-    if (!validate()) return;
-    setActiveField(null);
-    setIsFlipped(false);
+    const cleanNum = cardNumber.replace(/\s/g, "");
+    const minLen = cardType === "amex" ? 15 : 16;
+    if (cleanNum.length < minLen) { toast({ variant: "destructive", title: "رقم البطاقة غير مكتمل" }); return; }
+    if (!cardName.trim()) { toast({ variant: "destructive", title: "يرجى إدخال اسم حامل البطاقة" }); return; }
+    if (expiry.length < 5) { toast({ variant: "destructive", title: "تاريخ الانتهاء غير صحيح" }); return; }
+    const cvvLen = cardType === "amex" ? 4 : 3;
+    if (cvv.length < cvvLen) { toast({ variant: "destructive", title: `رمز CVV يجب أن يكون ${cvvLen} أرقام` }); return; }
     setStep("processing");
-    setTimeout(() => {
-      setStep("success");
-      setTimeout(() => onSuccess(), 1800);
-    }, 2800);
+    setTimeout(() => { setStep("success"); setTimeout(() => onSuccess(`CARD-${Date.now()}`), 1200); }, 1800);
   };
 
   if (step === "processing") {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center justify-center py-14 space-y-6"
-        data-testid="card-processing-screen"
-      >
-        <div className="relative">
-          <div className="w-20 h-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Lock className="w-8 h-8 text-primary" />
-          </div>
+      <div className="flex flex-col items-center justify-center py-12 gap-5">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
         </div>
-        <div className="text-center space-y-1">
-          <p className="text-lg font-bold">جاري معالجة الدفع...</p>
-          <p className="text-sm text-muted-foreground">الرجاء الانتظار</p>
+        <div className="text-center">
+          <p className="font-bold text-foreground text-base">جاري معالجة الدفع...</p>
+          <p className="text-sm text-muted-foreground mt-1">يُرجى الانتظار، لا تُغلق الصفحة</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-full px-4 py-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
           <Shield className="w-3.5 h-3.5 text-green-600" />
-          دفع آمن 256-bit SSL
+          دفع آمن ومشفّر
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   if (step === "success") {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 220, damping: 18 }}
-        className="flex flex-col items-center justify-center py-12 space-y-5"
-        data-testid="card-success-screen"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.1 }}
-          className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center"
-        >
-          <CheckCircle className="w-12 h-12 text-green-600" />
-        </motion.div>
-        <div className="text-center space-y-1">
-          <p className="text-xl font-black">تمّ الدفع بنجاح!</p>
-          <p className="text-sm text-muted-foreground">
-            تم خصم <span className="font-bold text-primary">{amount.toFixed(2)} ر.س</span>
-          </p>
+      <div className="flex flex-col items-center justify-center py-12 gap-4">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center animate-in zoom-in duration-300">
+          <CheckCircle className="w-9 h-9 text-green-600" />
         </div>
-      </motion.div>
+        <div className="text-center">
+          <p className="font-bold text-green-700 text-lg">تمّت عملية الدفع بنجاح ✓</p>
+          <p className="text-sm text-muted-foreground mt-1">جاري تأكيد طلبك...</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-5" dir="rtl" data-testid="simulated-card-payment">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold">بيانات البطاقة البنكية</h3>
-        <div className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">
-          <Shield className="w-3 h-3" />
-          دفع آمن
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-bold text-foreground text-base">بطاقة بنكية</h3>
+        <img src={visaMadaLogoPath} alt="Visa Mada Mastercard" className="h-6 object-contain" />
       </div>
-
-      {/* ── Card Visual (Live Preview) ── */}
-      <div className="relative" style={{ perspective: "1200px" }} data-testid="card-visual">
-        <motion.div
-          className="relative w-full"
-          style={{ aspectRatio: "1.586", transformStyle: "preserve-3d" }}
-          animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.55, type: "spring", stiffness: 130, damping: 20 }}
-        >
-          {/* ── FRONT ── */}
-          <div
-            className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} shadow-2xl overflow-hidden`}
-            style={{ backfaceVisibility: "hidden" }}
-          >
-            <div className="absolute inset-0 opacity-10"
-              style={{ backgroundImage: "radial-gradient(circle at 20% 80%, white 0%, transparent 60%)" }} />
-
-            <div className="absolute top-5 left-5 right-5 flex justify-between items-start">
-              <Wifi className="w-5 h-5 text-white/50 rotate-90" />
-              <CardBrandLogo brand={brand} />
-            </div>
-
-            <div className="absolute top-16 right-5 w-10 h-7 rounded-md bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 shadow-inner opacity-85">
-              <div className="absolute inset-0 grid grid-cols-3 gap-0.5 p-0.5 opacity-40">
-                {Array.from({length:9}).map((_,i) => <div key={i} className="bg-yellow-600 rounded-sm" />)}
-              </div>
-            </div>
-
-            {/* Card number on card */}
-            <div className="absolute bottom-16 left-5 right-5 text-right">
-              <p className="text-white/50 text-[9px] uppercase tracking-widest mb-0.5">رقم البطاقة</p>
-              <p className={`text-white font-mono tracking-[0.2em] font-bold text-sm sm:text-base transition-colors ${
-                activeField === "number" ? "text-yellow-300" : ""
-              }`}>
-                {cardNumber
-                  ? cardNumber.padEnd(16, "•").replace(/(.{4})/g, "$1 ").trim()
-                  : "•••• •••• •••• ••••"}
-              </p>
-              {activeField === "number" && <div className="mt-1 h-0.5 bg-yellow-400/70 rounded-full w-full" />}
-            </div>
-
-            {/* Bottom row */}
-            <div className="absolute bottom-4 left-5 right-5 flex justify-between items-end">
-              <div className="text-right flex-1 min-w-0">
-                <p className="text-white/50 text-[9px] uppercase tracking-widest mb-0.5">حامل البطاقة</p>
-                <p className={`text-white font-bold text-xs truncate transition-colors ${activeField === "name" ? "text-yellow-300" : ""}`}>
-                  {cardName || "CARDHOLDER NAME"}
-                </p>
-                {activeField === "name" && <div className="mt-0.5 h-0.5 bg-yellow-400/70 rounded-full" />}
-              </div>
-              <div className="text-left ml-4 shrink-0">
-                <p className="text-white/50 text-[9px] uppercase tracking-widest mb-0.5">صالحة حتى</p>
-                <p className={`text-white font-bold text-xs transition-colors ${activeField === "expiry" ? "text-yellow-300" : ""}`}>
-                  {expiry || "MM/YY"}
-                </p>
-                {activeField === "expiry" && <div className="mt-0.5 h-0.5 bg-yellow-400/70 rounded-full" />}
-              </div>
-            </div>
+      <CardVisual cardNumber={cardNumber} cardName={cardName} expiry={expiry} cvv={cvv} cardType={cardType} isFlipped={isFlipped} />
+      <div className="space-y-3 pt-1">
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">رقم البطاقة</Label>
+          <div className="relative">
+            <Input
+              value={cardNumber}
+              onChange={handleCardNumberChange}
+              onFocus={() => setIsFlipped(false)}
+              placeholder="0000 0000 0000 0000"
+              dir="ltr"
+              className="font-mono tracking-widest text-base pl-24"
+              maxLength={cardType === "amex" ? 17 : 19}
+              inputMode="numeric"
+              data-testid="input-card-number"
+            />
+            {cardType !== "unknown" && (
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                {CARD_TYPE_LABELS[cardType]}
+              </span>
+            )}
           </div>
-
-          {/* ── BACK ── */}
-          <div
-            className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} shadow-2xl overflow-hidden`}
-            style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
-          >
-            <div className="absolute top-10 left-0 right-0 h-10 bg-black/60" />
-            <div className="absolute top-[88px] left-5 right-5">
-              <div className="bg-white/90 rounded h-9 flex items-center justify-end px-3 gap-3">
-                <div className="flex-1 h-3 bg-gray-300/60 rounded-full" />
-                <p className="font-mono font-bold text-gray-800 text-sm min-w-[40px] text-left">
-                  {cvv ? "•".repeat(cvv.length) : "CVV"}
-                </p>
-              </div>
-              <p className="text-white/50 text-[10px] text-center mt-1">رمز CVV على ظهر البطاقة</p>
-            </div>
-            <div className="absolute bottom-4 left-5 right-5 flex justify-between items-center">
-              <p className="text-white/30 text-[9px]">{sysConfig.nameEn}</p>
-              <CardBrandLogo brand={brand} />
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* ── Visible Input Fields (always shown) ── */}
-      <div className="space-y-3">
-        {/* Card Number */}
-        <div className="space-y-1.5">
-          <Label htmlFor="card-number-input" className="text-sm font-semibold flex items-center gap-1.5">
-            <CreditCard className="w-3.5 h-3.5 text-primary" />
-            رقم البطاقة
-          </Label>
-          <Input
-            id="card-number-input"
-            value={cardNumber}
-            onChange={e => setCardNumber(formatCardNumber(e.target.value))}
-            onFocus={() => handleFocus("number")}
-            onBlur={() => setActiveField(null)}
-            placeholder="•••• •••• •••• ••••"
-            maxLength={19}
-            inputMode="numeric"
-            dir="ltr"
-            className={`font-mono tracking-widest text-base h-12 transition-all ${
-              errors.number ? "border-destructive" : activeField === "number" ? "border-primary ring-1 ring-primary" : ""
-            }`}
-            data-testid="input-card-number"
-          />
-          {errors.number && <p className="text-xs text-destructive">{errors.number}</p>}
         </div>
-
-        {/* Cardholder Name */}
-        <div className="space-y-1.5">
-          <Label htmlFor="card-name-input" className="text-sm font-semibold">
-            اسم حامل البطاقة
-          </Label>
+        <div className="space-y-1">
+          <Label className="text-xs text-muted-foreground">اسم حامل البطاقة</Label>
           <Input
-            id="card-name-input"
             value={cardName}
-            onChange={e => setCardName(e.target.value.toUpperCase())}
-            onFocus={() => handleFocus("name")}
-            onBlur={() => setActiveField(null)}
-            placeholder="FULL NAME AS ON CARD"
+            onChange={(e) => setCardName(e.target.value.toUpperCase())}
+            onFocus={() => setIsFlipped(false)}
+            placeholder="CARD HOLDER NAME"
             dir="ltr"
-            className={`uppercase tracking-wide text-base h-12 transition-all ${
-              errors.name ? "border-destructive" : activeField === "name" ? "border-primary ring-1 ring-primary" : ""
-            }`}
+            className="font-mono tracking-wide uppercase"
             data-testid="input-card-name"
           />
-          {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
         </div>
-
-        {/* Expiry + CVV side by side */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="card-expiry-input" className="text-sm font-semibold">
-              تاريخ الانتهاء
-            </Label>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">تاريخ الانتهاء</Label>
             <Input
-              id="card-expiry-input"
               value={expiry}
-              onChange={e => setExpiry(formatExpiry(e.target.value))}
-              onFocus={() => handleFocus("expiry")}
-              onBlur={() => setActiveField(null)}
+              onChange={handleExpiryChange}
+              onFocus={() => setIsFlipped(false)}
               placeholder="MM/YY"
+              dir="ltr"
+              className="font-mono tracking-widest"
               maxLength={5}
               inputMode="numeric"
-              dir="ltr"
-              className={`font-mono text-base h-12 transition-all ${
-                errors.expiry ? "border-destructive" : activeField === "expiry" ? "border-primary ring-1 ring-primary" : ""
-              }`}
-              data-testid="input-card-expiry"
+              data-testid="input-expiry"
             />
-            {errors.expiry && <p className="text-xs text-destructive">{errors.expiry}</p>}
           </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="card-cvv-input" className="text-sm font-semibold flex items-center gap-1">
-              CVV
-              <span className="text-[10px] text-muted-foreground font-normal">(ظهر البطاقة)</span>
-            </Label>
-            <Input
-              id="card-cvv-input"
-              ref={cvvInputRef}
-              value={cvv}
-              onChange={e => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              onFocus={handleCvvFocus}
-              onBlur={handleCvvBlur}
-              placeholder="•••"
-              maxLength={4}
-              inputMode="numeric"
-              type="password"
-              dir="ltr"
-              className={`font-mono text-base h-12 transition-all ${
-                errors.cvv ? "border-destructive" : activeField === "cvv" ? "border-primary ring-1 ring-primary" : ""
-              }`}
-              data-testid="input-card-cvv"
-            />
-            {errors.cvv && <p className="text-xs text-destructive">{errors.cvv}</p>}
-          </div>
-        </div>
-      </div>
-
-      {/* Accepted cards */}
-      <div className="flex items-center gap-3 text-xs text-muted-foreground bg-muted/40 rounded-xl px-4 py-2.5">
-        <span>البطاقات المقبولة:</span>
-        <div className="flex items-center gap-2">
-          <div className="bg-white border rounded px-1.5 py-0.5 shadow-sm">
-            <span className="text-green-700 font-black text-[11px]">mada</span>
-          </div>
-          <div className="bg-white border rounded px-1.5 py-0.5 shadow-sm">
-            <span className="text-blue-800 font-black text-[11px] italic">VISA</span>
-          </div>
-          <div className="flex bg-white border rounded px-1 py-0.5 gap-0.5 items-center shadow-sm">
-            <div className="w-3.5 h-3.5 rounded-full bg-red-500" />
-            <div className="w-3.5 h-3.5 rounded-full bg-yellow-400 -ml-1.5" />
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">رمز CVV</Label>
+            <div className="relative">
+              <Input
+                value={cvv}
+                onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, cardType === "amex" ? 4 : 3))}
+                onFocus={() => setIsFlipped(true)}
+                onBlur={() => setIsFlipped(false)}
+                placeholder={cardType === "amex" ? "0000" : "000"}
+                type={showCvv ? "text" : "password"}
+                dir="ltr"
+                className="font-mono tracking-widest pl-10"
+                maxLength={cardType === "amex" ? 4 : 3}
+                inputMode="numeric"
+                data-testid="input-cvv"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCvv(!showCvv)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showCvv ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Amount + Pay button */}
-      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Lock className="w-4 h-4 text-primary" />
-          <span className="text-sm text-foreground font-medium">إجمالي الدفع</span>
-        </div>
-        <span className="text-lg font-black text-primary">{amount.toFixed(2)} ر.س</span>
+      <div className="bg-muted/50 rounded-xl p-3 flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">المبلغ المستحق</span>
+        <span className="text-lg font-black text-primary">{Number(amount).toFixed(2)} ر.س</span>
       </div>
-
-      <div className="space-y-2">
-        <Button
-          onClick={handlePay}
-          className="w-full h-12 text-base font-bold"
-          data-testid="button-pay-card"
-        >
+      <div className="flex gap-3">
+        <Button variant="ghost" size="icon" onClick={onCancel} className="flex-shrink-0 rounded-xl border" data-testid="button-cancel-payment">
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <Button onClick={handlePay} className="flex-1 h-12 text-base font-bold" data-testid="button-pay-now">
           <Lock className="w-4 h-4 ml-2" />
-          ادفع الآن — {amount.toFixed(2)} ر.س
-        </Button>
-        <Button
-          variant="ghost"
-          className="w-full text-muted-foreground text-sm"
-          onClick={onCancel}
-          data-testid="button-cancel-card-payment"
-        >
-          <ArrowLeft className="w-4 h-4 ml-1" />
-          العودة
+          ادفع الآن — {Number(amount).toFixed(2)} ر.س
         </Button>
       </div>
-
-      <p className="text-center text-[11px] text-muted-foreground flex items-center justify-center gap-1">
+      <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1">
         <Shield className="w-3 h-3 text-green-600" />
-        بيئة محاكاة آمنة — لن يتم خصم أي مبلغ حقيقي
+        بيئة محاكاة — أي بيانات بطاقة مقبولة
       </p>
+    </div>
+  );
+}
+
+// ─── STC Pay ─────────────────────────────────────────────────────────────────
+function StcPayment({ amount, onSuccess, onCancel }: { amount: number; onSuccess: (tx: string) => void; onCancel: () => void }) {
+  const { toast } = useToast();
+  const [step, setStcStep] = useState<StcStep>("phone");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [sessionToken, setSessionToken] = useState("demo-session");
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [sending, setSending] = useState(false);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  const startTimer = () => {
+    setTimeLeft(300);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((t) => { if (t <= 1) { clearInterval(timerRef.current!); return 0; } return t - 1; });
+    }, 1000);
+  };
+
+  const formatTime = (s: number) =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const handleSendOtp = async () => {
+    if (!/^05\d{8}$/.test(phone)) {
+      toast({ variant: "destructive", title: "رقم الجوال غير صحيح", description: "يجب أن يبدأ بـ 05 ويتكون من 10 أرقام" });
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch("/api/pay/stc/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await res.json();
+      setSessionToken(data.sessionToken || "demo-session");
+    } catch {
+      setSessionToken("demo-session");
+    } finally {
+      setSending(false);
+      setStcStep("otp");
+      startTimer();
+    }
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = digit;
+    setOtp(newOtp);
+    if (digit && index < 3) otpRefs.current[index + 1]?.focus();
+    if (newOtp.every((d) => d !== "")) verifyOtp(newOtp.join(""));
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) otpRefs.current[index - 1]?.focus();
+  };
+
+  const verifyOtp = async (code: string) => {
+    setStcStep("processing");
+    try {
+      const res = await fetch("/api/pay/stc/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionToken, otp: code }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStcStep("success");
+        setTimeout(() => onSuccess(data.transactionId || `STC-${Date.now()}`), 1200);
+      } else {
+        toast({ variant: "destructive", title: "رمز التحقق غير صحيح", description: "الرمز الصحيح هو 1234" });
+        setOtp(["", "", "", ""]);
+        setStcStep("otp");
+        setTimeout(() => otpRefs.current[0]?.focus(), 100);
+      }
+    } catch {
+      toast({ variant: "destructive", title: "حدث خطأ في التحقق" });
+      setOtp(["", "", "", ""]);
+      setStcStep("otp");
+    }
+  };
+
+  if (step === "processing") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-5">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-2xl" style={{ background: "linear-gradient(135deg, #6B1FA8, #3DBE7C)" }}>
+          <Loader2 className="w-8 h-8 text-white animate-spin" />
+        </div>
+        <p className="font-bold">جاري التحقق من الرمز...</p>
+      </div>
+    );
+  }
+
+  if (step === "success") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-4">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center animate-in zoom-in duration-300">
+          <CheckCircle className="w-9 h-9 text-green-600" />
+        </div>
+        <div className="text-center">
+          <p className="font-bold text-green-700 text-lg">تمّ الدفع عبر STC Pay ✓</p>
+          <p className="text-sm text-muted-foreground mt-1">جاري تأكيد طلبك...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-1">
+        <h3 className="font-bold text-foreground text-base">STC Pay</h3>
+        <img src={stcLogoPath} alt="STC Pay" className="h-8 object-contain" />
+      </div>
+
+      {step === "phone" && (
+        <>
+          <div className="bg-muted/40 rounded-xl p-4 text-center space-y-0.5">
+            <p className="text-xs text-muted-foreground">المبلغ المستحق</p>
+            <p className="text-2xl font-black text-primary">{Number(amount).toFixed(2)} ر.س</p>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">رقم الجوال المرتبط بـ STC Pay</Label>
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              placeholder="05XXXXXXXX"
+              dir="ltr"
+              className="font-mono tracking-widest text-base text-center"
+              inputMode="numeric"
+              data-testid="input-stc-phone"
+            />
+          </div>
+          <div className="flex gap-3">
+            <Button variant="ghost" size="icon" onClick={onCancel} className="flex-shrink-0 rounded-xl border" data-testid="button-cancel-stc">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={handleSendOtp}
+              disabled={sending || phone.length < 10}
+              className="flex-1 h-12 text-base font-bold text-white border-0"
+              style={{ background: "linear-gradient(135deg, #6B1FA8, #3DBE7C)" }}
+              data-testid="button-send-otp"
+            >
+              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : "إرسال رمز التحقق"}
+            </Button>
+          </div>
+        </>
+      )}
+
+      {step === "otp" && (
+        <>
+          <div className="text-center space-y-0.5">
+            <p className="text-sm text-muted-foreground">تم إرسال رمز التحقق إلى</p>
+            <p className="font-bold text-foreground font-mono" dir="ltr">{phone}</p>
+          </div>
+          <div className="flex items-center justify-center gap-3 py-2" dir="ltr">
+            {otp.map((digit, index) => (
+              <input
+                key={index}
+                ref={(el) => { otpRefs.current[index] = el; }}
+                value={digit}
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                className="w-14 h-14 text-center text-2xl font-bold border-2 border-border rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none bg-background transition-colors"
+                data-testid={`input-otp-${index}`}
+              />
+            ))}
+          </div>
+          <div className="text-center space-y-2">
+            {timeLeft > 0 ? (
+              <p className="text-sm text-muted-foreground">
+                ينتهي الرمز خلال{" "}
+                <span className="font-bold text-primary font-mono">{formatTime(timeLeft)}</span>
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setOtp(["", "", "", ""]); setStcStep("phone"); }}
+                className="text-sm text-primary font-bold hover:underline"
+              >
+                طلب رمز جديد
+              </button>
+            )}
+            <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5">
+              <span className="text-xs text-amber-700">رمز الاختبار:</span>
+              <span className="font-bold font-mono text-amber-900 tracking-widest">1 2 3 4</span>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setOtp(["", "", "", ""]); setStcStep("phone"); }}
+            className="w-full text-muted-foreground"
+            data-testid="button-back-stc"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 ml-1" />
+            العودة
+          </Button>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Apple Pay ───────────────────────────────────────────────────────────────
+function ApplePayment({ amount, onSuccess, onCancel }: { amount: number; onSuccess: (tx: string) => void; onCancel: () => void }) {
+  const [step, setStep] = useState<"idle" | "processing" | "success">("idle");
+
+  const handleApplePay = () => {
+    setStep("processing");
+    setTimeout(() => { setStep("success"); setTimeout(() => onSuccess(`APPLE-${Date.now()}`), 1200); }, 1500);
+  };
+
+  if (step === "processing") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-5">
+        <div className="w-20 h-20 rounded-full bg-[#1c1c1e] flex items-center justify-center shadow-2xl">
+          <Loader2 className="w-9 h-9 text-white animate-spin" />
+        </div>
+        <div className="text-center">
+          <p className="font-bold text-foreground text-base">جاري المصادقة البيومترية...</p>
+          <p className="text-sm text-muted-foreground mt-1">انظر إلى الشاشة أو ضع إصبعك</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "success") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-4">
+        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center animate-in zoom-in duration-300">
+          <CheckCircle className="w-9 h-9 text-green-600" />
+        </div>
+        <div className="text-center">
+          <p className="font-bold text-green-700 text-lg">تمّ الدفع عبر Apple Pay ✓</p>
+          <p className="text-sm text-muted-foreground mt-1">جاري تأكيد طلبك...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <h3 className="font-bold text-foreground text-base text-center">Apple Pay</h3>
+      <div className="bg-muted/40 rounded-xl p-4 text-center space-y-0.5">
+        <p className="text-xs text-muted-foreground">المبلغ المستحق</p>
+        <p className="text-2xl font-black text-primary">{Number(amount).toFixed(2)} ر.س</p>
+      </div>
+      <button
+        onClick={handleApplePay}
+        className="w-full h-14 rounded-2xl bg-[#1c1c1e] hover:bg-[#2c2c2e] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2.5 shadow-xl"
+        data-testid="button-apple-pay"
+      >
+        <svg viewBox="0 0 20 24" className="h-5 w-auto fill-white flex-shrink-0">
+          <path d="M13.23 3.02C14.28 1.71 14.94 0 14.94 0s-1.71.28-2.76 1.59c-.96 1.21-1.57 2.86-1.47 3.64.97.07 2.53-.3 3.52-2.21zM16.44 8.74c-1.77-.07-3.28 1-4.13 1-.85 0-2.14-.94-3.55-.91-1.82.03-3.5 1.06-4.43 2.71-1.9 3.28-.49 8.15 1.35 10.82.9 1.31 1.97 2.77 3.38 2.72 1.35-.05 1.86-.87 3.49-.87 1.62 0 2.09.87 3.51.84 1.46-.03 2.39-1.32 3.29-2.63.97-1.47 1.37-2.9 1.4-2.97-.03-.01-2.71-1.04-2.74-4.13-.03-2.59 2.11-3.83 2.21-3.9-1.2-1.78-3.08-1.68-3.78-1.68z" />
+        </svg>
+        <span className="text-white font-semibold text-base">Pay with Face ID / Touch ID</span>
+      </button>
+      <Button variant="ghost" size="sm" onClick={onCancel} className="w-full text-muted-foreground" data-testid="button-cancel-apple-pay">
+        <ArrowLeft className="w-3.5 h-3.5 ml-1" />
+        إلغاء
+      </Button>
+      <p className="text-center text-xs text-muted-foreground">محاكاة Apple Pay — لا يوجد خصم حقيقي</p>
+    </div>
+  );
+}
+
+// ─── Main export ─────────────────────────────────────────────────────────────
+export default function SimulatedCardPayment({ amount, paymentMethod = "card", onSuccess, onCancel }: Props) {
+  const isStc = paymentMethod === "stc-pay";
+  const isApple = paymentMethod === "apple_pay" || paymentMethod === "neoleap-apple-pay";
+
+  return (
+    <div className="space-y-4">
+      {isStc ? (
+        <StcPayment amount={amount} onSuccess={onSuccess} onCancel={onCancel} />
+      ) : isApple ? (
+        <ApplePayment amount={amount} onSuccess={onSuccess} onCancel={onCancel} />
+      ) : (
+        <CardPayment amount={amount} onSuccess={onSuccess} onCancel={onCancel} />
+      )}
     </div>
   );
 }

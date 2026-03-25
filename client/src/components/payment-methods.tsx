@@ -154,8 +154,9 @@ export default function PaymentMethods({
      <div className="space-y-4">
      {paymentMethods.map((method) => {
     const isQahwaCard = (method.id as string) === 'qahwa-card';
-    const isNeoLeap = (method.id as string) === 'neoleap' || (method.id as string) === 'neoleap-apple-pay' || (method.id as string) === 'apple_pay';
+    const isNeoLeap = (method.id as string) === 'neoleap';
     const isApplePay = (method.id as string) === 'apple_pay' || (method.id as string) === 'neoleap-apple-pay';
+    const isStcPay = (method.id as string) === 'stc-pay';
     const isLoyaltyCard = (method.id as string) === 'loyalty-card';
     const isSelected = selectedMethod === method.id;
     const isComingSoon = COMING_SOON_METHODS.includes(method.id as string);
@@ -167,11 +168,6 @@ export default function PaymentMethods({
       return null;
     }
 
-    const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent.toLowerCase() : '';
-    const iosDevices = ['iphone', 'ipad', 'ipod'];
-    const isIOS = iosDevices.some(device => userAgent.includes(device));
-
-    if (isApplePay && !isIOS) return null;
     if (isLoyaltyCard) return null; // Always hide loyalty card from customer checkout
 
     // Coming Soon: show disabled card with badge
@@ -206,6 +202,59 @@ export default function PaymentMethods({
       );
     }
 
+    // Apple Pay
+    if (isApplePay) {
+      return (
+        <div key={method.id}>
+          <div
+            className={`h-12 px-4 rounded-xl bg-[#1c1c1e] flex items-center gap-2 hover:bg-[#2c2c2e] transition-all duration-150 shadow-sm cursor-pointer ${isSelected ? 'ring-2 ring-white/40 scale-[1.01]' : ''}`}
+            onClick={() => onSelectMethod(method.id)}
+            data-testid={`payment-method-${method.id}`}
+          >
+            <svg viewBox="0 0 20 24" className="h-5 w-auto fill-white flex-shrink-0">
+              <path d="M13.23 3.02C14.28 1.71 14.94 0 14.94 0s-1.71.28-2.76 1.59c-.96 1.21-1.57 2.86-1.47 3.64.97.07 2.53-.3 3.52-2.21zM16.44 8.74c-1.77-.07-3.28 1-4.13 1-.85 0-2.14-.94-3.55-.91-1.82.03-3.5 1.06-4.43 2.71-1.9 3.28-.49 8.15 1.35 10.82.9 1.31 1.97 2.77 3.38 2.72 1.35-.05 1.86-.87 3.49-.87 1.62 0 2.09.87 3.51.84 1.46-.03 2.39-1.32 3.29-2.63.97-1.47 1.37-2.9 1.4-2.97-.03-.01-2.71-1.04-2.74-4.13-.03-2.59 2.11-3.83 2.21-3.9-1.2-1.78-3.08-1.68-3.78-1.68z" />
+            </svg>
+            <span className="text-white font-semibold text-sm">Pay</span>
+            {isSelected && (
+              <div className="mr-auto w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                <Check className="w-3 h-3 text-white" />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // STC Pay
+    if (isStcPay) {
+      return (
+        <div key={method.id}>
+          <Card
+            className={`cursor-pointer transition-all duration-300 rounded-2xl overflow-hidden ${isSelected ? 'ring-2 ring-primary shadow-md scale-[1.01] bg-primary/5 border-primary' : 'border-border/50 hover:border-primary/30 hover:bg-primary/5'}`}
+            onClick={() => onSelectMethod(method.id)}
+            data-testid={`payment-method-${method.id}`}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #6B1FA8, #3DBE7C)" }}>
+                  <span className="text-white font-black text-xs tracking-tight">STC</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-foreground text-sm">STC Pay</h4>
+                  <p className="text-xs text-muted-foreground">الدفع عبر محفظة STC</p>
+                </div>
+                {isSelected && (
+                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center animate-in zoom-in duration-300 flex-shrink-0">
+                    <Check className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div key={method.id} className="relative group">
         {(isQahwaCard || isNeoLeap) && (
@@ -213,9 +262,7 @@ export default function PaymentMethods({
         )}
         <Card
          className={`cursor-pointer transition-all duration-500 relative overflow-hidden rounded-2xl ${
-          isApplePay
-          ? 'bg-black border-0 text-white shadow-xl hover:scale-[1.01]'
-          : (isQahwaCard || isNeoLeap)
+          (isQahwaCard || isNeoLeap)
           ? isSelected
            ? 'border-2 border-amber-400 shadow-2xl scale-[1.02] bg-white'
            : 'border-2 border-amber-200/50 hover:border-amber-400/80 shadow-lg hover:scale-[1.01] bg-white/80'
@@ -227,13 +274,7 @@ export default function PaymentMethods({
          data-testid={`payment-method-${method.id}`}
         >
          <CardContent className="p-0">
-           {isApplePay ? (
-             <div className="p-5 flex items-center justify-center gap-2 bg-black h-16">
-               <span className="text-white font-bold text-lg">Pay with</span>
-               <Smartphone className="w-6 h-6 text-white" />
-               <span className="text-white font-black text-xl tracking-tighter"> Pay</span>
-             </div>
-           ) : (isQahwaCard || isNeoLeap) && isSelected ? (
+           {(isQahwaCard || isNeoLeap) && isSelected ? (
              <div className="space-y-4">
                <div className="min-h-80 relative overflow-visible rounded-3xl shadow-2xl border border-white/10" 
                  style={{

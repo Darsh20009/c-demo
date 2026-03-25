@@ -2253,9 +2253,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allMethods.push({ id: 'qahwa-card', nameAr: 'بطاقة كيروكس', nameEn: 'QIROX Card', details: 'ادفع ببطاقة الولاء', icon: 'fas fa-gift' });
       }
 
-      if (pg?.stcPayEnabled) {
-        allMethods.push({ id: 'stc-pay', nameAr: 'STC Pay', nameEn: 'STC Pay', details: 'الدفع عبر محفظة STC', icon: 'fas fa-mobile-alt' });
-      }
+      // STC Pay — always available (simulated)
+      allMethods.push({ id: 'stc-pay', nameAr: 'STC Pay', nameEn: 'STC Pay', details: 'الدفع عبر محفظة STC', icon: 'fas fa-mobile-alt' });
 
       if (pg?.bankTransferEnabled) {
         allMethods.push({
@@ -2278,11 +2277,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           allMethods.push({ id: 'neoleap-apple-pay', nameAr: 'Apple Pay', nameEn: 'Apple Pay', details: 'الدفع السريع عبر Apple Pay', icon: 'fas fa-mobile-alt', gateway: 'neoleap' });
         }
       } else if (pg?.provider === 'geidea') {
-        const hasCredentials = !!(pg.geidea?.publicKey && pg.geidea?.apiPassword);
-        if (hasCredentials) {
-          allMethods.push({ id: 'geidea', nameAr: 'بطاقة بنكية', nameEn: 'Card Payment', details: 'مدى، فيزا، ماستر كارد عبر جيديا', icon: 'fas fa-credit-card', gateway: 'geidea' });
-          allMethods.push({ id: 'apple_pay', nameAr: 'Apple Pay', nameEn: 'Apple Pay', details: 'الدفع السريع عبر Apple Pay', icon: 'fas fa-mobile-alt', gateway: 'geidea' });
-        }
+        // Simulated card + Apple Pay (no real geidea credentials needed)
+        allMethods.push({ id: 'geidea', nameAr: 'بطاقة بنكية', nameEn: 'Card Payment', details: 'مدى، فيزا، ماستر كارد', icon: 'fas fa-credit-card', gateway: 'simulated' });
+        allMethods.push({ id: 'apple_pay', nameAr: 'Apple Pay', nameEn: 'Apple Pay', details: 'الدفع السريع عبر Apple Pay', icon: 'fas fa-mobile-alt', gateway: 'simulated' });
       } else if (pg?.provider === 'paymob') {
         const hasCredentials = !!(pg.paymob?.apiKey && pg.paymob?.integrationId);
         if (hasCredentials) {
@@ -2300,6 +2297,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch payment methods" });
     }
   });
+
+  // ─── Simulated STC Pay endpoints ─────────────────────────────────────────
+  // Initiate STC Pay: accepts phone number, returns session token
+  app.post("/api/pay/stc/initiate", async (req, res) => {
+    try {
+      const { phone } = req.body as { phone?: string };
+      if (!phone || !/^05\d{8}$/.test(phone.replace(/\s/g, ''))) {
+        return res.status(400).json({ success: false, error: "رقم الجوال غير صحيح" });
+      }
+      const sessionToken = `stc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      return res.json({ success: true, sessionToken, message: "تم إرسال رمز التحقق" });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: "Server error" });
+    }
+  });
+
+  // Verify STC Pay OTP: correct code is always "1234"
+  app.post("/api/pay/stc/verify", async (req, res) => {
+    try {
+      const { sessionToken, otp, orderId } = req.body as { sessionToken?: string; otp?: string; orderId?: string };
+      if (!sessionToken || !otp) {
+        return res.status(400).json({ success: false, error: "بيانات غير مكتملة" });
+      }
+      if (otp !== "1234") {
+        return res.status(422).json({ success: false, error: "رمز التحقق غير صحيح" });
+      }
+      const transactionId = `TXN-STC-${Date.now()}`;
+      return res.json({ success: true, transactionId, message: "تمت عملية الدفع بنجاح" });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: "Server error" });
+    }
+  });
+  // ─────────────────────────────────────────────────────────────────────────
 
   // Get payment gateway config (masked for admin UI)
   app.get("/api/payment-gateway/config", requireAuth, async (req: AuthRequest, res) => {
