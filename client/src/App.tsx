@@ -17,6 +17,7 @@ import { PWAUpdateNotifier } from "@/components/PWAUpdateNotifier";
 import { GlobalPrompts } from "@/components/global-prompts";
 import { PWAInstallBanner } from "@/components/pwa-install";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { PageHelpTooltip } from "@/components/page-help-tooltip";
 import MenuPage from "@/pages/menu"; 
 import CustomerProfile from "@/pages/customer-profile";
 import CartPage from "@/pages/cart-page";
@@ -362,6 +363,7 @@ function AppContent() {
       {/* Modals inside Router to ensure they can use routing hooks if needed */}
       {isCartOpen && <CartModal />}
       {isCheckoutOpen && <CheckoutModal />}
+      <PageHelpTooltip />
       <Toaster />
     </>
   );
