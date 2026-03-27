@@ -95,11 +95,11 @@ Fully dynamic plan management UI in the QIROX super admin panel:
 
 ## Quick Start
 
-- **Build**: `npx vite build` (builds frontend to dist/public/)
-- **Production**: `NODE_ENV=production npx tsx server/index.ts` (serves pre-built assets)
-- **Workflow**: Build first, then run production server on port 5000
-- **Port**: 5000
-- **Note**: Vite dev server has a known Radix UI/React hook incompatibility in this environment; use production build workflow instead
+- **Dev**: `NODE_ENV=development node_modules/.bin/tsx server/index.ts` (starts server + Vite middleware on port 5000)
+- **Build**: `npm run build` (builds frontend to dist/public/ and bundles server to dist/index.js)
+- **Production**: `node dist/index.js` (serves pre-built assets)
+- **Port**: 5000 (webview)
+- **Workflow**: "Start application" workflow runs the dev command automatically on Replit
 
 ## Branding
 
