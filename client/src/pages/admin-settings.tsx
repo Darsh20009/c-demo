@@ -209,6 +209,8 @@ export default function AdminSettings() {
 
   const [isEmergencyClosed, setIsEmergencyClosed] = useState(false);
   const [storeHours, setStoreHours] = useState<any>(null);
+  const [systemCountry, setSystemCountry] = useState("SA");
+  const [systemTimezone, setSystemTimezone] = useState("Asia/Riyadh");
   const [socialLinks, setSocialLinks] = useState({
     instagram: '',
     twitter: '',
@@ -245,6 +247,8 @@ export default function AdminSettings() {
     if (config) {
       setIsEmergencyClosed(config.isEmergencyClosed || false);
       setStoreHours(config.storeHours || null);
+      setSystemCountry(config.country || 'SA');
+      setSystemTimezone(config.timezone || 'Asia/Riyadh');
       setSocialLinks(config.socialLinks || {
         instagram: '',
         twitter: '',
@@ -438,6 +442,8 @@ export default function AdminSettings() {
     const payload: any = {
       isEmergencyClosed,
       socialLinks,
+      country: systemCountry,
+      timezone: systemTimezone,
     };
 
     if (storeHours) {
@@ -776,6 +782,73 @@ export default function AdminSettings() {
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex items-start gap-2">
                   <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
                   <p>{tc("تأكد من وضع الروابط كاملة (مثال: https://instagram.com/qirox) لتظهر بشكل صحيح في أسفل الموقع للعملاء.","Make sure to enter full URLs (e.g. https://instagram.com/qirox) so they display correctly at the bottom of the customer site.")}</p>
+                </div>
+
+                {/* Country & Timezone */}
+                <div className="mt-6 pt-6 border-t space-y-4">
+                  <h3 className="font-bold text-lg flex items-center gap-2 text-primary border-b pb-2">
+                    <Globe className="w-5 h-5" />
+                    {tc("الدولة والتوقيت", "Country & Timezone")}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-semibold text-sm">{tc("الدولة", "Country")}</Label>
+                      <Select value={systemCountry} onValueChange={(v) => {
+                        setSystemCountry(v);
+                        const tzMap: Record<string,string> = {
+                          SA: 'Asia/Riyadh', AE: 'Asia/Dubai', EG: 'Africa/Cairo',
+                          KW: 'Asia/Kuwait', BH: 'Asia/Bahrain', QA: 'Asia/Qatar',
+                          OM: 'Asia/Muscat', JO: 'Asia/Amman', LB: 'Asia/Beirut',
+                          TR: 'Europe/Istanbul', GB: 'Europe/London', US: 'America/New_York'
+                        };
+                        if (tzMap[v]) setSystemTimezone(tzMap[v]);
+                      }}>
+                        <SelectTrigger data-testid="select-system-country">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="SA">🇸🇦 {tc("المملكة العربية السعودية","Saudi Arabia")}</SelectItem>
+                          <SelectItem value="AE">🇦🇪 {tc("الإمارات","UAE")}</SelectItem>
+                          <SelectItem value="EG">🇪🇬 {tc("مصر","Egypt")}</SelectItem>
+                          <SelectItem value="KW">🇰🇼 {tc("الكويت","Kuwait")}</SelectItem>
+                          <SelectItem value="BH">🇧🇭 {tc("البحرين","Bahrain")}</SelectItem>
+                          <SelectItem value="QA">🇶🇦 {tc("قطر","Qatar")}</SelectItem>
+                          <SelectItem value="OM">🇴🇲 {tc("عُمان","Oman")}</SelectItem>
+                          <SelectItem value="JO">🇯🇴 {tc("الأردن","Jordan")}</SelectItem>
+                          <SelectItem value="LB">🇱🇧 {tc("لبنان","Lebanon")}</SelectItem>
+                          <SelectItem value="TR">🇹🇷 {tc("تركيا","Turkey")}</SelectItem>
+                          <SelectItem value="GB">🇬🇧 {tc("المملكة المتحدة","UK")}</SelectItem>
+                          <SelectItem value="US">🇺🇸 {tc("الولايات المتحدة","USA")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-semibold text-sm">{tc("المنطقة الزمنية", "Timezone")}</Label>
+                      <Select value={systemTimezone} onValueChange={setSystemTimezone}>
+                        <SelectTrigger data-testid="select-system-timezone">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Asia/Riyadh">Asia/Riyadh (UTC+3)</SelectItem>
+                          <SelectItem value="Asia/Dubai">Asia/Dubai (UTC+4)</SelectItem>
+                          <SelectItem value="Africa/Cairo">Africa/Cairo (UTC+2/3)</SelectItem>
+                          <SelectItem value="Asia/Kuwait">Asia/Kuwait (UTC+3)</SelectItem>
+                          <SelectItem value="Asia/Bahrain">Asia/Bahrain (UTC+3)</SelectItem>
+                          <SelectItem value="Asia/Qatar">Asia/Qatar (UTC+3)</SelectItem>
+                          <SelectItem value="Asia/Muscat">Asia/Muscat (UTC+4)</SelectItem>
+                          <SelectItem value="Asia/Amman">Asia/Amman (UTC+2/3)</SelectItem>
+                          <SelectItem value="Asia/Beirut">Asia/Beirut (UTC+2/3)</SelectItem>
+                          <SelectItem value="Europe/Istanbul">Europe/Istanbul (UTC+3)</SelectItem>
+                          <SelectItem value="Europe/London">Europe/London (UTC+0/1)</SelectItem>
+                          <SelectItem value="America/New_York">America/New_York (UTC-5/4)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-green-50 dark:bg-green-900/10 rounded-lg text-xs text-green-700 dark:text-green-300 flex items-start gap-2">
+                    <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p>{tc("يحدد هذا الإعداد المنطقة الزمنية المستخدمة في جميع تقارير وإحصاءات النظام. اختر المنطقة الزمنية الخاصة ببلدك لضمان دقة تقارير اليوم والفترات الزمنية.","This setting controls the timezone used across all system reports and statistics. Choose your country's timezone to ensure accurate daily reports and time-based filters.")}</p>
+                  </div>
                 </div>
               </div>
             </div>

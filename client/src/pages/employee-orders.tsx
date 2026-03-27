@@ -68,10 +68,16 @@ export default function EmployeeOrders() {
   }, [setLocation]);
 
   const { data: orders = [], refetch, isLoading, isError } = useQuery<any[]>({
-    queryKey: ["/api/orders"],
-    refetchInterval: 10000,
+    queryKey: ["/api/orders", "management"],
+    queryFn: async () => {
+      const res = await fetch("/api/orders?limit=500", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch orders");
+      return res.json();
+    },
+    refetchInterval: 8000,
     refetchOnWindowFocus: true,
     retry: 2,
+    staleTime: 4000,
   });
 
   const { data: branches = [] } = useQuery<any[]>({

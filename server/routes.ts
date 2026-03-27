@@ -68,6 +68,29 @@ const isValidObjectId = (id: string) => Types.ObjectId.isValid(id);
 // The value in BusinessConfigModel.taxRate is authoritative; this constant is
 // used as a fallback for synchronous calculations.
 const VAT_RATE = 0.15;
+
+// ─── Saudi Arabia Timezone Utilities (UTC+3) ─────────────────────────────────
+// All "today" calculations must use Saudi Arabia time (Asia/Riyadh, UTC+3)
+// so that midnight rolls over at 00:00 Riyadh time, not 00:00 UTC (which
+// would be 03:00 Riyadh time — 3 hours late).
+function getSaudiStartOfDay(date?: Date): Date {
+  const d = date || new Date();
+  // Add 3 hours to get the current date in Riyadh time
+  const saudiDate = new Date(d.getTime() + 3 * 60 * 60 * 1000);
+  // Zero out to midnight in Riyadh (using UTC methods on the shifted date)
+  const midnight = new Date(Date.UTC(
+    saudiDate.getUTCFullYear(),
+    saudiDate.getUTCMonth(),
+    saudiDate.getUTCDate(),
+    0, 0, 0, 0
+  ));
+  // Shift back to UTC: Saudi midnight 00:00 = UTC 21:00 previous day
+  return new Date(midnight.getTime() - 3 * 60 * 60 * 1000);
+}
+function getSaudiEndOfDay(date?: Date): Date {
+  const start = getSaudiStartOfDay(date);
+  return new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 const __filename = fileURLToPath(import.meta.url);
@@ -774,14 +797,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // --- ORDERS API ---
   app.get("/api/orders/live", async (req: any, res) => {
     try {
-      const branchId = req.query.branchId as string;
-      const orders = await storage.getOrders(200, 0);
-      const liveOrders = orders.filter((o: any) => {
-        const isLive = ['pending', 'in_progress', 'ready', 'payment_confirmed', 'confirmed'].includes(o.status);
-        if (branchId && o.branchId) return isLive && o.branchId === branchId;
-        return isLive;
+      const { OrderModel } = await import("@shared/schema");
+      const employee = req.session?.employee;
+      const tenantId = employee?.tenantId || getTenantIdFromRequest(req) || 'demo-tenant';
+      const branchId = (req.query.branchId as string) || employee?.branchId;
+
+      const query: any = {
+        tenantId,
+        status: { $in: ['pending', 'in_progress', 'ready', 'payment_confirmed', 'confirmed', 'preparing', 'serving'] }
+      };
+      if (branchId) query.branchId = branchId;
+
+      const liveOrders = await OrderModel.find(query)
+        .sort({ createdAt: -1 })
+        .limit(150)
+        .lean();
+
+      const coffeeItems = await storage.getCoffeeItems();
+      const enriched = liveOrders.map((order: any) => {
+        const s = serializeDoc(order);
+        let orderItems = s.items;
+        if (typeof orderItems === 'string') { try { orderItems = JSON.parse(orderItems); } catch { orderItems = []; } }
+        if (!Array.isArray(orderItems)) orderItems = [];
+        return {
+          ...s,
+          items: orderItems.map((item: any) => {
+            const ci = coffeeItems.find(c => c.id === item.coffeeItemId);
+            return { ...item, coffeeItem: ci ? { nameAr: ci.nameAr, nameEn: ci.nameEn, price: ci.price, imageUrl: ci.imageUrl } : null };
+          })
+        };
       });
-      res.json(liveOrders);
+
+      res.json(enriched);
     } catch (error) {
       console.error("Error fetching live orders:", error);
       res.status(500).json({ error: "Failed to fetch live orders" });
@@ -7733,53 +7780,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all orders (branch-filtered for non-admin/owner roles)
   app.get("/api/orders", async (req: any, res) => {
     try {
-      const { limit, offset } = req.query;
-      const limitNum = limit ? parseInt(limit as string) : undefined;
-      const offsetNum = offset ? parseInt(offset as string) : undefined;
+      const { OrderModel } = await import("@shared/schema");
+      const { limit, offset, status, today, fromDate } = req.query;
 
-      const allOrders = await storage.getOrders(limitNum, offsetNum);
-
-      // If session employee exists, filter by branch; otherwise return all orders
       const employee = req.session?.employee;
-      const orders = employee ? filterByBranch(allOrders, { ...employee, tenantId: employee.tenantId || 'default' }) : allOrders;
+      const tenantId = employee?.tenantId || getTenantIdFromRequest(req) || 'demo-tenant';
+
+      const limitNum = limit ? parseInt(limit as string) : 300;
+      const offsetNum = offset ? parseInt(offset as string) : 0;
+
+      const query: any = { tenantId };
+      if (employee?.branchId) query.branchId = employee.branchId;
+
+      // Support status filter (comma-separated)
+      if (status && status !== 'all') {
+        const statuses = (status as string).split(',').map(s => s.trim()).filter(Boolean);
+        if (statuses.length === 1) query.status = statuses[0];
+        else if (statuses.length > 1) query.status = { $in: statuses };
+      }
+
+      // Support today filter (Saudi timezone)
+      if (today === 'true' || today === '1') {
+        query.createdAt = { $gte: getSaudiStartOfDay(), $lte: getSaudiEndOfDay() };
+      } else if (fromDate) {
+        query.createdAt = { $gte: new Date(fromDate as string) };
+      }
+
+      const rawOrders = await OrderModel.find(query)
+        .sort({ createdAt: -1 })
+        .skip(offsetNum)
+        .limit(limitNum)
+        .lean();
 
       const coffeeItems = await storage.getCoffeeItems();
 
-      // Enrich orders with coffee item details
-      const enrichedOrders = orders.map(order => {
-        const serializedOrder = serializeDoc(order);
-        
-        // Parse items if they're stored as JSON string
-        let orderItems = serializedOrder.items;
-        if (typeof orderItems === 'string') {
-          try {
-            orderItems = JSON.parse(orderItems);
-          } catch (e) {
-            orderItems = [];
-          }
-        }
-        
-        // Ensure orderItems is an array
-        if (!Array.isArray(orderItems)) {
-          orderItems = [];
-        }
-        
-        const items = orderItems.map((item: any) => {
-          const coffeeItem = coffeeItems.find(ci => ci.id === item.coffeeItemId);
-          return {
-            ...item,
-            coffeeItem: coffeeItem ? {
-              nameAr: coffeeItem.nameAr,
-              nameEn: coffeeItem.nameEn,
-              price: coffeeItem.price,
-              imageUrl: coffeeItem.imageUrl
-            } : null
-          };
-        });
-
+      const enrichedOrders = rawOrders.map((order: any) => {
+        const s = serializeDoc(order);
+        let orderItems = s.items;
+        if (typeof orderItems === 'string') { try { orderItems = JSON.parse(orderItems); } catch { orderItems = []; } }
+        if (!Array.isArray(orderItems)) orderItems = [];
         return {
-          ...serializedOrder,
-          items
+          ...s,
+          items: orderItems.map((item: any) => {
+            const ci = coffeeItems.find(c => c.id === item.coffeeItemId);
+            return { ...item, coffeeItem: ci ? { nameAr: ci.nameAr, nameEn: ci.nameEn, price: ci.price, imageUrl: ci.imageUrl } : null };
+          })
         };
       });
 
@@ -11730,7 +11775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         CategoryModel.countDocuments(),
         DeliveryZoneModel.countDocuments(),
         OrderModel.countDocuments({
-          createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+          createdAt: { $gte: getSaudiStartOfDay(), $lte: getSaudiEndOfDay() },
           status: { $ne: 'cancelled' }
         }),
         OrderModel.aggregate([
@@ -13521,25 +13566,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Support period filter (today/week/month/year)
       if (period && !startDate && !endDate) {
         const now = new Date();
-        const start = new Date();
+        let start: Date;
         switch (period as string) {
           case 'today':
-            start.setHours(0, 0, 0, 0);
+            start = getSaudiStartOfDay();
             break;
           case 'week':
-            start.setDate(now.getDate() - 7);
-            start.setHours(0, 0, 0, 0);
+            start = new Date(getSaudiStartOfDay().getTime() - 6 * 24 * 60 * 60 * 1000);
             break;
           case 'month':
-            start.setDate(now.getDate() - 30);
-            start.setHours(0, 0, 0, 0);
+            start = new Date(getSaudiStartOfDay().getTime() - 29 * 24 * 60 * 60 * 1000);
             break;
           case 'year':
-            start.setFullYear(now.getFullYear() - 1);
-            start.setHours(0, 0, 0, 0);
+            start = new Date(getSaudiStartOfDay().getTime() - 364 * 24 * 60 * 60 * 1000);
             break;
           default:
-            start.setHours(0, 0, 0, 0);
+            start = getSaudiStartOfDay();
         }
         query.date = { $gte: start, $lte: now };
       } else if (startDate || endDate) {
@@ -13640,28 +13682,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         query.branchId = finalBranchId;
       }
       
-      // Support period filter (today/week/month/year)
+      // Support period filter (today/week/month/year) — Saudi Arabia timezone (UTC+3)
       if (period && !startDate && !endDate) {
         const now = new Date();
-        const start = new Date();
+        let start: Date;
         switch (period as string) {
           case 'today':
-            start.setHours(0, 0, 0, 0);
+            start = getSaudiStartOfDay();
             break;
           case 'week':
-            start.setDate(now.getDate() - 7);
-            start.setHours(0, 0, 0, 0);
+            start = new Date(getSaudiStartOfDay().getTime() - 6 * 24 * 60 * 60 * 1000);
             break;
           case 'month':
-            start.setDate(now.getDate() - 30);
-            start.setHours(0, 0, 0, 0);
+            start = new Date(getSaudiStartOfDay().getTime() - 29 * 24 * 60 * 60 * 1000);
             break;
           case 'year':
-            start.setFullYear(now.getFullYear() - 1);
-            start.setHours(0, 0, 0, 0);
+            start = new Date(getSaudiStartOfDay().getTime() - 364 * 24 * 60 * 60 * 1000);
             break;
           default:
-            start.setHours(0, 0, 0, 0);
+            start = getSaudiStartOfDay();
         }
         query.date = { $gte: start, $lte: now };
       } else if (startDate || endDate) {
@@ -13793,17 +13832,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       switch (period) {
         case 'today':
-          startDate.setHours(0, 0, 0, 0);
-          endDate.setHours(23, 59, 59, 999);
+          startDate = getSaudiStartOfDay();
+          endDate = getSaudiEndOfDay();
           break;
         case 'week':
-          startDate.setDate(now.getDate() - 7);
+          startDate = new Date(getSaudiStartOfDay().getTime() - 6 * 24 * 60 * 60 * 1000);
           break;
         case 'month':
-          startDate.setDate(1);
+          startDate = getSaudiStartOfDay();
+          startDate.setDate(startDate.getDate() - startDate.getDate() + 1);
           break;
         case 'year':
-          startDate = new Date(now.getFullYear(), 0, 1);
+          startDate = new Date(getSaudiStartOfDay());
+          startDate.setMonth(0, 1);
           break;
       }
       
