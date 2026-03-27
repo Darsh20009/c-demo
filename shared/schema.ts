@@ -1264,6 +1264,12 @@ const OrderSchema = new Schema<IOrder>({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// Core compound indexes for high-throughput queries
+OrderSchema.index({ tenantId: 1, branchId: 1, status: 1, createdAt: -1 }); // live orders with branch + sort
+OrderSchema.index({ tenantId: 1, status: 1, createdAt: -1 });              // live orders no-branch + sort
+OrderSchema.index({ tenantId: 1, branchId: 1, createdAt: -1, status: 1 }); // today filter with branch
+OrderSchema.index({ tenantId: 1, createdAt: -1, status: 1 });              // today filter no-branch
+// Existing indexes retained
 OrderSchema.index({ tenantId: 1, branchId: 1, status: 1 });
 OrderSchema.index({ tenantId: 1, createdAt: -1 });
 OrderSchema.index({ status: 1, createdAt: -1 });

@@ -41,10 +41,11 @@ async function connectDatabase() {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
     heartbeatFrequencyMS: 10000,
-    maxPoolSize: 50,
-    minPoolSize: 10,
+    maxPoolSize: 200,
+    minPoolSize: 20,
+    waitQueueTimeoutMS: 10000,
     connectTimeoutMS: 10000,
-    maxIdleTimeMS: 30000,
+    maxIdleTimeMS: 60000,
     compressors: ['zlib'] as any,
   };
 

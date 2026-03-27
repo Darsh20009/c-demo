@@ -93,6 +93,45 @@ function getSaudiEndOfDay(date?: Date): Date {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─── High-Performance Coffee Items Cache ─────────────────────────────────────
+// getCoffeeItems() is called in 11+ hot paths. This cached version eliminates
+// repeated DB round-trips, returning a Map<id, item> for O(1) lookups.
+// Cache is per-tenantId and auto-invalidated on item mutations.
+async function getCachedCoffeeItemMap(tenantId: string): Promise<Map<string, any>> {
+  const ck = cacheKey('coffee-items-map', tenantId);
+  const cached = cache.get<Map<string, any>>(ck);
+  if (cached) return cached;
+  const { CoffeeItemModel } = await import("@shared/schema");
+  const items = await CoffeeItemModel.find({ tenantId })
+    .select('id nameAr nameEn price imageUrl category isAvailable')
+    .lean();
+  const map = new Map<string, any>();
+  for (const item of items) {
+    const s = serializeDoc(item as any);
+    map.set(s.id, s);
+  }
+  cache.set(ck, map, CACHE_TTL.COFFEE_ITEM_MAP);
+  return map;
+}
+
+async function getCachedCoffeeItems(tenantId: string): Promise<any[]> {
+  const ck = cacheKey('coffee-items', tenantId);
+  const cached = cache.get<any[]>(ck);
+  if (cached) return cached;
+  const { CoffeeItemModel } = await import("@shared/schema");
+  const items = await CoffeeItemModel.find({ tenantId }).lean();
+  const serialized = (items as any[]).map(serializeDoc);
+  cache.set(ck, serialized, CACHE_TTL.COFFEE_ITEMS);
+  return serialized;
+}
+
+function invalidateCoffeeItemsCache(tenantId: string) {
+  cache.invalidateKey(cacheKey('coffee-items', tenantId));
+  cache.invalidateKey(cacheKey('coffee-items-map', tenantId));
+  cache.invalidate('menu-items');
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import nodemailer from "nodemailer";
@@ -813,7 +852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(150)
         .lean();
 
-      const coffeeItems = await storage.getCoffeeItems();
+      const coffeeItemMap = await getCachedCoffeeItemMap(tenantId);
       const enriched = liveOrders.map((order: any) => {
         const s = serializeDoc(order);
         let orderItems = s.items;
@@ -822,7 +861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return {
           ...s,
           items: orderItems.map((item: any) => {
-            const ci = coffeeItems.find(c => c.id === item.coffeeItemId);
+            const ci = coffeeItemMap.get(item.coffeeItemId);
             return { ...item, coffeeItem: ci ? { nameAr: ci.nameAr, nameEn: ci.nameEn, price: ci.price, imageUrl: ci.imageUrl } : null };
           })
         };
@@ -2217,6 +2256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "فشل في حذف المشروب من قاعدة البيانات" });
       }
 
+      invalidateCoffeeItemsCache(tenantId || 'demo-tenant');
       res.json({ 
         success: true, 
         message: "تم حذف المشروب وجميع البيانات المرتبطة به بنجاح" 
@@ -6389,8 +6429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publishedBranches: itemData.publishedBranches
       });
 
-      // Clear server-side cache if any (some routers use memory cache)
-      // This ensures immediate visibility
+      invalidateCoffeeItemsCache(tenantId);
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.status(201).json(itemData);
     } catch (error) {
@@ -6409,6 +6448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!updatedItem) {
         return res.status(404).json({ error: "المنتج غير موجود" });
       }
+      invalidateCoffeeItemsCache(req.employee?.tenantId || 'demo-tenant');
       res.json(updatedItem);
     } catch (error) {
       console.error("[PATCH /api/coffee-items/:id] Error:", error);
@@ -6581,6 +6621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const updatedItem = await storage.updateCoffeeItem(id, { branchAvailability });
+      invalidateCoffeeItemsCache((item as any).tenantId || 'demo-tenant');
       res.json(serializeDoc(updatedItem));
     } catch (error) {
       res.status(500).json({ error: "Failed to update coffee item branches" });
@@ -7390,10 +7431,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get pending table orders (for cashier) - MOST SPECIFIC FIRST
-  app.get("/api/orders/table/pending", async (req, res) => {
+  app.get("/api/orders/table/pending", async (req: any, res) => {
     try {
       const orders = await storage.getPendingTableOrders();
-      const coffeeItems = await storage.getCoffeeItems();
+      const _tenantId = req.session?.employee?.tenantId || getTenantIdFromRequest(req) || 'demo-tenant';
+      const coffeeItemMap = await getCachedCoffeeItemMap(_tenantId);
 
       // Enrich orders with coffee item details
       const enrichedOrders = orders.map(order => {
@@ -7413,7 +7455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const items = orderItems.map((item: any) => {
-          const coffeeItem = coffeeItems.find(ci => ci.id === item.coffeeItemId);
+          const coffeeItem = coffeeItemMap.get(item.coffeeItemId);
           return {
             ...item,
             coffeeItem: coffeeItem ? {
@@ -7450,7 +7492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
       }).sort({ createdAt: -1 }).limit(100).lean();
 
-      const coffeeItems = await storage.getCoffeeItems();
+      const coffeeItemMap = await getCachedCoffeeItemMap(tenantId);
       const enrichedOrders = allOrders.map(order => {
         const serialized = serializeDoc(order);
         let items = serialized.items;
@@ -7459,7 +7501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return {
           ...serialized,
           items: items.map((item: any) => {
-            const ci = coffeeItems.find(c => c.id === item.coffeeItemId);
+            const ci = coffeeItemMap.get(item.coffeeItemId);
             return { ...item, coffeeItem: ci ? { nameAr: ci.nameAr, nameEn: ci.nameEn, price: ci.price, imageUrl: ci.imageUrl } : null };
           })
         };
@@ -7479,7 +7521,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter by branch for non-admin managers
       const orders = filterByBranch(allOrders, req.employee);
 
-      const coffeeItems = await storage.getCoffeeItems();
+      const tableOrderTenantId = req.employee?.tenantId || 'demo-tenant';
+      const coffeeItemMap = await getCachedCoffeeItemMap(tableOrderTenantId);
 
       // Enrich orders with coffee item details
       const enrichedOrders = orders.map(order => {
@@ -7499,7 +7542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const items = orderItems.map((item: any) => {
-          const coffeeItem = coffeeItems.find(ci => ci.id === item.coffeeItemId);
+          const coffeeItem = coffeeItemMap.get(item.coffeeItemId);
           return {
             ...item,
             coffeeItem: coffeeItem ? {
@@ -7565,10 +7608,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Enrich items with coffee item details
-      const coffeeItems = await storage.getCoffeeItems();
+      // Enrich items with coffee item details (cached)
+      const invoiceTenantId = employee?.tenantId || 'demo-tenant';
+      const coffeeItemMap = await getCachedCoffeeItemMap(invoiceTenantId);
       const enrichedItems = Array.isArray(orderItems) ? orderItems.map((item: any) => {
-        const coffeeItem = coffeeItems.find(ci => ci.id === item.coffeeItemId);
+        const coffeeItem = coffeeItemMap.get(item.coffeeItemId);
         return {
           ...item,
           coffeeItem: coffeeItem ? {
@@ -7728,9 +7772,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      const kdsTenantId = req.employee?.tenantId || 'demo-tenant';
+      if (!query.tenantId) query.tenantId = kdsTenantId; // security: scope to tenant
       const orders = await OrderModel.find(query).sort({ createdAt: 1 }); // Oldest first for FIFO processing
 
-      const coffeeItems = await storage.getCoffeeItems();
+      const kdsCoffeeMap = await getCachedCoffeeItemMap(kdsTenantId);
 
       // Enrich orders with coffee item details
       const enrichedOrders = orders.map(order => {
@@ -7752,7 +7798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const items = orderItems.map((item: any) => {
-          const coffeeItem = coffeeItems.find(ci => ci.id === item.coffeeItemId);
+          const coffeeItem = kdsCoffeeMap.get(item.coffeeItemId);
           return {
             ...item,
             coffeeItem: coffeeItem ? {
@@ -7820,7 +7866,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .limit(limitNum)
         .lean();
 
-      const coffeeItems = await storage.getCoffeeItems();
+      const ordersItemMap = await getCachedCoffeeItemMap(tenantId);
 
       const enrichedOrders = rawOrders.map((order: any) => {
         const s = serializeDoc(order);
@@ -7830,7 +7876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return {
           ...s,
           items: orderItems.map((item: any) => {
-            const ci = coffeeItems.find(c => c.id === item.coffeeItemId);
+            const ci = ordersItemMap.get(item.coffeeItemId);
             return { ...item, coffeeItem: ci ? { nameAr: ci.nameAr, nameEn: ci.nameEn, price: ci.price, imageUrl: ci.imageUrl } : null };
           })
         };
@@ -10728,11 +10774,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get orders assigned to specific cashier
-  app.get("/api/cashier/:cashierId/orders", async (req, res) => {
+  app.get("/api/cashier/:cashierId/orders", async (req: any, res) => {
     try {
       const { OrderModel } = await import("@shared/schema");
       const { status } = req.query;
-      const coffeeItems = await storage.getCoffeeItems();
+      const cashierTenantId = req.session?.employee?.tenantId || getTenantIdFromRequest(req) || 'demo-tenant';
+      const cashierCoffeeMap = await getCachedCoffeeItemMap(cashierTenantId);
       
       const query: any = {
         assignedCashierId: req.params.cashierId,
@@ -10763,7 +10810,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const items = orderItems.map((item: any) => {
-          const coffeeItem = coffeeItems.find(ci => ci.id === item.coffeeItemId);
+          const coffeeItem = cashierCoffeeMap.get(item.coffeeItemId);
           return {
             ...item,
             coffeeItem: coffeeItem ? {
@@ -17133,7 +17180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const bestDay = Object.entries(dayRevenue).sort((a, b) => b[1] - a[1])[0];
 
         const allEmployees = await storage.getEmployees();
-        const products = await storage.getCoffeeItems();
+        const products = await getCachedCoffeeItems(aiTenantId);
 
         businessContext = `
 معلومات الكافيه (محدثة الآن):

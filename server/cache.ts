@@ -83,19 +83,21 @@ class MemoryCache {
   }
 }
 
-export const cache = new MemoryCache(1000);
+export const cache = new MemoryCache(5000);
 
 export const CACHE_TTL = {
-  MENU_ITEMS: 60,
-  CATEGORIES: 120,
-  BUSINESS_CONFIG: 30,
+  MENU_ITEMS: 90,
+  CATEGORIES: 180,
+  BUSINESS_CONFIG: 60,
   SUBSCRIPTION: 300,
-  BRANCHES: 120,
-  EMPLOYEES: 60,
-  TABLES: 30,
-  BANNERS: 120,
-  ADDONS: 120,
+  BRANCHES: 180,
+  EMPLOYEES: 90,
+  TABLES: 45,
+  BANNERS: 180,
+  ADDONS: 180,
   LOYALTY_CARD: 15,
+  COFFEE_ITEMS: 90,
+  COFFEE_ITEM_MAP: 90,
 };
 
 export function cacheKey(...parts: (string | number | undefined | null)[]): string {
