@@ -13508,7 +13508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/accounting/expenses", requireAuth, async (req: AuthRequest, res) => {
     try {
       const { ExpenseModel } = await import('@shared/schema');
-      const { branchId, startDate, endDate, category, status, page = '1', limit = '20' } = req.query;
+      const { branchId, startDate, endDate, category, status, period, page = '1', limit = '50' } = req.query;
       
       const query: any = {};
       const isAdmin = req.employee?.role === 'admin' || req.employee?.role === 'owner';
@@ -13518,7 +13518,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         query.branchId = finalBranchId;
       }
       
-      if (startDate || endDate) {
+      // Support period filter (today/week/month/year)
+      if (period && !startDate && !endDate) {
+        const now = new Date();
+        const start = new Date();
+        switch (period as string) {
+          case 'today':
+            start.setHours(0, 0, 0, 0);
+            break;
+          case 'week':
+            start.setDate(now.getDate() - 7);
+            start.setHours(0, 0, 0, 0);
+            break;
+          case 'month':
+            start.setDate(now.getDate() - 30);
+            start.setHours(0, 0, 0, 0);
+            break;
+          case 'year':
+            start.setFullYear(now.getFullYear() - 1);
+            start.setHours(0, 0, 0, 0);
+            break;
+          default:
+            start.setHours(0, 0, 0, 0);
+        }
+        query.date = { $gte: start, $lte: now };
+      } else if (startDate || endDate) {
         query.date = {};
         if (startDate) query.date.$gte = new Date(startDate as string);
         if (endDate) query.date.$lte = new Date(endDate as string);
@@ -13606,7 +13630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/accounting/revenue", requireAuth, async (req: AuthRequest, res) => {
     try {
       const { RevenueModel } = await import('@shared/schema');
-      const { branchId, startDate, endDate, category, page = '1', limit = '20' } = req.query;
+      const { branchId, startDate, endDate, category, period, page = '1', limit = '50' } = req.query;
       
       const query: any = {};
       const isAdmin = req.employee?.role === 'admin' || req.employee?.role === 'owner';
@@ -13616,7 +13640,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         query.branchId = finalBranchId;
       }
       
-      if (startDate || endDate) {
+      // Support period filter (today/week/month/year)
+      if (period && !startDate && !endDate) {
+        const now = new Date();
+        const start = new Date();
+        switch (period as string) {
+          case 'today':
+            start.setHours(0, 0, 0, 0);
+            break;
+          case 'week':
+            start.setDate(now.getDate() - 7);
+            start.setHours(0, 0, 0, 0);
+            break;
+          case 'month':
+            start.setDate(now.getDate() - 30);
+            start.setHours(0, 0, 0, 0);
+            break;
+          case 'year':
+            start.setFullYear(now.getFullYear() - 1);
+            start.setHours(0, 0, 0, 0);
+            break;
+          default:
+            start.setHours(0, 0, 0, 0);
+        }
+        query.date = { $gte: start, $lte: now };
+      } else if (startDate || endDate) {
         query.date = {};
         if (startDate) query.date.$gte = new Date(startDate as string);
         if (endDate) query.date.$lte = new Date(endDate as string);

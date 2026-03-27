@@ -28,6 +28,17 @@ This is the **single source of truth** for ALL branding across the entire system
 
 **Note for server-side branding** (email templates in `server/mail-service.ts`): These contain hardcoded brand strings that should be manually kept in sync with `brand.ts` values.
 
+## Latest Fixes (March 2026 Session)
+
+### Bug Fixes Applied
+- **Accounting Period Filter**: `GET /api/accounting/expenses` and `GET /api/accounting/revenue` now properly handle `period` query param (`today/week/month/year`) converting it to a date range. Previously the `period` param was ignored showing ALL records.
+- **Expense Form Validation**: `handleAddExpense` now validates category, description, and amount before submitting.
+- **Inventory UI Consistency**: All inventory pages (raw-items, purchases, alerts, movements, recipes, suppliers, transfers) now use `bg-white text-gray-900 min-h-screen` for consistent light theme.
+- **Menu Category Sync**: `employee-menu-management.tsx` `filteredItems` now filters by `availableCatIds` (current department's categories only). Removed the `|| true` hack that caused all items to appear in all category sections.
+- **Delivery System UI**: `manager-delivery.tsx` background changed from `bg-background` to `bg-white text-gray-900`.
+- **In-Cafe Live Tracking**: Added `CafeInternalTracking` component that shows dine-in orders with real-time status tracking (pending/preparing/ready/serving), progress bars, and waiter assignment. Added `TrackingModeSelector` to toggle between in-cafe and external delivery tracking.
+- **Smart Category Deletion**: Already implemented in backend at `DELETE /api/menu-categories/:id` with keyword-based reassignment of orphaned items.
+
 ## New Features (Session T001–T006)
 
 ### Foodics-Parity Additions

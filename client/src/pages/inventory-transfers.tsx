@@ -236,10 +236,10 @@ export default function InventoryTransfersPage() {
   }
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="min-h-screen bg-white text-gray-900 p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <ArrowRightLeft className="h-8 w-8 text-primary" />
+          <ArrowRightLeft className="h-8 w-8 text-green-600" />
           <div>
             <h1 className="text-2xl font-bold">{tc("تحويلات المخزون", "Stock Transfers")}</h1>
             <p className="text-muted-foreground text-sm">إدارة تحويلات المواد بين الفروع</p>

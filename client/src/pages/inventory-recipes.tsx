@@ -543,10 +543,10 @@ export default function InventoryRecipesPage() {
   }
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="min-h-screen bg-white text-gray-900 p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50">
+          <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100">
             <BookOpen className="h-7 w-7 text-emerald-700 dark:text-emerald-400" />
           </div>
           <div>

@@ -232,11 +232,11 @@ export default function InventoryRawItemsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6" dir="rtl">
+    <div className="min-h-screen bg-white text-gray-900 p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/40 dark:to-primary/30">
-            <Package className="h-8 w-8 text-accent dark:text-accent" />
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 shadow-sm shadow-green-200">
+            <Package className="h-8 w-8 text-green-700" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">{tc("المواد الخام", "Raw Materials")}</h1>

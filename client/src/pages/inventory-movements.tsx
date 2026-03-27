@@ -122,11 +122,11 @@ export default function InventoryMovementsPage() {
   }
 
   return (
-    <div className="p-4 lg:p-6 space-y-5" dir="rtl">
+    <div className="min-h-screen bg-white text-gray-900 p-4 lg:p-6 space-y-5" dir="rtl">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <History className="h-7 w-7 text-primary" />
+          <History className="h-7 w-7 text-green-600" />
           <div>
             <h1 className="text-xl font-bold">{tc("حركات المخزون", "Inventory Movements")}</h1>
             <p className="text-muted-foreground text-xs">{tc("جرد تفصيلي لجميع حركات المواد الخام", "Detailed ledger of all raw material movements")}</p>

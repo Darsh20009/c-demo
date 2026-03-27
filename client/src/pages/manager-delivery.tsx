@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -14,7 +14,8 @@ import {
   MapPin, CheckCircle, XCircle, ArrowLeft,
   RefreshCw, Zap, Globe, BarChart3,
   Navigation, Phone, Star, Signal, SignalLow,
-  SignalMedium, AlertCircle, Timer, Route
+  SignalMedium, AlertCircle, Timer, Route,
+  Coffee, UtensilsCrossed, TableProperties, Activity, Wifi
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -286,6 +287,241 @@ function LiveDriverTracking() {
   );
 }
 
+function TrackingModeSelector() {
+  const tc = useTranslate();
+  const [mode, setMode] = useState<"external" | "cafe">("cafe");
+  return (
+    <div className="space-y-4">
+      <div className="flex rounded-xl border border-gray-200 bg-gray-50 p-1 gap-1 w-fit">
+        <button
+          onClick={() => setMode("cafe")}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+            mode === "cafe"
+              ? "bg-green-600 text-white shadow-sm shadow-green-200"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          <Coffee className="w-4 h-4" />
+          {tc("التوصيل الداخلي", "In-Cafe Delivery")}
+        </button>
+        <button
+          onClick={() => setMode("external")}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+            mode === "external"
+              ? "bg-[#2D9B6E] text-white shadow-sm"
+              : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          <Truck className="w-4 h-4" />
+          {tc("سائقو التوصيل الخارجي", "External Drivers")}
+        </button>
+      </div>
+      {mode === "cafe" ? <CafeInternalTracking /> : <LiveDriverTracking />}
+    </div>
+  );
+}
+
+const DINE_IN_STATUS_STEPS = [
+  { key: 'pending',    label: 'وارد',        color: 'bg-yellow-400', icon: Clock },
+  { key: 'preparing',  label: 'يُحضَّر',     color: 'bg-blue-500',   icon: Coffee },
+  { key: 'ready',      label: 'جاهز',        color: 'bg-purple-500', icon: CheckCircle },
+  { key: 'serving',    label: 'يُقدَّم',     color: 'bg-orange-500', icon: UtensilsCrossed },
+  { key: 'delivered',  label: 'سُلِّم',      color: 'bg-green-500',  icon: CheckCircle },
+];
+
+function CafeInternalTracking() {
+  const tc = useTranslate();
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(t);
+  }, []);
+
+  const { data: rawOrders = [], isLoading, refetch } = useQuery({
+    queryKey: ["/api/orders", "dine_in_active"],
+    queryFn: async () => {
+      const res = await fetch("/api/orders?limit=50&status=pending,preparing,ready,serving&orderType=dine_in", { credentials: "include" });
+      if (!res.ok) return [];
+      const d = await res.json();
+      return Array.isArray(d) ? d : d.orders || [];
+    },
+    refetchInterval: 15000,
+  });
+
+  const orders: any[] = rawOrders.filter((o: any) =>
+    ['pending', 'preparing', 'ready', 'serving'].includes(o.status) &&
+    (o.orderType === 'dine_in' || o.orderType === 'dine-in' || o.tableNumber)
+  );
+
+  const elapsedMin = (createdAt: string) => {
+    const diff = now.getTime() - new Date(createdAt).getTime();
+    return Math.floor(diff / 60000);
+  };
+
+  const getStepIdx = (status: string) => DINE_IN_STATUS_STEPS.findIndex(s => s.key === status);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gray-500">جاري تحميل الطلبات الداخلية...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5" dir="rtl">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900">
+            <Coffee className="w-5 h-5 text-green-600 animate-pulse" />
+            {tc("التوصيل الداخلي للكافيه - مباشر", "In-Cafe Live Delivery")}
+          </h2>
+          <p className="text-sm text-gray-500 mt-0.5 flex items-center gap-1">
+            <Wifi className="w-3 h-3 text-green-500" />
+            يتحدث كل 15 ثانية • {now.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="border-green-300 text-green-700 hover:bg-green-50">
+          <RefreshCw className="w-4 h-4 ml-1" />
+          تحديث
+        </Button>
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
+          <p className="text-3xl font-black text-yellow-700">
+            {orders.filter(o => o.status === 'pending' || o.status === 'preparing').length}
+          </p>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+            <p className="text-xs font-semibold text-yellow-700">قيد التحضير</p>
+          </div>
+        </div>
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 text-center">
+          <p className="text-3xl font-black text-purple-700">
+            {orders.filter(o => o.status === 'ready').length}
+          </p>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+            <p className="text-xs font-semibold text-purple-700">جاهز للتقديم</p>
+          </div>
+        </div>
+        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
+          <p className="text-3xl font-black text-orange-700">
+            {orders.filter(o => o.status === 'serving').length}
+          </p>
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+            <p className="text-xs font-semibold text-orange-700">يُقدَّم الآن</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Orders by table */}
+      {orders.length === 0 ? (
+        <Card className="border-dashed border-gray-300">
+          <CardContent className="py-16 text-center space-y-3">
+            <div className="w-16 h-16 mx-auto bg-green-50 rounded-full flex items-center justify-center">
+              <Coffee className="w-8 h-8 text-green-400" />
+            </div>
+            <p className="font-semibold text-gray-600">لا توجد طلبات داخلية نشطة حالياً</p>
+            <p className="text-sm text-gray-400">ستظهر طلبات الطاولات هنا بمجرد ورودها</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {orders.map((order: any) => {
+            const elapsed = elapsedMin(order.createdAt);
+            const stepIdx = getStepIdx(order.status);
+            const isUrgent = elapsed > 15;
+            const step = DINE_IN_STATUS_STEPS[Math.max(0, stepIdx)];
+            const StepIcon = step?.icon || Clock;
+            return (
+              <Card key={order.id} className={`border-2 transition-all ${
+                order.status === 'ready' ? 'border-purple-400 bg-purple-50/30 shadow-purple-100 shadow-md' :
+                order.status === 'serving' ? 'border-orange-400 bg-orange-50/30 shadow-orange-100 shadow-md' :
+                isUrgent ? 'border-red-300 bg-red-50/20' :
+                'border-gray-200 bg-white'
+              }`}>
+                <CardContent className="p-4">
+                  {/* Table + Order number header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white ${step?.color || 'bg-gray-400'}`}>
+                        {order.tableNumber ? `T${order.tableNumber}` : order.orderNumber?.slice(-2) || '?'}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-gray-900">
+                          {order.tableNumber ? `طاولة ${order.tableNumber}` : (order.customerName || 'طلب داخلي')}
+                        </p>
+                        <p className="text-xs text-gray-500">#{order.orderNumber || order.id?.slice(-6)}</p>
+                      </div>
+                    </div>
+                    <div className="text-left">
+                      <Badge className={`${step?.color} text-white text-xs flex items-center gap-1 ${order.status === 'ready' || order.status === 'serving' ? 'animate-pulse' : ''}`}>
+                        <StepIcon className="w-3 h-3" />
+                        {step?.label}
+                      </Badge>
+                      <p className={`text-xs mt-1 text-left ${isUrgent ? 'text-red-600 font-bold' : 'text-gray-500'}`}>
+                        {elapsed} دقيقة {isUrgent ? '⚠️' : ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="flex items-center gap-1 mb-3">
+                    {DINE_IN_STATUS_STEPS.slice(0, 4).map((s, idx) => (
+                      <div key={s.key} className="flex-1 flex items-center gap-1">
+                        <div className={`h-1.5 flex-1 rounded-full transition-all ${idx <= stepIdx ? s.color : 'bg-gray-200'}`} />
+                        {idx < 3 && <div className={`w-1 h-1 rounded-full ${idx < stepIdx ? 'bg-gray-400' : 'bg-gray-200'}`} />}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Items summary */}
+                  <div className="space-y-1">
+                    {(order.items || []).slice(0, 3).map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between text-xs text-gray-600">
+                        <span className="flex items-center gap-1">
+                          <span className="w-4 h-4 rounded bg-green-100 text-green-700 text-center leading-4 font-bold text-[10px]">{item.quantity}</span>
+                          <span className="truncate max-w-[120px]">{item.coffeeItem?.nameAr || item.nameAr || 'صنف'}</span>
+                        </span>
+                      </div>
+                    ))}
+                    {(order.items || []).length > 3 && (
+                      <p className="text-xs text-gray-400">+{(order.items || []).length - 3} أصناف أخرى</p>
+                    )}
+                  </div>
+
+                  {/* Waiter */}
+                  {order.employeeName && (
+                    <div className="mt-2 flex items-center gap-1.5 text-xs text-green-700 bg-green-50 rounded-lg p-1.5">
+                      <Users className="w-3 h-3" />
+                      <span className="font-medium">{order.employeeName}</span>
+                    </div>
+                  )}
+
+                  {/* Total */}
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-gray-400">إجمالي الطلب</span>
+                    <span className="font-bold text-sm text-gray-900">{(order.totalAmount || 0).toFixed(2)} ر.س</span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ManagerDelivery() {
   const tc = useTranslate();
   const { toast } = useToast();
@@ -336,7 +572,7 @@ export default function ManagerDelivery() {
   const pendingOrders = ordersData.filter((o: any) => o.status === 'pending');
 
   return (
-    <div className="p-4 md:p-6 space-y-6 bg-background min-h-screen" dir="rtl">
+    <div className="p-4 md:p-6 space-y-6 bg-white text-gray-900 min-h-screen" dir="rtl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/employee/dashboard")}>
@@ -616,7 +852,7 @@ export default function ManagerDelivery() {
         </TabsContent>
 
         <TabsContent value="tracking" className="space-y-4">
-          <LiveDriverTracking />
+          <TrackingModeSelector />
         </TabsContent>
 
         <TabsContent value="settings">

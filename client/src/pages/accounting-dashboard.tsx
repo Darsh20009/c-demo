@@ -371,20 +371,32 @@ export default function AccountingDashboardPage() {
   });
 
   const handleAddExpense = () => {
+    if (!newExpense.category) {
+      toast({ title: tc("يرجى اختيار فئة المصروف", "Please select expense category"), variant: "destructive" });
+      return;
+    }
+    if (!newExpense.description.trim()) {
+      toast({ title: tc("يرجى إدخال وصف المصروف", "Please enter expense description"), variant: "destructive" });
+      return;
+    }
     const amount = parseFloat(newExpense.amount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({ title: tc("يرجى إدخال مبلغ صحيح أكبر من صفر", "Please enter a valid amount greater than zero"), variant: "destructive" });
+      return;
+    }
     const vatAmount = parseFloat(newExpense.vatAmount || "0");
     
     createExpenseMutation.mutate({
       branchId: selectedBranch !== "all" ? selectedBranch : undefined,
       date: new Date().toISOString(),
       category: newExpense.category,
-      subcategory: newExpense.subcategory,
-      description: newExpense.description,
+      subcategory: newExpense.subcategory || undefined,
+      description: newExpense.description.trim(),
       amount,
       vatAmount,
       totalAmount: amount + vatAmount,
       paymentMethod: newExpense.paymentMethod,
-      notes: newExpense.notes,
+      notes: newExpense.notes || undefined,
     });
   };
 

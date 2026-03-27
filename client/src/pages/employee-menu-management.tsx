@@ -733,7 +733,8 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  const allowedCategories = [...UNIFIED_CATEGORY_IDS, ...LEGACY_FOOD_CATEGORIES, ...LEGACY_DRINK_CATEGORIES, ...dynamicCategoryIds];
 
- const filteredItems = coffeeItems.filter(item => allowedCategories.includes(item.category) || true);
+ const availableCatIds = new Set(availableForDropdown.map(c => c.id));
+ const filteredItems = coffeeItems.filter(item => availableCatIds.has(item.category));
 
  const categorizedItems = filteredItems.reduce((acc, item) => {
  if (!acc[item.category]) {
