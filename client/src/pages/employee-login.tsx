@@ -22,7 +22,7 @@ function useAutoRedirectIfLoggedIn() {
           if (emp.role === "admin") setLocation("/admin/dashboard");
           else if (emp.role === "owner") setLocation("/owner/dashboard");
           else if (emp.role === "manager" || emp.role === "branch_manager") setLocation("/manager/dashboard");
-          else setLocation("/employee/dashboard");
+          else setLocation("/employee/home");
         }
       } catch {}
     }
@@ -53,7 +53,7 @@ export default function EmployeeLogin() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed?.id) { window.location.href = "/employee/dashboard"; return; }
+        if (parsed?.id) { window.location.href = "/employee/home"; return; }
       } catch {}
     }
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -84,7 +84,7 @@ export default function EmployeeLogin() {
       if (role === "admin") window.location.href = "/admin/dashboard";
       else if (role === "owner") window.location.href = "/owner/dashboard";
       else if (role === "manager" || role === "branch_manager") window.location.href = "/manager/dashboard";
-      else window.location.href = "/employee/dashboard";
+      else window.location.href = "/employee/home";
     },
     onError: (err: any) => {
       setError(err?.message || tc("بيانات تسجيل الدخول غير صحيحة", "Invalid login credentials"));

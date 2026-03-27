@@ -542,7 +542,7 @@ export default function AccountingDashboardPage() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <Button 
             variant="ghost" 
-            onClick={() => setLocation("/employee/dashboard")}
+            onClick={() => setLocation("/manager/dashboard")}
             className="text-accent dark:text-accent"
             data-testid="button-back"
           >

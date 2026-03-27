@@ -325,7 +325,7 @@ export default function KitchenDisplay() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                onClick={() => setLocation("/employee/dashboard")}
+                onClick={() => setLocation("/employee/home")}
                 data-testid="button-back"
               >
                 <ArrowLeft className="h-5 w-5" />

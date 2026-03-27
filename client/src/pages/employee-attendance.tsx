@@ -647,7 +647,7 @@ export default function EmployeeAttendance() {
         <div className="mt-6">
           <Button
             variant="ghost"
-            onClick={() => setLocation("/employee/dashboard")}
+            onClick={() => setLocation("/employee/home")}
             className="w-full text-muted-foreground hover:text-primary"
             data-testid="button-back-dashboard"
           >

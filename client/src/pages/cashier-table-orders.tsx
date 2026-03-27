@@ -330,7 +330,7 @@ export default function CashierTableOrders() {
               onToggleSound={(val) => { setSoundEnabled(val); saveSoundEnabled('cashier-tables', val); }}
               compact
             />
-            <Button variant="outline" className="bg-gray-800" onClick={() => setLocation("/employee/dashboard")}>
+            <Button variant="outline" className="bg-gray-800" onClick={() => setLocation("/employee/home")}>
               {tc("العودة للوحة التحكم", "Back to Dashboard")}
             </Button>
           </div>

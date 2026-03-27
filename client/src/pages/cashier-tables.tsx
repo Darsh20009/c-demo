@@ -442,7 +442,7 @@ export default function CashierTables() {
           </div>
           <Button
             variant="ghost"
-            onClick={() => setLocation("/employee/dashboard")}
+            onClick={() => setLocation("/employee/home")}
             data-testid="button-back"
           >
             <ArrowRight className="ml-2 h-5 w-5" />

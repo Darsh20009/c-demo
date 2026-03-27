@@ -34,7 +34,7 @@ export default function ExecutiveDashboard() {
     if (storedEmployee) {
       const emp = JSON.parse(storedEmployee);
       if (emp.role !== "manager" && emp.role !== "admin" && emp.role !== "owner") {
-        setLocation("/employee/dashboard");
+        setLocation("/manager/dashboard");
         return;
       }
       setManager(emp);

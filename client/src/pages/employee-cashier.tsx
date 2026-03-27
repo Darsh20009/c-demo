@@ -1098,7 +1098,7 @@ export default function EmployeeCashier() {
  </Button>
  <Button
  variant="outline"
- onClick={() => setLocation("/employee/dashboard")}
+ onClick={() => setLocation("/employee/home")}
  className="border-primary/50 text-accent hover:bg-primary hover:text-white"
  data-testid="button-back-dashboard"
  >

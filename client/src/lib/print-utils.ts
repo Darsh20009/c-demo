@@ -387,16 +387,10 @@ export async function printUnifiedReceipt(data: TaxInvoiceData): Promise<void> {
     </div>
   `).join('');
 
-  const html = `
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <title>إيصال المبيعات والتحضير - ${data.orderNumber}</title>
-  <style>
+  const sharedStyles = `
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     body { font-family: 'Cairo', sans-serif; direction: rtl; width: 80mm; margin: 0; padding: 10px; color: #000; }
-    .receipt-section { border: 2px solid #000; padding: 10px; margin-bottom: 20px; border-radius: 8px; }
+    .receipt-section { padding: 10px; }
     .header { text-align: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
     .label { background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 14px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
     .row { display: flex; justify-content: space-between; margin: 4px 0; font-size: 13px; }
@@ -404,11 +398,18 @@ export async function printUnifiedReceipt(data: TaxInvoiceData): Promise<void> {
     .footer { text-align: center; margin-top: 15px; font-size: 11px; color: #666; }
     .qr-container { text-align: center; margin-top: 10px; }
     .qr-container img { width: 120px; height: 120px; }
-    @media print { .receipt-section { page-break-inside: avoid; } }
-  </style>
+  `;
+
+  // نسخة العميل — تُطبع أولاً، الطابعة تقطع بعد الانتهاء منها تلقائياً
+  const customerHtml = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>إيصال العميل - ${data.orderNumber}</title>
+  <style>${sharedStyles}</style>
 </head>
 <body>
-  <!-- نسخة العميل (الفاتورة الضريبية) -->
   <div class="receipt-section">
     <div class="header">
       <div class="label">إيصال العميل (فاتورة ضريبية)</div>
@@ -419,16 +420,13 @@ export async function printUnifiedReceipt(data: TaxInvoiceData): Promise<void> {
       <div style="font-size: 12px;">رقم الطلب: ${data.orderNumber}</div>
       <div style="font-size: 11px;">التاريخ: ${formattedDate} ${formattedTime}</div>
     </div>
-    
     <div style="margin-bottom: 10px; font-size: 12px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
       <div>العميل: ${data.customerName || 'عميل نقدي'}</div>
       ${data.customerPhone ? `<div>الجوال: ${data.customerPhone}</div>` : ''}
       ${data.tableNumber ? `<div>طاولة: ${data.tableNumber}</div>` : ''}
       <div>الموظف: ${data.employeeName}</div>
     </div>
-
     <div class="items">${itemsHtml}</div>
-    
     <div class="totals" style="margin-top: 10px;">
       <div class="row">
         <span>المجموع (غير شامل الضريبة):</span>
@@ -447,22 +445,31 @@ export async function printUnifiedReceipt(data: TaxInvoiceData): Promise<void> {
         <span>${data.paymentMethod}</span>
       </div>
     </div>
-
     ${qrCodeUrl ? `
     <div class="qr-container">
       <img src="${qrCodeUrl}" alt="ZATCA QR" />
       <div style="font-size: 10px;">امسح للتحقق من الفاتورة</div>
     </div>
     ` : ''}
-
     <div class="footer">
       <div style="font-weight: bold; margin-bottom: 4px;">www.qiroxstudio.online</div>
       شكراً لزيارتكم!
     </div>
   </div>
+</body>
+</html>`;
 
-  <!-- نسخة الموظف (التحضير) -->
-  <div class="receipt-section" style="border-style: dashed;">
+  // نسخة الموظف — تُطبع تلقائياً بعد قطع نسخة العميل
+  const staffHtml = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>إيصال التحضير - ${data.orderNumber}</title>
+  <style>${sharedStyles}</style>
+</head>
+<body>
+  <div class="receipt-section" style="border: 2px dashed #000; border-radius: 8px;">
     <div class="header">
       <div class="label" style="background: #444;">إيصال الموظف (التحضير)</div>
       <h3 style="margin: 5px 0;">تفاصيل التحضير</h3>
@@ -480,9 +487,12 @@ export async function printUnifiedReceipt(data: TaxInvoiceData): Promise<void> {
     <div class="footer" style="margin-top: 10px; font-weight: bold; color: #000;">يرجى التحقق من الأصناف قبل التسليم</div>
   </div>
 </body>
-</html>
-  `;
-  openPrintWindow(html, `Unified Receipt - ${data.orderNumber}`, { paperWidth: '80mm', autoPrint: true });
+</html>`;
+
+  // إرسال نسختين إلى قائمة الطباعة: العميل أولاً ثم الموظف
+  // الطابعة تقطع الورق تلقائياً بعد كل مهمة طباعة منفصلة
+  openPrintWindow(customerHtml, `Customer Receipt - ${data.orderNumber}`, { paperWidth: '80mm', autoPrint: true });
+  openPrintWindow(staffHtml, `Staff Receipt - ${data.orderNumber}`, { paperWidth: '80mm', autoPrint: true });
 }
 
 export async function printBulkEmployeeInvoices(orders: any[]): Promise<void> {

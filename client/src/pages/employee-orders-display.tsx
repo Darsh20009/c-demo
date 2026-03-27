@@ -200,7 +200,7 @@ export default function EmployeeOrdersDisplay() {
     <div className="min-h-screen bg-background p-6">
       <div className="flex items-center justify-between mb-8 bg-card rounded-lg border border-border p-4">
         <Button
-          onClick={() => setLocation("/employee/dashboard")}
+          onClick={() => setLocation("/employee/home")}
           size="icon"
           variant="ghost"
           data-testid="button-back"

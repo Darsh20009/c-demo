@@ -912,7 +912,7 @@ export default function PosSystem() {
           >
             {i18n.language === 'ar' ? 'EN' : 'ع'}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setLocation("/employee/dashboard")} className="h-8 w-8 sm:h-9 sm:w-9" data-testid="button-back-dashboard" title={t('pos.back_to_dashboard')}>
+          <Button variant="ghost" size="icon" onClick={() => setLocation("/employee/home")} className="h-8 w-8 sm:h-9 sm:w-9" data-testid="button-back-dashboard" title={t('pos.back_to_dashboard')}>
             <ArrowRight className="w-5 h-5 text-muted-foreground" />
           </Button>
         </div>

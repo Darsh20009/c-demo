@@ -136,7 +136,7 @@ export default function ManagerDashboard() {
  const managerRoles = ["manager", "admin", "owner", "branch_manager"];
  if (!managerRoles.includes(emp.role)) {
  localStorage.removeItem("currentEmployee");
- setLocation("/employee/dashboard");
+ setLocation("/manager/dashboard");
  return;
  }
 

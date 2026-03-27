@@ -3833,10 +3833,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { date, branchId } = req.query;
       const targetDate = date ? new Date(date as string) : new Date();
-      const startOfDay = new Date(targetDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(targetDate);
-      endOfDay.setHours(23, 59, 59, 999);
+      const startOfDay = getSaudiStartOfDay(targetDate);
+      const endOfDay = getSaudiEndOfDay(targetDate);
 
       const filter: any = {
         openedAt: { $gte: startOfDay, $lte: endOfDay },
@@ -5008,13 +5006,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         start = new Date(startDate as string);
         end = new Date(endDate as string);
       } else if (period === 'daily') {
-        start = new Date(now.setHours(0, 0, 0, 0));
+        start = getSaudiStartOfDay(now);
       } else if (period === 'weekly') {
         start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       } else if (period === 'monthly') {
-        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        start = new Date(getSaudiStartOfDay(now).getTime() - 29 * 24 * 60 * 60 * 1000);
       } else {
-        start = new Date(now.setHours(0, 0, 0, 0));
+        start = getSaudiStartOfDay(now);
       }
 
       const { OrderModel } = await import("@shared/schema");
@@ -11368,10 +11366,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if already checked in today
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = getSaudiStartOfDay();
+      const tomorrow = getSaudiEndOfDay();
 
       const existingAttendance = await AttendanceModel.findOne({
         employeeId: employeeId,
@@ -11386,8 +11382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if late (assuming 8 AM start time, can be customized per employee)
       const now = new Date();
       const shiftStartHour = employee.shiftTime ? parseInt(employee.shiftTime.split('-')[0]) : 8;
-      const shiftStart = new Date(today);
-      shiftStart.setHours(shiftStartHour, 0, 0, 0);
+      const shiftStart = new Date(today.getTime() + shiftStartHour * 60 * 60 * 1000);
       
       const isLate = now > shiftStart;
       const lateMinutes = isLate ? Math.floor((now.getTime() - shiftStart.getTime()) / 60000) : 0;
@@ -11482,10 +11477,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Find today's check-in
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = getSaudiStartOfDay();
+      const tomorrow = getSaudiEndOfDay();
 
       const attendance = await AttendanceModel.findOne({
         employeeId: employeeId,
@@ -11548,10 +11541,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter by date
       if (date) {
         const targetDate = new Date(date as string);
-        targetDate.setHours(0, 0, 0, 0);
-        const nextDay = new Date(targetDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        query.shiftDate = { $gte: targetDate, $lt: nextDay };
+        const saudiDayStart = getSaudiStartOfDay(targetDate);
+        const saudiDayEnd = getSaudiEndOfDay(targetDate);
+        query.shiftDate = { $gte: saudiDayStart, $lt: saudiDayEnd };
       }
 
       // Filter by employee
@@ -11603,10 +11595,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "غير مصرح" });
       }
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = getSaudiStartOfDay();
+      const tomorrow = getSaudiEndOfDay();
 
       const todayAttendance = await AttendanceModel.findOne({
         employeeId: employeeId,

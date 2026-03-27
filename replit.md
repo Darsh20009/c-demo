@@ -28,6 +28,29 @@ This is the **single source of truth** for ALL branding across the entire system
 
 **Note for server-side branding** (email templates in `server/mail-service.ts`): These contain hardcoded brand strings that should be manually kept in sync with `brand.ts` values.
 
+## Latest Fixes (March 2026 - Timezone, Printing, Dashboard)
+
+### Bug Fixes Applied (March 27, 2026)
+
+**1. Saudi Arabia Timezone (UTC+3) - Day Boundary Fix**
+All server-side "today" calculations previously used raw `setHours(0,0,0,0)` which relied on the server's local clock (UTC). This caused the day to roll over at 3 AM Riyadh time instead of midnight. All affected routes now use `getSaudiStartOfDay()` / `getSaudiEndOfDay()`:
+- `GET /api/shifts/daily-summary` — Z-report date boundaries
+- Expense/revenue period='daily' filter in analytics routes
+- Attendance check-in / check-out "today" queries (3 instances)
+- Attendance admin filter by date
+
+**2. Thermal Printer Auto-Cut Between Customer & Staff Copies**
+`printUnifiedReceipt` in `client/src/lib/print-utils.ts` now sends TWO separate print jobs to the queue instead of one combined HTML:
+- Job 1: Customer copy (full tax invoice with ZATCA QR) → printer auto-cuts after
+- Job 2: Staff prep copy (large item quantities for kitchen) → printer auto-cuts after
+The existing `_drainPrintQueue` handles serial execution, ensuring the printer completes each job (and cuts) before starting the next.
+
+**3. Employee Dashboard Routing Consistency**
+Regular employees were redirected to `/employee/dashboard` (HR profile page) after login, while the mobile nav "Home" button went to `/employee/home` (quick-access portal) — causing inconsistency. Fixes:
+- `employee-login.tsx`: All login redirects for non-manager employees now go to `/employee/home`
+- 11 employee-facing pages (pos, cashier, orders, attendance, kitchen, tables, etc.): Back buttons now navigate to `/employee/home`
+- 6 manager-facing pages (accounting, analytics, reports, executive, delivery, employees): Back buttons corrected to `/manager/dashboard`
+
 ## Latest Fixes (March 2026 Session)
 
 ### Bug Fixes Applied

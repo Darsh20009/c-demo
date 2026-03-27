@@ -346,7 +346,7 @@ export default function ManagerEmployees() {
           </div>
  <div className="flex gap-2">
  <Button
- onClick={() => setLocation("/employee/dashboard")}
+ onClick={() => setLocation("/manager/dashboard")}
  variant="outline"
  className="border-primary/50 text-accent"
  data-testid="button-dashboard"

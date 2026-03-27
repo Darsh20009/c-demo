@@ -58,7 +58,7 @@ export default function EmployeeActivation() {
         description: tc("مرحباً بك! تم تفعيل حسابك بنجاح", "Welcome! Your account has been activated"),
       });
 
-      setLocation("/employee/dashboard");
+      setLocation("/employee/home");
     } catch (error: any) {
       toast({
         variant: "destructive",

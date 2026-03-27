@@ -261,7 +261,7 @@ export default function EmployeeOrders() {
                 <RefreshCw className={`w-4 h-4 ml-2 ${isLoading ? 'animate-spin' : ''}`} />
                 {tc("تحديث", "Refresh")}
               </Button>
-              <Button variant="outline" onClick={() => setLocation("/employee/dashboard")} data-testid="button-back">
+              <Button variant="outline" onClick={() => setLocation("/employee/home")} data-testid="button-back">
                 <ArrowRight className="w-4 h-4 ml-2" />
                 {tc("العودة", "Back")}
               </Button>
