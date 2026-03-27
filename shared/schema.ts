@@ -674,6 +674,7 @@ export interface IBusinessConfig extends Document {
   vatPercentage: number;
   currency: string;
   timezone: string;
+  country?: string;
   isEmergencyClosed: boolean;
   isMaintenanceMode?: boolean;
   maintenanceReason?: string;
@@ -746,6 +747,7 @@ const BusinessConfigSchema = new Schema<IBusinessConfig>({
   vatPercentage: { type: Number, default: 15 },
   currency: { type: String, default: 'SAR' },
   timezone: { type: String, default: 'Asia/Riyadh' },
+  country: { type: String, default: 'SA' },
   isMaintenanceMode: { type: Boolean, default: false },
   maintenanceReason: { type: String, default: 'maintenance' },
   isEmergencyClosed: { type: Boolean, default: false },

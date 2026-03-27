@@ -17101,9 +17101,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const todayStart = getSaudiStartOfDay();
       const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+      const aiTenantId = req.employee?.tenantId || 'demo-tenant';
       let businessContext = "";
       try {
-        const allOrders = await storage.getOrders(500);
+        const { OrderModel: AiOrderModel } = await import("@shared/schema");
+        const allOrders = await AiOrderModel.find({ tenantId: aiTenantId }).sort({ createdAt: -1 }).limit(500).lean();
         const todayOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= todayStart);
         const weekOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= weekStart);
 
@@ -17209,10 +17211,12 @@ ${businessContext}
       const apiKey = process.env.OPENAI_API_KEY;
       if (!apiKey) return res.status(500).json({ error: "OPENAI_API_KEY غير مضبوط" });
 
+      const insightsTenantId = req.employee?.tenantId || 'demo-tenant';
       const todayStart = getSaudiStartOfDay();
       const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      const allOrders = await storage.getOrders(500);
+      const { OrderModel: InsightsOrderModel } = await import("@shared/schema");
+      const allOrders = await InsightsOrderModel.find({ tenantId: insightsTenantId }).sort({ createdAt: -1 }).limit(500).lean();
       const todayOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= todayStart);
       const weekOrders = allOrders.filter((o: any) => new Date(o.createdAt) >= weekStart);
       const prevWeekStart = new Date(weekStart.getTime() - 7 * 24 * 60 * 60 * 1000);
