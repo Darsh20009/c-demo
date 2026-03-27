@@ -573,10 +573,26 @@ CSS Variables defined in `client/src/index.css`:
 - `client/src/pages/delivery-selection.tsx`: Replaced dark neon/glow "DRIVE-THRU" design (lines 630-929) with clean professional card layout
 - All functionality preserved: car brand selector, color picker, plate number (Saudi style), arrival time, save car, parking slot (1-12 grid), car summary
 
+### Saudi Arabia Timezone (UTC+3)
+- **Global utilities** in `server/routes.ts` (top of file, before `registerRoutes`): `getSaudiStartOfDay()` and `getSaudiEndOfDay()` return Date objects representing midnight/end-of-day in UTC+3
+- These utilities are used across **all** date-filtered endpoints: accounting expenses/revenue, orders `today` filter, admin dashboard stats, delivery stats, analytics/advanced, reports/unified, accounting/export, and AI assistant context
+- Zero `setHours(0,0,0,0)` UTC-based midnight calculations remain in routes.ts — every "today" boundary uses Saudi time
+
+### `/api/orders` Endpoint Capabilities
+- **DB-level filters**: `tenantId` (from session), `branchId` (query param OR session employee's branch), `status` (single or comma-separated), period (`today`/`week`/`month`/`year`), `fromDate`, `today=true`
+- **Default limit**: 300 (override via `?limit=N`)
+- `branchId` query param takes precedence over session branchId — allows admins to filter specific branches
+
+### `/api/orders/live` Endpoint
+- Uses `OrderModel.find()` directly (bypasses `storage.getOrders()`)
+- Returns only active statuses: `pending, in_progress, ready, payment_confirmed, confirmed, preparing, serving`
+- Default limit 150, DB-level tenant+branch filtering
+
 ### Key Known Behaviors
 - Purchase invoice `invoiceNumber` auto-generation: creates `PO-YYYYMM-XXXXX` format
 - ERP income statement source: `"orders"` when no journal entries, `"journal"` when accounts exist
 - ERP expense approval flow: draft → pending_approval → approved → paid (via PATCH `/api/erp/expenses/:id/approve`)
+- Dialog centering: `dialog.tsx` uses `inset-x-0 mx-auto` (not `left-[50%] translate-x-[-50%]`) to fix RTL/Arabic layout shift; close button uses `end-4` logical property
 
 ## Deployment
 

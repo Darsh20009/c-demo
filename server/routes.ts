@@ -7781,7 +7781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/orders", async (req: any, res) => {
     try {
       const { OrderModel } = await import("@shared/schema");
-      const { limit, offset, status, today, fromDate } = req.query;
+      const { limit, offset, status, today, fromDate, period, branchId: qBranchId } = req.query;
 
       const employee = req.session?.employee;
       const tenantId = employee?.tenantId || getTenantIdFromRequest(req) || 'demo-tenant';
@@ -7790,7 +7790,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const offsetNum = offset ? parseInt(offset as string) : 0;
 
       const query: any = { tenantId };
-      if (employee?.branchId) query.branchId = employee.branchId;
+      // Branch filter: query param takes precedence for admins; session branch for employees
+      const resolvedBranch = (qBranchId && qBranchId !== 'all') ? (qBranchId as string) : (employee?.branchId || null);
+      if (resolvedBranch) query.branchId = resolvedBranch;
 
       // Support status filter (comma-separated)
       if (status && status !== 'all') {
@@ -7799,9 +7801,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         else if (statuses.length > 1) query.status = { $in: statuses };
       }
 
-      // Support today filter (Saudi timezone)
-      if (today === 'true' || today === '1') {
+      // Support period filter (Saudi timezone)
+      if (today === 'true' || today === '1' || period === 'today') {
         query.createdAt = { $gte: getSaudiStartOfDay(), $lte: getSaudiEndOfDay() };
+      } else if (period === 'week') {
+        query.createdAt = { $gte: new Date(getSaudiStartOfDay().getTime() - 6 * 24 * 60 * 60 * 1000) };
+      } else if (period === 'month') {
+        query.createdAt = { $gte: new Date(getSaudiStartOfDay().getTime() - 29 * 24 * 60 * 60 * 1000) };
+      } else if (period === 'year') {
+        query.createdAt = { $gte: new Date(getSaudiStartOfDay().getTime() - 364 * 24 * 60 * 60 * 1000) };
       } else if (fromDate) {
         query.createdAt = { $gte: new Date(fromDate as string) };
       }
@@ -16106,13 +16114,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const period = req.query.period as string || 'today';
 
       let fromDate: Date | undefined;
-      const now = new Date();
       if (period === 'today') {
-        fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        fromDate = getSaudiStartOfDay();
       } else if (period === 'week') {
-        fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        fromDate = new Date(getSaudiStartOfDay().getTime() - 7 * 24 * 60 * 60 * 1000);
       } else if (period === 'month') {
-        fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        const s = getSaudiStartOfDay(); fromDate = new Date(s.getFullYear(), s.getMonth(), 1);
       }
 
       const stats = await deliveryService.getDeliveryStats(tenantId, branchId, fromDate);
@@ -16174,30 +16181,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const finalBranchId = qBranch || req.employee?.branchId;
       const { OrderModel, CoffeeItemModel, EmployeeModel } = await import("@shared/schema");
 
-      const now = new Date();
       let startDate: Date;
       let prevStartDate: Date;
       let prevEndDate: Date;
 
       switch (period) {
         case 'week':
-          startDate = new Date(now); startDate.setDate(now.getDate() - 7); startDate.setHours(0,0,0,0);
-          prevStartDate = new Date(startDate); prevStartDate.setDate(startDate.getDate() - 7);
+          startDate = new Date(getSaudiStartOfDay().getTime() - 6 * 24 * 60 * 60 * 1000);
+          prevStartDate = new Date(startDate.getTime() - 7 * 24 * 60 * 60 * 1000);
           prevEndDate = new Date(startDate);
           break;
-        case 'month':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          prevStartDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        case 'month': {
+          const s = getSaudiStartOfDay();
+          startDate = new Date(s.getFullYear(), s.getMonth(), 1);
+          prevStartDate = new Date(s.getFullYear(), s.getMonth() - 1, 1);
           prevEndDate = new Date(startDate);
           break;
-        case 'year':
-          startDate = new Date(now.getFullYear(), 0, 1);
-          prevStartDate = new Date(now.getFullYear() - 1, 0, 1);
+        }
+        case 'year': {
+          const s = getSaudiStartOfDay();
+          startDate = new Date(s.getFullYear(), 0, 1);
+          prevStartDate = new Date(s.getFullYear() - 1, 0, 1);
           prevEndDate = new Date(startDate);
           break;
+        }
         default: // today
-          startDate = new Date(now); startDate.setHours(0,0,0,0);
-          prevStartDate = new Date(startDate); prevStartDate.setDate(startDate.getDate() - 1);
+          startDate = getSaudiStartOfDay();
+          prevStartDate = new Date(startDate.getTime() - 24 * 60 * 60 * 1000);
           prevEndDate = new Date(startDate);
       }
 
@@ -16350,20 +16360,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { OrderModel, CoffeeItemModel, EmployeeModel } = await import("@shared/schema");
       const { BranchModel } = await import("@shared/schema");
 
-      const now = new Date();
       let startDate: Date;
-      switch (period) {
-        case 'week':
-          startDate = new Date(now); startDate.setDate(now.getDate() - 7); startDate.setHours(0,0,0,0);
-          break;
-        case 'month':
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-          break;
-        case 'year':
-          startDate = new Date(now.getFullYear(), 0, 1);
-          break;
-        default:
-          startDate = new Date(now); startDate.setHours(0,0,0,0);
+      { const s = getSaudiStartOfDay();
+        switch (period) {
+          case 'week':
+            startDate = new Date(s.getTime() - 6 * 24 * 60 * 60 * 1000);
+            break;
+          case 'month':
+            startDate = new Date(s.getFullYear(), s.getMonth(), 1);
+            break;
+          case 'year':
+            startDate = new Date(s.getFullYear(), 0, 1);
+            break;
+          default:
+            startDate = s;
+        }
       }
 
       const baseMatch: any = { createdAt: { $gte: startDate }, status: { $ne: 'cancelled' } };
@@ -16483,20 +16494,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { period = 'month', format = 'csv', branchId } = req.query;
       const { OrderModel } = await import("@shared/schema");
 
-      const now = new Date();
       let startDate: Date;
-      switch (period) {
-        case 'today':
-          startDate = new Date(now); startDate.setHours(0,0,0,0);
-          break;
-        case 'week':
-          startDate = new Date(now); startDate.setDate(now.getDate() - 7); startDate.setHours(0,0,0,0);
-          break;
-        case 'year':
-          startDate = new Date(now.getFullYear(), 0, 1);
-          break;
-        default:
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      { const s = getSaudiStartOfDay();
+        switch (period) {
+          case 'today':
+            startDate = s;
+            break;
+          case 'week':
+            startDate = new Date(s.getTime() - 6 * 24 * 60 * 60 * 1000);
+            break;
+          case 'year':
+            startDate = new Date(s.getFullYear(), 0, 1);
+            break;
+          default:
+            startDate = new Date(s.getFullYear(), s.getMonth(), 1);
+        }
       }
 
       const match: any = { createdAt: { $gte: startDate }, status: { $ne: 'cancelled' } };
@@ -17086,8 +17098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!apiKey) return res.status(500).json({ error: "مفتاح الذكاء الاصطناعي غير مضبوط - يرجى إضافة OPENAI_API_KEY في الإعدادات" });
 
       // Gather business context
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayStart = getSaudiStartOfDay();
       const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
 
       let businessContext = "";
@@ -17198,8 +17209,7 @@ ${businessContext}
       const apiKey = process.env.OPENAI_API_KEY;
       if (!apiKey) return res.status(500).json({ error: "OPENAI_API_KEY غير مضبوط" });
 
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayStart = getSaudiStartOfDay();
       const weekStart = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
 
       const allOrders = await storage.getOrders(500);
