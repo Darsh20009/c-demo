@@ -366,19 +366,21 @@ app.use((req, res, next) => {
 // Serve attached assets for both development and production
 app.use('/attached_assets', express.static(path.resolve(__dirname, '..', 'attached_assets'), {
   setHeaders: (res, filePath) => {
-    res.set('Cache-Control', 'public, max-age=3600');
-    // Ensure correct content type for images
+    res.set('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400'); // 7 days
     if (filePath.endsWith('.png')) res.set('Content-Type', 'image/png');
     if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) res.set('Content-Type', 'image/jpeg');
+    if (filePath.endsWith('.webp')) res.set('Content-Type', 'image/webp');
   }
 }));
 
-// Serve public static files (audio, images) explicitly so Vite dev middleware doesn't intercept
+// Serve public static files (audio, images, icons) explicitly so Vite dev middleware doesn't intercept
 app.use(express.static(path.resolve(__dirname, '..', 'public'), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.mp4') || filePath.endsWith('.mp3') || filePath.endsWith('.ogg') || filePath.endsWith('.wav')) {
       res.set('Content-Type', filePath.endsWith('.mp4') ? 'video/mp4' : 'audio/mpeg');
-      res.set('Cache-Control', 'public, max-age=86400');
+      res.set('Cache-Control', 'public, max-age=604800'); // 7 days
+    } else if (filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg') || filePath.endsWith('.webp') || filePath.endsWith('.ico') || filePath.endsWith('.svg')) {
+      res.set('Cache-Control', 'public, max-age=604800, stale-while-revalidate=86400'); // 7 days
     }
   }
 }));

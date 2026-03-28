@@ -7,9 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthGuard } from "@/components/guards/AuthGuard";
 import { AdminLayout } from "@/components/admin-layout";
-import SplashScreen from "@/pages/splash";
-import CartModal from "@/components/cart-modal";
-import CheckoutModal from "@/components/checkout-modal";
 import { CartProvider, useCartStore } from "@/lib/cart-store";
 import { CustomerProvider } from "@/contexts/CustomerContext";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -17,9 +14,12 @@ import { PWAUpdateNotifier } from "@/components/PWAUpdateNotifier";
 import { GlobalPrompts } from "@/components/global-prompts";
 import { PWAInstallBanner } from "@/components/pwa-install";
 import { OfflineIndicator } from "@/components/offline-indicator";
-import MenuPage from "@/pages/menu"; 
-import CustomerProfile from "@/pages/customer-profile";
-import CartPage from "@/pages/cart-page";
+
+const CartModal = lazy(() => import("@/components/cart-modal"));
+const CheckoutModal = lazy(() => import("@/components/checkout-modal"));
+const MenuPage = lazy(() => import("@/pages/menu"));
+const CustomerProfile = lazy(() => import("@/pages/customer-profile"));
+const CartPage = lazy(() => import("@/pages/cart-page"));
 
 const ProductDetails = lazy(() => import("@/pages/product-details"));
 const PaymentReturnPage = lazy(() => import("@/pages/payment-return"));
@@ -360,8 +360,10 @@ function AppContent() {
         <AppRouter />
       </Suspense>
       {/* Modals inside Router to ensure they can use routing hooks if needed */}
-      {isCartOpen && <CartModal />}
-      {isCheckoutOpen && <CheckoutModal />}
+      <Suspense fallback={null}>
+        {isCartOpen && <CartModal />}
+        {isCheckoutOpen && <CheckoutModal />}
+      </Suspense>
       <Toaster />
     </>
   );
@@ -375,6 +377,18 @@ function App() {
     const onLangChanged = (lng: string) => setLang(lng);
     i18n.on('languageChanged', onLangChanged);
     return () => { i18n.off('languageChanged', onLangChanged); };
+  }, []);
+
+  useEffect(() => {
+    // Prefetch critical data in parallel on app start so pages load instantly
+    const prefetch = (url: string) =>
+      queryClient.prefetchQuery({ queryKey: [url], staleTime: 5 * 60 * 1000 });
+    Promise.all([
+      prefetch("/api/business-config"),
+      prefetch("/api/coffee-items"),
+      prefetch("/api/menu-categories"),
+      prefetch("/api/product-addons"),
+    ]);
   }, []);
 
   useEffect(() => {
