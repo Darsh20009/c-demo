@@ -81,7 +81,7 @@ function _drainPrintQueue() {
     @media print {
       @page { size: ${paperWidth} auto; margin: 0; }
       body > *:not(#${overlayId}) { display: none !important; visibility: hidden !important; }
-      #${overlayId} { display: block !important; visibility: visible !important; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999; background: white; }
+      #${overlayId} { display: block !important; visibility: visible !important; position: static !important; width: 100%; background: white; }
       .no-print { display: none !important; }
     }
     #${overlayId} { display: none; }

@@ -137,11 +137,12 @@ export function ReceiptInvoice({ order, variant = "button" }: ReceiptInvoiceProp
         </tr>`;
     }).join('');
 
-    const html = `
-      <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;width:80mm;max-width:80mm;margin:0 auto;padding:10px;color:#000;font-size:12px;">
+    // ── صفحة العميل (Page 1) ──
+    const customerPage = `
+      <div style="page-break-after:always;font-family:'Cairo',Arial,sans-serif;direction:rtl;width:80mm;max-width:80mm;margin:0 auto;padding:10px;color:#000;font-size:12px;">
         <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:8px;">
           <div style="font-size:16px;font-weight:bold;">${brand.nameAr}</div>
-          <div style="font-size:10px;color:#555;">فاتورة ضريبية</div>
+          <div style="font-size:10px;color:#555;">فاتورة ضريبية — نسخة العميل</div>
           <div style="font-size:11px;margin-top:4px;">رقم الطلب: <strong>${order.orderNumber || ''}</strong></div>
           <div style="font-size:10px;">${dateStr} ${timeStr}</div>
           ${(order as any).tableNumber ? `<div style="font-size:11px;">طاولة: <strong>${(order as any).tableNumber}</strong></div>` : ''}
@@ -186,7 +187,47 @@ export function ReceiptInvoice({ order, variant = "button" }: ReceiptInvoiceProp
         </div>
       </div>`;
 
-    printHtmlInPage(html, '80mm');
+    // ── صفحة الموظف / المطبخ (Page 2) ──
+    const employeeItemsHtml = items.map((item: any) => {
+      const nameAr = item.nameAr || item.coffeeItem?.nameAr || item.name || '';
+      const nameEn = item.nameEn || item.coffeeItem?.nameEn || '';
+      const qty = item.quantity || 1;
+      const addons = (item.customization?.selectedItemAddons || []).map((a: any) => a.nameAr).join('، ');
+      return `
+        <div style="margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed #ccc;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+              <div style="font-size:15px;font-weight:bold;">${nameAr}</div>
+              ${nameEn && nameEn !== nameAr ? `<div style="font-size:11px;color:#666;direction:ltr;">${nameEn}</div>` : ''}
+              ${addons ? `<div style="font-size:11px;color:#555;margin-top:2px;">+ ${addons}</div>` : ''}
+            </div>
+            <div style="font-size:20px;font-weight:bold;border:2px solid #000;padding:2px 10px;border-radius:4px;white-space:nowrap;">×${qty}</div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const employeePage = `
+      <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;width:80mm;max-width:80mm;margin:0 auto;padding:10px;color:#000;">
+        <div style="text-align:center;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:bold;color:#555;">ورقة التحضير — نسخة الموظف</div>
+          <div style="font-size:30px;font-weight:bold;margin:8px 0;letter-spacing:2px;">${order.orderNumber || ''}</div>
+          <div style="font-size:11px;">${timeStr} — ${dateStr}</div>
+          ${(order as any).tableNumber ? `<div style="font-size:13px;font-weight:bold;margin-top:4px;">طاولة رقم: ${(order as any).tableNumber}</div>` : ''}
+          ${(order as any).orderType ? `<div style="font-size:11px;color:#555;">${(order as any).orderType}</div>` : ''}
+        </div>
+        <div style="margin-bottom:10px;">
+          ${employeeItemsHtml}
+        </div>
+        ${(order as any).customerNotes ? `
+        <div style="margin-top:8px;border:2px solid #000;padding:6px;font-size:12px;">
+          <strong>ملاحظات:</strong> ${(order as any).customerNotes}
+        </div>` : ''}
+        <div style="text-align:center;margin-top:12px;font-size:11px;color:#888;">
+          الكاشير: ${(order as any).employeeName || ''} — العميل: ${(order as any).customerName || 'نقدي'}
+        </div>
+      </div>`;
+
+    printHtmlInPage(customerPage + employeePage, '80mm');
   };
 
   useEffect(() => {
