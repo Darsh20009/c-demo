@@ -94,20 +94,25 @@ function _drainPrintQueue() {
   document.head.appendChild(styleEl);
   document.body.appendChild(overlay);
 
+  // Guard to ensure cleanup runs only once even if afterprint + fallback both fire
+  let cleanupDone = false;
   const cleanup = () => {
+    if (cleanupDone) return;
+    cleanupDone = true;
     styleEl.remove();
     overlay.remove();
     _isPrinting = false;
-    setTimeout(_drainPrintQueue, 300);
+    // Wait 2 seconds before next job — gives thermal printer time to finish cutting
+    setTimeout(_drainPrintQueue, 2000);
   };
 
   window.addEventListener('afterprint', cleanup, { once: true });
 
   setTimeout(() => {
     window.print();
-    // Fallback cleanup (afterprint may not fire in all browsers)
-    setTimeout(cleanup, 8000);
-  }, 250);
+    // Fallback cleanup if afterprint never fires (some browsers/environments)
+    setTimeout(cleanup, 10000);
+  }, 300);
 }
 
 function openPrintWindow(html: string, _title: string, config: PrintConfig = {}): Window | null {
