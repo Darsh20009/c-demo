@@ -164,8 +164,8 @@ export const getQueryFn: <T>(options: {
 
  await throwIfResNotOk(res);
  const text = await res.text();
- if (!text || !text.trim()) return null as T;
- try { return JSON.parse(text) as T; } catch { return null as T; }
+ if (!text || !text.trim()) return null as any;
+ try { return JSON.parse(text); } catch { return null as any; }
  };
 
 export const queryClient = new QueryClient({

@@ -190,9 +190,9 @@ export default function AdminReports() {
   const handleBulkPrint = async () => {
     if (selectedOrders.length === 0) return;
     const res = await apiRequest('POST', '/api/orders/bulk-print-employee', { orderIds: selectedOrders });
-    const orders = await res.json();
+    const bulkOrders = await res.json();
     const { printBulkEmployeeInvoices } = await import('@/lib/print-utils');
-    printBulkEmployeeInvoices(orders);
+    printBulkEmployeeInvoices(bulkOrders);
   };
 
   const handlePrintDailySummary = async () => {
