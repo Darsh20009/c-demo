@@ -53,7 +53,7 @@ export default function EmployeeAvailability() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background p-4 md:p-6">
+    <div dir="rtl" className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
           <h1 className="font-amiri text-3xl font-bold text-primary flex items-center gap-2">

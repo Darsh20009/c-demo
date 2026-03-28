@@ -52,8 +52,8 @@ export default function EmployeeHome() {
   ];
 
   return (
-    <div className="min-h-screen pb-16 sm:pb-0 bg-gradient-to-br from-background via-primary/5 to-background" dir="rtl">
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/20">
+    <div className="min-h-screen pb-16 sm:pb-0 bg-gray-50" dir="rtl">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -61,23 +61,23 @@ export default function EmployeeHome() {
                 <img src={qiroxLogo} alt="QIROX" className="w-full h-full object-contain rounded-2xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
               </div>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-accent">{tc("لوحة التحكم", "Control Panel")}</h1>
-                <p className="text-gray-400 text-sm">{tc("مرحباً", "Welcome")}, {employee.fullName}</p>
+                <h1 className="text-xl sm:text-3xl font-bold text-primary">{tc("لوحة التحكم", "Control Panel")}</h1>
+                <p className="text-gray-500 text-sm">{tc("مرحباً", "Welcome")}, {employee.fullName}</p>
               </div>
             </div>
-            <Button variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10" onClick={handleLogout} data-testid="button-logout">
+            <Button variant="outline" className="border-red-400 text-red-500 hover:bg-red-50" onClick={handleLogout} data-testid="button-logout">
               <LogOut className="w-4 h-4 sm:ml-2" />
               <span className="hidden sm:inline">{tc("تسجيل الخروج", "Sign Out")}</span>
             </Button>
           </div>
 
           <div className="grid md:grid-cols-3 gap-4">
-            <Card className="bg-[#2d1f1a] border-primary/20">
+            <Card className="bg-white border-gray-200">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-gray-400 text-sm">{tc("المسمى الوظيفي", "Job Title")}</p>
-                    <p className="text-white font-bold text-lg">{employee.jobTitle || employee.role}</p>
+                    <p className="text-gray-500 text-sm">{tc("المسمى الوظيفي", "Job Title")}</p>
+                    <p className="text-gray-900 font-bold text-lg">{employee.jobTitle || employee.role}</p>
                   </div>
                   <Badge className="bg-primary/20 text-primary">
                     {employee.role === "manager" ? tc("مدير", "Manager") : tc("موظف", "Employee")}
@@ -85,19 +85,19 @@ export default function EmployeeHome() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-[#2d1f1a] border-primary/20">
+            <Card className="bg-white border-gray-200">
               <CardContent className="pt-6">
                 <div>
-                  <p className="text-gray-400 text-sm">{tc("الفرع", "Branch")}</p>
-                  <p className="text-white font-bold text-lg">{employee.branchId || tc("جميع الفروع", "All Branches")}</p>
+                  <p className="text-gray-500 text-sm">{tc("الفرع", "Branch")}</p>
+                  <p className="text-gray-900 font-bold text-lg">{employee.branchId || tc("جميع الفروع", "All Branches")}</p>
                 </div>
               </CardContent>
             </Card>
-            <Card className="bg-[#2d1f1a] border-primary/20">
+            <Card className="bg-white border-gray-200">
               <CardContent className="pt-6">
                 <div>
-                  <p className="text-gray-400 text-sm">{tc("رقم الموظف", "Employee ID")}</p>
-                  <p className="text-white font-bold text-lg">{employee.id?.slice(0, 8)}</p>
+                  <p className="text-gray-500 text-sm">{tc("رقم الموظف", "Employee ID")}</p>
+                  <p className="text-gray-900 font-bold text-lg">{employee.id?.slice(0, 8)}</p>
                 </div>
               </CardContent>
             </Card>
@@ -107,7 +107,7 @@ export default function EmployeeHome() {
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-accent mb-6">{tc("الوصول السريع", "Quick Access")}</h2>
+          <h2 className="text-2xl font-bold text-primary mb-6">{tc("الوصول السريع", "Quick Access")}</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {employeeQuickAccess.map((item) => {
               const Icon = item.icon;
@@ -121,7 +121,7 @@ export default function EmployeeHome() {
                       <Icon className="w-5 h-5" />
                       <span className="font-bold text-base">{item.title}</span>
                     </div>
-                    <p className="text-white/80 text-xs ml-8">{item.description}</p>
+                    <p className="text-gray-600 text-xs ml-8">{item.description}</p>
                   </div>
                 </Button>
               );
@@ -131,7 +131,7 @@ export default function EmployeeHome() {
 
         {isManager && (
           <div>
-            <h2 className="text-2xl font-bold text-accent mb-6">{tc("صلاحيات المدير", "Manager Permissions")}</h2>
+            <h2 className="text-2xl font-bold text-primary mb-6">{tc("صلاحيات المدير", "Manager Permissions")}</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
               {managerAccess.map((item) => {
                 const Icon = item.icon;
@@ -145,7 +145,7 @@ export default function EmployeeHome() {
                         <Icon className="w-5 h-5" />
                         <span className="font-bold text-base">{item.title}</span>
                       </div>
-                      <p className="text-white/80 text-xs ml-8">{item.description}</p>
+                      <p className="text-gray-600 text-xs ml-8">{item.description}</p>
                     </div>
                   </Button>
                 );

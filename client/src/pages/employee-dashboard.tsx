@@ -356,7 +356,7 @@ export default function EmployeeDashboard() {
 
   if (isLoading && !employee) {
     return (
-      <div dir={dir} className="min-h-screen bg-background flex items-center justify-center">
+      <div dir={dir} className="min-h-screen bg-gray-50 flex items-center justify-center">
         <LoadingState message={t('employee.loading')} />
       </div>
     );
@@ -390,10 +390,10 @@ export default function EmployeeDashboard() {
   const roleVariant = getRoleVariant(employee.role || "cashier");
 
   return (
-    <div dir={dir} className="flex h-screen bg-background">
+    <div dir={dir} className="flex h-screen bg-gray-50">
       <EmployeeSidebar employee={employee} onLogout={handleLogout} />
       <main className="flex-1 overflow-auto pb-16 sm:pb-0">
-        <div className="flex sm:hidden items-center justify-between px-4 py-3 border-b bg-background sticky top-0 z-40">
+        <div className="flex sm:hidden items-center justify-between px-4 py-3 border-b bg-white sticky top-0 z-40">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-bold">{t('employee.control_panel')}</h1>
             <span
@@ -449,7 +449,7 @@ export default function EmployeeDashboard() {
           </div>
         )}
 
-        <div className="min-h-screen bg-background p-3 sm:p-6">
+        <div className="min-h-screen bg-gray-50 p-3 sm:p-6">
           <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between gap-2 flex-wrap">

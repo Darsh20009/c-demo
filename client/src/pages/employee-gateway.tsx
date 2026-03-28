@@ -39,7 +39,7 @@ export default function EmployeeGateway() {
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div dir="rtl" className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2 font-playfair">QIROX Systems</h1>
@@ -65,7 +65,7 @@ export default function EmployeeGateway() {
                     placeholder={tc("كلمة المرور العامة", "Access password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10 pl-10 text-right bg-background border-border"
+                    className="pr-10 pl-10 text-right bg-white border-gray-300"
                     data-testid="input-gateway-password"
                     autoFocus
                   />

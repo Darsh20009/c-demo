@@ -947,7 +947,7 @@ export default function EmployeeCashier() {
  }
 
  return (
- <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background p-4 pb-20 sm:pb-4">
+ <div className="min-h-screen bg-gray-50 p-4 pb-20 sm:pb-4">
  <div className="max-w-7xl mx-auto">
  <div className="flex items-center justify-between mb-6">
  <div className="flex items-center gap-3">
@@ -955,7 +955,7 @@ export default function EmployeeCashier() {
  <img src={qiroxLogoStaff} alt="QIROX" className="w-full h-full object-contain rounded-2xl" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
  </div>
  <div>
- <h1 className="text-2xl font-bold text-accent">{tc("نظام الكاشير","Cashier System")}</h1>
+ <h1 className="text-2xl font-bold text-primary">{tc("نظام الكاشير","Cashier System")}</h1>
  <p className="text-gray-400 text-sm">{tc("الموظف:","Employee:")} {employee.fullName}</p>
  </div>
  </div>
@@ -982,7 +982,7 @@ export default function EmployeeCashier() {
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/cashier/phone-lookup")}
- className="border-primary/50 text-accent hover:bg-primary hover:text-white"
+ className="border-primary/50 text-primary hover:bg-primary hover:text-white"
  data-testid="button-phone-lookup"
  >
  <Search className="w-4 h-4 ml-2" />
@@ -990,7 +990,7 @@ export default function EmployeeCashier() {
  </Button>
  <Dialog open={isPosSettingsOpen} onOpenChange={setIsPosSettingsOpen}>
  <DialogTrigger asChild>
- <div className="bg-[#2d1f1a] border border-primary/20 rounded-lg px-4 py-2 hover-elevate cursor-pointer" data-testid="pos-settings-trigger">
+ <div className="bg-white border border-gray-200 rounded-lg px-4 py-2 hover-elevate cursor-pointer" data-testid="pos-settings-trigger">
  <div className="flex items-center gap-2">
  <MonitorSmartphone className={`w-4 h-4 ${posConnected ? 'text-green-400' : 'text-gray-400'}`} />
  <span className="text-xs text-gray-400">{tc("جهاز POS:","POS Device:")}</span>
@@ -1002,7 +1002,7 @@ export default function EmployeeCashier() {
  <p className="text-xs text-gray-500 mt-1">{posConnected ? tc("جاهز للدفع الإلكتروني","Ready for payment") : tc("انقر للإعدادات","Click for settings")}</p>
  </div>
  </DialogTrigger>
- <DialogContent className="bg-[#2d1f1a] border-primary/20 text-white">
+ <DialogContent className="bg-white border-gray-200 text-gray-900">
  <DialogHeader>
  <DialogTitle className="text-accent flex items-center gap-2">
  <MonitorSmartphone className="w-5 h-5" />
@@ -1010,7 +1010,7 @@ export default function EmployeeCashier() {
  </DialogTitle>
  </DialogHeader>
  <div className="space-y-6">
- <div className="flex items-center justify-between p-4 bg-[#1a1410] rounded-lg border border-primary/20">
+ <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
  <div className="flex items-center gap-3">
  {posConnected ? (
  <Wifi className="w-6 h-6 text-green-400" />
@@ -1032,7 +1032,7 @@ export default function EmployeeCashier() {
  />
  </div>
  
- <div className="space-y-3 p-4 bg-[#1a1410]/50 rounded-lg">
+ <div className="space-y-3 p-4 bg-gray-50/50 rounded-lg">
  <h4 className="text-accent font-medium flex items-center gap-2">
  <Settings className="w-4 h-4" />
  {tc("معلومات الجهاز","Device Info")}
@@ -1051,8 +1051,8 @@ export default function EmployeeCashier() {
  </div>
  </div>
 
- <div className="text-xs text-gray-500 p-3 bg-primary/10 rounded-lg border border-primary/20">
- <p className="font-medium text-accent mb-1">{tc("ملاحظة:","Note:")}</p>
+ <div className="text-xs text-gray-500 p-3 bg-primary/10 rounded-lg border border-gray-200">
+ <p className="font-medium text-primary mb-1">{tc("ملاحظة:","Note:")}</p>
  <p>{tc("عند تفعيل جهاز POS، سيتم معالجة الدفعات الإلكترونية تلقائياً عبر الجهاز. تأكد من توصيل الجهاز بشكل صحيح قبل التفعيل.","When POS is enabled, electronic payments will be processed automatically. Ensure the device is connected correctly before activation.")}</p>
  </div>
  </div>
@@ -1090,7 +1090,7 @@ export default function EmployeeCashier() {
  size="icon"
  variant="outline"
  onClick={handleOpenCashDrawer}
- className="border-primary/50 text-accent hover:bg-primary hover:text-white"
+ className="border-primary/50 text-primary hover:bg-primary hover:text-white"
  data-testid="button-open-drawer"
  title={tc("فتح الخزانة", "Open Cash Drawer")}
  >
@@ -1099,7 +1099,7 @@ export default function EmployeeCashier() {
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/home")}
- className="border-primary/50 text-accent hover:bg-primary hover:text-white"
+ className="border-primary/50 text-primary hover:bg-primary hover:text-white"
  data-testid="button-back-dashboard"
  >
  <ArrowRight className="w-4 h-4 ml-2" />
@@ -1112,7 +1112,7 @@ export default function EmployeeCashier() {
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
  {/* Menu Section */}
  <div className="lg:col-span-2">
- <Card className="bg-[#2d1f1a] border-primary/20">
+ <Card className="bg-white border-gray-200">
  <CardHeader>
  <CardTitle className="text-accent text-right">{tc("القائمة","Menu")}</CardTitle>
  </CardHeader>
@@ -1145,7 +1145,7 @@ export default function EmployeeCashier() {
 
  {/* Order Summary Section */}
  <div className="lg:col-span-1 space-y-4">
- <Card className="bg-[#2d1f1a] border-primary/20 sticky top-4">
+ <Card className="bg-white border-gray-200 sticky top-4">
  <CardHeader>
  <CardTitle className="text-accent text-right flex items-center justify-between gap-2">
  <div className="flex items-center gap-2">
@@ -1174,14 +1174,14 @@ export default function EmployeeCashier() {
  </CardHeader>
  <CardContent className="space-y-4">
  {orderItems.length === 0 ? (
- <div className="text-center text-gray-400 py-8">
+ <div className="text-center text-gray-500 py-8">
  {tc("لا توجد عناصر في الطلب","No items in order")}
  </div>
  ) : (
  <>
  <div className="space-y-3 max-h-64 overflow-y-auto">
  {orderItems.map((item) => (
- <div key={item.coffeeItem.id} className="bg-[#1a1410] rounded-lg p-3">
+ <div key={item.coffeeItem.id} className="bg-gray-50 rounded-lg p-3">
  <div className="flex justify-between items-start mb-2">
  <div className="text-right flex-1">
  <div className="flex items-center gap-2">
@@ -1209,7 +1209,7 @@ export default function EmployeeCashier() {
  size="sm"
  variant="outline"
  onClick={() => updateQuantity(item.coffeeItem.id, item.quantity - 1)}
- className="h-7 w-7 p-0 border-primary/30"
+ className="h-7 w-7 p-0 border-gray-300"
  data-testid={`button-decrease-${item.coffeeItem.id}`}
  >
  <Minus className="w-3 h-3" />
@@ -1221,13 +1221,13 @@ export default function EmployeeCashier() {
  size="sm"
  variant="outline"
  onClick={() => updateQuantity(item.coffeeItem.id, item.quantity + 1)}
- className="h-7 w-7 p-0 border-primary/30"
+ className="h-7 w-7 p-0 border-gray-300"
  data-testid={`button-increase-${item.coffeeItem.id}`}
  >
  <Plus className="w-3 h-3" />
  </Button>
  </div>
- <span className="font-bold text-accent">
+ <span className="font-bold text-primary">
  {(() => {
    let price = Number(item.coffeeItem.price) || 0;
    if ((item as any).selectedSize && item.coffeeItem.availableSizes) {
@@ -1247,7 +1247,7 @@ export default function EmployeeCashier() {
 
  <div className="space-y-3">
  <div className="space-y-2">
- <Label className="text-gray-300 text-right block">
+ <Label className="text-gray-600 text-right block">
  <User className="w-4 h-4 inline ml-2" />
  {tc("اسم العميل","Customer Name")}
  </Label>
@@ -1255,13 +1255,13 @@ export default function EmployeeCashier() {
  value={customerName}
  onChange={(e) => setCustomerName(e.target.value)}
  placeholder={tc("أدخل اسم العميل","Enter customer name")}
- className="bg-[#1a1410] border-primary/30 text-white text-right"
+ className="bg-gray-50 border-gray-300 text-gray-900 text-right"
  data-testid="input-customer-name"
  />
  </div>
 
  <div className="space-y-2">
- <Label className="text-gray-300 text-right block">
+ <Label className="text-gray-600 text-right block">
  <Phone className="w-4 h-4 inline ml-2" />
  {tc("رقم الجوال (9 أرقام تبدأ بـ 5)","Mobile (9 digits starting with 5)")}
  </Label>
@@ -1270,7 +1270,7 @@ export default function EmployeeCashier() {
  value={customerPhone}
  onChange={(e) => setCustomerPhone(e.target.value)}
  placeholder="5xxxxxxxx"
- className="bg-[#1a1410] border-primary/30 text-white text-right flex-1"
+ className="bg-gray-50 border-gray-300 text-gray-900 text-right flex-1"
  data-testid="input-customer-phone"
  />
  <Dialog open={showBarcodeScanner} onOpenChange={setShowBarcodeScanner}>
@@ -1278,15 +1278,15 @@ export default function EmployeeCashier() {
  <Button
  variant="outline"
  size="icon"
- className="border-primary/30 text-accent"
+ className="border-gray-300 text-primary"
  data-testid="button-scan-loyalty"
  >
  <CreditCard className="w-4 h-4" />
  </Button>
  </DialogTrigger>
- <DialogContent className="bg-[#1a1410] border-primary/30 text-white max-w-md">
+ <DialogContent className="bg-gray-50 border-gray-300 text-gray-900 max-w-md">
  <DialogHeader>
- <DialogTitle className="text-right text-accent">{tc("مسح بطاقة الولاء","Scan Loyalty Card")}</DialogTitle>
+ <DialogTitle className="text-right text-primary">{tc("مسح بطاقة الولاء","Scan Loyalty Card")}</DialogTitle>
  </DialogHeader>
  <BarcodeScanner
  showManualInput={true}
@@ -1312,7 +1312,7 @@ export default function EmployeeCashier() {
  </Dialog>
  </div>
  {isCheckingCustomer && (
- <p className="text-xs text-accent text-right animate-pulse">{tc("جاري التحقق من العميل...","Checking customer...")}</p>
+ <p className="text-xs text-primary text-right animate-pulse">{tc("جاري التحقق من العميل...","Checking customer...")}</p>
  )}
  </div>
 
@@ -1320,7 +1320,7 @@ export default function EmployeeCashier() {
  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 space-y-3">
  <p className="text-blue-300 text-sm text-right">{tc("عميل غير مسجل - يمكنك تسجيله الآن","Unregistered customer — you can register them now")}</p>
  <div className="space-y-2">
- <Label className="text-gray-300 text-right block text-xs">
+ <Label className="text-gray-600 text-right block text-xs">
  {tc("البريد الإلكتروني (اختياري)", "Email (optional)")}
  </Label>
  <Input
@@ -1328,7 +1328,7 @@ export default function EmployeeCashier() {
  onChange={(e) => setCustomerEmail(e.target.value)}
  placeholder="customer@example.com"
  type="email"
- className="bg-[#1a1410] border-blue-500/30 text-white text-right"
+ className="bg-gray-50 border-blue-500/30 text-gray-900 text-right"
  data-testid="input-customer-email"
  />
  </div>
@@ -1340,7 +1340,7 @@ export default function EmployeeCashier() {
  >
  {isRegisteringCustomer ? tc("جاري التسجيل...", "Registering...") : tc("تسجيل العميل", "Register Customer")}
  </Button>
- <p className="text-xs text-gray-400 text-right">
+ <p className="text-xs text-gray-500 text-right">
  {tc("سيتمكن العميل من تفعيل حسابه لاحقاً", "Customer can activate their account later")}
  </p>
  </div>
@@ -1367,7 +1367,7 @@ export default function EmployeeCashier() {
          value={pointsToRedeem || ''}
          onChange={(e) => setPointsToRedeem(Math.min(parseInt(e.target.value) || 0, customerPoints))}
          placeholder={tc("عدد النقاط", "Points to use")}
-         className="bg-[#1a1410] border-purple-500/30 text-white text-center flex-1"
+         className="bg-gray-50 border-purple-500/30 text-gray-900 text-center flex-1"
          data-testid="input-points-to-redeem"
        />
        <Button
@@ -1408,16 +1408,16 @@ export default function EmployeeCashier() {
  )}
 
  {customerId && customerEmail && (
- <div className="text-xs text-gray-400 text-right">
+ <div className="text-xs text-gray-500 text-right">
  {customerEmail}
  </div>
  )}
 
  {loyaltyCard && (
- <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border-2 border-primary/30 space-y-2">
+ <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-4 rounded-lg border-2 border-gray-300 space-y-2">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-2">
- <Gift className="w-5 h-5 text-accent" />
+ <Gift className="w-5 h-5 text-primary" />
  <span className="text-accent font-semibold">{tc("بطاقة كوبي","Loyalty Card")}</span>
  </div>
  <Badge className="bg-primary text-black">
@@ -1433,7 +1433,7 @@ export default function EmployeeCashier() {
  key={i}
  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 ${
  isUsed
- ? 'bg-gray-600 border-gray-500 text-gray-400 line-through'
+ ? 'bg-gray-600 border-gray-500 text-gray-500 line-through'
  : isEarned
  ? 'bg-primary border-primary text-black'
  : 'bg-gray-800 border-gray-600 text-gray-500'
@@ -1444,15 +1444,15 @@ export default function EmployeeCashier() {
  );
  })}
  </div>
- <p className="text-xs text-gray-400 text-right flex items-center gap-1 justify-end">
- <Gift className="w-3 h-3 text-accent" />
+ <p className="text-xs text-gray-500 text-right flex items-center gap-1 justify-end">
+ <Gift className="w-3 h-3 text-primary" />
  {tc("المشروبات المجانية متاحة:","Free drinks available:")} {Math.floor(((loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)) / 10)}
  </p>
  </div>
  )}
 
  <div className="space-y-2">
- <Label className="text-gray-300 text-right block text-sm font-medium">
+ <Label className="text-gray-600 text-right block text-sm font-medium">
  {tc("نوع الطلب","Order Type")}
  </Label>
  <div className="grid grid-cols-3 gap-2">
@@ -1463,7 +1463,7 @@ export default function EmployeeCashier() {
  className={`flex flex-col items-center gap-1 py-3 ${
  orderType === 'dine-in' 
  ? 'bg-purple-600 border-purple-500 text-white' 
- : 'bg-[#1a1410] border-primary/30 text-gray-300'
+ : 'bg-gray-50 border-gray-300 text-gray-300'
  }`}
  data-testid="button-order-type-dinein"
  >
@@ -1477,7 +1477,7 @@ export default function EmployeeCashier() {
  className={`flex flex-col items-center gap-1 py-3 ${
  orderType === 'pickup' 
  ? 'bg-blue-600 border-blue-500 text-white' 
- : 'bg-[#1a1410] border-primary/30 text-gray-300'
+ : 'bg-gray-50 border-gray-300 text-gray-300'
  }`}
  data-testid="button-order-type-pickup"
  >
@@ -1491,7 +1491,7 @@ export default function EmployeeCashier() {
  className={`flex flex-col items-center gap-1 py-3 ${
  orderType === 'delivery' 
  ? 'bg-green-600 border-green-500 text-white' 
- : 'bg-[#1a1410] border-primary/30 text-gray-300'
+ : 'bg-gray-50 border-gray-300 text-gray-300'
  }`}
  data-testid="button-order-type-delivery"
  >
@@ -1502,7 +1502,7 @@ export default function EmployeeCashier() {
  </div>
 
  <div className="space-y-2">
- <Label className="text-gray-300 text-right block">
+ <Label className="text-gray-600 text-right block">
  <Coffee className="w-4 h-4 inline ml-2" />
  {tc("رقم الطاولة (اختياري)","Table Number (optional)")}
  </Label>
@@ -1510,20 +1510,20 @@ export default function EmployeeCashier() {
  value={tableNumber}
  onChange={(e) => setTableNumber(e.target.value)}
  placeholder={tc("مثال: 5 أو A3","e.g. 5 or A3")}
- className="bg-[#1a1410] border-primary/30 text-white text-right"
+ className="bg-gray-50 border-gray-300 text-gray-900 text-right"
  data-testid="input-table-number"
  />
  </div>
 
  <div className="space-y-2">
- <Label className="text-gray-300 text-right block">
+ <Label className="text-gray-600 text-right block">
  {tc("طريقة الدفع","Payment Method")}
  </Label>
  <Select value={paymentMethod} onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}>
- <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-payment-method">
+ <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900" data-testid="select-payment-method">
  <SelectValue />
  </SelectTrigger>
-    <SelectContent className="bg-[#1a1410] border-primary/30 text-white">
+    <SelectContent className="bg-gray-50 border-gray-300 text-gray-900">
       <SelectItem value="cash">{tc("نقدي","Cash")}</SelectItem>
       <SelectItem value="pos-network">{tc("شبكة","Network")}</SelectItem>
       <SelectItem value="qahwa-card">{tc("بطاقة كيروكس (ولاء)","QIROX Card (Loyalty)")}</SelectItem>
@@ -1540,13 +1540,13 @@ export default function EmployeeCashier() {
  max={(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)}
  value={stampsToUse}
  onChange={(e) => setStampsToUse(Math.min(parseInt(e.target.value) || 0, (loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)))}
- className="bg-[#1a1410] border-primary/30 text-white text-center w-20"
+ className="bg-gray-50 border-gray-300 text-gray-900 text-center w-20"
  data-testid="input-stamps-to-use"
  />
  <span className="text-accent text-sm">{tc("من","of")} {(loyaltyCard.freeCupsEarned || 0) - (loyaltyCard.freeCupsRedeemed || 0)}</span>
  </div>
  </div>
- <div className="bg-[#1a1410] rounded p-2 space-y-1">
+ <div className="bg-gray-50 rounded p-2 space-y-1">
  <p className="text-xs text-gray-400">{tc("تفاصيل الحسم:","Discount details:")}</p>
  <p className="text-accent text-sm">
  {tc("الأختام المستخدمة:","Stamps used:")} {stampsToUse} {tc("ختم","stamp")}
@@ -1586,11 +1586,11 @@ export default function EmployeeCashier() {
  </div>
 
  <div className="space-y-2 bg-gradient-to-br from-green-900/20 to-emerald-900/20 p-4 rounded-lg border border-green-500/20">
- <Label className="text-gray-300 text-right block flex items-center justify-end gap-2">
+ <Label className="text-gray-600 text-right block flex items-center justify-end gap-2">
  <span className="text-green-400">{tc("كود الخصم (اختياري)","Discount Code (optional)")}</span>
  <Gift className="w-5 h-5 text-green-400" />
  </Label>
- <p className="text-xs text-gray-400 text-right mb-2">
+ <p className="text-xs text-gray-500 text-right mb-2">
  {tc("هل لديك كود خصم؟ أدخله هنا للحصول على تخفيض فوري","Have a discount code? Enter it here for an instant discount")}
  </p>
  {!appliedDiscount ? (
@@ -1599,7 +1599,7 @@ export default function EmployeeCashier() {
  value={discountCode}
  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
  placeholder={tc("مثال: WELCOME10", "e.g. WELCOME10")}
- className="bg-[#1a1410] border-green-500/30 text-white text-right flex-1 focus:border-green-500"
+ className="bg-gray-50 border-green-500/30 text-gray-900 text-right flex-1 focus:border-green-500"
  data-testid="input-discount-code"
  />
  <Button
@@ -1707,7 +1707,7 @@ export default function EmployeeCashier() {
 
  {/* Pending Orders Panel */}
  <Dialog open={showPendingPanel} onOpenChange={setShowPendingPanel}>
-   <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto bg-[#1a1008] border-orange-500/30" dir="rtl">
+   <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto bg-gray-50 border-orange-500/30" dir="rtl">
      <DialogHeader>
        <DialogTitle className="text-orange-300 flex items-center gap-2">
          <Printer className="w-5 h-5" />
@@ -1726,7 +1726,7 @@ export default function EmployeeCashier() {
            const itemCount = (rd?.items || []).length;
            const createdAt = new Date(po.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
            return (
-             <div key={po.id} className="bg-[#2d1f1a] border border-orange-500/20 rounded-xl p-4">
+             <div key={po.id} className="bg-white border border-orange-500/20 rounded-xl p-4">
                <div className="flex items-start justify-between gap-3">
                  <div className="flex-1 min-w-0">
                    <div className="flex items-center gap-2 mb-1">

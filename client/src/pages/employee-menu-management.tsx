@@ -749,7 +749,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  }
 
  return (
- <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-background p-4 pb-20 sm:pb-4">
+ <div className="min-h-screen bg-gray-50 p-4 pb-20 sm:pb-4">
  {/* Header */}
          <div className="max-w-7xl mx-auto mb-6">
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -758,7 +758,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
          <Coffee className="w-6 h-6 text-white" />
          </div>
          <div>
-         <h1 className="text-2xl font-bold text-accent">{tc("إدارة القائمة", "Menu Management")}</h1>
+         <h1 className="text-2xl font-bold text-primary">{tc("إدارة القائمة", "Menu Management")}</h1>
          <p className="text-gray-400 text-sm">{tc("تحديث حالة توفر المنتجات", "Update product availability")}</p>
          </div>
          </div>
@@ -802,7 +802,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  {isFood ? tc('إضافة صنف جديد', 'Add New Item') : tc('إضافة مشروب جديد', 'Add New Drink')}
  </Button>
  </DialogTrigger>
- <DialogContent className="bg-[#2d1f1a] border-primary/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+ <DialogContent className="bg-white border-gray-200 text-gray-900 max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="text-accent">
    <div className="flex flex-col gap-3">
@@ -831,7 +831,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  required
  defaultValue={step1Data?.nameAr || ""}
  onChange={(e) => setAiAddNameAr(e.target.value)}
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-name-ar"
  />
  </div>
@@ -856,7 +856,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  name="nameEn"
  value={aiAddNameEn}
  onChange={(e) => setAiAddNameEn(e.target.value)}
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-name-en"
  />
  </div>
@@ -884,7 +884,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  required
  value={aiAddDescription}
  onChange={(e) => setAiAddDescription(e.target.value)}
- className="bg-[#1a1410] border-primary/30 text-white min-h-[80px]"
+ className="bg-gray-50 border-gray-300 text-gray-900 min-h-[80px]"
  data-testid="input-description"
  />
  </div>
@@ -894,10 +894,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                      <div className="space-y-2">
                        <Label htmlFor="category" className="text-gray-300">{tc("القسم *", "Category *")}</Label>
                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                         <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-category">
+                         <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900" data-testid="select-category">
                            <SelectValue placeholder={tc("اختر القسم", "Select category")} />
                          </SelectTrigger>
-                         <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
+                         <SelectContent className="bg-white border-gray-200 text-gray-900">
                            {availableForDropdown.map(cat => (
                              <SelectItem key={cat.id} value={cat.id}>{cat.nameAr}</SelectItem>
                            ))}
@@ -924,7 +924,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  min="0"
  required
  defaultValue={step1Data?.price || ""}
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-price"
  />
  </div>
@@ -940,7 +940,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  step="0.01"
  min="0"
  defaultValue={step1Data?.oldPrice || ""}
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-old-price"
  />
  </div>
@@ -950,7 +950,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
    <div className="flex flex-wrap gap-2">
      {addImageUrls.map((url, idx) => (
        <div key={idx} className="relative w-20 h-20">
-         <img src={url.startsWith('/') ? url : ("/" + url)} alt={"صورة " + (idx+1)} className="w-full h-full object-cover rounded-lg border border-primary/30" />
+         <img src={url.startsWith('/') ? url : ("/" + url)} alt={"صورة " + (idx+1)} className="w-full h-full object-cover rounded-lg border border-gray-300" />
          <button type="button" onClick={() => setAddImageUrls(addImageUrls.filter((_, i) => i !== idx))} className="absolute -top-1 -right-1 bg-red-600 rounded-full w-5 h-5 flex items-center justify-center">
            <X className="w-3 h-3 text-white" />
          </button>
@@ -958,7 +958,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
        </div>
      ))}
      {addImageUrls.length < 5 && (
-       <button type="button" onClick={() => { setImageLibraryContext("add"); setIsImageLibraryOpen(true); }} className="w-20 h-20 border-2 border-dashed border-primary/30 rounded-lg flex flex-col items-center justify-center text-accent/60 hover:text-accent hover:border-accent/50 transition-colors">
+       <button type="button" onClick={() => { setImageLibraryContext("add"); setIsImageLibraryOpen(true); }} className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-primary/60 hover:text-accent hover:border-accent/50 transition-colors">
          <Plus className="w-5 h-5" />
          <span className="text-[10px] mt-1">{tc("إضافة", "Add")}</span>
        </button>
@@ -972,10 +972,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div>
  <Label htmlFor="coffeeStrength" className="text-gray-300">قوة القهوة</Label>
  <Select value={selectedCoffeeStrength} onValueChange={setSelectedCoffeeStrength}>
- <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-coffee-strength">
+ <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900" data-testid="select-coffee-strength">
  <SelectValue placeholder="اختر قوة القهوة" />
  </SelectTrigger>
- <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
+ <SelectContent className="bg-white border-gray-200 text-gray-900">
  <SelectItem value="mild">خفيفة (1-4)</SelectItem>
  <SelectItem value="classic">كلاسيكية/العادي</SelectItem>
  <SelectItem value="medium">متوسطة (4-8)</SelectItem>
@@ -989,12 +989,12 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
   <Label className="text-gray-300">الإضافات المتاحة (مع السعر)</Label>
   <div className="space-y-2">
     {addEditableAddons.map((addon, idx) => (
-      <div key={idx} className="space-y-1.5 p-2 rounded-lg bg-[#1a1410]/50 border border-primary/10">
+      <div key={idx} className="space-y-1.5 p-2 rounded-lg bg-gray-50/50 border border-primary/10">
         <div className="flex gap-2 items-center">
           <button
             type="button"
             onClick={() => { setEditingAddonImageIdx(idx); setImageLibraryContext("add-addon"); setIsImageLibraryOpen(true); }}
-            className="w-10 h-10 rounded-lg border-2 border-dashed border-primary/30 flex items-center justify-center shrink-0 overflow-hidden hover:border-accent/50 transition-colors"
+            className="w-10 h-10 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center shrink-0 overflow-hidden hover:border-accent/50 transition-colors"
             data-testid={"button-add-addon-img-" + idx}
           >
             {addon.imageUrl ? <img src={addon.imageUrl.startsWith('/') ? addon.imageUrl : '/' + addon.imageUrl} className="w-full h-full object-cover rounded-lg" alt="" /> : <Plus className="w-3 h-3 text-gray-500" />}
@@ -1004,7 +1004,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
             placeholder="اسم الإضافة"
             value={addon.nameAr}
             onChange={(e) => { const next = [...addEditableAddons]; next[idx] = { ...next[idx], nameAr: e.target.value }; setAddEditableAddons(next); }}
-            className="bg-[#1a1410] border-primary/30 text-white flex-1"
+            className="bg-gray-50 border-gray-300 text-gray-900 flex-1"
             data-testid={"input-add-addon-name-" + idx}
           />
           <Input
@@ -1012,7 +1012,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
             placeholder="السعر"
             value={addon.price}
             onChange={(e) => { const next = [...addEditableAddons]; next[idx] = { ...next[idx], price: parseFloat(e.target.value) || 0 }; setAddEditableAddons(next); }}
-            className="bg-[#1a1410] border-primary/30 text-white w-20"
+            className="bg-gray-50 border-gray-300 text-gray-900 w-20"
             data-testid={"input-add-addon-price-" + idx}
           />
           <Button
@@ -1031,7 +1031,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
           placeholder="القسم (مثال: الحجم، النكهات، الإضافات) — اختياري"
           value={addon.section || ''}
           onChange={(e) => { const next = [...addEditableAddons]; next[idx] = { ...next[idx], section: e.target.value }; setAddEditableAddons(next); }}
-          className="bg-[#1a1410] border-primary/20 text-white/70 text-xs h-7"
+          className="bg-gray-50 border-gray-200 text-gray-500 text-xs h-7"
           data-testid={"input-add-addon-section-" + idx}
         />
       </div>
@@ -1054,7 +1054,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
    <div>
      <Label className="text-gray-300">متوفر في الفروع</Label>
      <p className="text-gray-500 text-xs mb-2">اختر الفروع التي سيتوفر فيها هذا المنتج (اتركه فارغاً للتوفر في جميع الفروع)</p>
-     <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto bg-[#1a1410] p-3 rounded-lg border border-primary/20">
+     <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto bg-gray-50 p-3 rounded-lg border border-gray-200">
        {branches.filter((b: any) => b.isActive === 1 || b.isActive === "1").map((branch: any) => {
          const branchId = branch.id;
          const isSelected = selectedBranches.some(sb => sb.branchId === branchId);
@@ -1067,7 +1067,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                className="border-primary/50"
                data-testid={`checkbox-branch-${branchId}`}
              />
-             <label htmlFor={`branch-${branchId}`} className="text-gray-300 text-sm cursor-pointer">
+             <label htmlFor={`branch-${branchId}`} className="text-gray-600 text-sm cursor-pointer">
                {branch.nameAr}
              </label>
            </div>
@@ -1099,14 +1099,14 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  </form>
  ) : (
  <div className="space-y-4">
-   <div className="bg-[#1a1410] p-4 rounded-lg border border-primary/20">
+   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
      <p className="text-gray-400 text-sm mb-1">المشروب:</p>
      <p className="text-accent font-bold text-lg">{step1Data?.nameAr}</p>
      <p className="text-gray-500 text-sm">{step1Data?.category && categoryNames[step1Data.category as keyof typeof categoryNames]} • {step1Data?.price} ريال</p>
    </div>
 
-   <div className="border-t border-primary/20 pt-4">
-     <Label className="text-gray-300 text-lg flex items-center gap-2">
+   <div className="border-t border-gray-200 pt-4">
+     <Label className="text-gray-600 text-lg flex items-center gap-2">
        <FlaskConical className="w-5 h-5" />
        وصفة المنتج (المواد الخام)
      </Label>
@@ -1120,7 +1120,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
              const selected = recipeItems.find(s => s.rawItemId === raw.id);
              
              return (
-               <div key={raw.id} className="flex items-center gap-3 p-2 bg-[#1a1410] rounded-lg border border-primary/10">
+               <div key={raw.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-primary/10">
                  <Checkbox
                    id={`raw-step2-${raw.id}`}
                    checked={isSelected}
@@ -1139,7 +1139,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                    className="border-primary/50"
                    data-testid={`checkbox-raw-${raw.id}`}
                  />
-                 <label htmlFor={`raw-step2-${raw.id}`} className="text-gray-300 flex-1 cursor-pointer">
+                 <label htmlFor={`raw-step2-${raw.id}`} className="text-gray-600 flex-1 cursor-pointer">
                    <span>{raw.nameAr}</span>
                    <span className="text-gray-500 text-xs mr-2">({raw.unitCost.toFixed(2)} ريال/{raw.unit})</span>
                  </label>
@@ -1155,7 +1155,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                            s.rawItemId === raw.id ? { ...s, quantity: parseFloat(e.target.value) || 0 } : s
                          ));
                        }}
-                       className="w-20 bg-[#2d1f1a] border-primary/30 text-white text-center"
+                       className="w-20 bg-white border-gray-300 text-gray-900 text-center"
                        data-testid={`input-qty-raw-${raw.id}`}
                      />
                      <Select
@@ -1166,10 +1166,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                          ));
                        }}
                      >
-                       <SelectTrigger className="w-20 bg-[#2d1f1a] border-primary/30 text-white" data-testid={`select-unit-raw-${raw.id}`}>
+                       <SelectTrigger className="w-20 bg-white border-gray-300 text-gray-900" data-testid={`select-unit-raw-${raw.id}`}>
                          <SelectValue />
                        </SelectTrigger>
-                       <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
+                       <SelectContent className="bg-white border-gray-200 text-gray-900">
                          <SelectItem value="g">جرام</SelectItem>
                          <SelectItem value="ml">مل</SelectItem>
                          <SelectItem value="kg">كجم</SelectItem>
@@ -1215,7 +1215,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                return (
                  <>
                    <div className="flex items-center justify-between mb-3">
-                     <span className="text-gray-300 font-medium flex items-center gap-2">
+                     <span className="text-gray-600 font-medium flex items-center gap-2">
                        <FlaskConical className="w-4 h-4 text-green-400" />
                        تكلفة الوصفة التقديرية
                      </span>
@@ -1277,7 +1277,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
        type="button"
        variant="outline"
        onClick={() => setAddStep(1)}
-       className="border-primary/30 text-accent"
+       className="border-gray-300 text-primary"
        data-testid="button-back-step"
      >
        <ArrowRight className="w-4 h-4 ml-2" />
@@ -1313,7 +1313,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/ingredients")}
- className="border-primary/50 text-accent hover:bg-primary hover:text-white"
+ className="border-primary/50 text-primary hover:bg-primary hover:text-white"
  data-testid="button-ingredients"
  >
  إدارةالمكونات
@@ -1321,7 +1321,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  variant="outline"
  onClick={() => setLocation("/employee/home")}
- className="border-primary/50 text-accent hover:bg-primary hover:text-white"
+ className="border-primary/50 text-primary hover:bg-primary hover:text-white"
  data-testid="button-back"
  >
  <ArrowRight className="w-4 h-4 ml-2" />
@@ -1334,13 +1334,13 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  {/* Content */}
  <div className="max-w-7xl mx-auto space-y-6">
  {isLoading ? (
- <div className="text-center text-accent py-12">
+ <div className="text-center text-primary py-12">
  <Coffee className="w-12 h-12 animate-spin mx-auto mb-4" />
  <p>{isFood ? 'جاري تحميل المأكولات...' : 'جاري تحميل المشروبات...'}</p>
  </div>
  ) : (
  Object.entries(categorizedItems).map(([category, items]) => (
- <Card key={category} className="bg-[#2d1f1a] border-primary/20">
+ <Card key={category} className="bg-white border-gray-200">
  <CardHeader>
  <CardTitle className="text-accent text-right text-xl">
  {categoryNames[category as keyof typeof categoryNames] || category}
@@ -1350,7 +1350,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  {items.map((item) => (
  <div
  key={item.id}
- className="flex items-center justify-between p-4 bg-[#1a1410] rounded-lg border border-primary/10 hover:border-primary/30 transition-all"
+ className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-primary/10 hover:border-gray-300 transition-all"
  data-testid={`item-${item.id}`}
  >
  <div className="flex items-center gap-4 flex-1">
@@ -1364,7 +1364,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  data-testid={`img-${item.id}`}
  />
  <div className="flex-1">
- <h3 className="text-lg font-bold text-accent" data-testid={`text-name-${item.id}`}>
+ <h3 className="text-lg font-bold text-primary" data-testid={`text-name-${item.id}`}>
  {item.nameAr}
  </h3>
  <p className="text-gray-400 text-sm">{item.nameEn}</p>
@@ -1373,7 +1373,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  {parseFloat(String(item.price)).toFixed(2)} ريال
  </span>
  {item.coffeeStrength && item.coffeeStrength !== "classic" && (
- <Badge variant="outline" className="text-xs border-primary/30 text-gray-400">
+ <Badge variant="outline" className="text-xs border-gray-300 text-gray-400">
  {item.coffeeStrength === "strong" && "قوي"}
  {item.coffeeStrength === "medium" && "متوسط"}
  {item.coffeeStrength === "mild" && "خفيف"}
@@ -1424,7 +1424,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  value={item.availabilityStatus || 'available'}
  onChange={(e) => handleStatusChange(item.id, e.target.value)}
  disabled={updateAvailabilityMutation.isPending}
- className="bg-[#1a1410] border border-primary/30 rounded-lg px-3 py-1 text-sm text-accent"
+ className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 text-sm text-primary"
  data-testid={`select-status-${item.id}`}
  >
  <option value="available"> متوفر</option>
@@ -1455,7 +1455,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  className={`${
  item.isNewProduct === 1
  ? "bg-yellow-500 border-yellow-500 text-white"
- : "border-primary/30 text-accent"
+ : "border-gray-300 text-primary"
  }`}
  disabled={toggleNewProductMutation.isPending}
  data-testid={`button-toggle-new-${item.id}`}
@@ -1505,7 +1505,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  {/* Edit Dialog */}
  <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
- <DialogContent className="bg-[#2d1f1a] border-primary/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+ <DialogContent className="bg-white border-gray-200 text-gray-900 max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
  <DialogTitle className="text-accent">تعديل المشروب</DialogTitle>
  </DialogHeader>
@@ -1519,7 +1519,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  name="nameAr"
  defaultValue={editingItem.nameAr}
  required
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-edit-name-ar"
  />
  </div>
@@ -1544,7 +1544,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  name="nameEn"
  value={aiEditNameEn}
  onChange={(e) => setAiEditNameEn(e.target.value)}
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-edit-name-en"
  />
  </div>
@@ -1572,7 +1572,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  value={aiEditDescription}
  onChange={(e) => setAiEditDescription(e.target.value)}
  required
- className="bg-[#1a1410] border-primary/30 text-white min-h-[80px]"
+ className="bg-gray-50 border-gray-300 text-gray-900 min-h-[80px]"
  data-testid="input-edit-description"
  />
  </div>
@@ -1581,10 +1581,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <div>
  <Label htmlFor="edit-category" className="text-gray-300">{tc("القسم *", "Category *")}</Label>
  <Select name="category" defaultValue={editingItem.category} required>
- <SelectTrigger className="bg-[#1a1410] border-primary/30 text-white" data-testid="select-edit-category">
+ <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900" data-testid="select-edit-category">
  <SelectValue placeholder={tc("اختر القسم", "Select category")} />
  </SelectTrigger>
- <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
+ <SelectContent className="bg-white border-gray-200 text-gray-900">
  {availableForDropdown.map(cat => (
    <SelectItem key={cat.id} value={cat.id}>{cat.nameAr}</SelectItem>
  ))}
@@ -1601,7 +1601,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  min="0"
  defaultValue={editingItem.price}
  required
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-edit-price"
  />
  </div>
@@ -1617,7 +1617,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  step="0.01"
  min="0"
  defaultValue={editingItem.oldPrice}
- className="bg-[#1a1410] border-primary/30 text-white"
+ className="bg-gray-50 border-gray-300 text-gray-900"
  data-testid="input-edit-old-price"
  />
  </div>
@@ -1627,7 +1627,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
   <div className="flex flex-wrap gap-2">
     {editImageUrls.map((url, idx) => (
       <div key={idx} className="relative w-16 h-16">
-        <img src={url.startsWith('/') ? url : ("/" + url)} alt={"صورة " + (idx+1)} className="w-full h-full object-cover rounded-lg border border-primary/30" />
+        <img src={url.startsWith('/') ? url : ("/" + url)} alt={"صورة " + (idx+1)} className="w-full h-full object-cover rounded-lg border border-gray-300" />
         <button type="button" onClick={() => setEditImageUrls(editImageUrls.filter((_, i) => i !== idx))} className="absolute -top-1 -right-1 bg-red-600 rounded-full w-4 h-4 flex items-center justify-center">
           <X className="w-3 h-3 text-white" />
         </button>
@@ -1635,7 +1635,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
       </div>
     ))}
     {editImageUrls.length < 5 && (
-      <button type="button" onClick={() => { setImageLibraryContext("edit"); setIsImageLibraryOpen(true); }} className="w-16 h-16 border-2 border-dashed border-primary/30 rounded-lg flex flex-col items-center justify-center text-accent/60 hover:text-accent hover:border-accent/50 transition-colors">
+      <button type="button" onClick={() => { setImageLibraryContext("edit"); setIsImageLibraryOpen(true); }} className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-primary/60 hover:text-accent hover:border-accent/50 transition-colors">
         <Plus className="w-4 h-4" />
         <span className="text-[10px] mt-1">{tc("إضافة", "Add")}</span>
       </button>
@@ -1661,7 +1661,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
              newSizes[idx].nameAr = e.target.value;
              setEditableSizes(newSizes);
            }}
-           className="bg-[#1a1410] border-primary/30 text-white flex-1"
+           className="bg-gray-50 border-gray-300 text-gray-900 flex-1"
            data-testid={`input-edit-size-name-${idx}`}
          />
          <Input
@@ -1673,7 +1673,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
              newSizes[idx].price = parseFloat(e.target.value) || 0;
              setEditableSizes(newSizes);
            }}
-           className="bg-[#1a1410] border-primary/30 text-white w-24"
+           className="bg-gray-50 border-gray-300 text-gray-900 w-24"
            data-testid={`input-edit-size-price-${idx}`}
          />
          <Button
@@ -1707,12 +1707,12 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
    <Label className="text-gray-300">الإضافات المتاحة</Label>
    <div className="space-y-2">
      {editableAddons.map((addon, idx) => (
-       <div key={idx} className="space-y-1.5 p-2 rounded-lg bg-[#1a1410]/50 border border-primary/10">
+       <div key={idx} className="space-y-1.5 p-2 rounded-lg bg-gray-50/50 border border-primary/10">
          <div className="flex gap-2 items-center">
            <button
              type="button"
              onClick={() => { setEditingAddonImageIdx(idx); setImageLibraryContext("edit-addon"); setIsImageLibraryOpen(true); }}
-             className="w-10 h-10 rounded-lg border-2 border-dashed border-primary/30 flex items-center justify-center shrink-0 overflow-hidden hover:border-accent/50 transition-colors"
+             className="w-10 h-10 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center shrink-0 overflow-hidden hover:border-accent/50 transition-colors"
              data-testid={`button-edit-addon-img-${idx}`}
            >
              {addon.imageUrl ? <img src={addon.imageUrl.startsWith('/') ? addon.imageUrl : '/' + addon.imageUrl} className="w-full h-full object-cover rounded-lg" alt="" /> : <Plus className="w-3 h-3 text-gray-500" />}
@@ -1726,7 +1726,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                newAddons[idx] = { ...newAddons[idx], nameAr: e.target.value };
                setEditableAddons(newAddons);
              }}
-             className="bg-[#1a1410] border-primary/30 text-white flex-1"
+             className="bg-gray-50 border-gray-300 text-gray-900 flex-1"
              data-testid={`input-edit-addon-name-${idx}`}
            />
            <Input
@@ -1738,7 +1738,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                newAddons[idx] = { ...newAddons[idx], price: parseFloat(e.target.value) || 0 };
                setEditableAddons(newAddons);
              }}
-             className="bg-[#1a1410] border-primary/30 text-white w-20"
+             className="bg-gray-50 border-gray-300 text-gray-900 w-20"
              data-testid={`input-edit-addon-price-${idx}`}
            />
            <Button
@@ -1761,7 +1761,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
              newAddons[idx] = { ...newAddons[idx], section: e.target.value };
              setEditableAddons(newAddons);
            }}
-           className="bg-[#1a1410] border-primary/20 text-white/70 text-xs h-7"
+           className="bg-gray-50 border-gray-200 text-gray-500 text-xs h-7"
            data-testid={`input-edit-addon-section-${idx}`}
          />
        </div>
@@ -1816,7 +1816,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
      setRecipeItems([]);
    }
  }}>
-   <DialogContent className="bg-[#2d1f1a] border-green-500/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+   <DialogContent className="bg-white border-green-500/20 text-gray-900 max-w-2xl max-h-[90vh] overflow-y-auto">
      <DialogHeader>
        <DialogTitle className="text-green-400 flex items-center gap-2">
          <FlaskConical className="w-5 h-5" />
@@ -1825,12 +1825,12 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
      </DialogHeader>
      
      <div className="space-y-4 py-4">
-       <div className="bg-[#1a1410] p-3 rounded-lg border border-green-500/20">
+       <div className="bg-gray-50 p-3 rounded-lg border border-green-500/20">
          <p className="text-gray-400 text-sm">سعر البيع: <span className="text-accent font-bold">{editingRecipeItem?.price} ريال</span></p>
        </div>
        
        <div>
-         <Label className="text-gray-300 text-lg">اختر المواد الخام للوصفة</Label>
+         <Label className="text-gray-600 text-lg">اختر المواد الخام للوصفة</Label>
          <p className="text-gray-500 text-sm mb-3">حدد الكميات المستخدمة في تحضير المنتج</p>
          
          <div className="space-y-2 max-h-60 overflow-y-auto mb-3">
@@ -1839,7 +1839,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
              const selected = recipeItems.find(s => s.rawItemId === raw.id);
              
              return (
-               <div key={raw.id} className="flex items-center gap-3 p-2 bg-[#1a1410] rounded-lg border border-primary/10">
+               <div key={raw.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg border border-primary/10">
                  <Checkbox
                    id={`recipe-edit-${raw.id}`}
                    checked={isSelected}
@@ -1858,7 +1858,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                    className="border-green-500/50"
                    data-testid={`checkbox-recipe-edit-${raw.id}`}
                  />
-                 <label htmlFor={`recipe-edit-${raw.id}`} className="text-gray-300 flex-1 cursor-pointer">
+                 <label htmlFor={`recipe-edit-${raw.id}`} className="text-gray-600 flex-1 cursor-pointer">
                    <span>{raw.nameAr}</span>
                    <span className="text-gray-500 text-xs mr-2">({raw.unitCost.toFixed(2)} ريال/{raw.unit})</span>
                  </label>
@@ -1874,7 +1874,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                            s.rawItemId === raw.id ? { ...s, quantity: parseFloat(e.target.value) || 0 } : s
                          ));
                        }}
-                       className="w-20 bg-[#2d1f1a] border-green-500/30 text-white text-center"
+                       className="w-20 bg-white border-green-500/30 text-gray-900 text-center"
                        data-testid={`input-recipe-qty-${raw.id}`}
                      />
                      <Select
@@ -1885,10 +1885,10 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                          ));
                        }}
                      >
-                       <SelectTrigger className="w-20 bg-[#2d1f1a] border-green-500/30 text-white" data-testid={`select-recipe-unit-${raw.id}`}>
+                       <SelectTrigger className="w-20 bg-white border-green-500/30 text-gray-900" data-testid={`select-recipe-unit-${raw.id}`}>
                          <SelectValue />
                        </SelectTrigger>
-                       <SelectContent className="bg-[#2d1f1a] border-primary/20 text-white">
+                       <SelectContent className="bg-white border-gray-200 text-gray-900">
                          <SelectItem value="g">جرام</SelectItem>
                          <SelectItem value="ml">مل</SelectItem>
                          <SelectItem value="kg">كجم</SelectItem>
@@ -1914,7 +1914,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
                return (
                  <>
                    <div className="flex items-center justify-between mb-3">
-                     <span className="text-gray-300 font-medium flex items-center gap-2">
+                     <span className="text-gray-600 font-medium flex items-center gap-2">
                        <FlaskConical className="w-4 h-4 text-green-400" />
                        تكلفة الوصفة
                      </span>
@@ -1984,7 +1984,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  {/* Delete Confirmation */}
  <AlertDialog open={!!deletingItemId} onOpenChange={() => setDeletingItemId(null)}>
- <AlertDialogContent className="bg-[#2d1f1a] border-red-500/20 text-white">
+ <AlertDialogContent className="bg-white border-red-500/20 text-gray-900">
  <AlertDialogHeader>
  <AlertDialogTitle className="text-red-500">تأكيد الحذف</AlertDialogTitle>
  <AlertDialogDescription className="text-gray-300">
@@ -2012,7 +2012,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
 
  {/* Skip Recipe Confirmation Dialog */}
  <AlertDialog open={skipRecipeConfirmOpen} onOpenChange={setSkipRecipeConfirmOpen}>
-   <AlertDialogContent className="bg-[#2d1f1a] border-primary/20 text-white">
+   <AlertDialogContent className="bg-white border-gray-200 text-gray-900">
      <AlertDialogHeader>
        <AlertDialogTitle className="text-accent">تأكيد إنشاء منتج بدون وصفة</AlertDialogTitle>
        <AlertDialogDescription className="text-gray-300">
@@ -2022,7 +2022,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
            <li>لن يمكن حساب تكلفة المنتج بدقة</li>
            <li>لن يكون المنتج "جاهز للبيع" بالكامل</li>
          </ul>
-         <p className="mt-3 text-accent">يمكنك إضافة الوصفة لاحقاً من قائمة المنتجات.</p>
+         <p className="mt-3 text-primary">يمكنك إضافة الوصفة لاحقاً من قائمة المنتجات.</p>
        </AlertDialogDescription>
      </AlertDialogHeader>
      <AlertDialogFooter>

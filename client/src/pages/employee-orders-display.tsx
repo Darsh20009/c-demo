@@ -197,7 +197,7 @@ export default function EmployeeOrdersDisplay() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="flex items-center justify-between mb-8 bg-card rounded-lg border border-border p-4">
         <Button
           onClick={() => setLocation("/employee/home")}

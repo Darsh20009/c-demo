@@ -355,7 +355,7 @@ export default function EmployeeAttendance() {
   });
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-20 sm:pb-4" dir="rtl">
+    <div className="min-h-screen bg-gray-50 p-4 pb-20 sm:pb-4" dir="rtl">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">

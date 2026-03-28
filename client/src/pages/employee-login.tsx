@@ -128,7 +128,7 @@ export default function EmployeeLogin() {
   }, [showQRScanner]);
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div dir="rtl" className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-40 h-28 mb-4">
@@ -175,7 +175,7 @@ export default function EmployeeLogin() {
                     placeholder={tc("اسم المستخدم أو البريد الإلكتروني", "Username or Email")}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="pr-10 bg-background border-border"
+                    className="pr-10 bg-white border-gray-300"
                     data-testid="input-username"
                     autoFocus
                     autoComplete="username email"
@@ -190,7 +190,7 @@ export default function EmployeeLogin() {
                     placeholder={tc("كلمة المرور", "Password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10 pl-10 bg-background border-border"
+                    className="pr-10 pl-10 bg-white border-gray-300"
                     data-testid="input-password"
                     autoComplete="current-password"
                     disabled={loginMutation.isPending}

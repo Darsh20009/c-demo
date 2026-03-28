@@ -129,7 +129,7 @@ export default function EmployeeIngredientsManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <div className="bg-primary text-primary-foreground p-6 shadow-lg">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-4 flex-wrap">
