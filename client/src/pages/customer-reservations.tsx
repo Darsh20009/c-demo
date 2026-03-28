@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, getErrorMessage } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,7 @@ export default function CustomerReservations() {
     onError: (error: Error) => {
       toast({
         title: tc("خطأ", "Error"),
-        description: error.message,
+        description: getErrorMessage(error, tc("فشل تمديد الحجز", "Failed to extend reservation")),
         variant: "destructive"
       });
     }

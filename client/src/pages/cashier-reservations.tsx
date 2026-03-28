@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, getErrorMessage } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -97,7 +97,7 @@ export default function CashierReservations() {
     onError: (error) => {
       toast({
         title: tc("خطأ", "Error"),
-        description: error.message,
+        description: getErrorMessage(error, tc("فشل تأكيد الحجز", "Failed to confirm reservation")),
         variant: "destructive"
       });
     }
@@ -123,7 +123,7 @@ export default function CashierReservations() {
     onError: (error) => {
       toast({
         title: tc("خطأ", "Error"),
-        description: error.message,
+        description: getErrorMessage(error, tc("فشل إلغاء الحجز", "Failed to cancel reservation")),
         variant: "destructive"
       });
     }

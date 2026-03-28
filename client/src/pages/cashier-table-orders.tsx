@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useTranslate } from "@/lib/useTranslate";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, getErrorMessage } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -173,7 +173,7 @@ export default function CashierTableOrders() {
     onError: (error: Error) => {
       toast({
         title: tc("خطأ", "Error"),
-        description: error.message,
+        description: getErrorMessage(error, tc("فشل تحديث الطلب", "Failed to update order")),
         variant: "destructive",
       });
     },

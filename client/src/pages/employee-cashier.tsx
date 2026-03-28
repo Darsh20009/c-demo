@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useTranslate } from "@/lib/useTranslate";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, getErrorMessage } from "@/lib/queryClient";
 import { cacheMenuItems, getCachedMenuItems, savePendingOrder, getPendingOrdersCount, getPendingOrders, updatePendingOrderReceiptData, syncPendingOrders, type PendingOrder } from "@/lib/offline-cashier";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -446,7 +446,7 @@ export default function EmployeeCashier() {
  onError: (error: Error) => {
  toast({
  title: tc("خطأ في التسجيل", "Registration Error"),
- description: error.message,
+ description: getErrorMessage(error, tc("فشل تسجيل العميل", "Customer registration failed")),
  variant: "destructive",
  });
  },

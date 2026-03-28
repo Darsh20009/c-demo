@@ -59,6 +59,28 @@ async function throwIfResNotOk(res: Response) {
  }
 }
 
+export function getErrorMessage(error: unknown, fallback = "حدث خطأ، يرجى المحاولة مرة أخرى"): string {
+  if (!error) return fallback;
+  const msg = error instanceof Error ? error.message : String(error);
+  if (
+    msg.toLowerCase().includes("json") ||
+    msg.toLowerCase().includes("unexpected end") ||
+    msg.toLowerCase().includes("unexpected token") ||
+    msg.toLowerCase().includes("failed to fetch") ||
+    msg.toLowerCase().includes("networkerror") ||
+    msg.toLowerCase().includes("load failed")
+  ) {
+    return "تعذّر الاتصال بالسيرفر، يرجى المحاولة مرة أخرى";
+  }
+  return msg || fallback;
+}
+
+export async function safeParseJson<T>(res: Response): Promise<T | null> {
+  const text = await res.text();
+  if (!text || !text.trim()) return null;
+  try { return JSON.parse(text) as T; } catch { return null; }
+}
+
 export async function apiRequest(
  method: string,
  url: string,
@@ -141,7 +163,9 @@ export const getQueryFn: <T>(options: {
  }
 
  await throwIfResNotOk(res);
- return await res.json();
+ const text = await res.text();
+ if (!text || !text.trim()) return null as T;
+ try { return JSON.parse(text) as T; } catch { return null as T; }
  };
 
 export const queryClient = new QueryClient({

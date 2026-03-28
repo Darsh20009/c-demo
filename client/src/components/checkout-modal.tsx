@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/cart-store";
 import { useCustomer } from "@/contexts/CustomerContext";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, getErrorMessage } from "@/lib/queryClient";
 import PaymentMethods from "./payment-methods";
 import { generatePDF } from "@/lib/pdf-generator";
 import { saveOrderLocally } from "@/lib/local-orders";
@@ -94,7 +94,7 @@ const CheckoutModal = memo(() => {
  toast({
  variant: "destructive",
  title: "خطأ في إنشاء الطلب",
- description: error.message,
+ description: getErrorMessage(error, "فشل إنشاء الطلب، يرجى المحاولة مرة أخرى"),
  });
  },
  });
