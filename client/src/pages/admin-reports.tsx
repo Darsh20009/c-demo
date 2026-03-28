@@ -195,6 +195,108 @@ export default function AdminReports() {
     printBulkEmployeeInvoices(orders);
   };
 
+  const handlePrintDailySummary = async () => {
+    const { printHtmlInPage } = await import('@/lib/print-utils');
+    const { brand } = await import('@/lib/brand');
+
+    // Filter today's completed orders (Saudi time UTC+3)
+    const nowSaudi = new Date(Date.now() + 3 * 60 * 60 * 1000);
+    const todayStr = nowSaudi.toISOString().slice(0, 10);
+    const todayOrders = (orders as any[]).filter((o: any) => {
+      const d = new Date(new Date(o.createdAt).getTime() + 3 * 60 * 60 * 1000);
+      return d.toISOString().slice(0, 10) === todayStr &&
+        o.status !== 'cancelled';
+    });
+
+    if (todayOrders.length === 0) {
+      toast({ title: tc("لا توجد طلبات اليوم", "No orders today"), variant: "destructive" });
+      return;
+    }
+
+    const totalRevenue = todayOrders.reduce((s: number, o: any) => s + (Number(o.totalAmount) || 0), 0);
+    const totalVat = totalRevenue - totalRevenue / 1.15;
+    const netRevenue = totalRevenue / 1.15;
+    const printDate = nowSaudi.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const printTime = nowSaudi.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+
+    const payLabels: Record<string, string> = {
+      cash: 'نقدي', pos: 'نقاط البيع', stc: 'STC', geidea: 'جهاز', delivery: 'توصيل',
+      alinma: 'الإنماء', ur: 'يور باي', barq: 'برق', rajhi: 'الراجحي', 'qahwa-card': 'بطاقة قهوة',
+    };
+
+    const rowsHtml = todayOrders.map((o: any, i: number) => {
+      const items = (Array.isArray(o.items) ? o.items : [])
+        .map((it: any) => `${it.nameAr || it.coffeeItem?.nameAr || it.name || ''}×${it.quantity || 1}`)
+        .join('، ');
+      const time = new Date(new Date(o.createdAt).getTime() + 3 * 60 * 60 * 1000)
+        .toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+      return `
+        <tr style="background:${i % 2 === 0 ? '#fff' : '#f9f9f9'};">
+          <td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:right;">${o.orderNumber || o.dailyNumber || i + 1}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:right;font-size:10px;">${time}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:right;font-size:9px;">${items}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:right;font-size:10px;">${payLabels[o.paymentMethod] || o.paymentMethod || ''}</td>
+          <td style="padding:4px 6px;border-bottom:1px solid #eee;text-align:left;font-weight:bold;">${Number(o.totalAmount || 0).toFixed(2)}</td>
+        </tr>`;
+    }).join('');
+
+    const html = `
+      <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;width:80mm;max-width:80mm;margin:0 auto;padding:10px;color:#000;font-size:11px;">
+        <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:8px;">
+          <div style="font-size:16px;font-weight:bold;">${brand.nameAr}</div>
+          <div style="font-size:12px;font-weight:bold;margin-top:4px;">موجز أرباح وطلبات اليوم</div>
+          <div style="font-size:10px;color:#555;">${printDate}</div>
+          <div style="font-size:10px;color:#555;">وقت الطباعة: ${printTime}</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-weight:bold;">إجمالي الطلبات:</span>
+          <span style="font-weight:bold;">${todayOrders.length} طلب</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span>صافي المبيعات (بدون ضريبة):</span>
+          <span>${netRevenue.toFixed(2)} ر.س</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span>ضريبة القيمة المضافة (15%):</span>
+          <span>${totalVat.toFixed(2)} ر.س</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:bold;border:1px solid #000;padding:5px;margin-bottom:8px;border-radius:4px;">
+          <span>إجمالي الإيرادات:</span>
+          <span>${totalRevenue.toFixed(2)} ر.س</span>
+        </div>
+
+        <div style="border-top:1px dashed #000;padding-top:6px;margin-bottom:4px;font-size:10px;font-weight:bold;text-align:center;">
+          تفصيل الطلبات
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:10px;">
+          <thead>
+            <tr style="background:#000;color:#fff;">
+              <th style="padding:4px 4px;text-align:right;">#</th>
+              <th style="padding:4px 4px;text-align:right;">الوقت</th>
+              <th style="padding:4px 4px;text-align:right;">الأصناف</th>
+              <th style="padding:4px 4px;text-align:right;">الدفع</th>
+              <th style="padding:4px 4px;text-align:left;">المبلغ</th>
+            </tr>
+          </thead>
+          <tbody>${rowsHtml}</tbody>
+          <tfoot>
+            <tr style="background:#000;color:#fff;font-weight:bold;">
+              <td colspan="4" style="padding:5px 6px;text-align:right;">الإجمالي</td>
+              <td style="padding:5px 6px;text-align:left;">${totalRevenue.toFixed(2)}</td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div style="text-align:center;margin-top:10px;font-size:10px;color:#777;border-top:1px solid #ccc;padding-top:6px;">
+          <div>${brand.nameEn} — www.qiroxstudio.online</div>
+          <div>تم الإصدار: ${printDate} ${printTime}</div>
+        </div>
+      </div>`;
+
+    printHtmlInPage(html, '80mm');
+  };
+
   return (
     <div className="p-6 space-y-8 bg-white dark:bg-background min-h-screen">
       {/* Header */}
@@ -213,6 +315,10 @@ export default function AdminReports() {
               className="w-4 h-4 cursor-pointer"
             />
           </Card>
+          <Button variant="outline" onClick={handlePrintDailySummary} data-testid="button-print-daily-summary">
+            <Printer className="w-4 h-4 ml-2" />
+            {tc("طباعة موجز اليوم", "Print Daily Summary")}
+          </Button>
           <Button variant="outline" data-testid="button-export-report">
             <Download className="w-4 h-4 ml-2" />
             {tc("تصدير", "Export")}

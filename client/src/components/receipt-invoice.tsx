@@ -8,6 +8,7 @@ import { brand } from "@/lib/brand";
 import { useRef, useState, useEffect } from "react";
 import QRCode from "qrcode";
 import SarIcon from "@/components/sar-icon";
+import { printHtmlInPage } from "@/lib/print-utils";
 
 interface ReceiptInvoiceProps {
   order: Order;
@@ -100,81 +101,92 @@ export function ReceiptInvoice({ order, variant = "button" }: ReceiptInvoiceProp
   };
 
   const printReceipt = () => {
-    if (invoiceRef.current) {
-      const printWindow = window.open("", "_blank");
-      if (printWindow) {
-        const style = `
-          <style>
-            @media print {
-              body { margin: 0; padding: 0; }
-              .no-print { display: none !important; }
-              .receipt-container { width: 100%; max-width: 80mm; margin: 0 auto; font-family: sans-serif; }
-              @page { size: 80mm auto; margin: 0; }
-            }
-          </style>
-        `;
-        
-        // Preparation Slip (Kitchen)
-        const prepSlip = `
-          <div class="receipt-container" style="direction: rtl; padding: 10px; border-bottom: 2px dashed #000; margin-bottom: 20px;">
-            <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px;">
-              <h2 style="margin: 5px 0;">طلب تحضير</h2>
-              <div style="font-size: 24px; font-weight: bold; margin: 10px 0;">
-                ${order.orderNumber}
-              </div>
-            </div>
-            <div style="padding-top: 10px;">
-              ${items.map((item: any) => {
-                const inlineAddons = item.customization?.selectedItemAddons || [];
-                const addonsText = inlineAddons.length > 0 ? `<div style="font-size:13px;color:#555;margin-top:2px;">+ ${inlineAddons.map((a: any) => a.nameAr).join('، ')}</div>` : '';
-                const nameEn = item.nameEn || item.coffeeItem?.nameEn || '';
-                const nameAr = item.nameAr || item.coffeeItem?.nameAr || item.name || '';
-                return `<div style="margin-bottom: 8px;">
-                  <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
-                    <div>
-                      <div>${nameAr}</div>
-                      ${nameEn && nameEn !== nameAr ? `<div style="font-size:13px;font-weight:normal;color:#555;direction:ltr;text-align:right;">${nameEn}</div>` : ''}
-                    </div>
-                    <span style="border: 2px solid #000; padding: 2px 8px; border-radius: 4px; white-space:nowrap; align-self:flex-start;">x${item.quantity}</span>
-                  </div>
-                  ${addonsText}
-                </div>`;
-              }).join('')}
-            </div>
-            ${order.customerNotes ? `
-              <div style="margin-top: 10px; border: 1px solid #000; padding: 5px; font-size: 14px;">
-                <strong>ملاحظات:</strong> ${order.customerNotes}
-              </div>
-            ` : ''}
-            <div style="text-align: center; font-size: 12px; margin-top: 10px;">
-              ${new Date(order.createdAt).toLocaleTimeString('ar-SA')}
-            </div>
-          </div>
-        `;
+    const totalAmount = Number(order.totalAmount) || 0;
+    const subtotal = (totalAmount / 1.15).toFixed(2);
+    const vatAmount = (totalAmount - totalAmount / 1.15).toFixed(2);
+    const dateStr = order.createdAt
+      ? new Date(order.createdAt).toLocaleDateString('ar-SA')
+      : '';
+    const timeStr = order.createdAt
+      ? new Date(order.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+      : '';
 
-        printWindow.document.write(`
-          <html>
-            <head>
-              <meta charset="UTF-8">
-              ${style}
-            </head>
-            <body dir="rtl">
-              <div class="receipt-container">
-                ${invoiceRef.current.innerHTML}
-                ${prepSlip}
-              </div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        
-        // Use a timeout to ensure styles and content are loaded before printing
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-      }
-    }
+    const paymentLabels: Record<string, string> = {
+      cash: 'نقداً', pos: 'نقاط البيع', stc: 'STC Pay',
+      alinma: 'الإنماء', ur: 'يور باي', barq: 'برق',
+      rajhi: 'الراجحي', 'qahwa-card': 'بطاقة قهوة', delivery: 'الدفع عند التوصيل',
+    };
+    const payMethod = paymentLabels[order.paymentMethod as string] || order.paymentMethod || '';
+
+    const itemsHtml = items.map((item: any) => {
+      const nameAr = item.nameAr || item.coffeeItem?.nameAr || item.name || '';
+      const nameEn = item.nameEn || item.coffeeItem?.nameEn || '';
+      const qty = item.quantity || 1;
+      const price = Number(item.price || item.unitPrice || item.coffeeItem?.price || 0);
+      const lineTotal = (price * qty).toFixed(2);
+      const addons = (item.customization?.selectedItemAddons || []).map((a: any) => a.nameAr).join('، ');
+      return `
+        <tr>
+          <td style="padding:4px 2px;border-bottom:1px solid #eee;text-align:right;">
+            <div style="font-weight:600;">${nameAr}</div>
+            ${nameEn && nameEn !== nameAr ? `<div style="font-size:10px;color:#777;direction:ltr;">${nameEn}</div>` : ''}
+            ${addons ? `<div style="font-size:10px;color:#999;">+ ${addons}</div>` : ''}
+          </td>
+          <td style="padding:4px 2px;text-align:center;border-bottom:1px solid #eee;">${qty}</td>
+          <td style="padding:4px 2px;text-align:left;border-bottom:1px solid #eee;">${lineTotal}</td>
+        </tr>`;
+    }).join('');
+
+    const html = `
+      <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;width:80mm;max-width:80mm;margin:0 auto;padding:10px;color:#000;font-size:12px;">
+        <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:8px;">
+          <div style="font-size:16px;font-weight:bold;">${brand.nameAr}</div>
+          <div style="font-size:10px;color:#555;">فاتورة ضريبية</div>
+          <div style="font-size:11px;margin-top:4px;">رقم الطلب: <strong>${order.orderNumber || ''}</strong></div>
+          <div style="font-size:10px;">${dateStr} ${timeStr}</div>
+          ${(order as any).tableNumber ? `<div style="font-size:11px;">طاولة: <strong>${(order as any).tableNumber}</strong></div>` : ''}
+        </div>
+        <div style="margin-bottom:6px;font-size:11px;">
+          <div>العميل: ${(order as any).customerName || 'عميل نقدي'}</div>
+          ${(order as any).customerPhone ? `<div>الجوال: ${(order as any).customerPhone}</div>` : ''}
+          ${(order as any).employeeName ? `<div>الكاشير: ${(order as any).employeeName}</div>` : ''}
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead>
+            <tr style="border-bottom:1px solid #000;">
+              <th style="text-align:right;padding:4px 2px;">المنتج</th>
+              <th style="text-align:center;padding:4px 2px;">ك</th>
+              <th style="text-align:left;padding:4px 2px;">المجموع</th>
+            </tr>
+          </thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <div style="margin-top:8px;border-top:1px solid #000;padding-top:6px;font-size:11px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+            <span>المجموع (غير شامل الضريبة):</span><span>${subtotal} ر.س</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+            <span>ضريبة القيمة المضافة (15%):</span><span>${vatAmount} ر.س</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:bold;border-top:1px solid #000;padding-top:4px;margin-top:4px;">
+            <span>الإجمالي:</span><span>${totalAmount.toFixed(2)} ر.س</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;">
+            <span>طريقة الدفع:</span><span>${payMethod}</span>
+          </div>
+        </div>
+        ${trackingQrUrl ? `
+        <div style="text-align:center;margin-top:10px;">
+          <img src="${trackingQrUrl}" style="width:100px;height:100px;" />
+          <div style="font-size:9px;color:#555;">امسح لتتبع طلبك</div>
+        </div>` : ''}
+        <div style="text-align:center;margin-top:10px;border-top:1px solid #000;padding-top:6px;font-size:10px;color:#555;">
+          <div style="font-weight:bold;">شكراً لزيارتكم!</div>
+          <div>www.qiroxstudio.online</div>
+        </div>
+      </div>`;
+
+    printHtmlInPage(html, '80mm');
   };
 
   useEffect(() => {
