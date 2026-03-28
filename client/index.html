@@ -44,12 +44,12 @@
     <link rel="manifest" href="/manifest.json" id="main-manifest">
     
     <!-- Favicon & Apple Touch Icons - High Quality -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3">
-    <link rel="icon" type="image/png" href="/logo.png?v=3" id="main-favicon">
-    <link rel="icon" type="image/png" sizes="32x32" href="/logo-32.png?v=3">
-    <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png?v=3">
-    <link rel="icon" type="image/png" sizes="512x512" href="/logo-512.png?v=3">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=4">
+    <link rel="icon" type="image/png" href="/logo-32.png?v=4" id="main-favicon">
+    <link rel="icon" type="image/png" sizes="32x32" href="/logo-32.png?v=4">
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png?v=4">
+    <link rel="icon" type="image/png" sizes="512x512" href="/logo-512.png?v=4">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4">
     
     <!-- Meta Tags for SEO -->
     <meta name="theme-color" content="#2D9B6E">
@@ -156,15 +156,15 @@
 
         if (isEmployeePath) {
           if (manifestLink) manifestLink.href = '/employee-manifest.json';
-          if (favicon) favicon.href = '/employee-logo.png';
-          if (shortcutIcon) shortcutIcon.href = '/employee-logo.png';
+          if (favicon) favicon.href = '/employee-logo-192.png';
+          if (shortcutIcon) shortcutIcon.href = '/employee-logo-192.png';
           appleTouchIcons.forEach(icon => {
-            icon.href = '/employee-logo.png';
+            icon.href = '/employee-logo-192.png';
           });
           
           // Force update for some browsers
           const existingIcon = document.querySelector('link[rel="icon"]');
-          if (existingIcon) existingIcon.href = '/employee-logo.png';
+          if (existingIcon) existingIcon.href = '/employee-logo-192.png';
           
           document.title = "QIROX Systems | نظام إدارة الموظفين";
           
@@ -177,13 +177,13 @@
         } else {
           // Ensure customer branding is set explicitly if not on employee path
           if (manifestLink) manifestLink.href = '/manifest.json';
-          if (favicon) favicon.href = '/logo.png';
-          if (shortcutIcon) shortcutIcon.href = '/logo.png';
+          if (favicon) favicon.href = '/logo-192.png';
+          if (shortcutIcon) shortcutIcon.href = '/logo-192.png';
           appleTouchIcons.forEach(icon => {
-            icon.href = '/logo.png';
+            icon.href = '/apple-touch-icon.png';
           });
           const existingIcon = document.querySelector('link[rel="icon"]');
-          if (existingIcon) existingIcon.href = '/logo.png';
+          if (existingIcon) existingIcon.href = '/logo-32.png';
         }
       })();
     </script>

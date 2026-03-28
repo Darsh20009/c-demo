@@ -20,25 +20,25 @@
   },
   "icons": [
     {
-      "src": "/employee-logo.png",
+      "src": "/employee-logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/employee-logo.png",
+      "src": "/employee-logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/employee-logo.png",
+      "src": "/employee-logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/employee-logo.png",
+      "src": "/employee-logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -46,15 +46,15 @@
   ],
   "screenshots": [
     {
-      "src": "/employee-logo.png",
-      "sizes": "540x720",
+      "src": "/employee-logo-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "QIROX Systems App"
     },
     {
-      "src": "/employee-logo.png",
-      "sizes": "1280x720",
+      "src": "/employee-logo-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
       "label": "QIROX Systems Desktop"
