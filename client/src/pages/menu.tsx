@@ -895,8 +895,9 @@ export default function MenuPage() {
                   } else {
                     price = parseFloat(String(itemPrice));
                   }
-                  
-                  return sum + (isNaN(price) ? 0 : price * i.quantity);
+
+                  const inlinePrice = ((i as any).selectedItemAddons || []).reduce((s: number, a: any) => s + (Number(a.price) || 0), 0);
+                  return sum + (isNaN(price) ? 0 : (price + inlinePrice) * i.quantity);
                 }, 0).toFixed(2)} <SarIcon />
               </span>
             </div>

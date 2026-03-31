@@ -72,12 +72,13 @@ const CartModal = memo(() => {
                       <div className="text-right">
                         <p className="font-bold text-primary" data-testid={`text-cart-item-price-${item.id}`}>
                           {(() => {
-                            let itemPrice = item.coffeeItem?.price || 0;
+                            let itemPrice = Number(item.coffeeItem?.price || 0);
                             if (item.selectedSize && item.coffeeItem?.availableSizes) {
                               const size = item.coffeeItem.availableSizes.find(s => s.nameAr === item.selectedSize);
                               if (size) itemPrice = size.price;
                             }
-                            return (Number(itemPrice) * item.quantity).toFixed(2);
+                            const inlinePrice = ((item as any).selectedItemAddons || []).reduce((s: number, a: any) => s + (Number(a.price) || 0), 0);
+                            return ((itemPrice + inlinePrice) * item.quantity).toFixed(2);
                           })()} <SarIcon />
                         </p>
                       </div>

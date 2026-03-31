@@ -264,11 +264,10 @@ export function AddToCartModal({
                           <button
                             key={idx}
                             onClick={() => {
-                              setSelectedItemAddonIndices((prev) =>
-                                prev.includes(idx)
-                                  ? prev.filter((i) => i !== idx)
-                                  : [...prev, idx]
-                              );
+                              setSelectedItemAddonIndices((prev) => {
+                                const withoutSection = prev.filter(i => !indices.includes(i));
+                                return prev.includes(idx) ? withoutSection : [...withoutSection, idx];
+                              });
                             }}
                             className={`rounded-xl text-xs font-medium transition-all flex items-center gap-2 px-3 py-2 ${
                               selected
@@ -299,7 +298,7 @@ export function AddToCartModal({
             </div>
           )}
 
-          {specificAddons.length > 0 && (
+          {specificAddons.length > 0 && inlineAddons.length === 0 && (
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-foreground">{isAr ? "إضافات خاصة" : "Special Addons"}</Label>
               <div className="flex flex-wrap gap-2">
@@ -321,36 +320,6 @@ export function AddToCartModal({
                   >
                     {isAr ? addon.nameAr : addon.nameEn || addon.nameAr}
                     <span className={selectedAddons.includes(addon.id) ? "text-white/80" : "text-primary"}>
-                      +{addon.price}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {generalAddons.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-sm font-semibold text-foreground">{specificAddons.length > 0 ? (isAr ? "إضافات عامة" : "General Addons") : (isAr ? "إضافات عامة" : "General Addons")}</Label>
-              <div className="flex flex-wrap gap-2">
-                {generalAddons.slice(0, 6).map((addon) => (
-                  <button
-                    key={addon.id}
-                    onClick={() => {
-                      setSelectedAddons((prev) =>
-                        prev.includes(addon.id)
-                          ? prev.filter((id) => id !== addon.id)
-                          : [...prev, addon.id]
-                      );
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
-                      selectedAddons.includes(addon.id)
-                        ? "bg-accent text-white shadow-md"
-                        : "bg-secondary text-foreground border border-border hover:border-accent/50"
-                    }`}
-                  >
-                    {isAr ? addon.nameAr : addon.nameEn || addon.nameAr}
-                    <span className={selectedAddons.includes(addon.id) ? "text-white/80" : "text-accent"}>
                       +{addon.price}
                     </span>
                   </button>
