@@ -14894,12 +14894,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId || !title || !body) return res.status(400).json({ error: "بيانات ناقصة" });
 
       const { fireNotify } = await import("./notification-engine");
-      await fireNotify(userId, title, body, {
+
+      const notifOpts = {
         type: type || "info",
         link: link || "/",
         userType: userType || "customer",
         icon: "🔔",
-      });
+      };
+
+      // Resolve phone number → MongoDB customer ID
+      const trimmed = String(userId).replace(/\s/g, "");
+      let resolvedId = userId;
+      if (/^(\+?966|05|5)\d{8,9}$/.test(trimmed)) {
+        const digits = trimmed.replace(/\D/g, "");
+        const cleanPhone = digits.startsWith("966")
+          ? `+${digits}`
+          : digits.startsWith("05")
+          ? `+966${digits.slice(1)}`
+          : digits.startsWith("5") && digits.length === 9
+          ? `+966${digits}`
+          : null;
+
+        if (cleanPhone) {
+          const cust = await CustomerModel.findOne({ phone: cleanPhone }).lean() as any;
+          if (cust) {
+            resolvedId = cust.id || String(cust._id);
+          }
+        }
+      }
+
+      // Send with resolved ID (customer's MongoDB id)
+      await fireNotify(resolvedId, title, body, notifOpts);
+
+      // If the original userId was different (phone-based), also fire with it as fallback
+      if (resolvedId !== userId) {
+        fireNotify(userId, title, body, notifOpts).catch(() => {});
+      }
 
       res.json({ success: true });
     } catch (error) {

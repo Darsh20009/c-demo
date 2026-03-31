@@ -1,13 +1,14 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Coffee, MapPin, Truck, Check, Clock, Package, ExternalLink, Store, Navigation, Phone } from "lucide-react";
+import { Coffee, MapPin, Truck, Check, Clock, Package, ExternalLink, Store, Navigation, Phone, CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import LocationPreparationCheck from "@/components/location-preparation-check";
@@ -133,8 +134,59 @@ export default function OrderTrackingPage() {
     setTrackingOrderNumber(orderNumber);
   };
 
+  // WebSocket refs for live order tracking
+  const wsTrackRef = useRef<WebSocket | null>(null);
+  const wsReconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const connectTrackingWS = useCallback((orderId: string) => {
+    if (wsTrackRef.current && wsTrackRef.current.readyState === WebSocket.OPEN) return;
+
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const host = window.location.host;
+    const ws = new WebSocket(`${protocol}//${host}/ws/orders`);
+    wsTrackRef.current = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({
+        type: "subscribe",
+        clientType: "order-tracking",
+        orderId,
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "welcome") {
+          ws.send(JSON.stringify({ type: "subscribe", clientType: "order-tracking", orderId }));
+        }
+        if (msg.type === "order_updated" && msg.order) {
+          queryClient.invalidateQueries({ queryKey: ["/api/orders/number", trackingOrderNumber] });
+        }
+      } catch (_) {}
+    };
+
+    ws.onclose = () => {
+      wsReconnectRef.current = setTimeout(() => connectTrackingWS(orderId), 5000);
+    };
+
+    ws.onerror = () => { ws.close(); };
+  }, [trackingOrderNumber]);
+
+  useEffect(() => {
+    if (!order?.id) return;
+    connectTrackingWS(order.id);
+    return () => {
+      if (wsReconnectRef.current) clearTimeout(wsReconnectRef.current);
+      wsTrackRef.current?.close();
+      wsTrackRef.current = null;
+    };
+  }, [order?.id, connectTrackingWS]);
+
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'awaiting_payment':
+        return <CreditCard className="w-8 h-8 text-orange-500" />;
       case 'pending':
       case 'payment_confirmed':
         return <Clock className="w-8 h-8 text-yellow-500" />;
