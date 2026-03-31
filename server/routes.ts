@@ -997,8 +997,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const order = await storage.createOrder(orderData);
       const serializedOrder = serializeDoc(order);
       
-      // Notify via WebSocket - use broadcastNewOrder so POS/kitchen receive it as "new_order"
-      wsManager.broadcastNewOrder(serializedOrder);
+      // Notify via WebSocket - only broadcast to kitchen if order is not pending payment
+      if (serializedOrder.status !== 'awaiting_payment') {
+        wsManager.broadcastNewOrder(serializedOrder);
+      }
 
       res.status(201).json(serializedOrder);
 
@@ -1483,7 +1485,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       wsManager.broadcastOrderUpdate(serializedOrder);
       
       // Broadcast as new order for kitchen/POS when moving to active statuses
-      if (status === 'payment_confirmed' || status === 'confirmed' || status === 'in_progress') {
+      // Also broadcast for 'pending' when transitioning from 'awaiting_payment'
+      if (status === 'payment_confirmed' || status === 'confirmed' || status === 'in_progress' || status === 'pending') {
         wsManager.broadcastNewOrder(serializedOrder);
       }
       

@@ -1,0 +1,64 @@
+٤. ملخص الطلب:
+
+    يعرض المنتجات (حتى 4) والإجمالي
+
+٥. طباعة الفاتورة — إصلاح التوافق:
+
+    دالة handlePrintInvoice تحوّل العناصر لصيغة TaxInvoiceData الصحيحة
+    coffeeItem: { nameAr, nameEn, price } + quantity + customization
+    يمرر subtotal, total, customerName, customerPhone, employeeName, date
+
+سادساً: نظام إشعارات Push — الإصلاح الشامل
+إصلاح واجهة الاشتراك:
+
+في client/src/pages/checkout.tsx (صفحة النجاح):
+
+قبل: الزر يظهر فقط للمستخدمين المسجلين + لا يوجد أي تغذية راجعة بعد الضغط
+
+بعد:
+
+    الزر يظهر لأي مستخدم لم يرفض الإشعارات بعد (مسجل أو زائر)
+    pushUserId = successCustomerId || customerPhone || 'guest' ← يدعم الزوار
+    بعد الضغط بنجاح:
+        setPushSubscribed(true) ← يخفي الزر
+        يظهر toast: "✅ تم تفعيل الإشعارات"
+        يظهر بطاقة خضراء "الإشعارات مفعّلة"
+    إذا فشل → يظهر toast خطأ واضح
+    iOS بدون PWA → رسالة "أضف التطبيق لشاشتك الرئيسية"
+
+إصلاح إرسال الإشعارات للزوار:
+
+في server/push-service.ts:
+
+    sendPushToCustomer() أصبح يقبل fallbackPhone? اختياري
+    إذا لم يجد اشتراكاً بالـ ID → يبحث بجميع تنسيقات رقم الجوال
+    يسجّل في الـ log عند استخدام الـ fallback
+
+في server/routes.ts (إنشاء الطلب):
+
+    يُمرَّر custPhone كـ fallbackPhone عند استدعاء sendPushToCustomer
+    للزوار بدون account: يُرسَل مباشرة بالجوال + يبحث عن account مرتبط بنفس الرقم
+
+سابعاً: نظام الإشعارات الفوري للعملاء (Layer 2 — WebSocket)
+
+المشكلة الكبيرة المكتشفة:
+NotificationBell (مستمع WebSocket) كان موجوداً فقط في لوحة الموظفين. عند استدعاء fireNotify(customerId, ...) من السيرفر كانت الرسالة تُرسَل لكن لا أحد يستقبلها من جهة العملاء!
+
+الحل — ملف جديد client/src/components/customer-notification-listener.tsx:
+
+مكوّن يعمل بصمت في خلفية التطبيق لكل عميل مسجل:
+
+    الاتصال: يفتح WebSocket مع userId: customer.id عند تسجيل الدخول
+    إعادة الاتصال: تلقائياً كل 5 ثواني إذا انقطع
+    عند وصول إشعار notification:
+        يعرض toast فوري داخل التطبيق (بالعنوان والجسم والإيقون)
+        إذا كان إذن Notification ممنوحاً → يعرض native browser notification
+        يحدّث cache الإشعارات
+    عند وصول order_updated:
+        يحدّث قوائم الطلبات تلقائياً بدون تحديث الصفحة
+
+التثبيت في client/src/App.tsx:
+
+    أُضيف <CustomerNotificationListener /> داخل AppContent داخل CustomerProvider
+    يعمل في كل صفحات التطبيق طوال الجلسة بدون أي تدخل من المستخدم
+

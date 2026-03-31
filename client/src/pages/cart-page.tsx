@@ -101,7 +101,7 @@ export default function CartPage() {
 
               {cartItems.map((item, index) => (
                 <Card 
-                  key={item.coffeeItemId} 
+                  key={item.id} 
                   className="bg-card/90 border-primary/20 backdrop-blur-sm shadow-lg sm:shadow-xl hover:shadow-2xl transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-10 duration-500"
                   style={{animationDelay: `${index * 0.1}s`}}
                 >
@@ -157,9 +157,9 @@ export default function CartPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => updateQuantity(item.coffeeItemId, Math.max(0, item.quantity - 1))}
+                            onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
                             className="h-9 w-9 sm:h-8 sm:w-8 text-foreground hover:bg-primary hover:text-primary-foreground rounded-full"
-                            data-testid={`button-decrease-${item.coffeeItemId}`}
+                            data-testid={`button-decrease-${item.id}`}
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
@@ -171,9 +171,9 @@ export default function CartPage() {
                           <Button
                             size="icon"
                             variant="ghost"
-                            onClick={() => updateQuantity(item.coffeeItemId, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
                             className="h-9 w-9 sm:h-8 sm:w-8 text-foreground hover:bg-primary hover:text-primary-foreground rounded-full"
-                            data-testid={`button-increase-${item.coffeeItemId}`}
+                            data-testid={`button-increase-${item.id}`}
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
@@ -182,9 +182,9 @@ export default function CartPage() {
                         <Button
                           size="icon"
                           variant="outline"
-                          onClick={() => removeFromCart(item.coffeeItemId)}
+                          onClick={() => removeFromCart(item.id)}
                           className="h-9 w-9 sm:h-10 sm:w-10 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300 rounded-full"
-                          data-testid={`button-remove-${item.coffeeItemId}`}
+                          data-testid={`button-remove-${item.id}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

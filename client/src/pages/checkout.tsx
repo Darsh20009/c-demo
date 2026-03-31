@@ -746,29 +746,61 @@ export default function CheckoutPage() {
 
   if (showSuccessPage) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-8 bg-background" dir={isAr ? 'rtl' : 'ltr'}>
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl text-center space-y-6">
-          <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
-          <h2 className="text-3xl font-bold text-accent">{t("nav.thank_you")}</h2>
-          <p>{t("checkout.order_desc")} <span className="font-bold text-primary">{orderDetails?.orderNumber}</span></p>
+      <div className="min-h-screen bg-background flex flex-col" dir={isAr ? 'rtl' : 'ltr'}>
+        {/* Green success banner */}
+        <div className="bg-green-500 text-white py-8 px-6 flex flex-col items-center gap-3 shadow-lg">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+            <CheckCircle className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-black text-center">
+            {isAr ? 'تم استلام طلبك!' : 'Order Received!'}
+          </h2>
+          <p className="text-white/90 text-sm text-center max-w-xs">
+            {isAr ? 'سيبدأ الفريق بتحضيره فوراً' : 'Our team will start preparing it right away'}
+          </p>
+        </div>
 
-          {isGuestMode && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-right space-y-3">
-              <p className="font-bold text-amber-900">⭐ هل تريد تتبع طلباتك؟</p>
-              <p className="text-sm text-amber-800">
-                سجّل الآن بنفس رقم جوالك وسيتم ربط طلباتك تلقائياً. ستحصل على بطاقة ولاء ونقاط مكافآت مع كل طلب.
+        {/* Order number card */}
+        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
+          <div className="w-full max-w-sm bg-white dark:bg-card rounded-3xl shadow-2xl overflow-hidden">
+            <div className="bg-primary/10 py-4 px-6 text-center border-b border-primary/20">
+              <p className="text-sm text-muted-foreground font-medium">
+                {isAr ? 'رقم الطلب' : 'Order Number'}
               </p>
+              <p className="text-5xl font-black text-primary mt-1" data-testid="text-order-number">
+                #{orderDetails?.orderNumber}
+              </p>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-center text-sm text-muted-foreground">
+                {isAr ? 'احتفظ برقم طلبك لمتابعة الحالة' : 'Keep your order number to track its status'}
+              </p>
+
+              {isGuestMode && (
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 rounded-2xl p-4 text-right space-y-3">
+                  <p className="font-bold text-amber-900 dark:text-amber-300 text-sm">⭐ {isAr ? 'هل تريد تتبع طلباتك؟' : 'Want to track your orders?'}</p>
+                  <p className="text-xs text-amber-800 dark:text-amber-400">
+                    {isAr ? 'سجّل الآن بنفس رقم جوالك وسيتم ربط طلباتك تلقائياً. ستحصل على بطاقة ولاء ونقاط مكافآت مع كل طلب.' : 'Register with your phone number to link your orders and earn loyalty points.'}
+                  </p>
+                  <Button
+                    onClick={() => setLocation("/auth")}
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm"
+                    data-testid="button-register-after-order"
+                  >
+                    {isAr ? 'سجّل الآن — مجاناً' : 'Register Now — Free'}
+                  </Button>
+                </div>
+              )}
+
               <Button
-                onClick={() => setLocation("/auth")}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
-                data-testid="button-register-after-order"
+                onClick={() => setLocation("/menu")}
+                className="w-full h-12 bg-primary hover:bg-primary/90 font-bold rounded-xl"
+                data-testid="button-back-to-menu"
               >
-                سجّل الآن — مجاناً
+                {t("cart.continue_shopping")}
               </Button>
             </div>
-          )}
-
-          <Button onClick={() => setLocation("/menu")} className="w-full h-12 bg-primary" data-testid="button-back-to-menu">{t("cart.continue_shopping")}</Button>
+          </div>
         </div>
       </div>
     );
