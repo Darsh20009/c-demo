@@ -69,6 +69,22 @@ const CheckoutModal = memo(() => {
  enabled: isCheckoutOpen,
  });
 
+ const { data: businessConfig } = useQuery<any>({
+ queryKey: ["/api/business-config"],
+ enabled: isCheckoutOpen,
+ });
+
+ const subtotal = getTotalPrice();
+ const serviceFeeConfig = businessConfig?.serviceFeeConfig;
+ const serviceFeeEnabled = serviceFeeConfig?.enabled !== false;
+ const serviceFeeThreshold = serviceFeeConfig?.smallOrderThreshold ?? 5;
+ const serviceFee = serviceFeeEnabled
+   ? (subtotal < serviceFeeThreshold
+     ? (serviceFeeConfig?.smallOrderAmount ?? 0.35)
+     : (serviceFeeConfig?.amount ?? 0.70))
+   : 0;
+ const orderTotal = subtotal + serviceFee;
+
  const { data: branches = [] } = useQuery<Branch[]>({
  queryKey: ["/api/branches"],
  enabled: isCheckoutOpen && deliveryType === 'pickup',
@@ -160,7 +176,8 @@ const CheckoutModal = memo(() => {
           customization: inlineAddons.length > 0 ? { selectedItemAddons: inlineAddons } : undefined,
         };
       }),
-      totalAmount: getTotalPrice().toString(),
+      totalAmount: orderTotal.toString(),
+      serviceFee: serviceFee > 0 ? serviceFee : undefined,
       paymentMethod: selectedPaymentMethod,
       status: "pending",
       customerId: customer?.id || null,
@@ -288,7 +305,15 @@ const CheckoutModal = memo(() => {
  </div>
  ))}
  </div>
- <div className="border-t border-primary/30 pt-4"><div className="flex justify-between items-center bg-primary/10 p-4 rounded-lg"><span className="text-lg font-semibold">{t('checkout.total')}</span><span className="text-2xl font-bold text-primary">{getTotalPrice().toFixed(2)} <SarIcon /></span></div></div>
+ <div className="border-t border-primary/30 pt-4 space-y-2">
+ {serviceFeeEnabled && (
+   <div className="flex justify-between items-center px-1 text-sm text-muted-foreground">
+     <span>رسوم الخدمة</span>
+     <span>{serviceFee.toFixed(2)} <SarIcon className="inline w-3 h-3" /></span>
+   </div>
+ )}
+ <div className="flex justify-between items-center bg-primary/10 p-4 rounded-lg"><span className="text-lg font-semibold">{t('checkout.total')}</span><span className="text-2xl font-bold text-primary">{orderTotal.toFixed(2)} <SarIcon /></span></div>
+ </div>
  </div>
  <Button onClick={() => setCurrentStep('delivery')} size="lg" className="w-full">{t('checkout.continue')}</Button>
  </div>
@@ -371,7 +396,7 @@ const CheckoutModal = memo(() => {
    {showGeideaWidget && orderDetails ? (
      <GeideaCheckoutWidget
        orderNumber={orderDetails.orderNumber}
-       amount={getTotalPrice()}
+       amount={orderTotal}
        customerPhone={customerPhone}
        customerEmail={customer?.email}
        onSuccess={() => {

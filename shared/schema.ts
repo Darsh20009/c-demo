@@ -701,6 +701,12 @@ export interface IBusinessConfig extends Document {
     enableScheduledPickup?: boolean;
     enableTakeaway?: boolean;
   };
+  serviceFeeConfig?: {
+    enabled?: boolean;
+    amount?: number;
+    smallOrderAmount?: number;
+    smallOrderThreshold?: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -804,6 +810,15 @@ const BusinessConfigSchema = new Schema<IBusinessConfig>({
       enableDelivery: false,
       enableScheduledPickup: true,
       enableTakeaway: true,
+    })
+  },
+  serviceFeeConfig: {
+    type: Schema.Types.Mixed,
+    default: () => ({
+      enabled: true,
+      amount: 0.70,
+      smallOrderAmount: 0.35,
+      smallOrderThreshold: 5,
     })
   },
   createdAt: { type: Date, default: Date.now },

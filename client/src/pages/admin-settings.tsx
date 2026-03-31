@@ -293,6 +293,20 @@ export default function AdminSettings() {
   const [pointsRedemptionEnabled, setPointsRedemptionEnabled] = useState(true);
   const [pointsRedemptionMinPoints, setPointsRedemptionMinPoints] = useState(100);
 
+  const [serviceFeeEnabled, setServiceFeeEnabled] = useState(true);
+  const [serviceFeeAmount, setServiceFeeAmount] = useState(0.70);
+  const [serviceFeeSmallAmount, setServiceFeeSmallAmount] = useState(0.35);
+  const [serviceFeeSmallThreshold, setServiceFeeSmallThreshold] = useState(5);
+
+  useEffect(() => {
+    if (config?.serviceFeeConfig) {
+      setServiceFeeEnabled(config.serviceFeeConfig.enabled ?? true);
+      setServiceFeeAmount(config.serviceFeeConfig.amount ?? 0.70);
+      setServiceFeeSmallAmount(config.serviceFeeConfig.smallOrderAmount ?? 0.35);
+      setServiceFeeSmallThreshold(config.serviceFeeConfig.smallOrderThreshold ?? 5);
+    }
+  }, [config]);
+
   useEffect(() => {
     if (config?.loyaltyConfig) {
       setLoyaltyEnabled(config.loyaltyConfig.enabled ?? true);
@@ -450,6 +464,17 @@ export default function AdminSettings() {
       employeeId: 'admin',
       isActive: 1,
       visibleToCustomers: newCodeVisible,
+    });
+  };
+
+  const handleSaveServiceFee = () => {
+    mutation.mutate({
+      serviceFeeConfig: {
+        enabled: serviceFeeEnabled,
+        amount: serviceFeeAmount,
+        smallOrderAmount: serviceFeeSmallAmount,
+        smallOrderThreshold: serviceFeeSmallThreshold,
+      },
     });
   };
 
@@ -2638,6 +2663,88 @@ export default function AdminSettings() {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Service Fee Settings */}
+      <div className="mt-6">
+        <Card className="hover-elevate border-green-100 dark:border-green-900/30 shadow-lg">
+          <CardHeader className="bg-green-50/50 dark:bg-green-900/10 border-b">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                  <Banknote className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-bold">رسوم الخدمة</CardTitle>
+                  <CardDescription>إدارة رسوم الخدمة المضافة على كل طلب</CardDescription>
+                </div>
+              </div>
+              <Button onClick={handleSaveServiceFee} disabled={mutation.isPending} data-testid="button-save-service-fee">
+                {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <Save className="w-4 h-4 ml-2" />}
+                حفظ رسوم الخدمة
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/10 rounded-lg border border-green-100 dark:border-green-900/30">
+              <Label htmlFor="service-fee-enabled" className="text-sm font-bold cursor-pointer">تفعيل رسوم الخدمة</Label>
+              <Switch
+                id="service-fee-enabled"
+                checked={serviceFeeEnabled}
+                onCheckedChange={setServiceFeeEnabled}
+                data-testid="switch-service-fee-enabled"
+              />
+            </div>
+            {serviceFeeEnabled && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">رسوم الخدمة الافتراضية (ريال)</Label>
+                  <p className="text-xs text-muted-foreground">تُضاف لكل طلب يتجاوز الحد الأدنى</p>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={serviceFeeAmount}
+                    onChange={(e) => setServiceFeeAmount(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                    data-testid="input-service-fee-amount"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">رسوم الطلبات الصغيرة (ريال)</Label>
+                  <p className="text-xs text-muted-foreground">تُضاف إذا كان الطلب أقل من الحد</p>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={serviceFeeSmallAmount}
+                    onChange={(e) => setServiceFeeSmallAmount(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                    data-testid="input-service-fee-small-amount"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">الحد الأدنى للطلب (ريال)</Label>
+                  <p className="text-xs text-muted-foreground">إذا كان الطلب أقل منه تُطبق الرسوم الصغيرة</p>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={serviceFeeSmallThreshold}
+                    onChange={(e) => setServiceFeeSmallThreshold(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                    data-testid="input-service-fee-threshold"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground">كيف تعمل رسوم الخدمة؟</p>
+              <p>• إذا كان مجموع الطلب أقل من <strong>{serviceFeeSmallThreshold} ريال</strong> → تُضاف رسوم <strong>{serviceFeeSmallAmount.toFixed(2)} ريال</strong></p>
+              <p>• إذا كان مجموع الطلب <strong>{serviceFeeSmallThreshold} ريال أو أكثر</strong> → تُضاف رسوم <strong>{serviceFeeAmount.toFixed(2)} ريال</strong></p>
+            </div>
           </CardContent>
         </Card>
       </div>
