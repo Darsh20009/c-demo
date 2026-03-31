@@ -15,13 +15,14 @@ import PaymentMethods from "@/components/payment-methods";
 import GeideaCheckoutWidget from "@/components/geidea-checkout";
 import SimulatedCardPayment from "@/components/simulated-card-payment";
 import { printOrderReceiptDirect } from "@/components/receipt-invoice";
+import { printSimpleReceipt } from "@/lib/print-utils";
 import { brand } from "@/lib/brand";
 import { customerStorage } from "@/lib/customer-storage";
 import { useCustomer } from "@/contexts/CustomerContext";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useTranslate, tc } from "@/lib/useTranslate";
-import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft, Upload, Camera, Package, Printer, MapPin } from "lucide-react";
+import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft, Upload, Camera, Package, Printer, MapPin, Bell, BellOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { PaymentMethodInfo, PaymentMethod } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
@@ -400,6 +401,108 @@ export default function CheckoutPage() {
       sessionStorage.removeItem('paymentProvider');
       sessionStorage.removeItem('paymentSessionId');
       toast({ variant: 'destructive', title: 'خطأ في بدء الدفع', description: err.message });
+    }
+  };
+
+  // ── Push notifications ──────────────────────────────────────────────────
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [isPushSubscribing, setIsPushSubscribing] = useState(false);
+
+  const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+  };
+
+  const handleSubscribePush = async () => {
+    if (isPushSubscribing) return;
+    setIsPushSubscribing(true);
+    try {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isStandalone = (window.navigator as any).standalone;
+      if (isIOS && !isStandalone) {
+        toast({
+          title: '📱 أضف التطبيق لشاشتك الرئيسية',
+          description: 'افتح قائمة المشاركة ← "إضافة إلى الشاشة الرئيسية" لتفعيل الإشعارات',
+        });
+        setIsPushSubscribing(false);
+        return;
+      }
+      if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        toast({ variant: 'destructive', title: 'الإشعارات غير مدعومة', description: 'متصفحك لا يدعم الإشعارات' });
+        setIsPushSubscribing(false);
+        return;
+      }
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        toast({ variant: 'destructive', title: 'تم رفض الإشعارات', description: 'يمكنك تفعيلها لاحقاً من إعدادات المتصفح' });
+        setIsPushSubscribing(false);
+        return;
+      }
+      const registration = await navigator.serviceWorker.ready;
+      const existing = await registration.pushManager.getSubscription();
+      const vapidRes = await fetch('/api/push/vapid-key');
+      const { publicKey } = await vapidRes.json();
+      const sub = existing || await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      const pushUserId = orderDetails?.customerId || orderDetails?.customerInfo?.customerId || customerPhone || 'guest';
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON(), userType: 'customer', userId: pushUserId }),
+      });
+      setPushSubscribed(true);
+      toast({ title: '✅ تم تفعيل الإشعارات', description: 'ستصلك إشعارات فور تحديث حالة طلبك' });
+    } catch (err: any) {
+      toast({ variant: 'destructive', title: 'فشل تفعيل الإشعارات', description: err.message });
+    } finally {
+      setIsPushSubscribing(false);
+    }
+  };
+
+  // ── Print Invoice (TaxInvoiceData format) ─────────────────────────────
+  const handlePrintInvoice = async (order: any) => {
+    if (!order) return;
+    try {
+      const getItems = (o: any): any[] => {
+        if (!o?.items) return [];
+        if (Array.isArray(o.items)) return o.items;
+        if (typeof o.items === 'string') try { return JSON.parse(o.items); } catch { return []; }
+        if (typeof o.items === 'object') return Object.values(o.items);
+        return [];
+      };
+      const rawItems = getItems(order);
+      const mappedItems = rawItems.map((item: any) => ({
+        coffeeItem: {
+          nameAr: item.nameAr || item.coffeeItem?.nameAr || item.name || '',
+          nameEn: item.nameEn || item.coffeeItem?.nameEn || undefined,
+          price: String(item.price ?? item.unitPrice ?? item.coffeeItem?.price ?? 0),
+        },
+        quantity: item.quantity || 1,
+        customization: item.customization,
+      }));
+      const totalAmount = Number(order.totalAmount) || 0;
+      const subtotalAmount = totalAmount / 1.15;
+      await printSimpleReceipt({
+        orderNumber: String(order.orderNumber || ''),
+        customerName: order.customerName || order.customerInfo?.customerName || 'عميل',
+        customerPhone: order.customerPhone || order.customerInfo?.customerPhone || order.customerInfo?.phone || '',
+        employeeName: order.employeeName || '',
+        items: mappedItems,
+        subtotal: subtotalAmount.toFixed(2),
+        total: totalAmount.toFixed(2),
+        paymentMethod: order.paymentMethod || '',
+        date: order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : new Date().toLocaleDateString('ar-SA'),
+        tableNumber: order.tableNumber,
+        orderType: order.orderType,
+      });
+    } catch (err: any) {
+      toast({ variant: 'destructive', title: 'فشل الطباعة', description: err.message });
     }
   };
 
@@ -836,6 +939,42 @@ export default function CheckoutPage() {
                 {isAr ? 'احتفظ برقم طلبك لمتابعة الحالة' : 'Keep your order number to track its status'}
               </p>
 
+              {/* Mini order summary — up to 4 items */}
+              {(() => {
+                const getItems = (o: any): any[] => {
+                  if (!o?.items) return [];
+                  if (Array.isArray(o.items)) return o.items;
+                  if (typeof o.items === 'string') try { return JSON.parse(o.items); } catch { return []; }
+                  if (typeof o.items === 'object') return Object.values(o.items);
+                  return [];
+                };
+                const items = getItems(orderDetails);
+                const visibleItems = items.slice(0, 4);
+                const hiddenCount = Math.max(0, items.length - 4);
+                if (visibleItems.length === 0) return null;
+                return (
+                  <div className="bg-muted/40 rounded-xl p-3 space-y-1.5" data-testid="section-order-summary">
+                    {visibleItems.map((item: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between gap-2 text-xs" data-testid={`order-summary-item-${i}`}>
+                        <span className="text-muted-foreground flex-1 truncate">
+                          {item.nameAr || item.coffeeItem?.nameAr || item.name || '—'} × {item.quantity || 1}
+                        </span>
+                        <span className="font-semibold text-foreground tabular-nums">
+                          {((Number(item.price ?? item.unitPrice ?? item.coffeeItem?.price ?? 0)) * (item.quantity || 1)).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                    {hiddenCount > 0 && (
+                      <p className="text-[11px] text-muted-foreground text-center">+{hiddenCount} {isAr ? 'منتجات أخرى' : 'more items'}</p>
+                    )}
+                    <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-border font-bold text-sm">
+                      <span>{isAr ? 'الإجمالي' : 'Total'}</span>
+                      <span className="text-primary">{Number(orderDetails?.totalAmount || 0).toFixed(2)} ر.س</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Three shortcut buttons */}
               <div className="grid grid-cols-3 gap-2" data-testid="section-shortcut-buttons">
                 <Button
@@ -851,7 +990,7 @@ export default function CheckoutPage() {
                 <Button
                   variant="outline"
                   className="flex flex-col items-center gap-1 h-auto py-3 px-1 rounded-xl border-border hover:bg-primary/5 hover:border-primary/40 text-center"
-                  onClick={() => orderDetails && printOrderReceiptDirect(orderDetails)}
+                  onClick={() => handlePrintInvoice(orderDetails)}
                   data-testid="button-print-invoice-shortcut"
                 >
                   <Printer className="w-5 h-5 text-primary" />
@@ -876,6 +1015,34 @@ export default function CheckoutPage() {
                   <span className="text-[11px] font-semibold leading-tight">{isAr ? 'التوجه للفرع' : 'Get Directions'}</span>
                 </Button>
               </div>
+
+              {/* Push notification subscribe */}
+              {pushSubscribed ? (
+                <div className="flex items-center gap-3 bg-green-50 dark:bg-green-950/30 border border-green-300 dark:border-green-700 rounded-xl p-3" data-testid="push-subscribed-card">
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <Bell className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-green-700 dark:text-green-400">{isAr ? 'الإشعارات مفعّلة ✅' : 'Notifications Enabled ✅'}</p>
+                    <p className="text-xs text-green-600 dark:text-green-500">{isAr ? 'ستصلك إشعارات فور تحديث حالة طلبك' : "You'll be notified when your order status changes"}</p>
+                  </div>
+                </div>
+              ) : typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'denied' ? (
+                <Button
+                  variant="outline"
+                  className="w-full border-dashed border-primary/40 text-primary hover:bg-primary/5 flex items-center gap-2 rounded-xl"
+                  onClick={handleSubscribePush}
+                  disabled={isPushSubscribing}
+                  data-testid="button-enable-push"
+                >
+                  {isPushSubscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bell className="w-4 h-4" />}
+                  <span className="text-sm font-semibold">
+                    {isPushSubscribing
+                      ? (isAr ? 'جارٍ التفعيل...' : 'Enabling...')
+                      : (isAr ? 'تفعيل إشعارات الطلب' : 'Enable Order Notifications')}
+                  </span>
+                </Button>
+              ) : null}
 
               {isGuestMode && (
                 <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 rounded-2xl p-4 text-right space-y-3">

@@ -1119,24 +1119,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
           stageIndex: 0,
           totalStages: 4,
         };
+        const custPhone = order.customerPhone || order.customerInfo?.customerPhone;
         if (custId) {
-          sendPushToCustomer(custId, customerPushPayload)
+          sendPushToCustomer(custId, customerPushPayload, custPhone)
             .catch(err => console.error('[PUSH] Customer order confirmation error:', err));
-        } else {
-          // Fallback: POS order with phone only — look up customer by phone and send push
-          const custPhone = order.customerPhone || order.customerInfo?.customerPhone;
-          if (custPhone) {
-            const cleanPhone = custPhone.replace(/\D/g, '').replace(/^966/, '0').replace(/^9665/, '05');
-            storage.getCustomerByPhone(cleanPhone).then(customer => {
-              if (customer) {
-                const mongoId = (customer as any)._id?.toString() || (customer as any).id;
-                if (mongoId) {
-                  sendPushToCustomer(mongoId, customerPushPayload)
-                    .catch(err => console.error('[PUSH] POS phone-based customer push error:', err));
-                }
+        } else if (custPhone) {
+          // Fallback: POS/guest order with phone only — search by phone directly + via account lookup
+          const cleanPhone = custPhone.replace(/\D/g, '').replace(/^966/, '0').replace(/^9665/, '05');
+          sendPushToCustomer(custPhone, customerPushPayload, custPhone)
+            .catch(err => console.error('[PUSH] Guest phone push error:', err));
+          storage.getCustomerByPhone(cleanPhone).then(customer => {
+            if (customer) {
+              const mongoId = (customer as any)._id?.toString() || (customer as any).id;
+              if (mongoId && mongoId !== custPhone) {
+                sendPushToCustomer(mongoId, customerPushPayload, custPhone)
+                  .catch(err => console.error('[PUSH] POS phone-based customer push error:', err));
               }
-            }).catch(() => {});
-          }
+            }
+          }).catch(() => {});
         }
       } catch (pushErr) {
         console.error('[PUSH] Error sending push for new order:', pushErr);
