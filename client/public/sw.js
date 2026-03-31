@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v10';
+const CACHE_VERSION = 'v13';
 const CACHE_NAME = `qirox-cache-${CACHE_VERSION}`;
 
 // Essential shell files to pre-cache during install
@@ -181,85 +181,64 @@ self.addEventListener('push', function(event) {
   const icon = isEmployee ? '/employee-logo.png' : '/logo.png';
   let options = {};
   
+  // Core options — iOS-safe (no requireInteraction, no vibrate, no actions, no renotify)
+  let coreOptions = {
+    body: data.body || '',
+    icon: icon,
+    badge: '/badge-icon.png',
+    data: { url: data.url || '/', orderId: data.orderId, orderNumber: data.orderNumber, type: data.type, timestamp: Date.now() },
+    tag: data.tag || 'qirox-notification',
+    dir: 'rtl',
+    lang: 'ar',
+  };
+
   if (data.type === 'order_status' || data.type === 'new_order') {
     const notification = buildOrderStatusNotification(data);
-    
+    data.title = notification.title;
+    coreOptions.body = notification.body;
+    coreOptions.tag = data.tag || `order-${data.orderNumber || 'notification'}`;
+
     options = {
-      body: notification.body,
-      icon: icon,
-      badge: '/badge-icon.png',
-      vibrate: data.type === 'new_order' 
+      ...coreOptions,
+      vibrate: data.type === 'new_order'
         ? [200, 100, 200, 100, 200, 100, 400]
         : (data.orderStatus === 'ready' ? [500, 200, 500] : [300, 100, 300]),
-      data: {
-        url: data.url || '/',
-        orderId: data.orderId,
-        orderNumber: data.orderNumber,
-        orderStatus: data.orderStatus,
-        type: data.type,
-        timestamp: Date.now()
-      },
-      tag: data.tag || `order-${data.orderNumber || 'notification'}`,
       renotify: true,
-      requireInteraction: data.orderStatus === 'ready' || data.type === 'new_order',
       silent: false,
       actions: notification.actions,
       timestamp: data.timestamp || Date.now(),
-      dir: 'rtl',
-      lang: 'ar',
     };
-    
-    data.title = notification.title;
   } else if (data.type === 'promo') {
+    coreOptions.tag = data.tag || 'promo-notification';
+
     options = {
-      body: data.body,
-      icon: icon,
-      badge: '/badge-icon.png',
+      ...coreOptions,
       vibrate: [200, 100, 200],
-      data: {
-        url: data.url || '/',
-        type: 'promo',
-        timestamp: Date.now()
-      },
-      tag: data.tag || 'promo-notification',
       renotify: false,
-      requireInteraction: false,
       silent: false,
       actions: [
         { action: 'open', title: '🎁 عرض العرض' },
         { action: 'dismiss', title: 'تجاهل' }
       ],
       timestamp: data.timestamp || Date.now(),
-      dir: 'rtl',
-      lang: 'ar',
     };
   } else {
     options = {
-      body: data.body,
-      icon: icon,
-      badge: '/badge-icon.png',
+      ...coreOptions,
       vibrate: [300, 100, 300, 100, 300],
-      data: {
-        url: data.url || '/',
-        orderId: data.orderId,
-        timestamp: Date.now()
-      },
-      tag: data.tag || 'qirox-notification',
       renotify: true,
-      requireInteraction: true,
       silent: false,
       actions: [
         { action: 'open', title: '📋 عرض' },
         { action: 'dismiss', title: 'تجاهل' }
       ],
       timestamp: data.timestamp || Date.now(),
-      dir: 'rtl',
-      lang: 'ar',
     };
   }
 
   event.waitUntil(
     self.registration.showNotification(data.title, options)
+      .catch(() => self.registration.showNotification(data.title, coreOptions))
   );
 });
 
