@@ -1,0 +1,108 @@
+ثانياً: إصلاح هيدر القائمة (Menu Header) — الآيفون
+
+المشكلة الأولى: هيدر الصفحة لا يراعي الـ notch (الشق) في أعلى شاشة الآيفون.
+
+الإصلاح في client/src/pages/menu.tsx:
+
+    paddingTop في الهيدر: max(env(safe-area-inset-top, 0px), 12px)
+    paddingTop في المحتوى الرئيسي: max(calc(env(safe-area-inset-top, 0px) + 64px), 76px)
+
+المشكلة الثانية: البانر في الصفحة الرئيسية لا يتحدث عند تغيير البيانات.
+
+الإصلاح: تحويل bannerSlides من حساب ثابت إلى useMemo مع تبعيات [customBanners, coffeeItems, promoOffers, i18n.language]
+ثالثاً: إعادة هيكلة تدفق الدفع PayMob
+المرحلة الأولى (إصلاح مبدئي):
+
+المشكلة: الطلب يُنشأ فوراً بحالة awaiting_payment وتُرسل إشعارات للمطبخ قبل تأكيد الدفع.
+
+الإصلاح في server/routes.ts:
+
+    إذا كانت حالة الطلب awaiting_payment → لا يُبث الطلب للمطبخ عبر WebSocket
+    عند التحديث لـ pending أو payment_confirmed → يُبث آنذاك
+
+المرحلة الثانية (إعادة هيكلة كاملة):
+
+التغيير الجذري في client/src/pages/checkout.tsx:
+
+قبل:
+
+    ينشئ طلباً بحالة awaiting_payment → يفتح PayMob → عند الدفع يحدّث الحالة
+
+بعد:
+
+    يحفظ بيانات الطلب في pendingGeideaOrderData (ذاكرة) ← لكن هذا الجزء كانت له مشكلة لاحقاً
+    يفتح PayMob مباشرة بدون إنشاء طلب
+    عند نجاح الدفع → يُنشأ الطلب بحالة payment_confirmed
+    عند الإلغاء → لا يُنشأ أي طلب
+
+الأدوات المضافة:
+
+    دالة buildOrderData() مشتركة لبناء بيانات الطلب
+    دالة initiatePaymobDirect() مستقلة لتهيئة بوابة الدفع
+    الزر: "تأكيد الطلب" → "اذهب للدفع"
+
+المرحلة الثالثة (إصلاح الجوال والآيفون):
+
+المشكلة المكتشفة:
+
+    بيانات الطلب كانت تُحفظ في React ref (تُحذف عند أي redirect)
+    رابط العودة من PayMob يذهب لـ /payment-return-iframe وليس لصفحة الـ checkout
+    window.open() محجوب تلقائياً في متصفحات الجوال
+
+الإصلاحات الثلاث في client/src/pages/checkout.tsx:
+
+١. حفظ البيانات في sessionStorage:
+
+sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData))
+sessionStorage.setItem('paymentSessionId', payData.sessionId)
+sessionStorage.setItem('paymentProvider', 'paymob')
+
+٢. تمرير returnUrl للسيرفر:
+
+returnUrl = ${window.location.origin}/checkout?provider=paymob
+
+بحيث يرجع PayMob مباشرة لصفحة checkout لا لصفحة الـ iframe
+
+٣. كشف الجهاز تلقائياً:
+
+    جوال/iPhone: window.location.href = redirectUrl ← redirect مباشر
+    ديسكتوب: يفتح PaymobCheckoutWidget المدمج (iframe)
+
+الإصلاح في server/routes.ts:
+
+    PayMob SA redirection_url يستخدم الـ returnUrl المُمرَّر إذا وُجد، وإلا يستخدم الرابط القديم للـ iframe
+
+رابعاً: كودات الخصم — إصلاح الظهور للعملاء
+
+المشكلة:
+
+    كودات الخصم تُنشأ بـ visibleToCustomers: false افتراضياً
+    لا يوجد خيار لتغييرها في واجهة الإدارة
+    نتيجة: لا تظهر أي كودات خصم للعملاء في صفحة الدفع
+
+الإصلاحات في client/src/pages/admin-settings.tsx:
+
+١. نموذج إنشاء كود جديد:
+
+    أضيف state جديد: const [newCodeVisible, setNewCodeVisible] = useState(true)
+    أضيف Toggle "ظاهر للعملاء" في نافذة الإضافة (مفعّل افتراضياً)
+    handleCreateCode() يُرسل الآن visibleToCustomers: newCodeVisible
+
+٢. قائمة الكودات الموجودة:
+
+    أضيف toggleVisibilityMutation يستدعي PATCH /api/discount-codes/:id
+    أضيف عمود Toggle "ظاهر للعملاء" في كل صف بجانب Toggle "نشط"
+
+خامساً: إعادة تصميم صفحة الشكر بعد الطلب
+
+المشكلة: الصفحة كانت تعرض فقط علامة ✓ ورقم الطلب وزر واحد.
+
+التصميم الجديد في client/src/pages/checkout.tsx:
+
+١. شريط أخضر في الأعلى:
+
+    علامة ✓ كبيرة + نص "تم استلام طلبك! سيبدأ الفريق بتحضيره فوراً"
+
+٢. رقم الطلب:
+
+    يظهر بخط ضخم في المنتصف داخل بطاقة
