@@ -346,8 +346,60 @@ export default function CheckoutPage() {
   };
 
   const [isVerifyingPayment, setIsVerifyingPayment] = useState(false);
+  const [showPaymobIframe, setShowPaymobIframe] = useState(false);
+  const [paymobIframeUrl, setPaymobIframeUrl] = useState<string | null>(null);
   const pendingGeideaOrderData = useRef<any>(null);
   const geideaOrderNum = useRef<string>("");
+
+  const isPaymobMethod = (method: string | null) => {
+    return method === 'paymob-card' || method === 'paymob-wallet';
+  };
+
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  const initiatePaymobDirect = async (orderData: any) => {
+    try {
+      const returnUrl = `${window.location.origin}/checkout?provider=paymob`;
+      sessionStorage.setItem('pendingOrderData', JSON.stringify(orderData));
+      sessionStorage.setItem('paymentProvider', 'paymob');
+
+      const initRes = await apiRequest("POST", "/api/payments/initiate", {
+        amount: orderData.totalAmount,
+        currency: 'SAR',
+        paymentMethod: orderData.paymentMethod,
+        customerName: orderData.customerName,
+        customerPhone: orderData.customerPhone,
+        customerEmail: orderData.customerEmail,
+        returnUrl,
+      });
+
+      if (!initRes.ok) {
+        const err = await initRes.json();
+        throw new Error(err.error || 'فشل بدء الدفع');
+      }
+
+      const payData = await initRes.json();
+      const redirectUrl = payData.redirectUrl || payData.paymentUrl;
+
+      if (!redirectUrl) throw new Error('لم يتم الحصول على رابط الدفع');
+
+      sessionStorage.setItem('paymentSessionId', payData.sessionId || '');
+
+      if (isMobileDevice()) {
+        window.location.href = redirectUrl;
+      } else {
+        setPaymobIframeUrl(redirectUrl);
+        setShowPaymobIframe(true);
+      }
+    } catch (err: any) {
+      sessionStorage.removeItem('pendingOrderData');
+      sessionStorage.removeItem('paymentProvider');
+      sessionStorage.removeItem('paymentSessionId');
+      toast({ variant: 'destructive', title: 'خطأ في بدء الدفع', description: err.message });
+    }
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -711,6 +763,12 @@ export default function CheckoutPage() {
       } else {
         (orderData as any).paymentReceiptUrl = receiptPreview || undefined;
       }
+    }
+
+    if (isPaymobMethod(selectedPaymentMethod)) {
+      setShowConfirmation(false);
+      await initiatePaymobDirect(orderData);
+      return;
     }
 
     if (isCardPaymentMethod(selectedPaymentMethod)) {
@@ -1151,6 +1209,36 @@ export default function CheckoutPage() {
                     onCancelPoints={() => setPointsToRedeem(0)}
                     baseTotal={getBaseTotal()}
                   />
+                )}
+
+                {/* PayMob inline iframe for desktop */}
+                {showPaymobIframe && paymobIframeUrl && (
+                  <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-xl" data-testid="section-paymob-iframe">
+                    <div className="bg-primary px-4 py-3 text-white flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="w-4 h-4" />
+                        <span className="font-bold text-sm">الدفع عبر Paymob</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-white hover:bg-white/20 h-7 px-2 text-xs"
+                        onClick={() => { setShowPaymobIframe(false); setPaymobIframeUrl(null); }}
+                        data-testid="button-close-paymob"
+                      >
+                        إغلاق
+                      </Button>
+                    </div>
+                    <iframe
+                      src={paymobIframeUrl}
+                      width="100%"
+                      height="600"
+                      frameBorder="0"
+                      allow="payment"
+                      className="w-full"
+                      data-testid="iframe-paymob"
+                    />
+                  </div>
                 )}
 
                 {/* Simulated card payment widget */}

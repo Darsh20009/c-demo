@@ -2805,6 +2805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               billing_data: billingData,
               currency: currency || 'SAR',
               lock_order_when_paid: false,
+              ...(returnUrl ? { redirection_url: returnUrl } : {}),
             }),
           });
           const pkData = await pkRes.json() as any;
