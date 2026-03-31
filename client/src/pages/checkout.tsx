@@ -14,12 +14,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import PaymentMethods from "@/components/payment-methods";
 import GeideaCheckoutWidget from "@/components/geidea-checkout";
 import SimulatedCardPayment from "@/components/simulated-card-payment";
+import { printOrderReceiptDirect } from "@/components/receipt-invoice";
+import { brand } from "@/lib/brand";
 import { customerStorage } from "@/lib/customer-storage";
 import { useCustomer } from "@/contexts/CustomerContext";
 import { useLoyaltyCard } from "@/hooks/useLoyaltyCard";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useTranslate, tc } from "@/lib/useTranslate";
-import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft, Upload, Camera } from "lucide-react";
+import { User, Gift, CheckCircle, Sparkles, Loader2, Ticket, Tag, Wrench, Coffee, Award, CreditCard, Star, Coins, X, ChevronLeft, Upload, Camera, Package, Printer, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { PaymentMethodInfo, PaymentMethod } from "@shared/schema";
 import SarIcon from "@/components/sar-icon";
@@ -833,6 +835,47 @@ export default function CheckoutPage() {
               <p className="text-center text-sm text-muted-foreground">
                 {isAr ? 'احتفظ برقم طلبك لمتابعة الحالة' : 'Keep your order number to track its status'}
               </p>
+
+              {/* Three shortcut buttons */}
+              <div className="grid grid-cols-3 gap-2" data-testid="section-shortcut-buttons">
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-1 rounded-xl border-border hover:bg-primary/5 hover:border-primary/40 text-center"
+                  onClick={() => setLocation('/tracking')}
+                  data-testid="button-track-order"
+                >
+                  <Package className="w-5 h-5 text-primary" />
+                  <span className="text-[11px] font-semibold leading-tight">{isAr ? 'تتبع الطلب' : 'Track Order'}</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-1 rounded-xl border-border hover:bg-primary/5 hover:border-primary/40 text-center"
+                  onClick={() => orderDetails && printOrderReceiptDirect(orderDetails)}
+                  data-testid="button-print-invoice-shortcut"
+                >
+                  <Printer className="w-5 h-5 text-primary" />
+                  <span className="text-[11px] font-semibold leading-tight">{isAr ? 'طباعة الفاتورة' : 'Print Invoice'}</span>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="flex flex-col items-center gap-1 h-auto py-3 px-1 rounded-xl border-border hover:bg-primary/5 hover:border-primary/40 text-center"
+                  onClick={() => {
+                    const loc = (paymentMethods.find((m: any) => m.id === 'cash') as any)?.storeLocation;
+                    const lat = loc?.lat;
+                    const lng = loc?.lng;
+                    const url = lat && lng
+                      ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+                      : `https://www.google.com/maps/search/${encodeURIComponent(brand.nameAr)}`;
+                    window.open(url, '_blank');
+                  }}
+                  data-testid="button-navigate-branch"
+                >
+                  <MapPin className="w-5 h-5 text-primary" />
+                  <span className="text-[11px] font-semibold leading-tight">{isAr ? 'التوجه للفرع' : 'Get Directions'}</span>
+                </Button>
+              </div>
 
               {isGuestMode && (
                 <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 rounded-2xl p-4 text-right space-y-3">

@@ -10,6 +10,118 @@ import QRCode from "qrcode";
 import SarIcon from "@/components/sar-icon";
 import { printHtmlInPage } from "@/lib/print-utils";
 
+export async function printOrderReceiptDirect(order: any): Promise<void> {
+  const getItemsArray = (o: any): any[] => {
+    try {
+      if (!o?.items) return [];
+      if (Array.isArray(o.items)) return o.items;
+      if (typeof o.items === 'string') {
+        const parsed = JSON.parse(o.items);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      if (typeof o.items === 'object') return Object.values(o.items);
+    } catch { }
+    return [];
+  };
+
+  const items = getItemsArray(order);
+  const totalAmount = Number(order?.totalAmount) || 0;
+  const subtotal = (totalAmount / 1.15).toFixed(2);
+  const vatAmount = (totalAmount - totalAmount / 1.15).toFixed(2);
+  const dateStr = order?.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : '';
+  const timeStr = order?.createdAt
+    ? new Date(order.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })
+    : '';
+
+  let trackingQrUrl = '';
+  try {
+    const trackingUrl = `${window.location.origin}/tracking?order=${order?.orderNumber}`;
+    trackingQrUrl = await QRCode.toDataURL(trackingUrl, {
+      width: 150, margin: 1,
+      color: { dark: '#000000', light: '#FFFFFF' },
+      errorCorrectionLevel: 'M',
+    });
+  } catch { }
+
+  const paymentLabels: Record<string, string> = {
+    cash: 'نقداً', pos: 'نقاط البيع', stc: 'STC Pay',
+    alinma: 'الإنماء', ur: 'يور باي', barq: 'برق',
+    rajhi: 'الراجحي', 'qahwa-card': 'بطاقة قهوة', delivery: 'الدفع عند التوصيل',
+    'paymob-card': 'Paymob بطاقة', 'paymob-wallet': 'Paymob محفظة',
+    'geidea-card': 'Geidea بطاقة',
+  };
+  const payMethod = paymentLabels[order?.paymentMethod as string] || order?.paymentMethod || '';
+
+  const itemsHtml = items.map((item: any) => {
+    const nameAr = item.nameAr || item.coffeeItem?.nameAr || item.name || '';
+    const nameEn = item.nameEn || item.coffeeItem?.nameEn || '';
+    const qty = item.quantity || 1;
+    const price = Number(item.price || item.unitPrice || item.coffeeItem?.price || 0);
+    const lineTotal = (price * qty).toFixed(2);
+    const addons = (item.customization?.selectedItemAddons || []).map((a: any) => a.nameAr).join('، ');
+    return `
+      <tr>
+        <td style="padding:4px 2px;border-bottom:1px solid #eee;text-align:right;">
+          <div style="font-weight:600;">${nameAr}</div>
+          ${nameEn && nameEn !== nameAr ? `<div style="font-size:10px;color:#777;direction:ltr;">${nameEn}</div>` : ''}
+          ${addons ? `<div style="font-size:10px;color:#999;">+ ${addons}</div>` : ''}
+        </td>
+        <td style="padding:4px 2px;text-align:center;border-bottom:1px solid #eee;">${qty}</td>
+        <td style="padding:4px 2px;text-align:left;border-bottom:1px solid #eee;">${lineTotal}</td>
+      </tr>`;
+  }).join('');
+
+  const html = `
+    <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;width:80mm;max-width:80mm;margin:0 auto;padding:10px;color:#000;font-size:12px;">
+      <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:8px;">
+        <div style="font-size:16px;font-weight:bold;">${brand.nameAr}</div>
+        <div style="font-size:10px;color:#555;">فاتورة ضريبية مبسطة</div>
+        <div style="font-size:11px;margin-top:4px;">رقم الطلب: <strong>${order?.orderNumber || ''}</strong></div>
+        <div style="font-size:10px;">${dateStr} ${timeStr}</div>
+        ${order?.tableNumber ? `<div style="font-size:11px;">طاولة: <strong>${order.tableNumber}</strong></div>` : ''}
+      </div>
+      <div style="margin-bottom:6px;font-size:11px;">
+        <div>العميل: ${order?.customerName || 'عميل نقدي'}</div>
+        ${order?.customerPhone ? `<div>الجوال: ${order.customerPhone}</div>` : ''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11px;">
+        <thead>
+          <tr style="border-bottom:1px solid #000;">
+            <th style="text-align:right;padding:4px 2px;">المنتج</th>
+            <th style="text-align:center;padding:4px 2px;">ك</th>
+            <th style="text-align:left;padding:4px 2px;">المجموع</th>
+          </tr>
+        </thead>
+        <tbody>${itemsHtml}</tbody>
+      </table>
+      <div style="margin-top:8px;border-top:1px solid #000;padding-top:6px;font-size:11px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span>المجموع (غير شامل الضريبة):</span><span>${subtotal} ر.س</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span>ضريبة القيمة المضافة (15%):</span><span>${vatAmount} ر.س</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:bold;border-top:1px solid #000;padding-top:4px;margin-top:4px;">
+          <span>الإجمالي:</span><span>${totalAmount.toFixed(2)} ر.س</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:11px;">
+          <span>طريقة الدفع:</span><span>${payMethod}</span>
+        </div>
+      </div>
+      ${trackingQrUrl ? `
+      <div style="text-align:center;margin-top:10px;">
+        <img src="${trackingQrUrl}" style="width:100px;height:100px;" />
+        <div style="font-size:9px;color:#555;">امسح لتتبع طلبك</div>
+      </div>` : ''}
+      <div style="text-align:center;margin-top:10px;border-top:1px solid #000;padding-top:6px;font-size:10px;color:#555;">
+        <div style="font-weight:bold;">شكراً لزيارتكم!</div>
+        <div>${brand.websiteUrl}</div>
+      </div>
+    </div>`;
+
+  printHtmlInPage(html, '80mm');
+}
+
 interface ReceiptInvoiceProps {
   order: Order;
   variant?: "button" | "auto";
