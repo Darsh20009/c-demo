@@ -64,6 +64,7 @@ export default function EmployeeMenuManagement() {
  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
  const [editingItem, setEditingItem] = useState<CoffeeItem | null>(null);
  const [editableSizes, setEditableSizes] = useState<Array<{nameAr: string; price: number}>>([]);
+ const [addEditableSizes, setAddEditableSizes] = useState<Array<{nameAr: string; price: number}>>([]);
  const [editableAddons, setEditableAddons] = useState<Array<{nameAr: string; nameEn?: string; price: number; imageUrl?: string; category?: string; section?: string}>>([]);
  const [addEditableAddons, setAddEditableAddons] = useState<Array<{nameAr: string; nameEn?: string; price: number; imageUrl?: string; category?: string; section?: string}>>([]);
  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
@@ -515,8 +516,8 @@ const [aiEditDescription, setAiEditDescription] = useState("");
      imageUrl: addImageUrls[0] || step1Data?.imageUrl,
     imageUrls: addImageUrls.length > 0 ? addImageUrls : (step1Data?.imageUrls || []),
      branchAvailability: selectedBranches.length > 0 ? selectedBranches : undefined,
-     isGiftable: false, // Default value, will be updated by UI if needed
-     availableSizes: step1Data?.availableSizes || [],
+     isGiftable: false,
+     availableSizes: addEditableSizes.filter(s => s.nameAr.trim()),
      addons: addEditableAddons.filter(a => a.nameAr.trim()),
    });
    setAddStep(2);
@@ -789,6 +790,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
     setSelectedIngredients([]);
     setAddImageUrls([]);
     setAddEditableAddons([]);
+    setAddEditableSizes([]);
     setSelectedCategory(defaultCategory);
     setSelectedCoffeeStrength("classic");
   }
@@ -1050,6 +1052,62 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
   </Button>
 </div>
 
+{/* Sizes for Add (Step 1) */}
+<div className="space-y-2">
+  <Label className="text-gray-300">{tc("الأحجام المتاحة", "Available Sizes")}</Label>
+  <div className="space-y-2">
+    {addEditableSizes.map((size, idx) => (
+      <div key={idx} className="flex gap-2 items-end">
+        <Input
+          type="text"
+          placeholder={tc("اسم الحجم", "Size name")}
+          value={size.nameAr}
+          onChange={(e) => {
+            const next = [...addEditableSizes];
+            next[idx] = { ...next[idx], nameAr: e.target.value };
+            setAddEditableSizes(next);
+          }}
+          className="bg-gray-50 border-gray-300 text-gray-900 flex-1"
+          data-testid={`input-add-size-name-${idx}`}
+        />
+        <Input
+          type="number"
+          placeholder={tc("السعر", "Price")}
+          value={size.price}
+          onChange={(e) => {
+            const next = [...addEditableSizes];
+            next[idx] = { ...next[idx], price: parseFloat(e.target.value) || 0 };
+            setAddEditableSizes(next);
+          }}
+          className="bg-gray-50 border-gray-300 text-gray-900 w-24"
+          data-testid={`input-add-size-price-${idx}`}
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setAddEditableSizes(addEditableSizes.filter((_, i) => i !== idx))}
+          className="border-red-500/30 text-red-500"
+          data-testid={`button-delete-add-size-${idx}`}
+        >
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+    ))}
+  </div>
+  <Button
+    type="button"
+    size="sm"
+    variant="outline"
+    onClick={() => setAddEditableSizes([...addEditableSizes, { nameAr: '', price: 0 }])}
+    className="border-green-500/30 text-green-400 w-full"
+    data-testid="button-add-size"
+  >
+    <Plus className="w-4 h-4 ml-1" />
+    {tc("إضافة حجم", "Add Size")}
+  </Button>
+</div>
+
 {employee?.role === "manager" && branches.length > 0 && (
    <div>
      <Label className="text-gray-300">متوفر في الفروع</Label>
@@ -1081,7 +1139,7 @@ setEditImageUrls((item as any).imageUrls || (item.imageUrl ? [item.imageUrl] : [
  <Button
  type="button"
  variant="outline"
- onClick={() => { setIsAddDialogOpen(false); setAddImageUrls([]); setAddEditableAddons([]); setSelectedIngredients([]); setRecipeItems([]); setSelectedBranches([]); setAddStep(1); setStep1Data(null); setSelectedCategory(defaultCategory); setSelectedCoffeeStrength("classic"); setAiAddNameAr(""); setAiAddNameEn(""); setAiAddDescription(""); }}
+ onClick={() => { setIsAddDialogOpen(false); setAddImageUrls([]); setAddEditableAddons([]); setAddEditableSizes([]); setSelectedIngredients([]); setRecipeItems([]); setSelectedBranches([]); setAddStep(1); setStep1Data(null); setSelectedCategory(defaultCategory); setSelectedCoffeeStrength("classic"); setAiAddNameAr(""); setAiAddNameEn(""); setAiAddDescription(""); }}
  className="border-gray-600 text-gray-300"
  data-testid="button-cancel"
  >

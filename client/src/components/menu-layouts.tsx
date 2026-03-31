@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Star, Flame, Heart } from "lucide-react";
@@ -9,11 +9,59 @@ interface CoffeeItem {
   nameAr: string;
   nameEn?: string;
   imageUrl?: string;
+  imageUrls?: string[];
   price: number | string;
   description?: string;
   isAvailable?: boolean;
   isBestSeller?: boolean;
   isNew?: boolean;
+}
+
+function AutoImageSlider({ images, alt, className }: { images: string[]; alt: string; className?: string }) {
+  const [current, setCurrent] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const validImages = images.filter(Boolean);
+
+  useEffect(() => {
+    if (validImages.length <= 1) return;
+    timerRef.current = setInterval(() => {
+      setCurrent(prev => (prev + 1) % validImages.length);
+    }, 2500);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [validImages.length]);
+
+  if (validImages.length === 0) return null;
+
+  return (
+    <div className={`relative w-full h-full overflow-hidden ${className || ""}`}>
+      {validImages.map((src, i) => (
+        <img
+          key={i}
+          src={src.startsWith('/') ? src : `/${src}`}
+          alt={alt}
+          onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === current ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+        />
+      ))}
+      {validImages.length > 1 && (
+        <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-1 z-20">
+          {validImages.map((_, i) => (
+            <span
+              key={i}
+              className={`block rounded-full transition-all duration-300 ${i === current ? 'w-3 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50'}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function getImages(item: CoffeeItem): string[] {
+  const urls = item.imageUrls?.filter(Boolean) || [];
+  if (urls.length > 0) return urls;
+  if (item.imageUrl) return [item.imageUrl];
+  return [DEFAULT_IMG];
 }
 
 interface MenuLayoutProps {
@@ -62,13 +110,8 @@ export function ClassicMenuLayout({ items, onAddItem, lang, currency, favoriteId
               onClick={() => onAddItem(item)}
               data-testid={`card-menu-${item.id}`}
             >
-              <div className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 ${imgWrapClass(!!item.imageUrl, "bg-secondary")}`}>
-                <img
-                  src={item.imageUrl || DEFAULT_IMG}
-                  className={imgClass(!!item.imageUrl, "group-hover:scale-110 transition-transform duration-500")}
-                  alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
-                />
+              <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-secondary">
+                <AutoImageSlider images={getImages(item)} alt={getItemName(item, lang)} />
               </div>
               <div className="flex-1 min-w-0 py-1">
                 <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
@@ -120,13 +163,8 @@ export function CardsMenuLayout({ items, onAddItem, lang, currency, favoriteIds,
               onClick={() => onAddItem(item)}
               data-testid={`card-menu-${item.id}`}
             >
-              <div className={`relative aspect-square overflow-hidden ${imgWrapClass(!!item.imageUrl, "bg-secondary")}`}>
-                <img
-                  src={item.imageUrl || DEFAULT_IMG}
-                  className={imgClass(!!item.imageUrl, "group-hover:scale-110 transition-transform duration-500")}
-                  alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
-                />
+              <div className="relative aspect-square overflow-hidden bg-secondary">
+                <AutoImageSlider images={getImages(item)} alt={getItemName(item, lang)} />
                 {item.isBestSeller && (
                   <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
                     <Flame className="w-2.5 h-2.5" />الأكثر طلباً
@@ -183,13 +221,8 @@ export function ListMenuLayout({ items, onAddItem, lang, currency, favoriteIds, 
               onClick={() => onAddItem(item)}
               data-testid={`card-menu-${item.id}`}
             >
-              <div className={`w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 ${imgWrapClass(!!item.imageUrl, "bg-secondary")}`}>
-                <img
-                  src={item.imageUrl || DEFAULT_IMG}
-                  className={imgClass(!!item.imageUrl, "group-hover:scale-105 transition-transform duration-300")}
-                  alt={getItemName(item, lang)}
-                  onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_IMG; }}
-                />
+              <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-secondary">
+                <AutoImageSlider images={getImages(item)} alt={getItemName(item, lang)} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">

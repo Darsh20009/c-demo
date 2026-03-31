@@ -154,46 +154,23 @@ export default function TableMenuNew() {
     Coffee, Flame, Snowflake, Star, Cake, Utensils, Sparkles
   };
 
-  const drinkSystemCategories = [
-    { id: "all", name: t("menu.categories.all"), icon: Coffee, isSystem: true },
-    { id: "hot", name: t("menu.categories.hot"), icon: Flame, isSystem: true },
-    { id: "cold", name: t("menu.categories.cold"), icon: Snowflake, isSystem: true },
-    { id: "specialty", name: t("menu.categories.specialty"), icon: Star, isSystem: true },
-    { id: "drinks", name: t("menu.categories.drinks") || "المشروبات", icon: Coffee, isSystem: true },
-    { id: "additional_drinks", name: tc("مشروبات إضافية", "Additional Drinks"), icon: Plus, isSystem: true },
-    { id: "desserts", name: t("menu.categories.desserts"), icon: Cake, isSystem: true },
+  const allIcon = isBothModes && activeMode === "food" ? Utensils : Coffee;
+
+  const categories = [
+    { id: "all", name: t("menu.categories.all"), icon: allIcon, isSystem: true },
+    ...dynamicCategories
+      .filter(c => {
+        if (isBothModes) return !c.department || c.department === activeMode;
+        return true;
+      })
+      .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0))
+      .map(c => ({
+        id: c.id,
+        name: i18n.language === 'ar' ? c.nameAr : (c.nameEn || c.nameAr),
+        icon: iconMap[c.icon || 'Coffee'] || Coffee,
+        isSystem: c.isSystem || false,
+      })),
   ];
-
-  const foodSystemCategories = [
-    { id: "all", name: t("menu.categories.all"), icon: Utensils, isSystem: true },
-    { id: "food", name: t("menu.categories.food"), icon: Utensils, isSystem: true },
-    { id: "sandwiches", name: tc("السندوتشات", "Sandwiches"), icon: Utensils, isSystem: true },
-    { id: "bakery", name: t("menu.categories.bakery"), icon: Cake, isSystem: true },
-    { id: "croissant", name: tc("الكرواسون", "Croissant"), icon: Cake, isSystem: true },
-    { id: "cake", name: tc("الكيك", "Cake"), icon: Cake, isSystem: true },
-    { id: "desserts", name: t("menu.categories.desserts"), icon: Star, isSystem: true },
-  ];
-
-  const systemCategories = isBothModes
-    ? (activeMode === "food" ? foodSystemCategories : drinkSystemCategories)
-    : drinkSystemCategories;
-
-  const customCategories = dynamicCategories
-    .filter(c => {
-      if (c.isSystem) return false;
-      if (isBothModes) {
-        return !c.department || c.department === activeMode;
-      }
-      return true;
-    })
-    .map(c => ({
-      id: c.id,
-      name: i18n.language === 'ar' ? c.nameAr : (c.nameEn || c.nameAr),
-      icon: iconMap[c.icon || 'Coffee'] || Coffee,
-      isSystem: false
-    }));
-
-  const categories = [...systemCategories, ...customCategories];
 
   const getGroupingKey = (item: CoffeeItem): string => {
     if ((item as any).groupId) return (item as any).groupId;
@@ -216,20 +193,17 @@ export default function TableMenuNew() {
 
   const representativeItems = Object.values(groupedItems).map(group => group[0]);
 
-  const drinkCategoryIds = ['basic', 'hot', 'cold', 'specialty', 'drinks'];
-  const foodCategoryIds = ['food', 'bakery', 'desserts'];
+  const drinkCategoryIds = dynamicCategories.filter(c => !c.department || c.department === 'drinks').map(c => c.id);
+  const foodCategoryIds = dynamicCategories.filter(c => c.department === 'food').map(c => c.id);
 
   const filteredItems = representativeItems.filter(item => {
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
     const name = i18n.language === 'ar' ? item.nameAr : item.nameEn || item.nameAr;
     const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const drinkIds = [...drinkCategoryIds, ...dynamicCategories.filter(c => c.department === 'drinks').map(c => c.id)];
-    const foodIds = [...foodCategoryIds, ...dynamicCategories.filter(c => c.department === 'food').map(c => c.id)];
-
     const matchesMode = !isBothModes || (
       selectedCategory !== "all"
-        ? (activeMode === "drinks" ? drinkIds.includes(item.category) : foodIds.includes(item.category))
+        ? (activeMode === "drinks" ? drinkCategoryIds.includes(item.category) : foodCategoryIds.includes(item.category))
         : true
     );
 
@@ -238,10 +212,8 @@ export default function TableMenuNew() {
 
   const sortedFilteredItems = [...filteredItems].sort((a, b) => {
     if (!isBothModes || selectedCategory !== "all") return 0;
-    const drinkIds = [...drinkCategoryIds, ...dynamicCategories.filter(c => c.department === 'drinks').map(c => c.id)];
-    const foodIds = [...foodCategoryIds, ...dynamicCategories.filter(c => c.department === 'food').map(c => c.id)];
-    const aMatchesMode = activeMode === "drinks" ? drinkIds.includes(a.category) : foodIds.includes(a.category);
-    const bMatchesMode = activeMode === "drinks" ? drinkIds.includes(b.category) : foodIds.includes(b.category);
+    const aMatchesMode = activeMode === "drinks" ? drinkCategoryIds.includes(a.category) : foodCategoryIds.includes(a.category);
+    const bMatchesMode = activeMode === "drinks" ? drinkCategoryIds.includes(b.category) : foodCategoryIds.includes(b.category);
     if (aMatchesMode && !bMatchesMode) return -1;
     if (!aMatchesMode && bMatchesMode) return 1;
     return 0;
