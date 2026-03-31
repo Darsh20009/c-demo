@@ -19,6 +19,16 @@ export default function EmployeeHome() {
     if (storedEmployee) {
       const emp = JSON.parse(storedEmployee);
       setEmployee(emp);
+      const role = emp.role;
+      if (role === "cashier" || role === "barista") {
+        window.location.replace("/employee/cashier");
+      } else if (role === "cook") {
+        window.location.replace("/employee/kitchen");
+      } else if (role === "waiter") {
+        window.location.replace("/employee/orders");
+      } else if (role === "driver") {
+        window.location.replace("/employee/orders");
+      }
     } else {
       window.location.href = "/employee/gateway";
     }
