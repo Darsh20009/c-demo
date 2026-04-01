@@ -994,6 +994,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       // ─────────────────────────────────────────────────────────────────────────
 
+      // ── Auto-calculate preparation time ────────────────────────────────────
+      try {
+        const { BusinessConfigModel: BizCfgModel } = await import("@shared/schema");
+        const bCfg = await BizCfgModel.findOne({ tenantId }).lean() as any;
+        const prepCfg = bCfg?.prepTimeConfig || {};
+        const prepEnabled = prepCfg.enabled !== false;
+        if (prepEnabled) {
+          const baseMinutes = Number(prepCfg.baseMinutes) || 10;
+          const perItemMinutes = Number(prepCfg.perItemMinutes) || 3;
+          const freeItems = Number(prepCfg.freeItems) || 2;
+          const totalItems = (orderData.items || []).reduce((sum: number, item: any) => sum + (Number(item.quantity) || 1), 0);
+          const extraItems = Math.max(0, totalItems - freeItems);
+          const estimatedPrepTime = baseMinutes + (extraItems * perItemMinutes);
+          orderData.estimatedPrepTimeInMinutes = estimatedPrepTime;
+          orderData.prepTimeSetAt = new Date();
+        }
+      } catch {}
+      // ─────────────────────────────────────────────────────────────────────
+
       const order = await storage.createOrder(orderData);
       const serializedOrder = serializeDoc(order);
       

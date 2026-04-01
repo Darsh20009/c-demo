@@ -199,7 +199,6 @@ export default function DeliverySelectionPage() {
   const [hasSavedCar] = useState(() => {
     try { return !!localStorage.getItem('qirox_saved_car'); } catch { return false; }
   });
-  const [scheduledPickupTime, setScheduledPickupTime] = useState<string>('');
   const [userLocation, setUserLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [locationError, setLocationError] = useState<string>('');
   const [isCheckingLocation, setIsCheckingLocation] = useState(false);
@@ -339,21 +338,6 @@ export default function DeliverySelectionPage() {
     }
   };
 
-  const calculateScheduledPrepTime = (pickupTime: string): { prepStartTime: string; holdMinutes: number } | null => {
-    if (!pickupTime) return null;
-    try {
-      const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-      const holdMinutes = Math.max(10, 10 + (totalItems - 2) * 2);
-      const [hours, minutes] = pickupTime.split(':').map(Number);
-      const arrivalDate = new Date();
-      arrivalDate.setHours(hours, minutes, 0, 0);
-      const prepDate = new Date(arrivalDate.getTime() - holdMinutes * 60 * 1000);
-      return {
-        prepStartTime: `${prepDate.getHours().toString().padStart(2, '0')}:${prepDate.getMinutes().toString().padStart(2, '0')}`,
-        holdMinutes
-      };
-    } catch { return null; }
-  };
 
   const { data: branches = [], isLoading } = useQuery<Branch[]>({
     queryKey: ["/api/branches"],
@@ -366,7 +350,6 @@ export default function DeliverySelectionPage() {
   const orderMethods = businessConfig?.orderMethodsConfig || {};
   const enableDineIn = orderMethods.enableDineIn !== false;
   const enableCarPickup = orderMethods.enableCarPickup !== false;
-  const enableScheduledPickup = orderMethods.enableScheduledPickup !== false;
   const enableTakeaway = orderMethods.enableTakeaway !== false;
 
   const handleContinue = () => {
@@ -405,13 +388,8 @@ export default function DeliverySelectionPage() {
       }
     }
 
-    if (selectedMethod === 'scheduled' && !scheduledPickupTime) {
-      toast({ title: t("product.error"), description: "يرجى تحديد وقت وصولك المتوقع", variant: 'destructive' });
-      return;
-    }
-
     setDeliveryInfo({
-      type: selectedMethod === 'car-pickup' ? 'car-pickup' : selectedMethod === 'scheduled' ? 'scheduled-pickup' : selectedMethod === 'dine-in' ? 'dine-in' : 'pickup',
+      type: selectedMethod === 'car-pickup' ? 'car-pickup' : selectedMethod === 'dine-in' ? 'dine-in' : 'pickup',
       branchId: branch.id,
       branchName: branch.nameAr,
       branchAddress: branch.address,
@@ -426,7 +404,6 @@ export default function DeliverySelectionPage() {
       tableId: selectedTableId || undefined,
       tableNumber: bookedTable?.tableNumber || undefined,
       arrivalTime: arrivalTime || undefined,
-      scheduledPickupTime: selectedMethod === 'scheduled' ? scheduledPickupTime : undefined,
       deliveryFee: 0,
     });
 
@@ -469,16 +446,6 @@ export default function DeliverySelectionPage() {
       color: 'from-orange-500 to-orange-600',
       ring: 'ring-orange-500',
       bg: 'bg-orange-50 dark:bg-orange-950/20',
-    },
-    enableScheduledPickup && {
-      id: 'scheduled' as OrderMethod,
-      icon: Timer,
-      emoji: '⏰',
-      label: 'طلب مجدول',
-      desc: 'حدد وقت وصولك',
-      color: 'from-teal-500 to-teal-600',
-      ring: 'ring-teal-500',
-      bg: 'bg-teal-50 dark:bg-teal-950/20',
     },
   ].filter(Boolean) as Array<{
     id: OrderMethod;
@@ -907,61 +874,6 @@ export default function DeliverySelectionPage() {
               </Card>
             )}
 
-            {/* Scheduled Pickup Details */}
-            {selectedMethod === 'scheduled' && (
-              <Card className="border-teal-200 dark:border-teal-800">
-                <div className="bg-gradient-to-r from-teal-500 to-teal-600 p-4">
-                  <p className="text-white font-bold text-sm mb-1">⏰ طلب مجدول</p>
-                  <p className="text-teal-100 text-xs">سيبدأ تحضير طلبك قبل وصولك بوقت كافٍ ليكون جاهزاً تماماً</p>
-                </div>
-                <CardContent className="p-4 space-y-4">
-                  <div>
-                    <Label htmlFor="scheduled-pickup-time" className="text-sm font-bold mb-2 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-teal-500" />
-                      وقت وصولك المتوقع
-                    </Label>
-                    <Input
-                      id="scheduled-pickup-time"
-                      type="time"
-                      value={scheduledPickupTime}
-                      onChange={(e) => setScheduledPickupTime(e.target.value)}
-                      data-testid="input-scheduled-pickup-time"
-                      className="h-12 border-teal-300 dark:border-teal-700"
-                    />
-                  </div>
-
-                  {scheduledPickupTime && (() => {
-                    const calc = calculateScheduledPrepTime(scheduledPickupTime);
-                    if (!calc) return null;
-                    return (
-                      <div className="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800 space-y-3">
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-4 h-4 text-teal-500" />
-                          <p className="text-sm font-bold text-teal-700 dark:text-teal-300">جدول تحضير طلبك</p>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
-                            <span className="text-sm text-muted-foreground">يبدأ التحضير الساعة</span>
-                            <span className="font-bold text-teal-600 dark:text-teal-400" dir="ltr">{calc.prepStartTime}</span>
-                          </div>
-                          <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
-                            <span className="text-sm text-muted-foreground">وقت وصولك</span>
-                            <span className="font-bold" dir="ltr">{scheduledPickupTime}</span>
-                          </div>
-                          <div className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
-                            <span className="text-sm text-muted-foreground">مدة التحضير</span>
-                            <span className="font-medium">{calc.holdMinutes} دقيقة</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-teal-600 dark:text-teal-400 font-medium">
-                          🎯 طلبك سيكون جاهزاً تماماً عند وصولك!
-                        </p>
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            )}
 
             {/* Takeaway info */}
             {selectedMethod === 'takeaway' && selectedBranch && (

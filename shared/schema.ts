@@ -707,6 +707,12 @@ export interface IBusinessConfig extends Document {
     smallOrderAmount?: number;
     smallOrderThreshold?: number;
   };
+  prepTimeConfig?: {
+    enabled?: boolean;
+    baseMinutes?: number;
+    perItemMinutes?: number;
+    freeItems?: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -819,6 +825,15 @@ const BusinessConfigSchema = new Schema<IBusinessConfig>({
       amount: 0.70,
       smallOrderAmount: 0.35,
       smallOrderThreshold: 5,
+    })
+  },
+  prepTimeConfig: {
+    type: Schema.Types.Mixed,
+    default: () => ({
+      enabled: true,
+      baseMinutes: 10,
+      perItemMinutes: 3,
+      freeItems: 2,
     })
   },
   createdAt: { type: Date, default: Date.now },

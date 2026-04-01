@@ -307,6 +307,20 @@ export default function AdminSettings() {
     }
   }, [config]);
 
+  const [prepTimeEnabled, setPrepTimeEnabled] = useState(true);
+  const [prepTimeBase, setPrepTimeBase] = useState(10);
+  const [prepTimePerItem, setPrepTimePerItem] = useState(3);
+  const [prepTimeFreeItems, setPrepTimeFreeItems] = useState(2);
+
+  useEffect(() => {
+    if (config?.prepTimeConfig) {
+      setPrepTimeEnabled(config.prepTimeConfig.enabled ?? true);
+      setPrepTimeBase(config.prepTimeConfig.baseMinutes ?? 10);
+      setPrepTimePerItem(config.prepTimeConfig.perItemMinutes ?? 3);
+      setPrepTimeFreeItems(config.prepTimeConfig.freeItems ?? 2);
+    }
+  }, [config]);
+
   useEffect(() => {
     if (config?.loyaltyConfig) {
       setLoyaltyEnabled(config.loyaltyConfig.enabled ?? true);
@@ -474,6 +488,17 @@ export default function AdminSettings() {
         amount: serviceFeeAmount,
         smallOrderAmount: serviceFeeSmallAmount,
         smallOrderThreshold: serviceFeeSmallThreshold,
+      },
+    });
+  };
+
+  const handleSavePrepTime = () => {
+    mutation.mutate({
+      prepTimeConfig: {
+        enabled: prepTimeEnabled,
+        baseMinutes: prepTimeBase,
+        perItemMinutes: prepTimePerItem,
+        freeItems: prepTimeFreeItems,
       },
     });
   };
@@ -2744,6 +2769,86 @@ export default function AdminSettings() {
               <p className="font-semibold text-foreground">كيف تعمل رسوم الخدمة؟</p>
               <p>• إذا كان مجموع الطلب أقل من <strong>{serviceFeeSmallThreshold} ريال</strong> → تُضاف رسوم <strong>{serviceFeeSmallAmount.toFixed(2)} ريال</strong></p>
               <p>• إذا كان مجموع الطلب <strong>{serviceFeeSmallThreshold} ريال أو أكثر</strong> → تُضاف رسوم <strong>{serviceFeeAmount.toFixed(2)} ريال</strong></p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Prep Time Settings */}
+      <div className="mt-6">
+        <Card className="hover-elevate border-blue-100 dark:border-blue-900/30 shadow-lg">
+          <CardHeader className="bg-blue-50/50 dark:bg-blue-900/10 border-b">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                  <Timer className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl font-bold">وقت التحضير التلقائي</CardTitle>
+                  <CardDescription>تحديد وقت تحضير الطلبات تلقائياً وعرضه للعميل والمطبخ</CardDescription>
+                </div>
+              </div>
+              <Button onClick={handleSavePrepTime} disabled={mutation.isPending} data-testid="button-save-prep-time">
+                {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <Save className="w-4 h-4 ml-2" />}
+                حفظ إعدادات التحضير
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
+              <Label htmlFor="prep-time-enabled" className="text-sm font-bold cursor-pointer">تفعيل حساب وقت التحضير التلقائي</Label>
+              <Switch
+                id="prep-time-enabled"
+                checked={prepTimeEnabled}
+                onCheckedChange={setPrepTimeEnabled}
+                data-testid="switch-prep-time-enabled"
+              />
+            </div>
+            {prepTimeEnabled && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">الوقت الأساسي (دقيقة)</Label>
+                  <p className="text-xs text-muted-foreground">وقت التحضير لأي طلب بغض النظر عن عدد المنتجات</p>
+                  <input
+                    type="number"
+                    min="1"
+                    value={prepTimeBase}
+                    onChange={(e) => setPrepTimeBase(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                    data-testid="input-prep-time-base"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">إضافة لكل منتج زائد (دقيقة)</Label>
+                  <p className="text-xs text-muted-foreground">تُضاف لكل منتج يتجاوز الحد المجاني</p>
+                  <input
+                    type="number"
+                    min="0"
+                    value={prepTimePerItem}
+                    onChange={(e) => setPrepTimePerItem(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                    data-testid="input-prep-time-per-item"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">عدد المنتجات المجانية</Label>
+                  <p className="text-xs text-muted-foreground">المنتجات الأولى لا تُضيف وقتاً إضافياً</p>
+                  <input
+                    type="number"
+                    min="0"
+                    value={prepTimeFreeItems}
+                    onChange={(e) => setPrepTimeFreeItems(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border bg-background text-sm"
+                    data-testid="input-prep-time-free-items"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground">مثال على الحساب:</p>
+              <p>• طلب بـ {prepTimeFreeItems} منتج أو أقل → {prepTimeBase} دقيقة</p>
+              <p>• طلب بـ {prepTimeFreeItems + 1} منتجات → {prepTimeBase + prepTimePerItem} دقيقة</p>
+              <p>• طلب بـ {prepTimeFreeItems + 3} منتجات → {prepTimeBase + prepTimePerItem * 3} دقيقة</p>
             </div>
           </CardContent>
         </Card>
